@@ -545,7 +545,7 @@ def callback(progress):
     # adapt as required
     # if ((progress % 10) == 0):
     # if verbose option is set
-    if (args.verbose_progress):
+    if (false):
         if ((progress % 40) == 0):
             print(progress)
 

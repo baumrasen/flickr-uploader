@@ -871,10 +871,6 @@ class Uploadr:
         TraceBackIndexError = False
 
         # Title Handling
-        if args.title:  # Replace
-            FLICKR["title"] = args.title
-        if args.description:  # Replace
-            FLICKR["description"] = args.description
         if args.tags:  # Append a space to later add -t TAGS
             FLICKR["tags"] += " "
             if args.verbose:

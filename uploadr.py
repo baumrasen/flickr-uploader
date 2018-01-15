@@ -744,8 +744,6 @@ class Uploadr:
             # lock parameter not used (set to None) under single processing
             success = self.uploadFile(lock=None, file=file)
             count = count + 1
-            self.niceprocessedfiles(count, False)
-        self.niceprocessedfiles(count, True)
 
         niceprint("*****Completed uploading files*****")
 

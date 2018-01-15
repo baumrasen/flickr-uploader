@@ -743,10 +743,6 @@ class Uploadr:
                           .format(file, type(file)))
             # lock parameter not used (set to None) under single processing
             success = self.uploadFile(lock=None, file=file)
-            if args.drip_feed and success and i != changedMedia_count - 1:
-                niceprint('Waiting [{!s}] seconds before next upload'
-                          .format(str(DRIP_TIME)))
-                nutime.sleep(DRIP_TIME)
             count = count + 1
             self.niceprocessedfiles(count, False)
         self.niceprocessedfiles(count, True)
@@ -870,14 +866,6 @@ class Uploadr:
         # For tracking bad response from search_photos
         TraceBackIndexError = False
 
-        # Title Handling
-        if args.tags:  # Append a space to later add -t TAGS
-            FLICKR["tags"] += " "
-            if args.verbose:
-                niceprint('TAGS:[{} {}]'
-                          .format(FLICKR["tags"],
-                                 args.tags).replace(',', ''))
-    
         # if FLICKR["title"] is empty...
         # if filename's exif title is empty...
         #   Can't check without import exiftool
@@ -938,7 +926,7 @@ class Uploadr:
                                  .format(
                                         FLICKR["tags"],
                                         file_checksum,
-                                        args.tags if args.tags else '')
+                                        '')
                                         .replace(',', ''),
                             is_public=str(FLICKR["is_public"]),
                             is_family=str(FLICKR["is_family"]),
@@ -1008,7 +996,7 @@ class Uploadr:
                         exceptSysInfo=True)
             # Error code: [5]
             # Error code: [Error: 5: Filetype was not recognised]
-            if (format(ex.code) == '5') and (args.bad_files):
+            if (format(ex.code) == '5'):
                 # Add to db the file NOT uploaded
                 # Control for when running multiprocessing set locking
                 niceprint('Adding to Bad files table:[{!s}]'

@@ -925,7 +925,7 @@ class Uploadr:
                             tags='{} checksum:{} {}'
                                  .format(
                                         FLICKR["tags"],
-                                        file_checksum,
+                                        '999',
                                         '')
                                         .replace(',', ''),
                             is_public=str(FLICKR["is_public"]),

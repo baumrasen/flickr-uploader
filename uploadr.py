@@ -25,17 +25,14 @@ import argparse
 import mimetypes
 import os
 import time
-import sqlite3 as lite
 import hashlib
 import fcntl
 import errno
-import subprocess
 import re
 try:
     import ConfigParser as ConfigParser  # Python 2
 except ImportError:
     import configparser as ConfigParser  # Python 3
-import multiprocessing
 import flickrapi
 import xml
 # CODING: For some systems this second import is required. To confirm.
@@ -47,8 +44,6 @@ import os.path
 import logging
 import pprint
 # For repeating functions
-from functools import wraps
-import random
 
 # =============================================================================
 # Init code
@@ -747,8 +742,6 @@ class Uploadr:
             head, setName = os.path.split(os.path.dirname(file))
 
         success = False
-        # For tracking bad response from search_photos
-        TraceBackIndexError = False
 
         # if FLICKR["title"] is empty...
         # if filename's exif title is empty...

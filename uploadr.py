@@ -108,15 +108,9 @@ class UPLDRConstants:
 #   nutime       = for working with time module (import time)
 #   nuflickr     = object for flickr API module (import flickrapi)
 #   flick        = Class Uploadr (created in the Main code)
-#   nulockDB     = multiprocessing Lock for access to Database
-#   numutex      = multiprocessing mutex to control access to value nurunning
-#   nurunning    = multiprocessing Value to count processed photos
 #   nuMediacount = counter of total files to initially upload
 nutime = time
 nuflickr = None
-nulockDB = None
-numutex = None
-nurunning = None
 nuMediacount = None
 
 
@@ -270,96 +264,6 @@ def reportError(Caught=False, CaughtPrefix='', CaughtCode=0, CaughtMsg='',
     sys.stderr.flush()
     if NicePrint is not None and NicePrint:
         sys.stdout.flush()
-
-
-# -----------------------------------------------------------------------------
-# retry
-#
-# retries execution of a function
-#
-def retry(attempts=3, waittime=5, randtime=False):
-    """
-    Catches exceptions while running a supplied function
-    Re-runs it for times while sleeping X seconds in-between
-    outputs 3 types of errors (coming from the parameters)
-
-    attempts = Max Number of Attempts
-    waittime = Wait time in between Attempts
-    randtime = Randomize the Wait time from 1 to randtime for each Attempt
-    """
-    def wrapper_fn(f):
-        @wraps(f)
-        def new_wrapper(*args, **kwargs):
-
-            rtime = time
-            error = None
-
-            if LOGGING_LEVEL <= logging.WARNING:
-                if args is not None:
-                    logging.warning('___Retry f():[{!s}] '
-                                    'Max:[{!s}] Delay:[{!s}] Rnd[{!s}]'
-                                    .format(f.__name__, attempts,
-                                            waittime, randtime))
-                    for i, a in enumerate(args):
-                        logging.warning('___Retry f():[{!s}] arg[{!s}]={!s}'
-                                        .format(f.__name__, i, a))
-            for i in range(attempts if attempts > 0 else 1):
-                try:
-                    logging.warning('___Retry f():[{!s}]: '
-                                    'Attempt:[{!s}] of [{!s}]'
-                                    .format(f.__name__, i+1, attempts))
-                    return f(*args, **kwargs)
-                except Exception as e:
-                    logging.error('___Retry f():[{!s}]: Error code A: [{!s}]'
-                                  .format(f.__name__, e))
-                    error = e
-                except flickrapi.exceptions.FlickrError as ex:
-                    logging.error('___Retry f():[{!s}]: Error code B: [{!s}]'
-                                  .format(f.__name__, ex))
-                except lite.Error as e:
-                    logging.error('___Retry f():[{!s}]: Error code C: [{!s}]'
-                                  .format(f.__name__, e))
-                    error = e
-                    # Release the lock on error.
-                    # CODING: Check how to handle this particular scenario.
-                    # flick.useDBLock(nulockDB, False)
-                    # self.useDBLock( lock, True)
-                except:
-                    logging.error('___Retry f():[{!s}]: Error code D: Catchall'
-                                  .format(f.__name__))
-
-                logging.warning('___Function:[{!s}] Waiting:[{!s}] Rnd:[{!s}]'
-                                .format(f.__name__, waittime, randtime))
-                if randtime:
-                    rtime.sleep(random.randrange(0,
-                                                 (waittime+1)
-                                                 if waittime >= 0
-                                                 else 1))
-                else:
-                    rtime.sleep(waittime if waittime >= 0 else 0)
-            logging.error('___Retry f():[{!s}] '
-                            'Max:[{!s}] Delay:[{!s}] Rnd[{!s}]: Raising ERROR!'
-                            .format(f.__name__, attempts,
-                                    waittime, randtime))
-            raise error
-        return new_wrapper
-    return wrapper_fn
-
-# -----------------------------------------------------------------------------
-# Samples
-# @retry(attempts=3, waittime=2)
-# def retry_divmod(argslist):
-#     return divmod(*argslist)
-# print retry_divmod([5, 3])
-# try:
-#     print retry_divmod([5, 'H'])
-# except:
-#     logging.error('Error Caught (Overall Catchall)... Continuing')
-# finally:
-#     logging.error('...Continuing')
-# nargslist=dict(Caught=True, CaughtPrefix='+++')
-# retry_reportError(nargslist)
-
 
 # =============================================================================
 # Read Config from config.ini file
@@ -719,9 +623,6 @@ class Uploadr:
         If enabled CHANGE_MEDIA, checks for file changes and updates flickr
         """
 
-        global nulockDB
-        global numutex
-        global nurunning
         global nuMediacount
 
         niceprint("*****Uploading files*****")
@@ -807,21 +708,6 @@ class Uploadr:
         Returns True if a file is within an EXCLUDED_FOLDERS directory/folder
         """
         for excluded_dir in EXCLUDED_FOLDERS:
-            logging.debug('type(excluded_dir):[{!s}]'
-                          .format(type(excluded_dir)))
-            logging.debug('is excluded_dir unicode?[{!s}]'
-                          .format(isThisStringUnicode(excluded_dir)))
-            logging.debug('type(filename):[{!s}]'
-                          .format(type(filename)))
-            logging.debug('is filename unicode?[{!s}]'
-                          .format(isThisStringUnicode(filename)))
-            logging.debug('is os.path.dirname(filename) unicode?[{!s}]'
-                          .format(isThisStringUnicode(
-                                        os.path.dirname(filename))))
-            logging.debug('excluded_dir:[{!s}] filename:[{!s}]'
-                          .format(StrUnicodeOut(excluded_dir),
-                                  StrUnicodeOut(filename)))
-            # Now everything should be in Unicode
             if excluded_dir in os.path.dirname(filename):
                 logging.debug('Returning isFileIgnored:[True]')
                 return True

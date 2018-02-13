@@ -1913,6 +1913,7 @@ class Uploadr:
                                          .format(
                                                 FLICKR["tags"],
                                                 file_checksum,
+                                                StrUnicodeOut(setName),
                                                 args.tags if args.tags else '')
                                                 .replace(',', ''),
                                     is_public=str(FLICKR["is_public"]),

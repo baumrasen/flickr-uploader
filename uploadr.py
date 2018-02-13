@@ -1005,16 +1005,15 @@ class Uploadr:
             return True
 
     # -------------------------------------------------------------------------
-    # removeIgnoreMedia
+    # removeExcludedMedia
     #
     # When EXCLUDED_FOLDERS defintion changes. You can run the -g
-    # or --remove-ignored option in order to remove files previously loaded
-    # files from
+    # or --remove-excluded option in order to remove files previously uploaded.
     #
-    def removeIgnoredMedia(self):
-        """ removeIgnoredMedia
+    def removeExcludedMedia(self):
+        """ removeExcludedMedia
 
-        Remove previously uploaded files, that are now being ignored due to
+        Remove previously uploaded files, that are now being excluded due to
         change of the INI file configuration EXCLUDED_FOLDERS.
         """
         niceprint('*****Removing files from Excluded Folders*****')
@@ -1910,7 +1909,7 @@ class Uploadr:
                                           if FLICKR["title"] == ""
                                           else str(FLICKR["title"]),
                                     description=str(FLICKR["description"]),
-                                    tags='{} checksum:{} {}'
+                                    tags='{} checksum:{} album:"{}" {}'
                                          .format(
                                                 FLICKR["tags"],
                                                 file_checksum,
@@ -3854,6 +3853,16 @@ set0 = sets.find('photosets').findall('photoset')[0]
         pass
 
     # -------------------------------------------------------------------------
+    # AddAlbumsMigrate
+    #
+    # Prepare for version 2.7.0 Add album info to loaded pics
+    #
+    # CODING: to be developed. Consider making allMedia (coming from
+    # grabnewfiles from uploadr) a global variable to pass onto this function
+    def AddAlbumsMigrate(self):
+
+        pass
+    # -------------------------------------------------------------------------
     # printStat
     #
     # List Local pics, loaded pics into Flickr, pics not in sets on Flickr
@@ -4028,55 +4037,70 @@ if __name__ == "__main__":
         raise
     parser = argparse.ArgumentParser(
                         description='Upload files to Flickr. '
-                                    'Uses uploadr.ini as config file.'
+                                    'Uses uploadr.ini as config file.',
+                        epilog='by oPromessa, 2017, 2018'
                         )
-    parser.add_argument('-v', '--verbose', action='store_true',
-                        help='Provides some more verbose output. '
-                             'Will provide progress information on upload. '
-                             'See also LOGGING_LEVEL value in INI file.')
-    parser.add_argument('-x', '--verbose-progress', action='store_true',
-                        help='Provides progress indicator on each upload. '
-                             'Normally used in conjunction with -v option. '
-                             'See also LOGGING_LEVEL value in INI file.')
-    parser.add_argument('-u', '--not-is-already-uploaded', action='store_true',
-                        help='Do not check if file is already uploaded '
-                             'and exists on flickr prior to uploading.')
-    parser.add_argument('-n', '--dry-run', action='store_true',
-                        help='Dry run.')
-    parser.add_argument('-i', '--title', action='store',
-                        help='Title for uploaded files. '
-                             'Overwrites title from INI config file. '
-                             'If not indicated and not defined in INI file, '
-                             'it uses filename as title.')
-    parser.add_argument('-e', '--description', action='store',
-                        help='Description for uploaded files'
-                             'Overwrites description from INI config file. ')
-    parser.add_argument('-t', '--tags', action='store',
-                        help='Space-separated tags for uploaded files. '
-                             'It appends to the tags defined in INI file.')
-    parser.add_argument('-r', '--drip-feed', action='store_true',
-                        help='Wait a bit between uploading individual files')
-    parser.add_argument('-p', '--processes',
-                        metavar='P', type=int,
-                        help='Number of photos to upload simultaneously.')
-    # when you change EXCLUDED_FOLDERS setting
-    parser.add_argument('-g', '--remove-ignored', action='store_true',
-                        help='Remove previously uploaded files, that are '
-                             'now being excluded due to change of the INI '
-                             'file configuration EXCLUDED_FOLDERS')
+
+    # Verbose related options
+    vgrpparser = parser.add_argument_group('Verbose and dry-run options')
+    vgrpparser.add_argument('-v', '--verbose', action='store_true',
+                            help='Provides some more verbose output. '
+                                 'See also -x option. '
+                                 'See also LOGGING_LEVEL value in INI file.')
+    vgrpparser.add_argument('-x', '--verbose-progress', action='store_true',
+                             help='Provides progress indicator on each upload. '
+                                 'Normally used in conjunction with -v option.'
+                                 ' See also LOGGING_LEVEL value in INI file.')
+    vgrpparser.add_argument('-n', '--dry-run', action='store_true',
+                            help='Dry run. No changes are actually performed.')
+
+    # Information related options
+    igrpparser = parser.add_argument_group('Information options')
+    igrpparser.add_argument('-i', '--title', action='store',
+                            help='Title for uploaded files. '
+                                 'Overwrites title set in INI config file. '
+                                 'If not specified and not set in INI file, '
+                                 'it uses filename as title (*Recommended).')
+    igrpparser.add_argument('-e', '--description', action='store',
+                            help='Description for uploaded files'
+                                 'Overwrites description set in INI file. ')
+    igrpparser.add_argument('-t', '--tags', action='store',
+                            help='Space-separated tags for uploaded files. '
+                                 'It appends to the tags defined in INI file.')
     # used in printStat function
-    parser.add_argument('-l', '--list-photos-not-in-set',
-                        metavar='N', type=int,
-                        help='List as many as N photos not in set. '
-                             'Maximum listed photos is 500.')
+    igrpparser.add_argument('-l', '--list-photos-not-in-set',
+                            metavar='N', type=int,
+                            help='List as many as N photos not in set. '
+                                 'Maximum listed photos is 500.')
+    # finds duplicated images (based on checksum, titlename, setName) in Flickr
+    igrpparser.add_argument('-z', '--search-for-duplicates',
+                            action='store_true',
+                            help='Lists duplicated files: same checksum, '
+                                 'same title, list SetName (if different). '
+                                 'Not operational at this time.')
+    
+    # Processing related options
+    pgrpparser = parser.add_argument_group('Processing related options')
+    pgrpparser.add_argument('-r', '--drip-feed', action='store_true',
+                            help='Wait a bit between uploading individual '
+                                 'files.')
+    pgrpparser.add_argument('-p', '--processes',
+                            metavar='P', type=int,
+                            help='Number of photos to upload simultaneously.')
+    pgrpparser.add_argument('-u', '--not-is-already-uploaded',
+                            action='store_true',
+                            help='Do not check if file is already uploaded '
+                                 'and exists on flickr prior to uploading.')
     # run in daemon mode uploading every X seconds
-    parser.add_argument('-d', '--daemon', action='store_true',
-                        help='Run forever as a daemon.'
-                             'Uploading every SLEEP_TIME seconds'
-                             'Please note it only performs upload/replace')
+    pgrpparser.add_argument('-d', '--daemon', action='store_true',
+                            help='Run forever as a daemon.'
+                                 'Uploading every SLEEP_TIME seconds. Please '
+                                 'note it only performs upload/replace.')    
+
+    bgrpparser = parser.add_argument_group('Handling bad and excluded files')
     # cater for bad files. files in your Library that flickr does not recognize
     # -b add files to badfiles table
-    parser.add_argument('-b', '--bad-files', action='store_true',
+    bgrpparser.add_argument('-b', '--bad-files', action='store_true',
                         help='Save on database bad files to prevent '
                              'continuous uploading attempts. Bad files are '
                              'files in your Library that flickr does not '
@@ -4084,17 +4108,29 @@ if __name__ == "__main__":
                              'Check also option -c.')
     # cater for bad files. files in your Library that flickr does not recognize
     # -c clears the badfiles table to allow a reset of the list
-    parser.add_argument('-c', '--clean-bad-files', action='store_true',
+    bgrpparser.add_argument('-c', '--clean-bad-files', action='store_true',
                         help='Resets the badfiles table/list to allow a new '
                              'uploading attempt for bad files. Bad files are '
                              'files in your Library that flickr does not '
                              'recognize (Error 5) or are too large (Error 8). '
                              'Check also option -b.')
-    # finds duplicated images (based on checksum, titlename, setName) in Flickr
-    parser.add_argument('-z', '--search-for-duplicates', action='store_true',
-                        help='Lists duplicated files: same checksum, '
-                             'same title, list SetName (if different). '
-                             'Not operational at this time.')
+    # when you change EXCLUDED_FOLDERS setting
+    bgrpparser.add_argument('-g', '--remove-excluded', '--remove-ignored',
+                            action='store_true',
+                            help='Remove previously uploaded files, that are '
+                                 'now being excluded due to change of the INI '
+                                 'file configuration EXCLUDED_FOLDERS.'
+                                 'NOTE: Please drop use of --remove-ignored '
+                                 'in favor of --remove-excluded or -r. '
+                                 'From version 2.7.0 it will be dropped.')
+    
+    # Migration related options
+    # 2.7.0 Version will add album/setName as one 
+    agrpparser = parser.add_argument_group('Migrate to v2.7.0')
+    agrpparser.add_argument('--add-albums-migrate', action='store_true',
+                            help='Migration. Add tag with albums to already '
+                                 'uploaded files. To be used once you move '
+                                 'to version 2.7.0.')
 
     # parse arguments
     args = parser.parse_args()
@@ -4141,24 +4177,29 @@ if __name__ == "__main__":
         logging.warning('Make sure you have previously authenticated!')
         flick.run()
     else:
-        niceprint("Checking if token is available... if not will authenticate")
+        niceprint('Checking if token is available... if not will authenticate')
         if (not flick.checkToken()):
             flick.authenticate()
 
-        flick.removeUselessSetsTable()
-        flick.getFlickrSets()
-        flick.convertRawFiles()
-        flick.upload()
-        flick.removeDeletedMedia()
-
-        if args.search_for_duplicates:
-            flick.searchForDuplicates()
-
-        if args.remove_ignored:
-            flick.removeIgnoredMedia()
-
-        flick.createSets()
-        flick.printStat(UPLDRConstants.nuMediacount)
+        if args.add_albums_migrate:
+            niceprint('Performing preparation for migrate to 2.7.0')
+            flick.AddAlbumsMigrate()
+            niceprint("No more options will run.")
+        else:            
+            flick.removeUselessSetsTable()
+            flick.getFlickrSets()
+            flick.convertRawFiles()
+            flick.upload()
+            flick.removeDeletedMedia()
+    
+            if args.search_for_duplicates:
+                flick.searchForDuplicates()
+    
+            if args.remove_excluded:
+                flick.removeExcludedMedia()
+    
+            flick.createSets()
+            flick.printStat(UPLDRConstants.nuMediacount)
 
 niceprint('--------- (V{!s}) End time: {!s} ---------'
           .format(UPLDRConstants.Version,

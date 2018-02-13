@@ -39,7 +39,7 @@ env:
 # Set to -v for Verbose option of uploadr
     - VerboseVar=-v
     - BadFilesVar=-b
-    - ExcludedVar=-g
+    - ExcludedVar=--remove-excluded
     - TAIL_LINES=20  # Tail $TAIL_LINES for output logging
     - WAIT_TIME=2    # Sleep time between first and second run    
 # Delete !!!!!!!!!!!!!!!!!!! CAREFULL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

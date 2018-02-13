@@ -186,56 +186,73 @@
  ```bash
  $ ./uploadr.py --help
  
- usage: uploadr.py [-h] [-v] [-x] [-u] [-n] [-i TITLE] [-e DESCRIPTION]
-                   [-t TAGS] [-r] [-p P] [-g] [-l N] [-d] [-b] [-c] [-z]
- 
- Upload files to Flickr. Uses uploadr.ini as config file.
- 
- optional arguments:
-   -h, --help            show this help message and exit
-   -v, --verbose         Provides some more verbose output. Will provide
-                         progress information on upload. See also LOGGING_LEVEL
-                         value in INI file.
-   -x, --verbose-progress
-                         Provides progress indicator on each upload. Normally
-                         used in conjunction with -v option. See also
-                         LOGGING_LEVEL value in INI file.
-   -u, --not-is-already-uploaded
-                         Do not check if file is already uploaded and exists on
-                         flickr prior to uploading.
-   -n, --dry-run         Dry run.
-   -i TITLE, --title TITLE
-                         Title for uploaded files. Overwrites title from INI
-                         config file. If not indicated and not defined in INI
-                         file, it uses filename as title.
-   -e DESCRIPTION, --description DESCRIPTION
-                         Description for uploaded filesOverwrites description
-                         from INI config file.
-   -t TAGS, --tags TAGS  Space-separated tags for uploaded files. It appends to
-                         the tags defined in INI file.
-   -r, --drip-feed       Wait a bit between uploading individual files
-   -p P, --processes P   Number of photos to upload simultaneously.
-   -g, --remove-ignored  Remove previously uploaded files, that are now being
-                         excluded due to change of the INI file configuration
-                         EXCLUDED_FOLDERS
-   -l N, --list-photos-not-in-set N
-                         List as many as N photos not in set. Maximum listed
-                         photos is 500.
-   -d, --daemon          Run forever as a daemon.Uploading every SLEEP_TIME
-                         secondsPlease note it only performs upload/replace
-   -b, --bad-files       Save on database bad files to prevent continuous
-                         uploading attempts. Bad files are files in your
-                         Library that flickr does not recognize (Error 5).
-                         Check also option -c.
-   -c, --clean-bad-files
-                         Resets the badfiles table/list to allow a new
-                         uploading attempt for bad files. Bad files are files
-                         in your Library that flickr does not recognize (Error
-                         5). Check also option -b.
-   -z, --search-for-duplicates
-                         Lists duplicated files: same checksum, same title,
-                         list SetName (if different). Not operational at this
-                         time.
+usage: uploadr.py [-h] [-v] [-x] [-n] [-i TITLE] [-e DESCRIPTION] [-t TAGS]
+                  [-l N] [-z] [-r] [-p P] [-u] [-d] [-b] [-c] [-g]
+                  [--add-albums-migrate]
+
+Upload files to Flickr. Uses uploadr.ini as config file.
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+Verbose and dry-run options:
+  -v, --verbose         Provides some more verbose output. See also -x option.
+                        See also LOGGING_LEVEL value in INI file.
+  -x, --verbose-progress
+                        Provides progress indicator on each upload. Normally
+                        used in conjunction with -v option. See also
+                        LOGGING_LEVEL value in INI file.
+  -n, --dry-run         Dry run. No changes are actually performed.
+
+Information options:
+  -i TITLE, --title TITLE
+                        Title for uploaded files. Overwrites title set in INI
+                        config file. If not specified and not set in INI file,
+                        it uses filename as title (*Recommended).
+  -e DESCRIPTION, --description DESCRIPTION
+                        Description for uploaded filesOverwrites description
+                        set in INI file.
+  -t TAGS, --tags TAGS  Space-separated tags for uploaded files. It appends to
+                        the tags defined in INI file.
+  -l N, --list-photos-not-in-set N
+                        List as many as N photos not in set. Maximum listed
+                        photos is 500.
+  -z, --search-for-duplicates
+                        Lists duplicated files: same checksum, same title,
+                        list SetName (if different). Not operational at this
+                        time.
+
+Processing related options:
+  -r, --drip-feed       Wait a bit between uploading individual files.
+  -p P, --processes P   Number of photos to upload simultaneously.
+  -u, --not-is-already-uploaded
+                        Do not check if file is already uploaded and exists on
+                        flickr prior to uploading.
+  -d, --daemon          Run forever as a daemon.Uploading every SLEEP_TIME
+                        seconds. Please note it only performs upload/replace.
+
+Handling bad and excluded files:
+  -b, --bad-files       Save on database bad files to prevent continuous
+                        uploading attempts. Bad files are files in your
+                        Library that flickr does not recognize (Error 5) or
+                        are too large (Error 8). Check also option -c.
+  -c, --clean-bad-files
+                        Resets the badfiles table/list to allow a new
+                        uploading attempt for bad files. Bad files are files
+                        in your Library that flickr does not recognize (Error
+                        5) or are too large (Error 8). Check also option -b.
+  -g, --remove-excluded, --remove-ignored
+                        Remove previously uploaded files, that are now being
+                        excluded due to change of the INI file configuration
+                        EXCLUDED_FOLDERS.NOTE: Please drop use of --remove-
+                        ignored in favor of --remove-excluded or -r. From
+                        version 2.7.0 it will be dropped.
+
+Migrate to v2.7.0:
+  --add-albums-migrate  Migration. Add tag with albums to already uploaded
+                        files. To be used once you move to version 2.7.0.
+
+by oPromessa, 2017, 2018
  ```
  
  ## Task Scheduler (cron)

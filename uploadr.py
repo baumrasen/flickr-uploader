@@ -3380,6 +3380,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
     # CODING: possible outcomes
     # A) checksum,                             Count=0  THEN NOT EXISTS
     # B) checksum, title, empty setName,       Count=1  THEN EXISTS, ASSIGN SET
+    #                                                   IF tag album IS FOUND
     # C) checksum, title, setName (1 or more), Count>=1 THEN EXISTS
     # D) checksum, title, other setName,       Count>=1 THEN NOT EXISTS
     # E) checksum, title, setName BUT ALSO checksum, title, other setName => ??
@@ -3399,7 +3400,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
             Searchs for image with same:
                 title(file without extension)
                 tag:checksum
-                SetName.
+                SetName
+                    CODING: Being implemented...
+                    if setName is not defined on a pic, it attempts to
+                    check tag:album
 
             returnIsPhotoUploaded = True (already loaded)/False(not loaded)
             returnPhotoUploaded   = Number of found Images
@@ -3451,7 +3455,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                       if searchIsUploaded is None
                                       else self.isGood(searchIsUploaded)))
                 # CODING: how to indicate an error... different from False?
-                # Possibly raising an error?
+                # Possibly raising an exception?
+                # raise Exception('photos_search: Max attempts exhausted.')
                 return returnIsPhotoUploaded, \
                        returnPhotoUploaded, \
                        returnPhotoID
@@ -3498,6 +3503,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             .format((StrUnicodeOut(xtitle_filename) ==
                                      StrUnicodeOut(pic.attrib['title']))))
 
+                # if pic with checksum has a different title, continue
                 if not (StrUnicodeOut(xtitle_filename) ==
                             StrUnicodeOut(pic.attrib['title'])):
                     logging.info('Different titles: File:[{!s}] Flickr:[{!s}]'
@@ -3541,6 +3547,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                       .format('None'
                                                if resp is None
                                                else self.isGood(resp)))
+                        # CODING: how to indicate an error?
+                        # Possibly raising an exception?
+                        # raise Exception('photos_getAllContexts: Max attempts exhausted.')                        
                         return returnIsPhotoUploaded, \
                                returnPhotoUploaded, \
                                returnPhotoID
@@ -3566,12 +3575,19 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     # Valid for re-running interrupted runs EXCEPT when you
                     # you have two pics, with same file name and checksum on
                     # two different sets. SAME Orphaned pic will then be
-                    # assigned to TWO DIFFERENT SETS
-                    # returnIsPhotoUploaded = True
-                    # returnPhotoID = pic.attrib['id']
-                    # return returnIsPhotoUploaded, \
-                    #        returnPhotoUploaded, \
-                    #        returnPhotoID
+                    # assigned to TWO DIFFERENT SETS.
+                    # Unless it has the tag album:setName defined!
+                    
+                    tfind, tid = self.photos_find_tag(
+                                            photo_id = pic.attrib['id'],
+                                            intag = 'album:{}'
+                                                    .format(xsetName))
+                    if tfind:
+                        returnIsPhotoUploaded = True
+                        returnPhotoID = pic.attrib['id']
+                        return returnIsPhotoUploaded, \
+                               returnPhotoUploaded, \
+                               returnPhotoID
 
                 for setinlist in resp.findall('set'):
                     logging.warning('setinlist:')
@@ -3993,13 +4009,13 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                                       FILES_DIR,
                                                       FULL_SET_NAME)
 
-                    tfind, id = self.photos_find_tag(
+                    tfind, tid = self.photos_find_tag(
                                             photo_id = row[0],
                                             intag = 'album:{}'.format(row[2] \
                                             if row[2] is not None
                                             else setName))
-                    niceprint('Found:[{!s}] Id:[{!s}]'
-                              .format(tfind, id))
+                    niceprint('Found:[{!s}] TagId:[{!s}]'
+                              .format(tfind, tid))
                     if not tfind:
                         res_add_tag = self.photos_add_tags(
                                         row[0],

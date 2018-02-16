@@ -26,23 +26,7 @@
       logging.warning: relevant conclusions/situations
       logging.info: relevant output of variables
       logging.debug: entering and exiting functions
-      Note: Consider using assertions:
-        def niceassert(s):
-        \"""
-         Returns a message with the format:
-             [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Message
-             Accounts for UTF-8 Messages
-        \"""
-         return('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'.format(
-                UPLDRConstants.R,
-                UPLDRConstants.Run,
-                nutime.strftime(UPLDRConstants.TimeFormat),
-                os.getpid(),
-                UPLDRConstants.W,
-                'ASSERT',
-                'uploadr',
-                StrUnicodeOut(s)))
-        assert param1 >= 0, niceassert('param1 is not >= 0:'.format(param1))
+      Note: Consider using assertions: check niceassert function.
 
     * Test deleted file from local which is also deleted from flickr
     * Change code to insert on database prior to upload and then update result
@@ -266,7 +250,7 @@ class UPLDRConstants:
         #
         #   nuMediacount = counter of total files to initially upload
         #
-        self.nuMediacount = None        
+        self.nuMediacount = None
         pass
 
 # -----------------------------------------------------------------------------
@@ -362,6 +346,28 @@ def niceprint(s):
             'uploadr',
             StrUnicodeOut(s)))
 
+
+# -----------------------------------------------------------------------------
+# niceassert
+#
+def niceassert(s):
+    """
+     Returns a message with the format:
+         [2017.11.19 01:53:57]:[PID       ][ASSERT  ]:[uploadr] Message
+         Accounts for UTF-8 Messages
+
+     Usage:
+         assert param1 >= 0, niceassert('param1 is not >= 0:'.format(param1))
+    """
+    return('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'.format(
+           UPLDRConstants.R,
+           UPLDRConstants.Run,
+           nutime.strftime(UPLDRConstants.TimeFormat),
+           os.getpid(),
+           UPLDRConstants.W,
+           'ASSERT',
+           'uploadr',
+           StrUnicodeOut(s)))
 
 # -----------------------------------------------------------------------------
 # reportError
@@ -521,9 +527,9 @@ def retry(attempts=3, waittime=5, randtime=False):
 #     return divmod(*argslist)
 # print retry_divmod([5, 3])
 # try:
-#     print retry_divmod([5, 'H'])
+#     print(retry_divmod([5, 'H']))
 # except:
-#     logging.error('Error Caught (Overall Catchall)... Continuing')
+#     logging.error('Error Caught (Overall Catchall)...')
 # finally:
 #     logging.error('...Continuing')
 # nargslist=dict(Caught=True, CaughtPrefix='+++')
@@ -1477,7 +1483,7 @@ class Uploadr:
             if StrUnicodeOut(os.path.basename(os.path.normpath(dirpath))) \
                 in EXCLUDED_FOLDERS:
                 dirnames[:] = []
-                filenames[:] = []   
+                filenames[:] = []
                 logging.warning('Folder [{!s}] on path [{!s}] excluded.'
                                 .format(
                                     StrUnicodeOut(os.path.basename(
@@ -1746,11 +1752,7 @@ class Uploadr:
             niceprint('Checking file:[{!s}]...'
                       .format(StrUnicodeOut(file)))
 
-        if FULL_SET_NAME:
-            setName = os.path.relpath(os.path.dirname(file),
-                                      FILES_DIR)
-        else:
-            head, setName = os.path.split(os.path.dirname(file))
+        setName = self.getSetNameFromFile(file, FILES_DIR, FULL_SET_NAME)
 
         success = False
         # For tracking bad response from search_photos
@@ -1818,7 +1820,7 @@ class Uploadr:
                 niceprint('Already loaded file:[{!s}]...'
                           'On Album:[{!s}]... UPDATING LOCAL DATABASE.'
                           .format(StrUnicodeOut(file),
-                                  StrUnicodeOut(setName)))                
+                                  StrUnicodeOut(setName)))
                 dbInsertIntoFiles(lock, isfile_id, file,
                                   file_checksum, last_modified)
 
@@ -2596,6 +2598,43 @@ class Uploadr:
             logging.warning('Running in Daemon mode. Sleep [{!s}] seconds.'
                             .format(SLEEP_TIME))
             nutime.sleep(SLEEP_TIME)
+    # -------------------------------------------------------------------------
+    # getSetNameFromFile
+    #
+    # Return setName for a file path depending on FULL_SET_NAME True/False
+    #   File to upload: /home/user/media/2014/05/05/photo.jpg
+    #        FILES_DIR:  /home/user/media
+    #    FULL_SET_NAME:
+    #       False: 05
+    #       True: 2014/05/05
+    #
+    def getSetNameFromFile(self, afile, aFILES_DIR, aFULL_SET_NAME):
+        """getSetNameFromFile
+
+           Return setName for a file path depending on FULL_SET_NAME True/False
+           File to upload: /home/user/media/2014/05/05/photo.jpg
+           FILES_DIR:  /home/user/media
+           FULL_SET_NAME:
+              False: 05
+              True: 2014/05/05
+        """
+
+        assert len(afile) > 0, niceassert('len(afile) is not > 0:'
+                                          .format(afile))
+
+        logging.debug('getSetNameFromFile in: '
+                      'afile:[{!s}] aFILES_DIR=[{!s}] aFULL_SET_NAME:[{!s}]'
+                      .format(afile, aFILES_DIR, aFULL_SET_NAME))
+        if aFULL_SET_NAME:
+            asetName = os.path.relpath(os.path.dirname(afile), aFILES_DIR)
+        else:
+            head, asetName = os.path.split(os.path.dirname(afile))
+        logging.debug('getSetNameFromFile out: '
+                      'afile:[{!s}] aFILES_DIR=[{!s}] aFULL_SET_NAME:[{!s}]'
+                      ' asetName:[{!s}]'
+                      .format(afile, aFILES_DIR, aFULL_SET_NAME, asetName))
+
+        return asetName
 
     # -------------------------------------------------------------------------
     # createSets
@@ -2618,14 +2657,10 @@ class Uploadr:
             files = cur.fetchall()
 
             for row in files:
-                if FULL_SET_NAME:
-                    # row[1] = path for the file from table files
-                    setName = os.path.relpath(os.path.dirname(row[1]),
-                                              FILES_DIR)
-                else:
-                    # row[1] = path for the file from table files
-                    head, setName = os.path.split(os.path.dirname(row[1]))
-
+                # row[1] = path for the file from table files
+                setName = self.getSetNameFromFile(row[1],
+                                                  FILES_DIR,
+                                                  FULL_SET_NAME)
                 newSetCreated = False
 
                 # Search local DB for set_id by setName(folder name )
@@ -2739,12 +2774,9 @@ class Uploadr:
             # Error: 1: Photoset not found
             if (ex.code == 1):
                 niceprint('Photoset not found, creating new set...')
-                if FULL_SET_NAME:
-                    setName = os.path.relpath(os.path.dirname(file[1]),
-                                              FILES_DIR)
-                else:
-                    head, setName = os.path.split(os.path.dirname(file[1]))
-
+                setName = self.getSetNameFromFile(file[1],
+                                                  FILES_DIR,
+                                                  FULL_SET_NAME)
                 self.createSet(setName, file[0], cur, con)
             # Error: 3: Photo Already in set
             elif (ex.code == 3):
@@ -3727,12 +3759,12 @@ set0 = sets.find('photosets').findall('photoset')[0]
     # -------------------------------------------------------------------------
     # photos_find_tag
     #
-    #   Determines if tag is assigned to a pic. 
+    #   Determines if tag is assigned to a pic.
     #
     def photos_find_tag(self, photo_id, intag):
         """
         Determines if intag is assigned to a pic.
-        
+
         found_tag = False or True
         tag_id = tag_id if found
         """
@@ -3769,7 +3801,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
             logging.info(xml.etree.ElementTree.tostring(tagsResp,
                                                         encoding='utf-8',
                                                         method='xml'))
-            
+
             tag_id = None
             for tag in tagsResp.find('photo').find('tags').findall('tag'):
                 logging.info(tag.attrib['raw'])
@@ -3779,7 +3811,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     logging.info('Found tag_id:[{!s}] for intag:[{!s}]'
                                  .format(tag_id, intag))
                     return True, tag_id
-        
+
         return False, ''
 
 
@@ -3914,11 +3946,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
         pass
 
     # -------------------------------------------------------------------------
-    # AddAlbumsMigrate
+    # addAlbumsMigrate
     #
     # Prepare for version 2.7.0 Add album info to loaded pics
     #
-    def AddAlbumsMigrate(self):
+    def addAlbumsMigrate(self):
 
         con = lite.connect(DB_PATH)
         con.text_factory = str
@@ -3948,22 +3980,19 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     niceprint('ID:[{!s}] Path:[{!s}] Set:[{!s}] SetID:[{!s}]'
                               .format(str(row[0]), row[1], row[2], row[3]))
 
-                    if FULL_SET_NAME:
-                        # row[1] = path for the file from table files
-                        setName = os.path.relpath(os.path.dirname(row[1]),
-                                                  FILES_DIR)
-                    else:
-                        # row[1] = path for the file from table files
-                        head, setName = os.path.split(os.path.dirname(row[1]))
-                        
-                    ff, id = self.photos_find_tag(
+                    # row[1] = path for the file from table files
+                    setName = self.getSetNameFromFile(row[1],
+                                                      FILES_DIR,
+                                                      FULL_SET_NAME)
+
+                    tfind, id = self.photos_find_tag(
                                             photo_id = row[0],
                                             intag = 'album:{}'.format(row[2] \
                                             if row[2] is not None
                                             else setName))
                     niceprint('Found:[{!s}] Id:[{!s}]'
-                              .format(ff, id))
-                    if not ff:
+                              .format(tfind, id))
+                    if not tfind:
                         res_add_tag = self.photos_add_tags(
                                         row[0],
                                         ['album:"{}"'.format(row[2] \
@@ -4194,7 +4223,7 @@ if __name__ == "__main__":
                             help='Lists duplicated files: same checksum, '
                                  'same title, list SetName (if different). '
                                  'Not operational at this time.')
-    
+
     # Processing related options
     pgrpparser = parser.add_argument_group('Processing related options')
     pgrpparser.add_argument('-r', '--drip-feed', action='store_true',
@@ -4211,7 +4240,7 @@ if __name__ == "__main__":
     pgrpparser.add_argument('-d', '--daemon', action='store_true',
                             help='Run forever as a daemon.'
                                  'Uploading every SLEEP_TIME seconds. Please '
-                                 'note it only performs upload/replace.')    
+                                 'note it only performs upload/replace.')
 
     bgrpparser = parser.add_argument_group('Handling bad and excluded files')
     # cater for bad files. files in your Library that flickr does not recognize
@@ -4239,9 +4268,9 @@ if __name__ == "__main__":
                                  'NOTE: Please drop use of --remove-ignored '
                                  'in favor of --remove-excluded or -r. '
                                  'From version 2.7.0 it will be dropped.')
-    
+
     # Migration related options
-    # 2.7.0 Version will add album/setName as one 
+    # 2.7.0 Version will add album/setName as one
     agrpparser = parser.add_argument_group('Migrate to v2.7.0')
     agrpparser.add_argument('--add-albums-migrate', action='store_true',
                             help='Migration. Add tag with albums to already '
@@ -4299,21 +4328,21 @@ if __name__ == "__main__":
 
         if args.add_albums_migrate:
             niceprint('Performing preparation for migrate to 2.7.0')
-            flick.AddAlbumsMigrate()
+            flick.addAlbumsMigrate()
             niceprint("No more options will run.")
-        else:            
+        else:
             flick.removeUselessSetsTable()
             flick.getFlickrSets()
             flick.convertRawFiles()
             flick.upload()
             flick.removeDeletedMedia()
-    
+
             if args.search_for_duplicates:
                 flick.searchForDuplicates()
-    
+
             if args.remove_excluded:
                 flick.removeExcludedMedia()
-    
+
             flick.createSets()
             flick.printStat(UPLDRConstants.nuMediacount)
 

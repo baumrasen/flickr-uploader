@@ -870,8 +870,9 @@ class Uploadr:
         """
         niceprocessedfiles
 
-        count = Nicely print number of processed files rounded to 100's
-        total = if true shows the total (to be used at the end of processing)
+        count  = Nicely print number of processed files rounded to 100's
+        cTotal = Shows also the total number of items to be processed
+        total  = if true shows the final count (use at the end of processing)
         """
 
         if not total:
@@ -1305,7 +1306,9 @@ class Uploadr:
                 nulockDB = None
 
                 # Show number of total files processed
-                self.niceprocessedfiles(nurunning.value, True)
+                self.niceprocessedfiles(nurunning.value,
+                                        UPLDRConstants.nuMediacount,
+                                        True)
 
             else:
                 niceprint('Pool not in __main__ process. '
@@ -1324,8 +1327,12 @@ class Uploadr:
                               .format(str(DRIP_TIME)))
                     nutime.sleep(DRIP_TIME)
                 count = count + 1
-                self.niceprocessedfiles(count, False)
-            self.niceprocessedfiles(count, True)
+                self.niceprocessedfiles(count,
+                                        UPLDRConstants.nuMediacount,
+                                        False)
+
+            # Show number of total files processed
+            self.niceprocessedfiles(count, UPLDRConstants.nuMediacount, True)
 
         niceprint("*****Completed uploading files*****")
 
@@ -1657,10 +1664,8 @@ class Uploadr:
             logging.warning('===Multiprocessing=== out.mutex.release(w)')
 
             # Show number of files processed so far
-            self.niceprocessedfiles(xcount, False)
+            self.niceprocessedfiles(xcount, UPLDRConstants.nuMediacount, False)
 
-        # Show number of total files processed
-        # self.niceprocessedfiles(xcount, True)
 
     # -------------------------------------------------------------------------
     # uploadFile
@@ -3972,6 +3977,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                       .format(e.args[0]),
                             NicePrint=True)
             finally:
+                
+                count=0
+                countTotal=len(existingMedia)
                 for row in existingMedia:
                     # row[0] = files_id
                     # row[1] = path
@@ -4004,8 +4012,12 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                                 res_add_tag,
                                                 encoding='utf-8',
                                                 method='xml'))
+                    self.niceprocessedfiles(count, countTotal, False)
 
+                self.niceprocessedfiles(count, countTotal, True)
         pass
+    
+    
     # -------------------------------------------------------------------------
     # printStat
     #

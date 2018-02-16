@@ -54,15 +54,15 @@ env:
 # Badfiles
     #- TestScenario=BadFiles UploadrOptions="$VerboseVar $BadFilesVar"
 # Multiprocessing
-    - TestScenario=MultiProcessing UploadrOptions="$VerboseVar $BadFilesVar -p 10"
+    - TestScenario=MultiProcessing UploadrOptions="$VerboseVar $BadFilesVar -p 20"
 # Remove
     #- TestScenario=Remove UploadrOptions="$VerboseVar $BadFilesVar"
 # Replace
     #- TestScenario=Replace UploadrOptions="$VerboseVar $BadFilesVar"
 # RemoveReplace, also test cleaning up badfiles database entries
     - TestScenario=RemoveReplace UploadrOptions="$VerboseVar $BadFilesVar -p 10 -c"
-# ExcludedFolders, also test cleaning up badfiles database entries
-    - TestScenario=ExcludedFolders UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -p 5 -c"
+# ExcludedFolders+IgnoredFiles in Single Processing mode. also test cleaning up badfiles database entries
+    - TestScenario=ExcludedFolders UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -c"
 # =============================================================================
 # before_script
 # Get database token ready

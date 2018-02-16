@@ -866,7 +866,7 @@ class Uploadr:
     #
     # Nicely print number of processed files
     #
-    def niceprocessedfiles(self, count, total):
+    def niceprocessedfiles(self, count, cTotal, total):
         """
         niceprocessedfiles
 
@@ -879,13 +879,12 @@ class Uploadr:
             if (int(count) % 100 == 0):
                 niceprint('\t{!s} of \t{!s} files processed (uploaded, md5ed '
                           'or timestamp checked).'
-                          .format(count, UPLDRConstants.nuMediacount))
-
+                          .format(count, cTotal))
         else:
             if (int(count) % 100 > 0):
                 niceprint('\t{!s} of \t{!s} files processed (uploaded, md5ed '
                           'or timestamp checked).'
-                          .format(count, UPLDRConstants.nuMediacount))
+                          .format(count, cTotal))
 
         sys.stdout.flush()
 

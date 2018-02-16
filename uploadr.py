@@ -98,7 +98,9 @@
     * If local flickrdb is deleted it will re-upload entire local Library.
       It would be interesting to attempt to rebuild local database. With the
       exception of tags (would require use of exiftool) almost all other
-      information could be obtained.
+      information could be obtained. On V2.6.8, the function
+      is_photo_already_uploaded would already search pics with checksum+Set
+      and, if it finds it it will update the local DB.
     * In multiprocessing mode, when uploading additional files to your library
       the work is divided into sorted chunks by each process and it may occur
       that some processes have more work than others defeating the purpose
@@ -109,11 +111,8 @@
     * If you change IGNORED_REGEX in settings, the previously loaded files
       (which match such regular expression) are not removed.
     * Arguments not fully tested:
-        -n
-        -r (should work)
-        -d (should work)
-        -s (not yet fully developed)
-    * Regular Output needs to be aligned to include
+        -z (not yet fully developed)
+    * Regular Output needs to be aligned/simplified to include:
         successful uploads
         successful update of date/time in videos
         successful replacement of photos
@@ -1194,7 +1193,7 @@ class Uploadr:
                     """
                     it = iter(it)
                     # lambda: creates a returning expression function
-                    # whic returns slices
+                    # which returns slices
                     # iter, with the second argument () stops creating
                     # iterators when it reaches the end
                     return iter(lambda: tuple(islice(it, size)), ())
@@ -2281,10 +2280,10 @@ class Uploadr:
                             # later use such tag_id to delete it
                             if (self.isGood(res_get_info)):
                                 tag_id = None
-                                for tag in res_get_info.\
-                                                find('photo').\
-                                                find('tags').\
-                                                findall('tag'):
+                                for tag in res_get_info\
+                                                .find('photo')\
+                                                .find('tags')\
+                                                .findall('tag'):
                                     if (tag.attrib['raw'] ==
                                            'checksum:{}'.format(oldFileMd5)):
                                         tag_id = tag.attrib['id']
@@ -3710,22 +3709,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
         return notinsetResp
 
     # -------------------------------------------------------------------------
-    # photos_add_tags
-    #
-    #   Local Wrapper for Flickr photos.addTags
-    #
-    def photos_add_tags(self, photo_id, tags):
-        """
-        Local Wrapper for Flickr photos.addTags
-        """
-
-        global nuflickr
-
-        photos_add_tagsResp = nuflickr.photos.addTags(photo_id=photo_id,
-                                                      tags=tags)
-        return photos_add_tagsResp
-
-    # -------------------------------------------------------------------------
     # photos_get_info
     #
     #   Local Wrapper for Flickr photos.getInfo
@@ -3740,6 +3723,83 @@ set0 = sets.find('photosets').findall('photoset')[0]
         photos_get_infoResp = nuflickr.photos.getInfo(photo_id=photo_id)
 
         return photos_get_infoResp
+
+    # -------------------------------------------------------------------------
+    # photos_find_tag
+    #
+    #   Determines if tag is assigned to a pic. 
+    #
+    def photos_find_tag(self, photo_id, intag):
+        """
+        Determines if intag is assigned to a pic.
+        
+        found_tag = False or True
+        tag_id = tag_id if found
+        """
+
+        global nuflickr
+
+        logging.info('find_tag: photo:[{!s}] intag:[{!s}]'
+                     .format(photo_id, intag))
+        try:
+            tagsResp = nuflickr.tags.getListPhoto(photo_id=photo_id)
+        except (IOError, ValueError, httplib.HTTPException):
+            reportError(Caught=True,
+                        CaughtPrefix='+++',
+                        CaughtCode='???',
+                        CaughtMsg='Caught IOError, ValueError, '
+                                  'HTTP exception on getListPhoto',
+                        NicePrint=True,
+                        exceptSysInfo=True)
+        except flickrapi.exceptions.FlickrError as ex:
+            reportError(Caught=True,
+                        CaughtPrefix='+++',
+                        CaughtCode='???',
+                        CaughtMsg='Flickrapi exception on getListPhoto',
+                        exceptUse=True,
+                        exceptCode=ex.code,
+                        exceptMsg=ex,
+                        NicePrint=True,
+                        exceptSysInfo=True)
+        finally:
+            if (not self.isGood(tagsResp)):
+                raise IOError(tagsResp)
+
+            logging.info('Output for photo_find_tag:')
+            logging.info(xml.etree.ElementTree.tostring(tagsResp,
+                                                        encoding='utf-8',
+                                                        method='xml'))
+            
+            tag_id = None
+            for tag in tagsResp.find('photo').find('tags').findall('tag'):
+                logging.info(tag.attrib['raw'])
+                if (StrUnicodeOut(tag.attrib['raw']) ==
+                        StrUnicodeOut(intag)):
+                    tag_id = tag.attrib['id']
+                    logging.info('Found tag_id:[{!s}] for intag:[{!s}]'
+                                 .format(tag_id, intag))
+                    return True, tag_id
+        
+        return False, ''
+
+
+    # -------------------------------------------------------------------------
+    # photos_add_tags
+    #
+    #   Local Wrapper for Flickr photos.addTags
+    #
+    def photos_add_tags(self, photo_id, tags):
+        """
+        Local Wrapper for Flickr photos.addTags
+        """
+
+        global nuflickr
+
+        logging.info('photos_add_tags: photo_id:[{!s}] tags:[{!s}]'
+                     .format(photo_id, tags))
+        photos_add_tagsResp = nuflickr.photos.addTags(photo_id=photo_id,
+                                                      tags=tags)
+        return photos_add_tagsResp
 
     # -------------------------------------------------------------------------
     # photos_remove_tag
@@ -3858,9 +3918,63 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #
     # Prepare for version 2.7.0 Add album info to loaded pics
     #
-    # CODING: to be developed. Consider making allMedia (coming from
-    # grabnewfiles from uploadr) a global variable to pass onto this function
     def AddAlbumsMigrate(self):
+
+        con = lite.connect(DB_PATH)
+        con.text_factory = str
+        with con:
+            try:
+                cur = con.cursor()
+                cur.execute('SELECT files_id, path, sets.name, sets.set_id '
+                            'FROM files LEFT OUTER JOIN sets ON '
+                            'files.set_id = sets.set_id')
+                existingMedia = cur.fetchall()
+                logging.info('len(existingMedia)=[{!s}]'
+                             .format(len(existingMedia)))
+            except lite.Error as e:
+                reportError(Caught=True,
+                            CaughtPrefix='+++ DB',
+                            CaughtCode='???',
+                            CaughtMsg='DB error on SELECT FROM '
+                                      'sets: [{!s}]'
+                                      .format(e.args[0]),
+                            NicePrint=True)
+            finally:
+                for row in existingMedia:
+                    # row[0] = files_id
+                    # row[1] = path
+                    # row[2] = set_name
+                    # row[3] = set_id
+                    niceprint('ID:[{!s}] Path:[{!s}] Set:[{!s}] SetID:[{!s}]'
+                              .format(str(row[0]), row[1], row[2], row[3]))
+
+                    if FULL_SET_NAME:
+                        # row[1] = path for the file from table files
+                        setName = os.path.relpath(os.path.dirname(row[1]),
+                                                  FILES_DIR)
+                    else:
+                        # row[1] = path for the file from table files
+                        head, setName = os.path.split(os.path.dirname(row[1]))
+                        
+                    ff, id = self.photos_find_tag(
+                                            photo_id = row[0],
+                                            intag = 'album:{}'.format(row[2] \
+                                            if row[2] is not None
+                                            else setName))
+                    niceprint('Found:[{!s}] Id:[{!s}]'
+                              .format(ff, id))
+                    if not ff:
+                        res_add_tag = self.photos_add_tags(
+                                        row[0],
+                                        ['album:"{}"'.format(row[2] \
+                                                if row[2] is not None
+                                                else setName)]
+                                      )
+                        logging.info('res_add_tag: ')
+                        logging.info(xml.etree.ElementTree.tostring(
+                                                res_add_tag,
+                                                encoding='utf-8',
+                                                method='xml'))
 
         pass
     # -------------------------------------------------------------------------
@@ -4036,6 +4150,7 @@ if __name__ == "__main__":
                                 nutime.strftime(UPLDRConstants.TimeFormat)))
             sys.exit(-1)
         raise
+
     parser = argparse.ArgumentParser(
                         description='Upload files to Flickr. '
                                     'Uses uploadr.ini as config file.',
@@ -4050,8 +4165,8 @@ if __name__ == "__main__":
                                  'See also LOGGING_LEVEL value in INI file.')
     vgrpparser.add_argument('-x', '--verbose-progress', action='store_true',
                              help='Provides progress indicator on each upload. '
-                                 'Normally used in conjunction with -v option.'
-                                 ' See also LOGGING_LEVEL value in INI file.')
+                                  'Normally used in conjunction with -v option.'
+                                  ' See also LOGGING_LEVEL value in INI file.')
     vgrpparser.add_argument('-n', '--dry-run', action='store_true',
                             help='Dry run. No changes are actually performed.')
 

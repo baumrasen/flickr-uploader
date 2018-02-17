@@ -1815,8 +1815,10 @@ class Uploadr:
                 logging.warning('is_photo_already_uploaded:[{!s}] '
                                 'count:[{!s}] pic:[{!s}] '
                                 'row is None == [{!s}]'
+                                'isNoSet:[{!s}]'
                                 .format(isLoaded, isCount,
-                                        isfile_id, row is None))
+                                        isfile_id, row is None,
+                                        isNoSet))
 
             if isLoaded and row is None:
                 if file_checksum is None:

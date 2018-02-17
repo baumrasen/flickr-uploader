@@ -73,17 +73,18 @@ before_script:
   - pwd
   - pythonVersion=`python -V 2>&1 | cut -d\  -f2`
   - echo $pythonVersion
+  - echo Travis Python Version
+  - echo ${TRAVIS_PYTHON_VERSION}  
 #  - ls -laR
   - cp tests/uploadr.ini .
-  - cp tests/uploadr.ini /home/travis/virtualenv/python$pythonVersion/bin/uploadr.ini
+  - cp tests/uploadr.ini /home/travis/virtualenv/python$pythonVersion/bin/uploadr.ini || cp tests/uploadr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/uploadr.ini
   - grep FILES_DIR uploadr.ini
 #  - cat uploadr.ini
   - echo "INSERT INTO oauth_tokens ( api_key, lookup_key, oauth_token, oauth_token_secret, access_level, fullname, username, user_nsid) VALUES ( '"$api_key"', '', '"$oauth_token"', '"$oauth_token_secret"', 'delete', '"$fullname"', '"$username"', '"$user_nsid"');" | sqlite3 token/oauth-tokens.sqlite
   - sqlite3 token/oauth-tokens.sqlite 'SELECT * FROM oauth_tokens;'
   - find "./tests/Test Photo Library" -type f -exec md5sum '{}' \;
   - remote_syslog/remote_syslog -c ~/syslog2.yml
-  - echo Travis Python Version
-  - echo ${TRAVIS_PYTHON_VERSION}
+
 
 # =============================================================================
 # run script for tests

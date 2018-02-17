@@ -2148,8 +2148,9 @@ class Uploadr:
                     row[1] == isfile_id):
                     try:
                         self.useDBLock(lock, True)                        
-                        cur.execute('UPDATE files SET set_id = ? WHERE files_id = ?',
-                                    (setId, primaryPhotoId))
+                        cur.execute('UPDATE files SET set_id = null '
+                                    'WHERE files_id = ?',
+                                    (isfile_id))
                     except lite.Error as e:
                         reportError(Caught=True,
                             CaughtPrefix='+++ DB',
@@ -3743,7 +3744,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                         'CONTINUING SEARCH IN SETS')
                         continue
 
-        return returnIsPhotoUploaded, returnPhotoUploaded, returnPhotoID
+        return returnIsPhotoUploaded, returnPhotoUploaded,
+               returnPhotoID, returnUploadedNoSet
 # <?xml version="1.0" encoding="utf-8" ?>
 # <rsp stat="ok">
 #   <photos page="1" pages="1" perpage="100" total="2">

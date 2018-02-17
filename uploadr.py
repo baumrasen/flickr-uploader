@@ -16,7 +16,7 @@
       Consider one additional result for PHOTO UPLOADED
       WITHOUT SET WITH ALBUM TAG when row exists on DB. Mark
       such row on the database files.set_id to null
-      to force re-assigning to Album/Set on flickr.    
+      to force re-assigning to Album/Set on flickr.
     * On first authenticate... removedeletemedia seems to fail
     * Test if it Re-upload or not pictures removed from flickr Web interface.
     * CODING: Should extend this control to other parameters (Enhancement #7)
@@ -1812,13 +1812,13 @@ class Uploadr:
                                 self.is_photo_already_uploaded(file,
                                                                file_checksum,
                                                                setName)
-                logging.warning('is_photo_already_uploaded:[{!s}] '
-                                'count:[{!s}] pic:[{!s}] '
-                                'row is None == [{!s}]'
-                                'isNoSet:[{!s}]'
-                                .format(isLoaded, isCount,
-                                        isfile_id, row is None,
-                                        isNoSet))
+                logging.info('is_photo_already_uploaded:[{!s}] '
+                              'count:[{!s}] pic:[{!s}] '
+                              'row is None == [{!s}] '
+                              'isNoSet:[{!s}]'
+                              .format(isLoaded, isCount,
+                                      isfile_id, row is None,
+                                      isNoSet))
 
             if isLoaded and row is None:
                 if file_checksum is None:
@@ -2148,8 +2148,12 @@ class Uploadr:
                     isNoSet and
                     row is not None and
                     row[1] == isfile_id):
+                    
+                    logging.info('Will UPDATE files SET set_id = null '
+                                 'for pic:[{!s}] '
+                                 .format(row[1]))
                     try:
-                        self.useDBLock(lock, True)                        
+                        self.useDBLock(lock, True)
                         cur.execute('UPDATE files SET set_id = null '
                                     'WHERE files_id = ?',
                                     (isfile_id))
@@ -2159,9 +2163,13 @@ class Uploadr:
                             CaughtCode='???',
                             CaughtMsg='DB error on UPDATE: [{!s}]'.format(e.args[0]),
                             NicePrint=True)
-                    con.commit()
-                    self.useDBLock(lock, False)
-
+                    finally:
+                        con.commit()
+                        self.useDBLock(lock, False)
+                    
+                    logging.info('Did UPDATE files SET set_id = null '
+                                 'for pic:[{!s}] '
+                                 .format(row[1]))                        
 
                 # we have a file from disk which is found on the database also
                 # row[6] is last_modified date/timestamp

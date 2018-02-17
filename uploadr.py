@@ -3562,6 +3562,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                              .format(len(resp.findall('set'))))
 
                 # B) checksum, title, empty setName,       Count=1  THEN EXISTS, ASSIGN SET
+                #                                                   IF tag album IS FOUND
                 if (len(resp.findall('set')) == 0):
                     niceprint('PHOTO UPLOADED WITHOUT SET')
                     logging.warning('PHOTO UPLOADED WITHOUT SET')
@@ -3576,7 +3577,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     # two different sets. SAME Orphaned pic will then be
                     # assigned to TWO DIFFERENT SETS.
                     # Unless it has the tag album:setName defined!
-                    
                     tfind, tid = self.photos_find_tag(
                                             photo_id = pic.attrib['id'],
                                             intag = 'album:{}'

@@ -3513,7 +3513,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
             # returnList = []
             freturnPhotoUploaded = 0
             for pic in searchIsUploaded.find('photos').findall('photo'):
-                freturnPhotoUploaded +1
+                freturnPhotoUploaded +=1
                 logging.info('idx=[{!s}] pic.id=[{!s}] '
                              'pic.title=[{!s}] pic.tags=[{!s}]'
                              .format(freturnPhotoUploaded,

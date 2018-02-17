@@ -3744,7 +3744,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                         'CONTINUING SEARCH IN SETS')
                         continue
 
-        return returnIsPhotoUploaded, returnPhotoUploaded,
+        return returnIsPhotoUploaded, returnPhotoUploaded, \
                returnPhotoID, returnUploadedNoSet
 # <?xml version="1.0" encoding="utf-8" ?>
 # <rsp stat="ok">

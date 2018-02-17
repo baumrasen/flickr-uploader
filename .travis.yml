@@ -6,6 +6,7 @@ language: python
 python:
   - "2.7"
   - "3.6"
+  - "3.7"  
 # nightly gets the latest nightly version of python... python 3 in the case. For now I don't want that!
 #  - "nightly"
 

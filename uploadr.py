@@ -330,7 +330,7 @@ def StrUnicodeOut(s):
 # Print a message with the format:
 #   [2017.10.25 22:32:03]:[PRINT   ]:[uploadr] Some Message
 #
-def niceprint(s):
+def niceprint(s, fname='uploadr'):
     """
     Print a message with the format:
         [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
@@ -343,7 +343,7 @@ def niceprint(s):
             os.getpid(),
             UPLDRConstants.W,
             'PRINT',
-            'uploadr',
+            StrUnicodeOut(fname),
             StrUnicodeOut(s)))
 
 
@@ -2131,7 +2131,11 @@ class Uploadr:
                 #   then: if md5 has changed then perform replacePhoto
                 #   operation on Flickr
                 try:
-                    logging.warning('CHANGES row[6]=[{!s}]'.format(row[6]))
+                    logging.warning('CHANGES row[6]=[{!s}-({!s})]'
+                                    .format(nutime.strftime(
+                                                    UPLDRConstants.TimeFormat,
+                                                    nutime.localtime(row[6])),
+                                            row[6]))
                     if (row[6] is None):
                         # Update db the last_modified time of file
 
@@ -2952,11 +2956,13 @@ class Uploadr:
             # [0] = newly created
             # [1] = with last_modified column
             # [2] = badfiles table added
+            # [3] = Adding album tags to pics on upload.
+            #       Used in subsequent searches.
             cur = con.cursor()
             cur.execute('PRAGMA user_version')
             row = cur.fetchone()
             if (row[0] == 0):
-                # Database version 1
+                # Database version 1 <=========================DB VERSION: 1===
                 niceprint('Adding last_modified column to database')
                 cur = con.cursor()
                 cur.execute('PRAGMA user_version="1"')
@@ -2967,7 +2973,7 @@ class Uploadr:
                 cur.execute('PRAGMA user_version')
                 row = cur.fetchone()
             if (row[0] == 1):
-                # Database version 2
+                # Database version 2 <=========================DB VERSION: 2===
                 # Cater for badfiles
                 niceprint('Adding table badfiles to database')
                 cur.execute('PRAGMA user_version="2"')
@@ -2983,7 +2989,23 @@ class Uploadr:
                 row = cur.fetchone()
             if (row[0] == 2):
                 niceprint('Database version: [{!s}]'.format(row[0]))
-                # Database version 3
+                # Database version 3 <=========================DB VERSION: 3===
+                niceprint('Adding album tags to pics on upload... ')
+                if flick.addAlbumsMigrate():
+                    niceprint('Successfully added album tags to pics '
+                              'on upload. Updating Database version.')
+                    cur.execute('PRAGMA user_version="3"')
+                    con.commit()
+                    cur = con.cursor()
+                    cur.execute('PRAGMA user_version')
+                    row = cur.fetchone()
+                else:
+                    niceprint('Failed adding album tags to pics '
+                              'on upload. Not updating Database version.'
+                              'please check logs, correct, and retry.')
+            if (row[0] == 3):
+                niceprint('Database version: [{!s}]'.format(row[0]))
+                # Database version 4 <=========================DB VERSION: 4===
                 # ...for future use!
             # Closing DB connection
             if con is not None:
@@ -3414,7 +3436,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
         returnPhotoUploaded = 0
         returnPhotoID = None
 
-        logging.info('Is Already Uploaded:[checksum:{!s}]?'.format(xchecksum))
+        logging.info('Is Already Uploaded:[checksum:{!s}] [album:{!s}]?'
+                     .format(xchecksum, xsetName))
 
         # CODING: Used with a big random waitime to avoid errors in
         # multiprocessing mode.
@@ -3456,6 +3479,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 # CODING: how to indicate an error... different from False?
                 # Possibly raising an exception?
                 # raise Exception('photos_search: Max attempts exhausted.')
+                niceprint('return: IS_PHOTO_UPLOADED: ERROR#1',
+                          fname='is_photo_already_uploaded')
+                logging.warning('return: IS_PHOTO_UPLOADED: ERROR#1')
                 return returnIsPhotoUploaded, \
                        returnPhotoUploaded, \
                        returnPhotoID
@@ -3483,10 +3509,15 @@ set0 = sets.find('photosets').findall('photoset')[0]
             logging.info('Title:[{!s}]'.format(StrUnicodeOut(xtitle_filename)))
 
             # For each pic found on Flickr 1st check title and then Sets
-            returnList = []
+            # CODING returnList not being used
+            # returnList = []
+            freturnPhotoUploaded = 0
             for pic in searchIsUploaded.find('photos').findall('photo'):
-                logging.info('pic.id=[{!s}] pic.title=[{!s}] pic.tags=[{!s}]'
-                             .format(pic.attrib['id'],
+                freturnPhotoUploaded +1
+                logging.info('idx=[{!s}] pic.id=[{!s}] '
+                             'pic.title=[{!s}] pic.tags=[{!s}]'
+                             .format(freturnPhotoUploaded,
+                                     pic.attrib['id'],
                                      StrUnicodeOut(pic.attrib['title']),
                                      StrUnicodeOut(pic.attrib['tags'])))
 
@@ -3548,7 +3579,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                                else self.isGood(resp)))
                         # CODING: how to indicate an error?
                         # Possibly raising an exception?
-                        # raise Exception('photos_getAllContexts: Max attempts exhausted.')                        
+                        # raise Exception('photos_getAllContexts: Max attempts exhausted.')
+                        niceprint('return: IS_PHOTO_UPLOADED: ERROR#2',
+                                  fname='is_photo_already_uploaded')
+                        logging.warning('return: IS_PHOTO_UPLOADED: ERROR#2')
                         return returnIsPhotoUploaded, \
                                returnPhotoUploaded, \
                                returnPhotoID
@@ -3564,13 +3598,12 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 # B) checksum, title, empty setName,       Count=1  THEN EXISTS, ASSIGN SET
                 #                                                   IF tag album IS FOUND
                 if (len(resp.findall('set')) == 0):
-                    niceprint('PHOTO UPLOADED WITHOUT SET')
-                    logging.warning('PHOTO UPLOADED WITHOUT SET')
-                    returnList.append({'id': pic.attrib['id'],
-                                       'title': pic.attrib['title'],
-                                       'set': '',
-                                       'tags': pic.attrib['tags'],
-                                       'result': 'empty'})
+                    # CODING returnList not being used
+                    # returnList.append({'id': pic.attrib['id'],
+                    #                    'title': pic.attrib['title'],
+                    #                    'set': '',
+                    #                    'tags': pic.attrib['tags'],
+                    #                    'result': 'empty'})
                     # CODING: TEST
                     # Valid for re-running interrupted runs EXCEPT when you
                     # you have two pics, with same file name and checksum on
@@ -3582,11 +3615,22 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                             intag = 'album:{}'
                                                     .format(xsetName))
                     if tfind:
+                        niceprint('return: PHOTO UPLOADED WITHOUT SET '
+                                  'WITH ALBUM TAG',
+                                  fname='is_photo_already_uploaded')
+                        logging.warning('return: PHOTO UPLOADED WITHOUT SET '
+                                        'WITH ALBUM TAG')
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
                         return returnIsPhotoUploaded, \
                                returnPhotoUploaded, \
                                returnPhotoID
+                    else:
+                        niceprint('PHOTO UPLOADED WITHOUT SET '
+                                  'WITHOUT ALBUM TAG',
+                                  fname='is_photo_already_uploaded')
+                        logging.warning('PHOTO UPLOADED WITHOUT SET '
+                                        'WITHOUT ALBUM TAG')
 
                 for setinlist in resp.findall('set'):
                     logging.warning('setinlist:')
@@ -3613,12 +3657,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                           StrUnicodeOut(setinlist
                                                         .attrib['title']))))
 
-                    # result is either
-                    #   empty = same title, no set
-                    #   same
-                    #   noset
-                    #   otherset
-
+                    # CODING returnList not being used
                     # returnList.append({'id': pic.attrib['id'],
                     #                    'title': pic.attrib['title'],
                     #                    'set': setinlist.attrib['title'],
@@ -3630,8 +3669,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     # C) checksum, title, setName (1 or more), Count>=1 THEN EXISTS
                     if (StrUnicodeOut(xsetName) ==
                             StrUnicodeOut(setinlist.attrib['title'])):
-                        niceprint('IS PHOTO UPLOADED=TRUE')
-                        logging.warning('IS PHOTO UPLOADED=TRUE')
+                        niceprint('IS PHOTO UPLOADED=TRUE WITH SET',
+                                  fname='is_photo_already_uploaded')
+                        logging.warning('IS PHOTO UPLOADED=TRUE WITH SET')
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
                         return returnIsPhotoUploaded, \
@@ -3639,9 +3679,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                returnPhotoID
                     else:
                         # D) checksum, title, other setName,       Count>=1 THEN NOT EXISTS
-                        niceprint('IS PHOTO UPLOADED=FALSE, '
-                                  'CONTINUING SEARCH IN SETS')
-                        logging.warning('IS PHOTO UPLOADED=FALSE, '
+                        niceprint('IS PHOTO UPLOADED=FALSE OTHER SET, '
+                                  'CONTINUING SEARCH IN SETS',
+                                  fname='is_photo_already_uploaded')
+                        logging.warning('IS PHOTO UPLOADED=FALSE OTHER SET, '
                                         'CONTINUING SEARCH IN SETS')
                         continue
 
@@ -3992,7 +4033,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                       .format(e.args[0]),
                             NicePrint=True)
             finally:
-                
+
                 count=0
                 countTotal=len(existingMedia)
                 for row in existingMedia:
@@ -4030,9 +4071,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     self.niceprocessedfiles(count, countTotal, False)
 
                 self.niceprocessedfiles(count, countTotal, True)
-        pass
-    
-    
+        return True
+
+
     # -------------------------------------------------------------------------
     # printStat
     #

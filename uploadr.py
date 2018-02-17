@@ -1971,6 +1971,18 @@ class Uploadr:
                             # CODING: Revise and simplify this code
                             # CODING: Possibly use is_photo_already_uploaded
                             # CODING: but checking without SET
+                            ZisLoaded, ZisCount, Zisfile_id = \
+                                self.is_photo_already_uploaded(
+                                                                file,
+                                                                file_checksum,
+                                                                setName)
+                            logging.debug('CODING NEW CODE: '
+                                          'is_photo_already_uploaded:[{!s}] '
+                                          'Zcount:[{!s}] Zpic:[{!s}]'
+                                          .format(ZisLoaded, ZisCount,
+                                                  Zisfile_id))
+                            # CODING: END... to check how to replace following
+                            # lines. Check MAX_ATTEMPTS. Replace with retry?
                             search_result = self.photos_search(file_checksum)
                             if not self.isGood(search_result):
                                 raise IOError(search_result)
@@ -3669,9 +3681,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     # C) checksum, title, setName (1 or more), Count>=1 THEN EXISTS
                     if (StrUnicodeOut(xsetName) ==
                             StrUnicodeOut(setinlist.attrib['title'])):
-                        niceprint('IS PHOTO UPLOADED=TRUE WITH SET',
+                        niceprint('return: IS PHOTO UPLOADED=TRUE WITH SET',
                                   fname='is_photo_already_uploaded')
-                        logging.warning('IS PHOTO UPLOADED=TRUE WITH SET')
+                        logging.warning('return: IS PHOTO UPLOADED=TRUE WITH SET')
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
                         return returnIsPhotoUploaded, \

@@ -12,6 +12,11 @@
     Some giberish. Please ignore!
     -----------------------------
     Area for my personal notes on on-going work! Please ignore!
+    * function is_photo_already_uploaded:
+      Consider one additional result for PHOTO UPLOADED
+      WITHOUT SET WITH ALBUM TAG when row exists on DB. Mark
+      such row on the database files.set_id to null
+      to force re-assigning to Album/Set on flickr.    
     * On first authenticate... removedeletemedia seems to fail
     * Test if it Re-upload or not pictures removed from flickr Web interface.
     * CODING: Should extend this control to other parameters (Enhancement #7)
@@ -1803,10 +1808,10 @@ class Uploadr:
                                 .format(isLoaded))
             else:
                 file_checksum = self.md5Checksum(file)
-                isLoaded, isCount, isfile_id = self.is_photo_already_uploaded(
-                                                                file,
-                                                                file_checksum,
-                                                                setName)
+                isLoaded, isCount, isfile_id, isNoSet = \
+                                self.is_photo_already_uploaded(file,
+                                                               file_checksum,
+                                                               setName)
                 logging.warning('is_photo_already_uploaded:[{!s}] '
                                 'count:[{!s}] pic:[{!s}] '
                                 'row is None == [{!s}]'
@@ -1971,16 +1976,17 @@ class Uploadr:
                             # CODING: Revise and simplify this code
                             # CODING: Possibly use is_photo_already_uploaded
                             # CODING: but checking without SET
-                            ZisLoaded, ZisCount, Zisfile_id = \
+                            ZisLoaded, ZisCount, Zisfile_id, zisNoSet = \
                                 self.is_photo_already_uploaded(
                                                                 file,
                                                                 file_checksum,
                                                                 setName)
                             logging.debug('CODING NEW CODE: '
                                           'is_photo_already_uploaded:[{!s}] '
-                                          'Zcount:[{!s}] Zpic:[{!s}]'
+                                          'Zcount:[{!s}] Zpic:[{!s}] '
+                                          'ZisNoSet:[{!s}]'
                                           .format(ZisLoaded, ZisCount,
-                                                  Zisfile_id))
+                                                  Zisfile_id, zisNoSet))
                             # CODING: END... to check how to replace following
                             # lines. Check MAX_ATTEMPTS. Replace with retry?
                             search_result = self.photos_search(file_checksum)
@@ -2132,6 +2138,28 @@ class Uploadr:
                     return False
 
             elif (MANAGE_CHANGES):
+                # we have a file from disk which is found on the database
+                # and is also on flickr but is set on flickr is not defined.
+                # So we need to reset the local datbase set_id so that it will
+                # be later assigned once we run createSets()
+                if (isLoaded and
+                    isNoSet and
+                    row is not None and
+                    row[1] == isfile_id):
+                    try:
+                        self.useDBLock(lock, True)                        
+                        cur.execute('UPDATE files SET set_id = ? WHERE files_id = ?',
+                                    (setId, primaryPhotoId))
+                    except lite.Error as e:
+                        reportError(Caught=True,
+                            CaughtPrefix='+++ DB',
+                            CaughtCode='???',
+                            CaughtMsg='DB error on UPDATE: [{!s}]'.format(e.args[0]),
+                            NicePrint=True)
+                    con.commit()
+                    self.useDBLock(lock, False)
+
+
                 # we have a file from disk which is found on the database also
                 # row[6] is last_modified date/timestamp
                 # row[1] is files_id
@@ -3416,8 +3444,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #                                                   IF tag album IS FOUND
     # C) checksum, title, setName (1 or more), Count>=1 THEN EXISTS
     # D) checksum, title, other setName,       Count>=1 THEN NOT EXISTS
-    # E) checksum, title, setName BUT ALSO checksum, title, other setName => ??
-    # F) checksum, title, setName BUT ALSO checksum, title, empty setName => ??
+    # E) checksum, title, setName & ALSO checksum, title, other setName => N/A
+    # F) checksum, title, setName & ALSO checksum, title, empty setName => N/A
     #
     # Logic:
     #   Search photos with checksum
@@ -3441,12 +3469,19 @@ set0 = sets.find('photosets').findall('photoset')[0]
             returnIsPhotoUploaded = True (already loaded)/False(not loaded)
             returnPhotoUploaded   = Number of found Images
             returnPhotoID         = Pic ID on Flickr
+            returnUploadedNoSet   = True , B, C, D, E or F
+            Case | returnIsPhotoUploaded | returnUploadedNoSet |
+            A    | False                 | False               |
+            B    | True                  | True                |
+            C    | True                  | False          |
+            D    | False                 | False               |
         """
 
         global nuflickr
         returnIsPhotoUploaded = False
         returnPhotoUploaded = 0
         returnPhotoID = None
+        returnUploadedNoSet = False
 
         logging.info('Is Already Uploaded:[checksum:{!s}] [album:{!s}]?'
                      .format(xchecksum, xsetName))
@@ -3496,7 +3531,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 logging.warning('return: IS_PHOTO_UPLOADED: ERROR#1')
                 return returnIsPhotoUploaded, \
                        returnPhotoUploaded, \
-                       returnPhotoID
+                       returnPhotoID, \
+                       returnUploadedNoSet
 
         logging.debug('searchIsUploaded:')
         logging.debug(xml.etree.ElementTree.tostring(searchIsUploaded,
@@ -3597,7 +3633,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         logging.warning('return: IS_PHOTO_UPLOADED: ERROR#2')
                         return returnIsPhotoUploaded, \
                                returnPhotoUploaded, \
-                               returnPhotoID
+                               returnPhotoID, \
+                               returnUploadedNoSet
                     logging.debug('resp.getAllContextsOK:')
                     logging.debug(xml.etree.ElementTree.tostring(
                                                         resp,
@@ -3617,11 +3654,15 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     #                    'tags': pic.attrib['tags'],
                     #                    'result': 'empty'})
                     # CODING: TEST
-                    # Valid for re-running interrupted runs EXCEPT when you
+                    # Valid for re-running interrupted runs EXCEPT when
                     # you have two pics, with same file name and checksum on
                     # two different sets. SAME Orphaned pic will then be
                     # assigned to TWO DIFFERENT SETS.
                     # Unless it has the tag album:setName defined!
+                    # Consider one additional result for PHOTO UPLOADED
+                    # WITHOUT SET WITH ALBUM TAG when row exists on DB. Mark
+                    # such row on the database files.set_id to null
+                    # to force re-assigning to Album/Set on flickr.
                     tfind, tid = self.photos_find_tag(
                                             photo_id = pic.attrib['id'],
                                             intag = 'album:{}'
@@ -3634,9 +3675,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                         'WITH ALBUM TAG')
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
+                        returnUploadedNoSet = True
                         return returnIsPhotoUploaded, \
                                returnPhotoUploaded, \
-                               returnPhotoID
+                               returnPhotoID, \
+                               returnUploadedNoSet
                     else:
                         niceprint('PHOTO UPLOADED WITHOUT SET '
                                   'WITHOUT ALBUM TAG',
@@ -3686,9 +3729,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         logging.warning('return: IS PHOTO UPLOADED=TRUE WITH SET')
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
+                        returnUploadedNoSet = False
                         return returnIsPhotoUploaded, \
                                returnPhotoUploaded, \
-                               returnPhotoID
+                               returnPhotoID, \
+                               returnUploadedNoSet
                     else:
                         # D) checksum, title, other setName,       Count>=1 THEN NOT EXISTS
                         niceprint('IS PHOTO UPLOADED=FALSE OTHER SET, '
@@ -3851,7 +3896,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         except (IOError, ValueError, httplib.HTTPException):
             reportError(Caught=True,
                         CaughtPrefix='+++',
-                        CaughtCode='???',
+                        CaughtCode='205',
                         CaughtMsg='Caught IOError, ValueError, '
                                   'HTTP exception on getListPhoto',
                         NicePrint=True,
@@ -3859,7 +3904,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         except flickrapi.exceptions.FlickrError as ex:
             reportError(Caught=True,
                         CaughtPrefix='+++',
-                        CaughtCode='???',
+                        CaughtCode='206',
                         CaughtMsg='Flickrapi exception on getListPhoto',
                         exceptUse=True,
                         exceptCode=ex.code,
@@ -4039,7 +4084,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
             except lite.Error as e:
                 reportError(Caught=True,
                             CaughtPrefix='+++ DB',
-                            CaughtCode='???',
+                            CaughtCode='215',
                             CaughtMsg='DB error on SELECT FROM '
                                       'sets: [{!s}]'
                                       .format(e.args[0]),

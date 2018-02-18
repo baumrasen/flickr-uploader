@@ -2144,11 +2144,17 @@ class Uploadr:
                 # and is also on flickr but is set on flickr is not defined.
                 # So we need to reset the local datbase set_id so that it will
                 # be later assigned once we run createSets()
+                logging.debug('row[1] == isfile_id:[{!s}]'
+                              'row[1]:[{!s}] '
+                              'isfile_id:[{!s}]'
+                              .format(row[1] == isfile_id,
+                                      row[1],
+                                      isfile_id))
                 if (isLoaded and
                     isNoSet and
-                    row is not None and
-                    row[1] == isfile_id):
-                    
+                    (row is not None) and
+                    (row[1] == isfile_id)):
+
                     logging.info('Will UPDATE files SET set_id = null '
                                  'for pic:[{!s}] '
                                  .format(row[1]))
@@ -2166,10 +2172,10 @@ class Uploadr:
                     finally:
                         con.commit()
                         self.useDBLock(lock, False)
-                    
+
                     logging.info('Did UPDATE files SET set_id = null '
                                  'for pic:[{!s}] '
-                                 .format(row[1]))                        
+                                 .format(row[1]))
 
                 # we have a file from disk which is found on the database also
                 # row[6] is last_modified date/timestamp
@@ -3684,7 +3690,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                   fname='is_photo_already_uploaded')
                         logging.warning('return: PHOTO UPLOADED WITHOUT SET '
                                         'WITH ALBUM TAG')
-                        returnIsPhotoUploaded = True
+  returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
                         returnUploadedNoSet = True
                         return returnIsPhotoUploaded, \

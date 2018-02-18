@@ -2144,16 +2144,16 @@ class Uploadr:
                 # and is also on flickr but is set on flickr is not defined.
                 # So we need to reset the local datbase set_id so that it will
                 # be later assigned once we run createSets()
-                logging.debug('row[1] == isfile_id:[{!s}]'
-                              'row[1]:[{!s}] '
-                              'isfile_id:[{!s}]'
-                              .format(row[1] == isfile_id,
-                                      row[1],
-                                      isfile_id))
+                logging.debug('str(row[1]) == str(isfile_id:[{!s}])'
+                              'row[1]:[{!s}]=>type:[{!s}] '
+                              'isfile_id:[{!s}]=>type:[{!s}]'
+                              .format(str(row[1]) == str(isfile_id),
+                                      row[1], type(row[1]),
+                                      isfile_id, type(isfile_id)))
                 if (isLoaded and
                     isNoSet and
                     (row is not None) and
-                    (row[1] == isfile_id)):
+                    (str(row[1]) == str(isfile_id))):
 
                     logging.info('Will UPDATE files SET set_id = null '
                                  'for pic:[{!s}] '

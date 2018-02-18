@@ -4152,7 +4152,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                         else setName))
                     niceprint('Found:[{!s}] TagId:[{!s}]'
                               .format(tfind, tid))
-                except Exception as e:
+                except Exception as ex:
                     reportError(Caught=True,
                                  CaughtPrefix='+++',
                                  CaughtCode='216',
@@ -4162,7 +4162,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                  exceptMsg=ex,
                                  NicePrint=True,
                                  exceptSysInfo=True)
-                    self.niceprocessedfiles(count, countTotal, False)
 
                     logging.warning('Error processing Photo_id:[{!s}]. '
                                     'Continuing...'
@@ -4170,6 +4169,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     niceprint('Error processing Photo_id:[{!s}]. Continuing...'
                               .format(str(row[0])),
                               fname='addAlbumMigrate')
+
+                    self.niceprocessedfiles(count, countTotal, False)
+
                     continue
 
                 if not tfind:

@@ -4166,7 +4166,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
                     logging.warning('Error processing Photo_id:[{!s}]. '
                                     'Continuing...'
-                                    .format(str(row[0])),
+                                    .format(str(row[0])))
                     niceprint('Error processing Photo_id:[{!s}]. Continuing...'
                               .format(str(row[0])),
                               fname='addAlbumMigrate')

@@ -3690,7 +3690,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                   fname='is_photo_already_uploaded')
                         logging.warning('return: PHOTO UPLOADED WITHOUT SET '
                                         'WITH ALBUM TAG')
-  returnIsPhotoUploaded = True
+                        returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
                         returnUploadedNoSet = True
                         return returnIsPhotoUploaded, \

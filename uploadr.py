@@ -3704,7 +3704,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                returnPhotoID, \
                                returnUploadedNoSet
                     else:
-                        if args.verbose:                        
+                        if args.verbose_progress:                        
                             niceprint('PHOTO UPLOADED WITHOUT SET '
                                       'WITHOUT ALBUM TAG',
                                       fname='is_photo_already_uploaded')
@@ -3761,7 +3761,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                returnUploadedNoSet
                     else:
                         # D) checksum, title, other setName,       Count>=1 THEN NOT EXISTS
-                        if args.verbose:                        
+                        if args.verbose_progress:                        
                             niceprint('IS PHOTO UPLOADED=FALSE OTHER SET, '
                                       'CONTINUING SEARCH IN SETS',
                                       fname='is_photo_already_uploaded')

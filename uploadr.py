@@ -2162,11 +2162,11 @@ class Uploadr:
                         self.useDBLock(lock, True)
                         cur.execute('UPDATE files SET set_id = null '
                                     'WHERE files_id = ?',
-                                    (isfile_id))
+                                    (row[1]))
                     except lite.Error as e:
                         reportError(Caught=True,
                             CaughtPrefix='+++ DB',
-                            CaughtCode='???',
+                            CaughtCode='045',
                             CaughtMsg='DB error on UPDATE: [{!s}]'.format(e.args[0]),
                             NicePrint=True)
                     finally:

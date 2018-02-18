@@ -4464,11 +4464,11 @@ if __name__ == "__main__":
     agrpparser.add_argument('--add-albums-migrate', action='store_true',
                             help='From v2.7.0 onwards, uploadr adds to Flickr '
                                  'an album tag to each pic. '
-                                 'This option adds such tag to  previously '
+                                 'This option adds such tag to previously '
                                  'loaded pics. uploadr v2.7.0 will perform '
                                  'automatically such migration upon first run '
                                  'This option is *only* available to re-run '
-                                 'it, should it be  necessary.')    
+                                 'it, should it be necessary.')    
 
     # parse arguments
     args = parser.parse_args()

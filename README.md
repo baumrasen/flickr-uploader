@@ -4,7 +4,8 @@
  
  ## IMPORTANT NOTE: (MOST OF THE WORK DONE). MORE IN PROGRESS...
  * Updated to use sybrenstuvel's flickrapi and OAuth...
- * V2.6.7 is good to go.
+ * V2.6.8 is stable.
+ * V2.7.0 includes several enhancements. Check details and try it.
  
  ## Description
  --------------
@@ -249,8 +250,12 @@ Handling bad and excluded files:
                         version 2.7.0 it will be dropped.
 
 Migrate to v2.7.0:
-  --add-albums-migrate  Migration. Add tag with albums to already uploaded
-                        files. To be used once you move to version 2.7.0.
+  --add-albums-migrate  From v2.7.0 onwards, uploadr adds to Flickr an album
+                        tag to each pic. This option adds such tag to
+                        previously loaded pics. uploadr v2.7.0 will perform
+                        automatically such migration upon first run This
+                        option is *only* available to re-run it, should it be
+                        necessary.
 
 by oPromessa, 2017, 2018
  ```

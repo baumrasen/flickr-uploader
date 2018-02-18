@@ -6,6 +6,7 @@ language: python
 python:
   - "2.7"
   - "3.6"
+  - "3.7-dev"
 # nightly gets the latest nightly version of python... python 3 in the case. For now I don't want that!
 #  - "nightly"
 
@@ -39,9 +40,9 @@ env:
 # Set to -v for Verbose option of uploadr
     - VerboseVar=-v
     - BadFilesVar=-b
-    - ExcludedVar=-g
+    - ExcludedVar=--remove-excluded
     - TAIL_LINES=20  # Tail $TAIL_LINES for output logging
-    - WAIT_TIME=2    # Sleep time between first and second run    
+    - WAIT_TIME=2    # Sleep time between first and second run
 # Delete !!!!!!!!!!!!!!!!!!! CAREFULL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # To ensure an empty Flickr database. Set DeleteAllFromFlickr=1. 0 otherwise.
     - DeleteAllFromFlickr=0
@@ -54,15 +55,15 @@ env:
 # Badfiles
     #- TestScenario=BadFiles UploadrOptions="$VerboseVar $BadFilesVar"
 # Multiprocessing
-    - TestScenario=MultiProcessing UploadrOptions="$VerboseVar $BadFilesVar -p 10"
+    - TestScenario=MultiProcessing UploadrOptions="$VerboseVar $BadFilesVar -p 20"
 # Remove
     #- TestScenario=Remove UploadrOptions="$VerboseVar $BadFilesVar"
 # Replace
     #- TestScenario=Replace UploadrOptions="$VerboseVar $BadFilesVar"
 # RemoveReplace, also test cleaning up badfiles database entries
     - TestScenario=RemoveReplace UploadrOptions="$VerboseVar $BadFilesVar -p 10 -c"
-# ExcludedFolders, also test cleaning up badfiles database entries
-    - TestScenario=ExcludedFolders UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -p 5 -c"
+# ExcludedFolders+IgnoredFiles in Single Processing mode. also test cleaning up badfiles database entries
+    - TestScenario=ExcludedFolders UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -c"
 # =============================================================================
 # before_script
 # Get database token ready
@@ -72,17 +73,18 @@ before_script:
   - pwd
   - pythonVersion=`python -V 2>&1 | cut -d\  -f2`
   - echo $pythonVersion
+  - echo Travis Python Version
+  - echo ${TRAVIS_PYTHON_VERSION}  
 #  - ls -laR
   - cp tests/uploadr.ini .
-  - cp tests/uploadr.ini /home/travis/virtualenv/python$pythonVersion/bin/uploadr.ini
+  - cp tests/uploadr.ini /home/travis/virtualenv/python$pythonVersion/bin/uploadr.ini || cp tests/uploadr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/uploadr.ini
   - grep FILES_DIR uploadr.ini
 #  - cat uploadr.ini
   - echo "INSERT INTO oauth_tokens ( api_key, lookup_key, oauth_token, oauth_token_secret, access_level, fullname, username, user_nsid) VALUES ( '"$api_key"', '', '"$oauth_token"', '"$oauth_token_secret"', 'delete', '"$fullname"', '"$username"', '"$user_nsid"');" | sqlite3 token/oauth-tokens.sqlite
   - sqlite3 token/oauth-tokens.sqlite 'SELECT * FROM oauth_tokens;'
   - find "./tests/Test Photo Library" -type f -exec md5sum '{}' \;
   - remote_syslog/remote_syslog -c ~/syslog2.yml
-  - echo Travis Python Version
-  - echo ${TRAVIS_PYTHON_VERSION}
+
 
 # =============================================================================
 # run script for tests
@@ -101,13 +103,13 @@ script:
 
   - coverage combine
   - coverage report -m uploadr.py
-  
+
 # DB OUTPUT for REFERENCE RUN#1------------------------------------------------
-  - sqlite3 flickrdb "SELECT *, datetime( last_modified, 'unixepoch', 'localtime') FROM files ORDER BY path;"
-  - sqlite3 flickrdb 'SELECT * FROM badfiles ORDER BY path;'
-  - sqlite3 flickrdb 'SELECT * FROM sets ORDER BY name;'
-  - sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;'
-  - sqlite3 flickrdb 'SELECT sets.set_id, sets.name, files_id, path FROM sets, files WHERE sets.set_id = files.set_id ORDER BY sets.name, path;'
+  - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb "SELECT *, datetime( last_modified, 'unixepoch', 'localtime') FROM files ORDER BY path;"; fi
+  - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT * FROM badfiles ORDER BY path;'; fi
+  - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT * FROM sets ORDER BY name;'; fi
+  - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;'; fi
+  - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT sets.set_id, sets.name, files_id, path FROM sets, files WHERE sets.set_id = files.set_id ORDER BY sets.name, path;'; fi
 
 # WAIT TINE BEFORE SECOND RUN -------------------------------------------------
   - sleep $WAIT_TIME
@@ -118,14 +120,14 @@ script:
 
   - if [[ $TestScenario == Replace ]]; then cp "./tests/Test Photo Library/ReplaceTest/file_34_Substituição.ForReplace" "./tests/Test Photo Library/Pics.Replaced/file_34_Substituição.jpg"; fi
   - if [[ $TestScenario == Replace ]]; then cp "./tests/Test Photo Library/ReplaceTest/file_35.jpg.ForReplace" "./tests/Test Photo Library/Pics.Replaced/file_35.jpg"; fi
-  
+
   - if [[ $TestScenario == RemoveReplace ]]; then rm "./tests/Test Photo Library/photo.jpg"; fi
   - if [[ $TestScenario == RemoveReplace ]]; then rm "./tests/Test Photo Library/photo_Excepção.jpg"; fi
   - if [[ $TestScenario == RemoveReplace ]]; then cp "./tests/Test Photo Library/ReplaceTest/file_34_Substituição.ForReplace" "./tests/Test Photo Library/Pics.Replaced/file_34_Substituição.jpg"; fi
   - if [[ $TestScenario == RemoveReplace ]]; then cp "./tests/Test Photo Library/ReplaceTest/file_35.jpg.ForReplace" "./tests/Test Photo Library/Pics.Replaced/file_35.jpg"; fi
 
   - if [[ $TestScenario == ExcludedFolders ]]; then cp ./tests/uploadr_excluded.ini ./uploadr.ini; fi
-  
+
   - coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.err
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.err
@@ -162,7 +164,7 @@ after_script:
   - sqlite3 flickrdb 'SELECT * FROM sets ORDER BY name;'
   - sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;'
   - sqlite3 flickrdb 'SELECT sets.set_id, sets.name, files_id, path FROM sets, files WHERE sets.set_id = files.set_id ORDER BY sets.name, path;'
-  
+
 # Deploy to Heroku ------------------------------------------------------------
 deploy:
   provider: heroku

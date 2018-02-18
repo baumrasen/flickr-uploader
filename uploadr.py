@@ -3049,16 +3049,23 @@ class Uploadr:
                 niceprint('Adding album tags to pics on upload... ')
                 if flick.addAlbumsMigrate():
                     niceprint('Successfully added album tags to pics '
-                              'on upload. Updating Database version.')
+                              'on upload. Updating Database version.',
+                              fname='addAlbumsMigrate')
+
                     cur.execute('PRAGMA user_version="3"')
                     con.commit()
                     cur = con.cursor()
                     cur.execute('PRAGMA user_version')
                     row = cur.fetchone()
                 else:
+                    logging.warning('Failed adding album tags to pics '
+                                    'on upload. Not updating Database version.'
+                                    'please check logs, correct, and retry.')
                     niceprint('Failed adding album tags to pics '
                               'on upload. Not updating Database version.'
-                              'please check logs, correct, and retry.')
+                              'Please check logs, correct, and retry.',
+                              fname='addAlbumsMigrate')
+
             if (row[0] == 3):
                 niceprint('Database version: [{!s}]'.format(row[0]))
                 # Database version 4 <=========================DB VERSION: 4===
@@ -3489,7 +3496,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
             Case | returnIsPhotoUploaded | returnUploadedNoSet |
             A    | False                 | False               |
             B    | True                  | True                |
-            C    | True                  | False          |
+            C    | True                  | False               |
             D    | False                 | False               |
         """
 
@@ -3909,6 +3916,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         logging.info('find_tag: photo:[{!s}] intag:[{!s}]'
                      .format(photo_id, intag))
         try:
+            tagsResp = None
             tagsResp = nuflickr.tags.getListPhoto(photo_id=photo_id)
         except (IOError, ValueError, httplib.HTTPException):
             reportError(Caught=True,
@@ -3919,33 +3927,45 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         NicePrint=True,
                         exceptSysInfo=True)
         except flickrapi.exceptions.FlickrError as ex:
-            reportError(Caught=True,
-                        CaughtPrefix='+++',
-                        CaughtCode='206',
-                        CaughtMsg='Flickrapi exception on getListPhoto',
-                        exceptUse=True,
-                        exceptCode=ex.code,
-                        exceptMsg=ex,
-                        NicePrint=True,
-                        exceptSysInfo=True)
-        finally:
-            if (not self.isGood(tagsResp)):
-                raise IOError(tagsResp)
+            if (format(ex.code) == '1'):
+                logging.warning('+++206: '
+                                'Photo_id:[{!s}] Flickr: Photo not found. '
+                                'on getListPhoto'
+                                .format(photo_id))
+                niceprint('+++206: '
+                          'Photo_id:[{!s}] Flickr: Photo not found. '
+                          'on getListPhoto'
+                          .format(photo_id),
+                          fname='photos_find_tag')
+            else:
+                reportError(Caught=True,
+                            CaughtPrefix='+++',
+                            CaughtCode='207',
+                            CaughtMsg='Flickrapi exception on getListPhoto',
+                            exceptUse=True,
+                            exceptCode=ex.code,
+                            exceptMsg=ex,
+                            NicePrint=True,
+                            exceptSysInfo=True)
+            raise
 
-            logging.info('Output for photo_find_tag:')
-            logging.info(xml.etree.ElementTree.tostring(tagsResp,
-                                                        encoding='utf-8',
-                                                        method='xml'))
+        if (not self.isGood(tagsResp)):
+            raise IOError(tagsResp)
 
-            tag_id = None
-            for tag in tagsResp.find('photo').find('tags').findall('tag'):
-                logging.info(tag.attrib['raw'])
-                if (StrUnicodeOut(tag.attrib['raw']) ==
-                        StrUnicodeOut(intag)):
-                    tag_id = tag.attrib['id']
-                    logging.info('Found tag_id:[{!s}] for intag:[{!s}]'
-                                 .format(tag_id, intag))
-                    return True, tag_id
+        logging.info('Output for photo_find_tag:')
+        logging.info(xml.etree.ElementTree.tostring(tagsResp,
+                                                    encoding='utf-8',
+                                                    method='xml'))
+
+        tag_id = None
+        for tag in tagsResp.find('photo').find('tags').findall('tag'):
+            logging.info(tag.attrib['raw'])
+            if (StrUnicodeOut(tag.attrib['raw']) ==
+                    StrUnicodeOut(intag)):
+                tag_id = tag.attrib['id']
+                logging.info('Found tag_id:[{!s}] for intag:[{!s}]'
+                             .format(tag_id, intag))
+                return True, tag_id
 
         return False, ''
 
@@ -4106,45 +4126,67 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                       'sets: [{!s}]'
                                       .format(e.args[0]),
                             NicePrint=True)
-            finally:
+                return False
 
-                count=0
-                countTotal=len(existingMedia)
-                for row in existingMedia:
-                    # row[0] = files_id
-                    # row[1] = path
-                    # row[2] = set_name
-                    # row[3] = set_id
-                    niceprint('ID:[{!s}] Path:[{!s}] Set:[{!s}] SetID:[{!s}]'
-                              .format(str(row[0]), row[1], row[2], row[3]))
+            count=0
+            countTotal=len(existingMedia)
+            for row in existingMedia:
+                count += 1
+                # row[0] = files_id
+                # row[1] = path
+                # row[2] = set_name
+                # row[3] = set_id
+                niceprint('ID:[{!s}] Path:[{!s}] Set:[{!s}] SetID:[{!s}]'
+                          .format(str(row[0]), row[1], row[2], row[3]),
+                          fname='addAlbumMigrate')
 
-                    # row[1] = path for the file from table files
-                    setName = self.getSetNameFromFile(row[1],
-                                                      FILES_DIR,
-                                                      FULL_SET_NAME)
-
+                # row[1] = path for the file from table files
+                setName = self.getSetNameFromFile(row[1],
+                                                  FILES_DIR,
+                                                  FULL_SET_NAME)
+                try:
                     tfind, tid = self.photos_find_tag(
-                                            photo_id = row[0],
-                                            intag = 'album:{}'.format(row[2] \
-                                            if row[2] is not None
-                                            else setName))
+                                        photo_id = row[0],
+                                        intag = 'album:{}'.format(row[2] \
+                                        if row[2] is not None
+                                        else setName))
                     niceprint('Found:[{!s}] TagId:[{!s}]'
                               .format(tfind, tid))
-                    if not tfind:
-                        res_add_tag = self.photos_add_tags(
-                                        row[0],
-                                        ['album:"{}"'.format(row[2] \
-                                                if row[2] is not None
-                                                else setName)]
-                                      )
-                        logging.info('res_add_tag: ')
-                        logging.info(xml.etree.ElementTree.tostring(
-                                                res_add_tag,
-                                                encoding='utf-8',
-                                                method='xml'))
+                except Exception as e:
+                    reportError(Caught=True,
+                                 CaughtPrefix='+++',
+                                 CaughtCode='216',
+                                 CaughtMsg='Exception on photos_find_tag',
+                                 exceptUse=True,
+                                 exceptCode=ex.code,
+                                 exceptMsg=ex,
+                                 NicePrint=True,
+                                 exceptSysInfo=True)
                     self.niceprocessedfiles(count, countTotal, False)
 
-                self.niceprocessedfiles(count, countTotal, True)
+                    logging.warning('Error processing Photo_id:[{!s}]. '
+                                    'Continuing...'
+                                    .format(str(row[0])),
+                    niceprint('Error processing Photo_id:[{!s}]. Continuing...'
+                              .format(str(row[0])),
+                              fname='addAlbumMigrate')
+                    continue
+
+                if not tfind:
+                    res_add_tag = self.photos_add_tags(
+                                    row[0],
+                                    ['album:"{}"'.format(row[2] \
+                                            if row[2] is not None
+                                            else setName)]
+                                  )
+                    logging.info('res_add_tag: ')
+                    logging.info(xml.etree.ElementTree.tostring(
+                                            res_add_tag,
+                                            encoding='utf-8',
+                                            method='xml'))
+                self.niceprocessedfiles(count, countTotal, False)
+
+            self.niceprocessedfiles(count, countTotal, True)
         return True
 
 
@@ -4469,9 +4511,25 @@ if __name__ == "__main__":
             flick.authenticate()
 
         if args.add_albums_migrate:
-            niceprint('Performing preparation for migrate to 2.7.0')
+            niceprint('Performing preparation for migrate to 2.7.0',
+                      fname='addAlbumsMigrate')
             flick.addAlbumsMigrate()
-            niceprint("No more options will run.")
+            niceprint('No more options will run.',
+                      fname='addAlbumsMigrate')
+
+            if flick.addAlbumsMigrate():
+                niceprint('Successfully added album tags to pics '
+                          'on upload.',
+                           fname='addAlbumsMigrate')
+            else:
+                logging.warning('Failed adding album tags to pics '
+                                'on upload. Not updating Database version.'
+                                'please check logs, correct, and retry.')
+                niceprint('Failed adding album tags to pics '
+                          'on upload. '
+                          'Please check logs, correct, and retry.',
+                          fname='addAlbumsMigrate')
+
         else:
             flick.removeUselessSetsTable()
             flick.getFlickrSets()

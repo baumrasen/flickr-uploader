@@ -3704,9 +3704,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                returnPhotoID, \
                                returnUploadedNoSet
                     else:
-                        niceprint('PHOTO UPLOADED WITHOUT SET '
-                                  'WITHOUT ALBUM TAG',
-                                  fname='is_photo_already_uploaded')
+                        if args.verbose:                        
+                            niceprint('PHOTO UPLOADED WITHOUT SET '
+                                      'WITHOUT ALBUM TAG',
+                                      fname='is_photo_already_uploaded')
                         logging.warning('PHOTO UPLOADED WITHOUT SET '
                                         'WITHOUT ALBUM TAG')
 
@@ -3747,7 +3748,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     # C) checksum, title, setName (1 or more), Count>=1 THEN EXISTS
                     if (StrUnicodeOut(xsetName) ==
                             StrUnicodeOut(setinlist.attrib['title'])):
-                        niceprint('return: IS PHOTO UPLOADED=TRUE WITH SET',
+                        niceprint('return: IS PHOTO UPLOADED='
+                                  'TRUE WITH SET',
                                   fname='is_photo_already_uploaded')
                         logging.warning('return: IS PHOTO UPLOADED=TRUE WITH SET')
                         returnIsPhotoUploaded = True
@@ -3759,9 +3761,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                returnUploadedNoSet
                     else:
                         # D) checksum, title, other setName,       Count>=1 THEN NOT EXISTS
-                        niceprint('IS PHOTO UPLOADED=FALSE OTHER SET, '
-                                  'CONTINUING SEARCH IN SETS',
-                                  fname='is_photo_already_uploaded')
+                        if args.verbose:                        
+                            niceprint('IS PHOTO UPLOADED=FALSE OTHER SET, '
+                                      'CONTINUING SEARCH IN SETS',
+                                      fname='is_photo_already_uploaded')
                         logging.warning('IS PHOTO UPLOADED=FALSE OTHER SET, '
                                         'CONTINUING SEARCH IN SETS')
                         continue
@@ -3929,12 +3932,12 @@ set0 = sets.find('photosets').findall('photoset')[0]
         except flickrapi.exceptions.FlickrError as ex:
             if (format(ex.code) == '1'):
                 logging.warning('+++206: '
-                                'Photo_id:[{!s}] Flickr: Photo not found. '
-                                'on getListPhoto'
+                                'Photo_id:[{!s}] Flickr: Photo not found '
+                                'on getListPhoto.'
                                 .format(photo_id))
                 niceprint('+++206: '
-                          'Photo_id:[{!s}] Flickr: Photo not found. '
-                          'on getListPhoto'
+                          'Photo_id:[{!s}] Flickr: Photo not found '
+                          'on getListPhoto.'
                           .format(photo_id),
                           fname='photos_find_tag')
             else:
@@ -4160,7 +4163,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                  exceptUse=True,
                                  exceptCode=ex.code,
                                  exceptMsg=ex,
-                                 NicePrint=True,
+                                 NicePrint=False,
                                  exceptSysInfo=True)
 
                     logging.warning('Error processing Photo_id:[{!s}]. '

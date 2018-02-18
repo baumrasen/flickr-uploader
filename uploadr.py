@@ -2161,8 +2161,7 @@ class Uploadr:
                     try:
                         self.useDBLock(lock, True)
                         cur.execute('UPDATE files SET set_id = null '
-                                    'WHERE files_id = ?',
-                                    (row[1]))
+                                    'WHERE files_id = ?', (row[1],))
                     except lite.Error as e:
                         reportError(Caught=True,
                             CaughtPrefix='+++ DB',

@@ -4462,9 +4462,13 @@ if __name__ == "__main__":
     # 2.7.0 Version will add album/setName as one
     agrpparser = parser.add_argument_group('Migrate to v2.7.0')
     agrpparser.add_argument('--add-albums-migrate', action='store_true',
-                            help='Migration. Add tag with albums to already '
-                                 'uploaded files. To be used once you move '
-                                 'to version 2.7.0.')
+                            help='From v2.7.0 onwards, uploadr adds to Flickr '
+                                 'an album tag to each pic. '
+                                 'This option adds such tag to  previously '
+                                 'loaded pics. uploadr v2.7.0 will perform '
+                                 'automatically such migration upon first run '
+                                 'This option is *only* available to re-run '
+                                 'it, should it be  necessary.')    
 
     # parse arguments
     args = parser.parse_args()

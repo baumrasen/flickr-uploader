@@ -555,11 +555,21 @@ if not INIFiles:
                              os.getpid(),
                              os.path.join(os.path.dirname(sys.argv[0]),
                                           'uploadr.ini')))
+    sys.stderr.flush()
     sys.exit(2)
 if config.has_option('Config', 'FILES_DIR'):
-    FILES_DIR = unicode(eval(config.get('Config', 'FILES_DIR')), 'utf-8') \
-                if sys.version_info < (3, ) \
-                else str(eval(config.get('Config', 'FILES_DIR')))
+    try:
+        FILES_DIR = unicode(eval(config.get('Config', 'FILES_DIR')), 'utf-8') \
+                    if sys.version_info < (3, ) \
+                    else str(eval(config.get('Config', 'FILES_DIR')))
+    except Exception as err:
+        sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] FILES_DIR: '
+                         'not defined or incorrect on INI file: [{!s}]\n'
+                         .format(nutime.strftime(UPLDRConstants.TimeFormat),
+                                 os.getpid(),
+                                 str(err)))
+        sys.stderr.flush()
+        sys.exit(3)
 else:
     FILES_DIR = unicode('', 'utf-8') if sys.version_info < (3, ) else str('')
 FLICKR = eval(config.get('Config', 'FLICKR'))
@@ -580,6 +590,7 @@ except (ConfigParser.NoOptionError, ConfigParser.NoOptionError) as err:
                                           "uploadr.ini"),
                              os.path.join(os.path.dirname(sys.argv[0]),
                                           "token")))
+    sys.stderr.flush()
     TOKEN_CACHE = os.path.join(os.path.dirname(sys.argv[0]), "token")
 LOCK_PATH = eval(config.get('Config', 'LOCK_PATH'))
 TOKEN_PATH = eval(config.get('Config', 'TOKEN_PATH'))
@@ -597,6 +608,7 @@ for folder in inEXCLUDED_FOLDERS:
                          .format(nutime.strftime(UPLDRConstants.TimeFormat),
                                  os.getpid(),
                                  StrUnicodeOut(folder)))
+        sys.stderr.flush()
 del inEXCLUDED_FOLDERS
 # Consider Unicode Regular expressions
 IGNORED_REGEX = [re.compile(regex, re.UNICODE) for regex in
@@ -607,6 +619,7 @@ if LOGGING_LEVEL <= logging.INFO:
                      .format(nutime.strftime(UPLDRConstants.TimeFormat),
                              os.getpid(),
                              len(IGNORED_REGEX)))
+    sys.stderr.flush()
 ALLOWED_EXT = eval(config.get('Config', 'ALLOWED_EXT'))
 RAW_EXT = eval(config.get('Config', 'RAW_EXT'))
 FILE_MAX_SIZE = eval(config.get('Config', 'FILE_MAX_SIZE'))
@@ -656,6 +669,7 @@ if (int(LOGGING_LEVEL) if str.isdigit(LOGGING_LEVEL) else 99) not in [
                             nutime.strftime(UPLDRConstants.TimeFormat),
                             os.path.join(os.path.dirname(sys.argv[0]),
                                          "uploadr.ini")))
+    sys.stderr.flush()
 # Force conversion of LOGGING_LEVEL into int() for later use in conditionals
 LOGGING_LEVEL = int(LOGGING_LEVEL)
 logging.basicConfig(stream=sys.stderr,
@@ -939,7 +953,7 @@ class Uploadr:
                         exceptMsg=ex,
                         NicePrint=True,
                         exceptSysInfo=True)
-            sys.exit(2)
+            sys.exit(4)
 
         niceprint('{!s} with {!s} permissions: {!s}'.format(
                                     'Check Authentication',
@@ -3083,7 +3097,7 @@ class Uploadr:
 
             if con is not None:
                 con.close()
-            sys.exit(2)
+            sys.exit(5)
         finally:
             niceprint('Completed database setup')
 
@@ -3139,7 +3153,7 @@ class Uploadr:
                         NicePrint=True)
             if con is not None:
                 con.close()
-            sys.exit(2)
+            sys.exit(6)
         finally:
             niceprint('Completed cleaning up badfiles table from the database')
 
@@ -3704,7 +3718,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                returnPhotoID, \
                                returnUploadedNoSet
                     else:
-                        if args.verbose_progress:                        
+                        if args.verbose_progress:
                             niceprint('PHOTO UPLOADED WITHOUT SET '
                                       'WITHOUT ALBUM TAG',
                                       fname='is_photo_already_uploaded')
@@ -3761,7 +3775,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                returnUploadedNoSet
                     else:
                         # D) checksum, title, other setName,       Count>=1 THEN NOT EXISTS
-                        if args.verbose_progress:                        
+                        if args.verbose_progress:
                             niceprint('IS PHOTO UPLOADED=FALSE OTHER SET, '
                                       'CONTINUING SEARCH IN SETS',
                                       fname='is_photo_already_uploaded')
@@ -4194,6 +4208,60 @@ set0 = sets.find('photosets').findall('photoset')[0]
             self.niceprocessedfiles(count, countTotal, True)
         return True
 
+    # -------------------------------------------------------------------------
+    # listBadFiles
+    #
+    # Prepare for version 2.7.0 Add album info to loaded pics
+    #
+    def listBadFiles(self):
+
+        con = lite.connect(DB_PATH)
+        con.text_factory = str
+        with con:
+            try:
+                cur = con.cursor()
+                cur.execute('SELECT files_id, path, set_id, md5, tagged, '
+                            'last_modified '
+                            'FROM badfiles ORDER BY path')
+                badFiles = cur.fetchall()
+                logging.info('len(badFiles)=[{!s}]'
+                             .format(len(badFiles)))
+            except lite.Error as e:
+                reportError(Caught=True,
+                            CaughtPrefix='+++ DB',
+                            CaughtCode='218',
+                            CaughtMsg='DB error on SELECT FROM '
+                                      'sets: [{!s}]'
+                                      .format(e.args[0]),
+                            NicePrint=True)
+                return False
+
+            count=0
+            countTotal=len(badFiles)
+            for row in badFiles:
+                count += 1
+                # row[0] = files_id
+                # row[1] = path
+                # row[2] = set_id
+                # row[3] = md5
+                # row[4] = tagged
+                # row[5] = last_modified
+                print('files_id|path|set_id|md5|tagged|last_modified')
+                print('{!s}|{!s}|{!s}|{!s}|{!s}|{!s}'
+                      .format(StrUnicodeOut(str(row[0])),
+                              StrUnicodeOut(str(row[1])),
+                              StrUnicodeOut(str(row[2])),
+                              StrUnicodeOut(str(row[3])),
+                              StrUnicodeOut(str(row[4])),
+                              nutime.strftime(UPLDRConstants.TimeFormat,
+                                              nutime.localtime(str(row[5])))))
+                sys.stdout.flush()
+
+            self.niceprocessedfiles(count, countTotal, True)
+
+        return True
+
+
 
     # -------------------------------------------------------------------------
     # printStat
@@ -4366,6 +4434,7 @@ if __name__ == "__main__":
             sys.stderr.write('[{!s}] Script already running.\n'
                              .format(
                                 nutime.strftime(UPLDRConstants.TimeFormat)))
+            sys.stderr.flush()
             sys.exit(-1)
         raise
 
@@ -4431,8 +4500,9 @@ if __name__ == "__main__":
                                  'Uploading every SLEEP_TIME seconds. Please '
                                  'note it only performs upload/replace.')
 
+    # Cater for bad files. files in your Library that flickr does not recognize
+    # Options: -b, -c, -s and -g
     bgrpparser = parser.add_argument_group('Handling bad and excluded files')
-    # cater for bad files. files in your Library that flickr does not recognize
     # -b add files to badfiles table
     bgrpparser.add_argument('-b', '--bad-files', action='store_true',
                         help='Save on database bad files to prevent '
@@ -4440,7 +4510,6 @@ if __name__ == "__main__":
                              'files in your Library that flickr does not '
                              'recognize (Error 5) or are too large (Error 8). '
                              'Check also option -c.')
-    # cater for bad files. files in your Library that flickr does not recognize
     # -c clears the badfiles table to allow a reset of the list
     bgrpparser.add_argument('-c', '--clean-bad-files', action='store_true',
                         help='Resets the badfiles table/list to allow a new '
@@ -4448,6 +4517,9 @@ if __name__ == "__main__":
                              'files in your Library that flickr does not '
                              'recognize (Error 5) or are too large (Error 8). '
                              'Check also option -b.')
+    # -s list the badfiles table
+    bgrpparser.add_argument('-s', '--list-bad-files', action='store_true',
+                        help='List the badfiles table/list.')
     # when you change EXCLUDED_FOLDERS setting
     bgrpparser.add_argument('-g', '--remove-excluded', '--remove-ignored',
                             action='store_true',
@@ -4468,7 +4540,7 @@ if __name__ == "__main__":
                                  'loaded pics. uploadr v2.7.0 will perform '
                                  'automatically such migration upon first run '
                                  'This option is *only* available to re-run '
-                                 'it, should it be necessary.')    
+                                 'it, should it be necessary.')
 
     # parse arguments
     args = parser.parse_args()
@@ -4486,18 +4558,18 @@ if __name__ == "__main__":
         niceprint('Please configure the name of the folder [FILES_DIR] '
                   'in the INI file [normally uploadr.ini], '
                   'with media available to sync with Flickr.')
-        sys.exit(2)
+        sys.exit(7)
     else:
         if not os.path.isdir(FILES_DIR):
             niceprint('Please configure the name of an existant folder '
                       'in the INI file [normally uploadr.ini] '
                       'with media available to sync with Flickr.')
-            sys.exit(2)
+            sys.exit(8)
 
     if FLICKR["api_key"] == "" or FLICKR["secret"] == "":
         niceprint('Please enter an API key and secret in the configuration '
                   'script file, normaly uploadr.ini (see README).')
-        sys.exit(2)
+        sys.exit(9)
 
     # Instantiate class Uploadr
     logging.debug('Instantiating the Main class flick = Uploadr()')
@@ -4538,7 +4610,12 @@ if __name__ == "__main__":
                           'on upload. '
                           'Please check logs, correct, and retry.',
                           fname='addAlbumsMigrate')
-
+        elif  args.list_bad_files:
+            niceprint('Listing badfiles: Start.',
+                  fname='listBadFiles')
+            flick.listBadFiles()
+            niceprint('Listing badfiles: End. No more options will run.',
+                  fname='listBadFiles')
         else:
             flick.removeUselessSetsTable()
             flick.getFlickrSets()
@@ -4559,3 +4636,4 @@ niceprint('--------- (V{!s}) End time: {!s} ---------'
           .format(UPLDRConstants.Version,
                   nutime.strftime(UPLDRConstants.TimeFormat)))
 sys.stderr.write('--------- ' + 'End: ' + ' ---------\n')
+sys.stderr.flush()

@@ -4254,7 +4254,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                               StrUnicodeOut(str(row[3])),
                               StrUnicodeOut(str(row[4])),
                               nutime.strftime(UPLDRConstants.TimeFormat,
-                                              nutime.localtime(str(row[5])))))
+                                              nutime.localtime(row[5]))))
                 sys.stdout.flush()
 
             self.niceprocessedfiles(count, countTotal, True)

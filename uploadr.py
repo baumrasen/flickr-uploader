@@ -4124,6 +4124,16 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #
     def addAlbumsMigrate(self):
 
+        # -----------------------------------------------------------------------------
+        # Local Variables
+        #
+        #   mlockDB     = multiprocessing Lock for access to Database
+        #   mmutex      = multiprocessing mutex for access to value mrunning
+        #   mrunning    = multiprocessing Value to count processed photos
+        mlockDB = None
+        mmutex = None
+        mrunning = None
+
         con = lite.connect(DB_PATH)
         con.text_factory = str
         with con:
@@ -4145,67 +4155,208 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             NicePrint=True)
                 return False
 
-            count=0
-            countTotal=len(existingMedia)
-            for row in existingMedia:
-                count += 1
-                # row[0] = files_id
-                # row[1] = path
-                # row[2] = set_name
-                # row[3] = set_id
-                niceprint('ID:[{!s}] Path:[{!s}] Set:[{!s}] SetID:[{!s}]'
-                          .format(str(row[0]), row[1], row[2], row[3]),
-                          fname='addAlbumMigrate')
-
-                # row[1] = path for the file from table files
-                setName = self.getSetNameFromFile(row[1],
-                                                  FILES_DIR,
-                                                  FULL_SET_NAME)
-                try:
-                    tfind, tid = self.photos_find_tag(
-                                        photo_id = row[0],
-                                        intag = 'album:{}'.format(row[2] \
-                                        if row[2] is not None
-                                        else setName))
-                    niceprint('Found:[{!s}] TagId:[{!s}]'
-                              .format(tfind, tid))
-                except Exception as ex:
-                    reportError(Caught=True,
-                                 CaughtPrefix='+++',
-                                 CaughtCode='216',
-                                 CaughtMsg='Exception on photos_find_tag',
-                                 exceptUse=True,
-                                 exceptCode=ex.code,
-                                 exceptMsg=ex,
-                                 NicePrint=False,
-                                 exceptSysInfo=True)
-
-                    logging.warning('Error processing Photo_id:[{!s}]. '
-                                    'Continuing...'
-                                    .format(str(row[0])))
-                    niceprint('Error processing Photo_id:[{!s}]. Continuing...'
-                              .format(str(row[0])),
+            # running in multi processing mode
+            if (args.processes and args.processes > 0):
+                logging.debug('Running Pool of [{!s}] processes...'
+                              .format(args.processes))
+                logging.debug('__name__:[{!s}] to prevent recursive calling)!'
+                              .format(__name__))
+    
+                # To prevent recursive calling, check if __name__ == '__main__'
+                if __name__ == '__main__':
+                    logging.debug('===Multiprocessing=== Setting up logger!')
+                    multiprocessing.log_to_stderr()
+                    logger = multiprocessing.get_logger()
+                    logger.setLevel(LOGGING_LEVEL)
+    
+                    logging.debug('===Multiprocessing=== Lock defined!')
+    
+                    # ---------------------------------------------------------
+                    # chunk
+                    #
+                    # Divides an iterable in slices/chunks of size size
+                    #
+                    from itertools import islice
+    
+                    def chunk(it, size):
+                        """
+                            Divides an iterable in slices/chunks of size size
+                        """
+                        it = iter(it)
+                        # lambda: creates a returning expression function
+                        # which returns slices
+                        # iter, with the second argument () stops creating
+                        # iterators when it reaches the end
+                        return iter(lambda: tuple(islice(it, size)), ())
+    
+                    migratePool = []
+                    mlockDB = multiprocessing.Lock()
+                    mrunning = multiprocessing.Value('i', 0)
+                    mmutex = multiprocessing.Lock()
+    
+                    sz = (len(existingMedia) // int(args.processes)) \
+                         if ((len(existingMedia) // int(args.processes)) > 0) \
+                         else 1
+    
+                    logging.debug('len(existingMedia):[{!s}] '
+                                  'int(args.processes):[{!s}] '
+                                  'sz per process:[{!s}]'
+                                  .format(len(existingMedia),
+                                          int(args.processes),
+                                          sz))
+    
+                    # Split the Media in chunks to distribute accross Processes
+                    for mexistingMedia in chunk(existingMedia, sz):
+                        logging.warning('===Actual/Planned Chunk size: '
+                                        '[{!s}]/[{!s}]'
+                                        .format(len(mexistingMedia), sz))
+                        logging.debug('===type(mexistingMedia)=[{!s}]'
+                                      .format(type(mexistingMedia)))
+                        logging.debug('===Job/Task Process: Creating...')
+                        migrateTask = multiprocessing.Process(
+                                            target=self.maddAlbumsMigrate, XXX
+                                            args=(mlockDB,
+                                                  mrunning,
+                                                  mmutex,
+                                                  mexistingMedia,))
+                        migratePool.append(migrateTask)
+                        logging.debug('===Job/Task Process: Starting...')
+                        migratePool.start()
+                        logging.debug('===Job/Task Process: Started')
+                        if (args.verbose):
+                            niceprint('===Job/Task Process: [{!s}] Started '
+                                      'with pid:[{!s}]'
+                                      .format(migrateTask.name,
+                                              migrateTask.pid))
+    
+                    # Check status of jobs/tasks in the Process Pool
+                    if LOGGING_LEVEL <= logging.DEBUG:
+                        logging.debug('===Checking Processes launched/status:')
+                        for j in migratePool:
+                            niceprint('{!s}.is_alive = {!s}'
+                                      .format(j.name, j.is_alive()))
+    
+                    # Regularly print status of jobs/tasks in the Process Pool
+                    # Prints status while there are processes active
+                    # Exits when all jobs/tasks are done.
+                    while (True):
+                        if not (any(multiprocessing.active_children())):
+                            logging.debug('===No active children Processes.')
+                            break
+                        for p in multiprocessing.active_children():
+                            logging.debug('==={!s}.is_alive = {!s}'
+                                          .format(p.name, p.is_alive()))
+                            if (args.verbose):
+                                niceprint('==={!s}.is_alive = {!s}'
+                                          .format(p.name, p.is_alive()))
+                            uploadTaskActive = p
+                        logging.info('===Will wait for 60 on {!s}.is_alive = {!s}'
+                                     .format(uploadTaskActive.name,
+                                             uploadTaskActive.is_alive()))
+                        niceprint('===Will wait for 60 on {!s}.is_alive = {!s}'
+                                  .format(uploadTaskActive.name,
+                                          uploadTaskActive.is_alive()))
+    
+                        uploadTaskActive.join(timeout=60)
+                        logging.info('===Waited for 60s on {!s}.is_alive = {!s}'
+                                     .format(uploadTaskActive.name,
+                                             uploadTaskActive.is_alive()))
+                        niceprint('===Waited for 60s on {!s}.is_alive = {!s}'
+                                  .format(uploadTaskActive.name,
+                                          uploadTaskActive.is_alive()))
+    
+                    # Wait for join all jobs/tasks in the Process Pool
+                    # All should be done by now!
+                    for j in uploadPool:
+                        j.join()
+                        niceprint('==={!s} (is alive: {!s}).exitcode = {!s}'
+                                  .format(j.name, j.is_alive(), j.exitcode))
+    
+                    logging.warning('===Multiprocessing=== pool joined! '
+                                    'All processes finished.')
+                    niceprint('===Multiprocessing=== pool joined! '
+                              'All processes finished.')
+    
+                    # Will release (set to None) the nulockDB lock control
+                    # this prevents subsequent calls to useDBLock( nuLockDB, False)
+                    # to raise exception:
+                    #    ValueError('semaphore or lock released too many times')
+                    if (args.verbose):
+                        niceprint('===Multiprocessing=== pool joined! '
+                                  'What happens to nulockDB is None:[{!s}]? '
+                                  'It seems not, it still has a value! '
+                                  'Setting it to None!'
+                                  .format(nulockDB is None))
+                    nulockDB = None
+    
+                    # Show number of total files processed
+                    self.niceprocessedfiles(nurunning.value,
+                                            UPLDRConstants.nuMediacount,
+                                            True)
+                    
+            else:
+                count=0
+                countTotal=len(existingMedia)
+                for row in existingMedia:
+                    count += 1
+                    # row[0] = files_id
+                    # row[1] = path
+                    # row[2] = set_name
+                    # row[3] = set_id
+                    niceprint('ID:[{!s}] Path:[{!s}] Set:[{!s}] SetID:[{!s}]'
+                              .format(str(row[0]), row[1], row[2], row[3]),
                               fname='addAlbumMigrate')
-
-                    self.niceprocessedfiles(count, countTotal, False)
-
-                    continue
-
-                if not tfind:
-                    res_add_tag = self.photos_add_tags(
-                                    row[0],
-                                    ['album:"{}"'.format(row[2] \
+    
+                    # row[1] = path for the file from table files
+                    setName = self.getSetNameFromFile(row[1],
+                                                      FILES_DIR,
+                                                      FULL_SET_NAME)
+                    try:
+                        tfind, tid = self.photos_find_tag(
+                                            photo_id = row[0],
+                                            intag = 'album:{}'.format(row[2] \
                                             if row[2] is not None
-                                            else setName)]
-                                  )
-                    logging.info('res_add_tag: ')
-                    logging.info(xml.etree.ElementTree.tostring(
-                                            res_add_tag,
-                                            encoding='utf-8',
-                                            method='xml'))
-                self.niceprocessedfiles(count, countTotal, False)
-
-            self.niceprocessedfiles(count, countTotal, True)
+                                            else setName))
+                        niceprint('Found:[{!s}] TagId:[{!s}]'
+                                  .format(tfind, tid))
+                    except Exception as ex:
+                        reportError(Caught=True,
+                                     CaughtPrefix='+++',
+                                     CaughtCode='216',
+                                     CaughtMsg='Exception on photos_find_tag',
+                                     exceptUse=True,
+                                     exceptCode=ex.code,
+                                     exceptMsg=ex,
+                                     NicePrint=False,
+                                     exceptSysInfo=True)
+    
+                        logging.warning('Error processing Photo_id:[{!s}]. '
+                                        'Continuing...'
+                                        .format(str(row[0])))
+                        niceprint('Error processing Photo_id:[{!s}]. Continuing...'
+                                  .format(str(row[0])),
+                                  fname='addAlbumMigrate')
+    
+                        self.niceprocessedfiles(count, countTotal, False)
+    
+                        continue
+    
+                    if not tfind:
+                        res_add_tag = self.photos_add_tags(
+                                        row[0],
+                                        ['album:"{}"'.format(row[2] \
+                                                if row[2] is not None
+                                                else setName)]
+                                      )
+                        logging.info('res_add_tag: ')
+                        logging.info(xml.etree.ElementTree.tostring(
+                                                res_add_tag,
+                                                encoding='utf-8',
+                                                method='xml'))
+                    self.niceprocessedfiles(count, countTotal, False)
+    
+                self.niceprocessedfiles(count, countTotal, True)
+                
         return True
 
     # -------------------------------------------------------------------------

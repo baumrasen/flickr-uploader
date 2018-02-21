@@ -4242,6 +4242,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             NicePrint=True)
                 return False
 
+            countTotal=len(existingMedia)
             # running in multi processing mode
             if (args.processes and args.processes > 0):
                 logging.debug('Running Pool of [{!s}] processes...'
@@ -4378,7 +4379,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
     
                     # Show number of total files processed
                     self.niceprocessedfiles(mrunning.value,
-                                            UPLDRConstants.nuMediacount,
+                                            countTotal,
                                             True)
                     
             else:

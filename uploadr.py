@@ -4137,8 +4137,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             .format(i, f))
             
             count=0
-            countTotal=len(existingMedia)
-            for row in existingMedia:
+            countTotal=len(filelist)
+            for row in filelist:
                 count += 1
                 # f[0] = files_id
                 # f[1] = path

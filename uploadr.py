@@ -4136,64 +4136,59 @@ set0 = sets.find('photosets').findall('photoset')[0]
             logging.warning('===Current element of Chunk: [{!s}][{!s}]'
                             .format(i, f))
             
-            count=0
-            countTotal=len(filelist)
-            for row in filelist:
-                count += 1
-                # f[0] = files_id
-                # f[1] = path
-                # f[2] = set_name
-                # f[3] = set_id
-                niceprint('ID:[{!s}] Path:[{!s}] Set:[{!s}] SetID:[{!s}]'
-                          .format(str(f[0]), f[1], f[2], f[3]),
+            # f[0] = files_id
+            # f[1] = path
+            # f[2] = set_name
+            # f[3] = set_id
+            niceprint('ID:[{!s}] Path:[{!s}] Set:[{!s}] SetID:[{!s}]'
+                      .format(str(f[0]), f[1], f[2], f[3]),
+                      fname='addAlbumMigrate')
+
+            # row[1] = path for the file from table files
+            setName = self.getSetNameFromFile(f[1],
+                                              FILES_DIR,
+                                              FULL_SET_NAME)
+            try:
+                terr = False
+                tfind, tid = self.photos_find_tag(
+                                    photo_id = f[0],
+                                    intag = 'album:{}'.format(f[2] \
+                                    if f[2] is not None
+                                    else setName))
+                niceprint('Found:[{!s}] TagId:[{!s}]'
+                          .format(tfind, tid))
+            except Exception as ex:
+                reportError(Caught=True,
+                             CaughtPrefix='+++',
+                             CaughtCode='216',
+                             CaughtMsg='Exception on photos_find_tag',
+                             exceptUse=True,
+                             exceptCode=ex.code,
+                             exceptMsg=ex,
+                             NicePrint=False,
+                             exceptSysInfo=True)
+
+                logging.warning('Error processing Photo_id:[{!s}]. '
+                                'Continuing...'
+                                .format(str(f[0])))
+                niceprint('Error processing Photo_id:[{!s}]. Continuing...'
+                          .format(str(f[0])),
                           fname='addAlbumMigrate')
 
-                # row[1] = path for the file from table files
-                setName = self.getSetNameFromFile(f[1],
-                                                  FILES_DIR,
-                                                  FULL_SET_NAME)
-                try:
-                    tfind, tid = self.photos_find_tag(
-                                        photo_id = f[0],
-                                        intag = 'album:{}'.format(f[2] \
+                terr = True
+
+            if not terr and not tfind:
+                res_add_tag = self.photos_add_tags(
+                                f[0],
+                                ['album:"{}"'.format(f[2] \
                                         if f[2] is not None
-                                        else setName))
-                    niceprint('Found:[{!s}] TagId:[{!s}]'
-                              .format(tfind, tid))
-                except Exception as ex:
-                    reportError(Caught=True,
-                                 CaughtPrefix='+++',
-                                 CaughtCode='216',
-                                 CaughtMsg='Exception on photos_find_tag',
-                                 exceptUse=True,
-                                 exceptCode=ex.code,
-                                 exceptMsg=ex,
-                                 NicePrint=False,
-                                 exceptSysInfo=True)
-
-                    logging.warning('Error processing Photo_id:[{!s}]. '
-                                    'Continuing...'
-                                    .format(str(f[0])))
-                    niceprint('Error processing Photo_id:[{!s}]. Continuing...'
-                              .format(str(f[0])),
-                              fname='addAlbumMigrate')
-
-                    self.niceprocessedfiles(xcount, countTotal, False)
-
-                    continue
-
-                if not tfind:
-                    res_add_tag = self.photos_add_tags(
-                                    f[0],
-                                    ['album:"{}"'.format(f[2] \
-                                            if f[2] is not None
-                                            else setName)]
-                                  )
-                    logging.info('res_add_tag: ')
-                    logging.info(xml.etree.ElementTree.tostring(
-                                            res_add_tag,
-                                            encoding='utf-8',
-                                            method='xml'))
+                                        else setName)]
+                              )
+                logging.info('res_add_tag: ')
+                logging.info(xml.etree.ElementTree.tostring(
+                                        res_add_tag,
+                                        encoding='utf-8',
+                                        method='xml'))
 
             # no need to check for
             # (args.processes and args.processes > 0):

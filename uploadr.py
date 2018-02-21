@@ -4118,6 +4118,98 @@ set0 = sets.find('photosets').findall('photoset')[0]
         pass
 
     # -------------------------------------------------------------------------
+    # maddAlbumsMigrate
+    #
+    # maddAlbumsMigrate wrapper for multiprocessing purposes
+    #
+    def maddAlbumsMigrate(self, lock, running, mutex, filelist):
+        """ maddAlbumsMigrate
+
+            Wrapper function for multiprocessing support to call uploadFile
+            with a chunk of the files.
+            lock = for database access control in multiprocessing
+            running = shared value to count processed files in multiprocessing
+            mutex = for running access control in multiprocessing
+        """
+
+        for i, f in enumerate(filelist):
+            logging.warning('===Current element of Chunk: [{!s}][{!s}]'
+                            .format(i, f))
+            
+            count=0
+            countTotal=len(existingMedia)
+            for row in existingMedia:
+                count += 1
+                # f[0] = files_id
+                # f[1] = path
+                # f[2] = set_name
+                # f[3] = set_id
+                niceprint('ID:[{!s}] Path:[{!s}] Set:[{!s}] SetID:[{!s}]'
+                          .format(str(f[0]), f[1], f[2], f[3]),
+                          fname='addAlbumMigrate')
+
+                # row[1] = path for the file from table files
+                setName = self.getSetNameFromFile(f[1],
+                                                  FILES_DIR,
+                                                  FULL_SET_NAME)
+                try:
+                    tfind, tid = self.photos_find_tag(
+                                        photo_id = f[0],
+                                        intag = 'album:{}'.format(f[2] \
+                                        if f[2] is not None
+                                        else setName))
+                    niceprint('Found:[{!s}] TagId:[{!s}]'
+                              .format(tfind, tid))
+                except Exception as ex:
+                    reportError(Caught=True,
+                                 CaughtPrefix='+++',
+                                 CaughtCode='216',
+                                 CaughtMsg='Exception on photos_find_tag',
+                                 exceptUse=True,
+                                 exceptCode=ex.code,
+                                 exceptMsg=ex,
+                                 NicePrint=False,
+                                 exceptSysInfo=True)
+
+                    logging.warning('Error processing Photo_id:[{!s}]. '
+                                    'Continuing...'
+                                    .format(str(f[0])))
+                    niceprint('Error processing Photo_id:[{!s}]. Continuing...'
+                              .format(str(f[0])),
+                              fname='addAlbumMigrate')
+
+                    self.niceprocessedfiles(xcount, countTotal, False)
+
+                    continue
+
+                if not tfind:
+                    res_add_tag = self.photos_add_tags(
+                                    f[0],
+                                    ['album:"{}"'.format(f[2] \
+                                            if f[2] is not None
+                                            else setName)]
+                                  )
+                    logging.info('res_add_tag: ')
+                    logging.info(xml.etree.ElementTree.tostring(
+                                            res_add_tag,
+                                            encoding='utf-8',
+                                            method='xml'))
+
+            # no need to check for
+            # (args.processes and args.processes > 0):
+            # as uploadFileX is already multiprocessing
+
+            logging.debug('===Multiprocessing=== in.mutex.acquire(w)')
+            mutex.acquire()
+            running.value += 1
+            xcount = running.value
+            mutex.release()
+            logging.warning('===Multiprocessing=== out.mutex.release(w)')
+
+            # Show number of files processed so far
+            self.niceprocessedfiles(xcount, countTotal, False)
+
+    # -------------------------------------------------------------------------
     # addAlbumsMigrate
     #
     # Prepare for version 2.7.0 Add album info to loaded pics
@@ -4133,7 +4225,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         mlockDB = None
         mmutex = None
         mrunning = None
-
+        
         con = lite.connect(DB_PATH)
         con.text_factory = str
         with con:
@@ -4214,14 +4306,14 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                       .format(type(mexistingMedia)))
                         logging.debug('===Job/Task Process: Creating...')
                         migrateTask = multiprocessing.Process(
-                                            target=self.maddAlbumsMigrate, XXX
+                                            target=self.maddAlbumsMigrate,
                                             args=(mlockDB,
                                                   mrunning,
                                                   mmutex,
                                                   mexistingMedia,))
                         migratePool.append(migrateTask)
                         logging.debug('===Job/Task Process: Starting...')
-                        migratePool.start()
+                        migrateTask.start()
                         logging.debug('===Job/Task Process: Started')
                         if (args.verbose):
                             niceprint('===Job/Task Process: [{!s}] Started '
@@ -4249,25 +4341,25 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             if (args.verbose):
                                 niceprint('==={!s}.is_alive = {!s}'
                                           .format(p.name, p.is_alive()))
-                            uploadTaskActive = p
+                            mTaskActive = p
                         logging.info('===Will wait for 60 on {!s}.is_alive = {!s}'
-                                     .format(uploadTaskActive.name,
-                                             uploadTaskActive.is_alive()))
+                                     .format(mTaskActive.name,
+                                             mTaskActive.is_alive()))
                         niceprint('===Will wait for 60 on {!s}.is_alive = {!s}'
-                                  .format(uploadTaskActive.name,
-                                          uploadTaskActive.is_alive()))
+                                  .format(mTaskActive.name,
+                                          mTaskActive.is_alive()))
     
-                        uploadTaskActive.join(timeout=60)
+                        mTaskActive.join(timeout=60)
                         logging.info('===Waited for 60s on {!s}.is_alive = {!s}'
-                                     .format(uploadTaskActive.name,
-                                             uploadTaskActive.is_alive()))
+                                     .format(mTaskActive.name,
+                                             mTaskActive.is_alive()))
                         niceprint('===Waited for 60s on {!s}.is_alive = {!s}'
-                                  .format(uploadTaskActive.name,
-                                          uploadTaskActive.is_alive()))
+                                  .format(mTaskActive.name,
+                                          mTaskActive.is_alive()))
     
                     # Wait for join all jobs/tasks in the Process Pool
                     # All should be done by now!
-                    for j in uploadPool:
+                    for j in migratePool:
                         j.join()
                         niceprint('==={!s} (is alive: {!s}).exitcode = {!s}'
                                   .format(j.name, j.is_alive(), j.exitcode))
@@ -4286,11 +4378,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                   'What happens to nulockDB is None:[{!s}]? '
                                   'It seems not, it still has a value! '
                                   'Setting it to None!'
-                                  .format(nulockDB is None))
-                    nulockDB = None
+                                  .format(mlockDB is None))
+                    mlockDB = None
     
                     # Show number of total files processed
-                    self.niceprocessedfiles(nurunning.value,
+                    self.niceprocessedfiles(mrunning.value,
                                             UPLDRConstants.nuMediacount,
                                             True)
                     

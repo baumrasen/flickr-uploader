@@ -7,6 +7,8 @@
 # On Python 3, force pip to install requests 2.2.1, or remove flickrapi below.
 # flickrapi==2.3 ; python_version < '2.7'
 #flickrapi>=1.4.5,<2 ; python_version < '2.7'
-flickrapi ; python_version >= '2.7'
+# weird error...
+flickrapi==2.3 ; python_version >= '2.7'
+#flickrapi ; python_version >= '2.7'
 pytest-flakes ; python_version >= '2.7'
 coverage ; python_version >= '2.7'

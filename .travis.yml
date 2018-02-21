@@ -41,8 +41,8 @@ env:
     - VerboseVar=-v
     - BadFilesVar=-b
     - ExcludedVar=--remove-excluded
-    - TAIL_LINES=20  # Tail $TAIL_LINES for output logging
-    - WAIT_TIME=2    # Sleep time between first and second run
+    - TAIL_LINES=200  # Tail $TAIL_LINES for output logging. Default: 20
+    - WAIT_TIME=2     # Sleep time between first and second run
 # Delete !!!!!!!!!!!!!!!!!!! CAREFULL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # To ensure an empty Flickr database. Set DeleteAllFromFlickr=1. 0 otherwise.
     - DeleteAllFromFlickr=0

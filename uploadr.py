@@ -3932,9 +3932,16 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
         logging.info('find_tag: photo:[{!s}] intag:[{!s}]'
                      .format(photo_id, intag))
+        
+        # CODING: Used with a big random waitime to avoid errors in
+        # multiprocessing mode.
+        @retry(attempts=3, waittime=20, randtime=True)
+        def R_tags_getListPhoto(kwargs):
+            return nuflickr.photos.search(**kwargs)
+        
         try:
             tagsResp = None
-            tagsResp = nuflickr.tags.getListPhoto(photo_id=photo_id)
+            tagsResp = R_tags_getListPhoto(dict(photo_id=photo_id))
         except (IOError, ValueError, httplib.HTTPException):
             reportError(Caught=True,
                         CaughtPrefix='+++',

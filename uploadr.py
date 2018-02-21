@@ -4122,7 +4122,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #
     # maddAlbumsMigrate wrapper for multiprocessing purposes
     #
-    def maddAlbumsMigrate(self, lock, running, mutex, filelist):
+    def maddAlbumsMigrate(self, lock, running, mutex, filelist, countTotal):
         """ maddAlbumsMigrate
 
             Wrapper function for multiprocessing support to call uploadFile
@@ -4130,6 +4130,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
             lock = for database access control in multiprocessing
             running = shared value to count processed files in multiprocessing
             mutex = for running access control in multiprocessing
+            countTotal = grand total of items.
         """
 
         for i, f in enumerate(filelist):
@@ -4306,7 +4307,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                             args=(mlockDB,
                                                   mrunning,
                                                   mmutex,
-                                                  mexistingMedia,))
+                                                  mexistingMedia,
+                                                  countTotal,))
                         migratePool.append(migrateTask)
                         logging.debug('===Job/Task Process: Starting...')
                         migrateTask.start()

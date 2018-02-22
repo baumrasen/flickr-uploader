@@ -524,7 +524,6 @@ def retry(attempts=3, waittime=5, randtime=False):
             raise error
         return new_wrapper
     return wrapper_fn
-
 # -----------------------------------------------------------------------------
 # Samples
 # @retry(attempts=3, waittime=2)
@@ -539,6 +538,62 @@ def retry(attempts=3, waittime=5, randtime=False):
 #     logging.error('...Continuing')
 # nargslist=dict(Caught=True, CaughtPrefix='+++')
 # retry_reportError(nargslist)
+
+
+# -----------------------------------------------------------------------------
+# retrate_limitedry
+#
+# retries execution of a function
+#
+import threading
+
+def rate_limited(max_per_second):
+
+    lock = threading.Lock()
+    min_interval = 1.0 / max_per_second
+
+    def decorate(func):
+        # CODING: Python 2
+        class context:
+            last_time_called = 0
+
+        # CODING: Python 3
+        # context.last_time_called = time.perf_counter()
+        # CODING: Python 2
+        context.last_time_called = time.clock()
+
+        @wraps(func)
+        def rate_limited_function(*args, **kwargs):
+            lock.acquire()
+            # CODING: Python 3
+            # nonlocal last_time_called
+            # CODING: Python 2
+            context.last_time_called
+            # CODING: Python 3
+            # elapsed = time.perf_counter() - context.last_time_called
+            # CODING: Python 2
+            elapsed = time.clock() - context.last_time_called
+            left_to_wait = min_interval - elapsed
+
+            if left_to_wait > 0:
+                time.sleep(left_to_wait)
+
+            ret = func(*args, **kwargs)
+            # CODING: Python 3
+            # context.last_time_called = time.perf_counter()
+            # CODING: Python 2
+            context.last_time_called = time.clock()
+            lock.release()
+            return ret
+
+        return rate_limited_function
+
+    return decorate
+# -----------------------------------------------------------------------------
+# Samples
+# @rate_limited(5) # 5 calls per second
+# def print_num(num):
+#     print (num )
 
 
 # =============================================================================
@@ -4129,6 +4184,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #
     # maddAlbumsMigrate wrapper for multiprocessing purposes
     #
+    @rate_limited(5) # 5 calls per second
     def maddAlbumsMigrate(self, lock, running, mutex, filelist, countTotal):
         """ maddAlbumsMigrate
 
@@ -4197,10 +4253,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                         res_add_tag,
                                         encoding='utf-8',
                                         method='xml'))
-
-            # no need to check for
-            # (args.processes and args.processes > 0):
-            # as uploadFileX is already multiprocessing
 
             logging.debug('===Multiprocessing=== in.mutex.acquire(w)')
             mutex.acquire()

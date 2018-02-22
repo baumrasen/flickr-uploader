@@ -3937,7 +3937,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         # multiprocessing mode.
         @retry(attempts=3, waittime=20, randtime=True)
         def R_tags_getListPhoto(kwargs):
-            return nuflickr.photos.search(**kwargs)
+            return nuflickr.tags.getListPhoto(**kwargs)
         
         try:
             tagsResp = None

@@ -1,3 +1,5 @@
+six>=1.11.0 ; python_version >= '2.7'
+
 # scripts/flickrripper.py
 # On Python 2.7, flickrapi 2.3 may be used.
 # The following automatically selects 2.x on all Python versions, which depends

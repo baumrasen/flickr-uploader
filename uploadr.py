@@ -1873,6 +1873,8 @@ class Uploadr:
             # Check if file is already loaded
             if (args.not_is_already_uploaded):
                 isLoaded = False
+                isfile_id = None
+                isNoSet = None
                 logging.warning('not_is_photo_already_uploaded:[{!s}] '
                                 .format(isLoaded))
             else:

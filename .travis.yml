@@ -56,8 +56,8 @@ env:
     #- TestScenario=BadFiles UploadrOptions="$VerboseVar $BadFilesVar"
 # Multiprocessing
     - TestScenario=MultiProcessing UploadrOptions="$VerboseVar $BadFilesVar -p 20"
-# addAlbumsMigrate
-    - TestScenario=addAlbumsMigrate UploadrOptions="$VerboseVar $BadFilesVar --add-albums-migrate -p 20"
+# addAlbumsMigrate. Option --add-albums-migrate is added on SECOND RUN
+    - TestScenario=addAlbumsMigrate UploadrOptions="$VerboseVar $BadFilesVar -p 20"
 # RemoveReplace, Multiprocessing. Also test cleaning up badfiles database entries
     - TestScenario=RemoveReplace UploadrOptions="$VerboseVar $BadFilesVar -p 10 -c"
 # ExcludedFolders+IgnoredFiles in Single Processing mode. Also test cleaning up badfiles database entries
@@ -114,6 +114,7 @@ script:
 
 # Second RUN: Remove, Replace, RemoveReplace, ExcludedFolders, addAlbumsMigrate
   - if [[ $TestScenario == addAlbumsMigrate ]]; then sqlite3 flickrdb 'PRAGMA user_version="2"'; fi
+  - if [[ $TestScenario == addAlbumsMigrate ]]; then export UploadrOptions="$UploadrOptions --add-albums-migrate"; echo $UploadrOptions; fi
 
   - if [[ $TestScenario == RemoveReplace ]]; then rm "./tests/Test Photo Library/photo.jpg"; fi
   - if [[ $TestScenario == RemoveReplace ]]; then rm "./tests/Test Photo Library/photo_Excepção.jpg"; fi

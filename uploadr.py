@@ -598,6 +598,7 @@ def rate_limited(max_per_second):
 
 # =============================================================================
 # Look for Config file uplaodr.ini file
+#
 config = ConfigParser.ConfigParser()
 INIFiles = config.read(os.path.join(os.path.dirname(sys.argv[0]),
                                     "uploadr.ini"))
@@ -614,9 +615,28 @@ if not INIFiles:
 # =============================================================================
 # Obtain configuration from uploadr.ini
 # Refer to contents of uploadr.ini for explanation on configuration parameters
+# Obtain configuration LOGGING_LELVE from Configuration file.
+# If not available or not valid assume WARNING level and notify of that fact.
+# Force conversion of LOGGING_LEVEL into int() for later use in conditionals
 LOGGING_LEVEL = (config.get('Config', 'LOGGING_LEVEL')
-                 if config.has_option('Config', 'LOGGING_LEVEL')
+                if config.has_option('Config', 'LOGGING_LEVEL')
                  else logging.WARNING)
+if (int(LOGGING_LEVEL) if str.isdigit(LOGGING_LEVEL) else 99) not in [
+                        logging.NOTSET,
+                        logging.DEBUG,
+                        logging.INFO,
+                        logging.WARNING,
+                        logging.ERROR,
+                        logging.CRITICAL]:
+    LOGGING_LEVEL = logging.WARNING
+    sys.stderr.write('[{!s}]:[WARNING ]:[uploadr] LOGGING_LEVEL '
+                     'not defined or incorrect on INI file: [{!s}]. '
+                     'Assuming WARNING level.\n'.format(
+                            nutime.strftime(UPLDRConstants.TimeFormat),
+                            os.path.join(os.path.dirname(sys.argv[0]),
+                                         "uploadr.ini")))
+    sys.stderr.flush()
+LOGGING_LEVEL = int(LOGGING_LEVEL)
 if config.has_option('Config', 'FILES_DIR'):
     try:
         FILES_DIR = unicode(eval(config.get('Config', 'FILES_DIR')), 'utf-8') \
@@ -696,8 +716,6 @@ MAX_UPLOAD_ATTEMPTS = eval(config.get('Config', 'MAX_UPLOAD_ATTEMPTS'))
 # =============================================================================
 # Logging
 #
-# Obtain configuration level from Configuration file.
-# If not available or not valid assume WARNING level and notify of that fact.
 # Two uses:
 #   Simply log message at approriate level
 #       logging.warning('Status: {!s}'.format('Setup Complete'))
@@ -715,23 +733,6 @@ MAX_UPLOAD_ATTEMPTS = eval(config.get('Config', 'MAX_UPLOAD_ATTEMPTS'))
 #            xml.etree.ElementTree.dump(uploadResp)
 #            <generate any further output>
 #
-if (int(LOGGING_LEVEL) if str.isdigit(LOGGING_LEVEL) else 99) not in [
-                        logging.NOTSET,
-                        logging.DEBUG,
-                        logging.INFO,
-                        logging.WARNING,
-                        logging.ERROR,
-                        logging.CRITICAL]:
-    LOGGING_LEVEL = logging.WARNING
-    sys.stderr.write('[{!s}]:[WARNING ]:[uploadr] LOGGING_LEVEL '
-                     'not defined or incorrect on INI file: [{!s}]. '
-                     'Assuming WARNING level.\n'.format(
-                            nutime.strftime(UPLDRConstants.TimeFormat),
-                            os.path.join(os.path.dirname(sys.argv[0]),
-                                         "uploadr.ini")))
-    sys.stderr.flush()
-# Force conversion of LOGGING_LEVEL into int() for later use in conditionals
-LOGGING_LEVEL = int(LOGGING_LEVEL)
 logging.basicConfig(stream=sys.stderr,
                     level=int(LOGGING_LEVEL),
                     datefmt=UPLDRConstants.TimeFormat,
@@ -1131,7 +1132,7 @@ class Uploadr:
                 # debug#C with row[1]
                 if (self.isFileExcluded(row[1]
                                         if sys.version_info < (3, )
-                                        else str(row[1]))):                    
+                                        else str(row[1]))):
                     self.deleteFile(row, cur)
 
         # Closing DB connection
@@ -4454,7 +4455,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     #    ValueError('semaphore or lock released too many times')
                     if (args.verbose):
                         niceprint('===Multiprocessing=== pool joined! '
-                                  'What happens to nulockDB is None:[{!s}]? '
+                                  'What happens to mlockDB is None:[{!s}]? '
                                   'It seems not, it still has a value! '
                                   'Setting it to None!'
                                   .format(mlockDB is None))

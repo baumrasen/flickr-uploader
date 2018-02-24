@@ -231,7 +231,7 @@ class UPLDRConstants:
     #   Run        = Identify the execution Run of this process. Unique number
     #
     TimeFormat = '%Y.%m.%d %H:%M:%S'
-    Version = '2.6.8'
+    Version = '2.7.1'
     Run = eval(time.strftime('int("%j")+int("%H")*100+int("%M")'))
 
     # -------------------------------------------------------------------------
@@ -4896,9 +4896,6 @@ if __name__ == "__main__":
         if args.add_albums_migrate:
             niceprint('Performing preparation for migrate to 2.7.0',
                       fname='addAlbumsMigrate')
-            flick.addAlbumsMigrate()
-            niceprint('No more options will run.',
-                      fname='addAlbumsMigrate')
 
             if flick.addAlbumsMigrate():
                 niceprint('Successfully added album tags to pics '
@@ -4906,8 +4903,8 @@ if __name__ == "__main__":
                            fname='addAlbumsMigrate')
             else:
                 logging.warning('Failed adding album tags to pics '
-                                'on upload. Not updating Database version.'
-                                'please check logs, correct, and retry.')
+                                'on upload. '
+                                'Please check logs, correct, and retry.')
                 niceprint('Failed adding album tags to pics '
                           'on upload. '
                           'Please check logs, correct, and retry.',

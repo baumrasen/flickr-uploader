@@ -680,16 +680,19 @@ inEXCLUDED_FOLDERS = eval(config.get('Config', 'EXCLUDED_FOLDERS'))
 EXCLUDED_FOLDERS = []
 for folder in inEXCLUDED_FOLDERS:
     # CODING: Python 2 and 3 compatibility
-    # EXCLUDED_FOLDERS.append(unicode(folder, 'utf-8')
-    #                         if sys.version_info < (3, )
-    #                         else str(folder))
-    EXCLUDED_FOLDERS.append(StrUnicodeOut(folder))
+    EXCLUDED_FOLDERS.append(unicode(folder, 'utf-8')
+                            if sys.version_info < (3, )
+                            else str(folder))
     if LOGGING_LEVEL <= logging.INFO:
         sys.stderr.write('[{!s}]:[{!s}][INFO    ]:[uploadr] '
-                         'folder from EXCLUDED_FOLDERS:[{!s}]\n'
+                         'folder from EXCLUDED_FOLDERS:[{!s}] '
+                         'type:[{!s}]\n'
                          .format(nutime.strftime(UPLDRConstants.TimeFormat),
                                  os.getpid(),
-                                 StrUnicodeOut(folder)))
+                                 StrUnicodeOut(EXCLUDED_FOLDERS[
+                                            len(EXCLUDED_FOLDERS)-1]),
+                                 type(EXCLUDED_FOLDERS[
+                                        len(EXCLUDED_FOLDERS)-1])))
         sys.stderr.flush()
 del inEXCLUDED_FOLDERS
 # Consider Unicode Regular expressions

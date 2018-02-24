@@ -12,11 +12,6 @@
     Some giberish. Please ignore!
     -----------------------------
     Area for my personal notes on on-going work! Please ignore!
-    * function is_photo_already_uploaded:
-      Consider one additional result for PHOTO UPLOADED
-      WITHOUT SET WITH ALBUM TAG when row exists on DB. Mark
-      such row on the database files.set_id to null
-      to force re-assigning to Album/Set on flickr.
     * On first authenticate... removedeletemedia seems to fail
     * Test if it Re-upload or not pictures removed from flickr Web interface.
     * CODING: Should extend this control to other parameters (Enhancement #7)
@@ -33,7 +28,6 @@
       logging.debug: entering and exiting functions
       Note: Consider using assertions: check niceassert function.
 
-    * Test deleted file from local which is also deleted from flickr
     * Change code to insert on database prior to upload and then update result
     * Protect all DB access (single processing or multiprocessing) with:
       And even more:
@@ -78,8 +72,8 @@
     * converRawFiles is not tested. Also requires an exif tool to be installed
       and configured as RAW_TOOL_PATH in INI file. Make sure to leave
       CONVERT_RAW_FILES = False in INI file or use at your own risk.
-    * On some systems it may be required to also import xml.etree.ElementTree
     * Consider using python module exiftool?
+    * On some systems it may be required to also import xml.etree.ElementTree
     * If one changes the FILES_DIR folder and do not DELETE all from flickr,
       uploadr WILL not delete the files.
     * Would be nice to update ALL tags on replacePhoto and not only the
@@ -1124,18 +1118,19 @@ class Uploadr:
                 logging.debug('type(row[1]):[{!s}]'.format(type(row[1])))
                 # row[0] is photo_id
                 # row[1] is filename
+                # CODING
                 # debug#A with unicode
-                # if (self.isFileExcluded(unicode(row[1], 'utf-8')
-                #                         if sys.version_info < (3, )
-                #                         else str(row[1]))):
-                # debug#B with StrUnicodeOut
-                # if (self.isFileExcluded(row[1]
-                #                         if sys.version_info < (3, )
-                #                        else str(row[1]))):
-                # debug#C with row[1]
-                if (self.isFileExcluded(row[1]
+                if (self.isFileExcluded(unicode(row[1], 'utf-8')
                                         if sys.version_info < (3, )
                                         else str(row[1]))):
+                # debug#B with StrUnicodeOut
+                # if (self.isFileExcluded(StrUnicodeOut(row[1])
+                #                         if sys.version_info < (3, )
+                #                         else str(row[1]))):
+                # debug#C with row[1] => Fails TravisCI test 331.5
+                # if (self.isFileExcluded(row[1]
+                #                         if sys.version_info < (3, )
+                #                         else str(row[1]))):
                     self.deleteFile(row, cur)
 
         # Closing DB connection

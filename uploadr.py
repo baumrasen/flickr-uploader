@@ -597,9 +597,7 @@ def rate_limited(max_per_second):
 
 
 # =============================================================================
-# Read Config from config.ini file
-# Obtain configuration from uploadr.ini
-# Refer to contents of uploadr.ini for explanation on configuration parameters
+# Look for Config file uplaodr.ini file
 config = ConfigParser.ConfigParser()
 INIFiles = config.read(os.path.join(os.path.dirname(sys.argv[0]),
                                     "uploadr.ini"))
@@ -612,6 +610,13 @@ if not INIFiles:
                                           'uploadr.ini')))
     sys.stderr.flush()
     sys.exit(2)
+
+# =============================================================================
+# Obtain configuration from uploadr.ini
+# Refer to contents of uploadr.ini for explanation on configuration parameters
+LOGGING_LEVEL = (config.get('Config', 'LOGGING_LEVEL')
+                 if config.has_option('Config', 'LOGGING_LEVEL')
+                 else logging.WARNING)
 if config.has_option('Config', 'FILES_DIR'):
     try:
         FILES_DIR = unicode(eval(config.get('Config', 'FILES_DIR')), 'utf-8') \
@@ -626,6 +631,7 @@ if config.has_option('Config', 'FILES_DIR'):
         sys.stderr.flush()
         sys.exit(3)
 else:
+    # Undefined FILES_DIR. Will be reported as an error later on Main code.
     FILES_DIR = unicode('', 'utf-8') if sys.version_info < (3, ) else str('')
 FLICKR = eval(config.get('Config', 'FLICKR'))
 SLEEP_TIME = eval(config.get('Config', 'SLEEP_TIME'))
@@ -657,7 +663,7 @@ for folder in inEXCLUDED_FOLDERS:
     # EXCLUDED_FOLDERS.append(unicode(folder, 'utf-8')
     #                         if sys.version_info < (3, )
     #                         else str(folder))
-    EXCLUDED_FOLDERS.append(StrUnicodeOut(folder))    
+    EXCLUDED_FOLDERS.append(StrUnicodeOut(folder))
     if LOGGING_LEVEL <= logging.INFO:
         sys.stderr.write('[{!s}]:[{!s}][INFO    ]:[uploadr] '
                          'folder from EXCLUDED_FOLDERS:[{!s}]\n'
@@ -685,9 +691,7 @@ CONVERT_RAW_FILES = eval(config.get('Config', 'CONVERT_RAW_FILES'))
 FULL_SET_NAME = eval(config.get('Config', 'FULL_SET_NAME'))
 MAX_SQL_ATTEMPTS = eval(config.get('Config', 'MAX_SQL_ATTEMPTS'))
 MAX_UPLOAD_ATTEMPTS = eval(config.get('Config', 'MAX_UPLOAD_ATTEMPTS'))
-LOGGING_LEVEL = (config.get('Config', 'LOGGING_LEVEL')
-                 if config.has_option('Config', 'LOGGING_LEVEL')
-                 else logging.WARNING)
+
 
 # =============================================================================
 # Logging
@@ -1116,9 +1120,18 @@ class Uploadr:
                 logging.debug('type(row[1]):[{!s}]'.format(type(row[1])))
                 # row[0] is photo_id
                 # row[1] is filename
-                if (self.isFileExcluded(unicode(row[1], 'utf-8')
+                # debug#A with unicode
+                # if (self.isFileExcluded(unicode(row[1], 'utf-8')
+                #                         if sys.version_info < (3, )
+                #                         else str(row[1]))):
+                # debug#B with StrUnicodeOut
+                # if (self.isFileExcluded(row[1]
+                #                         if sys.version_info < (3, )
+                #                        else str(row[1]))):
+                # debug#C with row[1]
+                if (self.isFileExcluded(row[1]
                                         if sys.version_info < (3, )
-                                        else str(row[1]))):
+                                        else str(row[1]))):                    
                     self.deleteFile(row, cur)
 
         # Closing DB connection
@@ -1561,9 +1574,9 @@ class Uploadr:
 
             # Prevent walking thru files in the list of EXCLUDED_FOLDERS
             # Reduce time by not checking a file in an excluded folder
-            
+
             # CODING
-            # For Debugging: UnicodeWarning comparison 
+            # For Debugging: UnicodeWarning comparison
             logging.info('Check for UnicodeWarning comparison dirpath:[{!s}]'
                          .format(StrUnicodeOut(os.path.basename(
                                                 os.path.normpath(dirpath)))))
@@ -3996,13 +4009,13 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
         logging.info('find_tag: photo:[{!s}] intag:[{!s}]'
                      .format(photo_id, intag))
-        
+
         # CODING: Used with a big random waitime to avoid errors in
         # multiprocessing mode.
         @retry(attempts=3, waittime=20, randtime=True)
         def R_tags_getListPhoto(kwargs):
             return nuflickr.tags.getListPhoto(**kwargs)
-        
+
         try:
             tagsResp = None
             tagsResp = R_tags_getListPhoto(dict(photo_id=photo_id))
@@ -4208,7 +4221,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         for i, f in enumerate(filelist):
             logging.warning('===Current element of Chunk: [{!s}][{!s}]'
                             .format(i, f))
-            
+
             # f[0] = files_id
             # f[1] = path
             # f[2] = set_name
@@ -4289,7 +4302,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         mlockDB = None
         mmutex = None
         mrunning = None
-        
+
         con = lite.connect(DB_PATH)
         con.text_factory = str
         with con:
@@ -4318,23 +4331,23 @@ set0 = sets.find('photosets').findall('photoset')[0]
                               .format(args.processes))
                 logging.debug('__name__:[{!s}] to prevent recursive calling)!'
                               .format(__name__))
-    
+
                 # To prevent recursive calling, check if __name__ == '__main__'
                 if __name__ == '__main__':
                     logging.debug('===Multiprocessing=== Setting up logger!')
                     multiprocessing.log_to_stderr()
                     logger = multiprocessing.get_logger()
                     logger.setLevel(LOGGING_LEVEL)
-    
+
                     logging.debug('===Multiprocessing=== Lock defined!')
-    
+
                     # ---------------------------------------------------------
                     # chunk
                     #
                     # Divides an iterable in slices/chunks of size size
                     #
                     from itertools import islice
-    
+
                     def chunk(it, size):
                         """
                             Divides an iterable in slices/chunks of size size
@@ -4345,23 +4358,23 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         # iter, with the second argument () stops creating
                         # iterators when it reaches the end
                         return iter(lambda: tuple(islice(it, size)), ())
-    
+
                     migratePool = []
                     mlockDB = multiprocessing.Lock()
                     mrunning = multiprocessing.Value('i', 0)
                     mmutex = multiprocessing.Lock()
-    
+
                     sz = (len(existingMedia) // int(args.processes)) \
                          if ((len(existingMedia) // int(args.processes)) > 0) \
                          else 1
-    
+
                     logging.debug('len(existingMedia):[{!s}] '
                                   'int(args.processes):[{!s}] '
                                   'sz per process:[{!s}]'
                                   .format(len(existingMedia),
                                           int(args.processes),
                                           sz))
-    
+
                     # Split the Media in chunks to distribute accross Processes
                     for mexistingMedia in chunk(existingMedia, sz):
                         logging.warning('===Actual/Planned Chunk size: '
@@ -4386,14 +4399,14 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                       'with pid:[{!s}]'
                                       .format(migrateTask.name,
                                               migrateTask.pid))
-    
+
                     # Check status of jobs/tasks in the Process Pool
                     if LOGGING_LEVEL <= logging.DEBUG:
                         logging.debug('===Checking Processes launched/status:')
                         for j in migratePool:
                             niceprint('{!s}.is_alive = {!s}'
                                       .format(j.name, j.is_alive()))
-    
+
                     # Regularly print status of jobs/tasks in the Process Pool
                     # Prints status while there are processes active
                     # Exits when all jobs/tasks are done.
@@ -4414,7 +4427,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         niceprint('===Will wait for 60 on {!s}.is_alive = {!s}'
                                   .format(mTaskActive.name,
                                           mTaskActive.is_alive()))
-    
+
                         mTaskActive.join(timeout=60)
                         logging.info('===Waited for 60s on {!s}.is_alive = {!s}'
                                      .format(mTaskActive.name,
@@ -4422,19 +4435,19 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         niceprint('===Waited for 60s on {!s}.is_alive = {!s}'
                                   .format(mTaskActive.name,
                                           mTaskActive.is_alive()))
-    
+
                     # Wait for join all jobs/tasks in the Process Pool
                     # All should be done by now!
                     for j in migratePool:
                         j.join()
                         niceprint('==={!s} (is alive: {!s}).exitcode = {!s}'
                                   .format(j.name, j.is_alive(), j.exitcode))
-    
+
                     logging.warning('===Multiprocessing=== pool joined! '
                                     'All processes finished.')
                     niceprint('===Multiprocessing=== pool joined! '
                               'All processes finished.')
-    
+
                     # Will release (set to None) the nulockDB lock control
                     # this prevents subsequent calls to useDBLock( nuLockDB, False)
                     # to raise exception:
@@ -4446,12 +4459,12 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                   'Setting it to None!'
                                   .format(mlockDB is None))
                     mlockDB = None
-    
+
                     # Show number of total files processed
                     self.niceprocessedfiles(mrunning.value,
                                             countTotal,
                                             True)
-                    
+
             else:
                 count=0
                 countTotal=len(existingMedia)
@@ -4464,7 +4477,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     niceprint('ID:[{!s}] Path:[{!s}] Set:[{!s}] SetID:[{!s}]'
                               .format(str(row[0]), row[1], row[2], row[3]),
                               fname='addAlbumMigrate')
-    
+
                     # row[1] = path for the file from table files
                     setName = self.getSetNameFromFile(row[1],
                                                       FILES_DIR,
@@ -4487,18 +4500,18 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                      exceptMsg=ex,
                                      NicePrint=False,
                                      exceptSysInfo=True)
-    
+
                         logging.warning('Error processing Photo_id:[{!s}]. '
                                         'Continuing...'
                                         .format(str(row[0])))
                         niceprint('Error processing Photo_id:[{!s}]. Continuing...'
                                   .format(str(row[0])),
                                   fname='addAlbumMigrate')
-    
+
                         self.niceprocessedfiles(count, countTotal, False)
-    
+
                         continue
-    
+
                     if not tfind:
                         res_add_tag = self.photos_add_tags(
                                         row[0],
@@ -4512,9 +4525,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                                 encoding='utf-8',
                                                 method='xml'))
                     self.niceprocessedfiles(count, countTotal, False)
-    
+
                 self.niceprocessedfiles(count, countTotal, True)
-                
+
         return True
 
     # -------------------------------------------------------------------------

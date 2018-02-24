@@ -1578,10 +1578,13 @@ class Uploadr:
 
             # CODING
             # For Debugging: UnicodeWarning comparison
-            logging.info('Check for UnicodeWarning comparison dirpath:[{!s}]'
+            logging.info('Check for UnicodeWarning comparison dirpath:[{!s}] '
+                         'type:[{!s}]'
                          .format(StrUnicodeOut(os.path.basename(
+                                                os.path.normpath(dirpath))),
+                                 type(os.path.basename(
                                                 os.path.normpath(dirpath)))))
-            if StrUnicodeOut(os.path.basename(os.path.normpath(dirpath))) \
+            if os.path.basename(os.path.normpath(dirpath)) \
                 in EXCLUDED_FOLDERS:
                 dirnames[:] = []
                 filenames[:] = []

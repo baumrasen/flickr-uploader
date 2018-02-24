@@ -654,9 +654,10 @@ inEXCLUDED_FOLDERS = eval(config.get('Config', 'EXCLUDED_FOLDERS'))
 EXCLUDED_FOLDERS = []
 for folder in inEXCLUDED_FOLDERS:
     # CODING: Python 2 and 3 compatibility
-    EXCLUDED_FOLDERS.append(unicode(folder, 'utf-8')
-                            if sys.version_info < (3, )
-                            else str(folder))
+    # EXCLUDED_FOLDERS.append(unicode(folder, 'utf-8')
+    #                         if sys.version_info < (3, )
+    #                         else str(folder))
+    EXCLUDED_FOLDERS.append(StrUnicodeOut(folder))    
     if LOGGING_LEVEL <= logging.INFO:
         sys.stderr.write('[{!s}]:[{!s}][INFO    ]:[uploadr] '
                          'folder from EXCLUDED_FOLDERS:[{!s}]\n'
@@ -1560,6 +1561,10 @@ class Uploadr:
 
             # Prevent walking thru files in the list of EXCLUDED_FOLDERS
             # Reduce time by not checking a file in an excluded folder
+            
+            # CODING
+            # For Debugging: UnicodeWarning comparison 
+            logging.info('Check for UnicodeWarning comparison dirpath:[{!s}]')
             if StrUnicodeOut(os.path.basename(os.path.normpath(dirpath))) \
                 in EXCLUDED_FOLDERS:
                 dirnames[:] = []

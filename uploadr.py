@@ -4224,12 +4224,19 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
         pass
 
+    @rate_limited(1) # 5 calls per second
+    def rate4maddAlbumsMigrate():
+        """
+        """
+        logging.debug('rate_limit timestamp:[{!s}]'
+                      .format(int(round(nutime.time() * 1000))))
+
+
     # -------------------------------------------------------------------------
     # maddAlbumsMigrate
     #
     # maddAlbumsMigrate wrapper for multiprocessing purposes
     #
-    @rate_limited(5) # 5 calls per second
     def maddAlbumsMigrate(self, lock, running, mutex, filelist, countTotal):
         """ maddAlbumsMigrate
 
@@ -4308,6 +4315,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
             # Show number of files processed so far
             self.niceprocessedfiles(xcount, countTotal, False)
+            
+            self.rate4maddAlbumsMigrate()
+
 
     # -------------------------------------------------------------------------
     # addAlbumsMigrate

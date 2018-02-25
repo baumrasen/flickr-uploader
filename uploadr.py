@@ -4316,7 +4316,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
             # Show number of files processed so far
             self.niceprocessedfiles(xcount, countTotal, False)
             
-            self.rate4maddAlbumsMigrate()
+            rate4maddAlbumsMigrate()
 
 
     # -------------------------------------------------------------------------

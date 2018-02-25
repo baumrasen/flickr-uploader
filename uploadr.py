@@ -535,7 +535,7 @@ def retry(attempts=3, waittime=5, randtime=False):
 
 
 # -----------------------------------------------------------------------------
-# retrate_limitedry
+# rate_limited
 #
 # retries execution of a function
 #
@@ -594,11 +594,22 @@ def rate_limited(max_per_second):
 # Look for Config file uplaodr.ini file
 #
 config = ConfigParser.ConfigParser()
-INIFiles = config.read(os.path.join(os.path.dirname(sys.argv[0]),
-                                    "uploadr.ini"))
+try:
+    INIFiles = None
+    INIFiles = config.read(os.path.join(os.path.dirname(sys.argv[0]),
+                                        "uploadr.ini"))
+except Exception as err:
+    sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] INI file: [{!s}] '
+                     'not found or incorrect format: [{!s}!.\n'
+                     .format(nutime.strftime(UPLDRConstants.TimeFormat),
+                             os.getpid(),
+                             os.path.join(os.path.dirname(sys.argv[0]),
+                                          'uploadr.ini')),
+                             str(err))
+    sys.stderr.flush()
 if not INIFiles:
     sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] '
-                     'INI file: [{!s}] not found!.\n'
+                     'INI file: [{!s}] not found! Exiting...\n'
                      .format(nutime.strftime(UPLDRConstants.TimeFormat),
                              os.getpid(),
                              os.path.join(os.path.dirname(sys.argv[0]),
@@ -614,7 +625,7 @@ if not INIFiles:
 # Force conversion of LOGGING_LEVEL into int() for later use in conditionals
 LOGGING_LEVEL = (config.get('Config', 'LOGGING_LEVEL')
                 if config.has_option('Config', 'LOGGING_LEVEL')
-                 else logging.WARNING)
+                else logging.WARNING)
 if (int(LOGGING_LEVEL) if str.isdigit(LOGGING_LEVEL) else 99) not in [
                         logging.NOTSET,
                         logging.DEBUG,

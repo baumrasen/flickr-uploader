@@ -600,7 +600,7 @@ try:
                                         "uploadr.ini"))
 except Exception as err:
     sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] INI file: [{!s}] '
-                     'not found or incorrect format: [{!s}!.\n'
+                     'not found or incorrect format: [{!s}]!\n'
                      .format(nutime.strftime(UPLDRConstants.TimeFormat),
                              os.getpid(),
                              os.path.join(os.path.dirname(sys.argv[0]),

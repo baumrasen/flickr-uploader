@@ -4229,7 +4229,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #
     # maddAlbumsMigrate wrapper for multiprocessing purposes
     #
-    @rate_limited(5) # 5 calls per second
+    # CODING: @rate_limited(5) # 5 calls per second
     def maddAlbumsMigrate(self, lock, running, mutex, filelist, countTotal):
         """ maddAlbumsMigrate
 

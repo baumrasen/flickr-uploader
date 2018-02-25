@@ -554,7 +554,7 @@ def rate_limited(max_per_second):
         # CODING: Python 3
         # context.last_time_called = time.perf_counter()
         # CODING: Python 2
-        context.last_time_called = time.clock()
+        context.last_time_called = time.time()
 
         @wraps(func)
         def rate_limited_function(*args, **kwargs):
@@ -566,7 +566,7 @@ def rate_limited(max_per_second):
             # CODING: Python 3
             # elapsed = time.perf_counter() - context.last_time_called
             # CODING: Python 2
-            elapsed = time.clock() - context.last_time_called
+            elapsed = time.time() - context.last_time_called
             left_to_wait = min_interval - elapsed
 
             if left_to_wait > 0:
@@ -576,7 +576,7 @@ def rate_limited(max_per_second):
             # CODING: Python 3
             # context.last_time_called = time.perf_counter()
             # CODING: Python 2
-            context.last_time_called = time.clock()
+            context.last_time_called = time.time()
             lock.release()
             return ret
 

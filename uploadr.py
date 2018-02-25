@@ -604,12 +604,12 @@ except Exception as err:
                      .format(nutime.strftime(UPLDRConstants.TimeFormat),
                              os.getpid(),
                              os.path.join(os.path.dirname(sys.argv[0]),
-                                          'uploadr.ini')),
-                             str(err))
+                                          'uploadr.ini'),
+                             str(err)))
     sys.stderr.flush()
 if not INIFiles:
-    sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] '
-                     'INI file: [{!s}] not found! Exiting...\n'
+    sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] INI file: [{!s}] '
+                     'not found or incorrect format! Exiting...\n'
                      .format(nutime.strftime(UPLDRConstants.TimeFormat),
                              os.getpid(),
                              os.path.join(os.path.dirname(sys.argv[0]),

@@ -591,7 +591,7 @@ def rate_limited(max_per_second):
 
 
 # =============================================================================
-# Look for Config file uplaodr.ini file
+# Look for Config file uploadr.ini
 #
 config = ConfigParser.ConfigParser()
 try:
@@ -616,8 +616,18 @@ if not INIFiles:
                                           'uploadr.ini')))
     sys.stderr.flush()
     sys.exit(2)
-
-# =============================================================================
+# -----------------------------------------------------------------------------
+# Look for [Config] section file uploadr.ini file
+if not config.has_section('Config'):
+    sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] INI file: [{!s}] '
+                     'has no [Config] section! Exiting...\n'
+                     .format(nutime.strftime(UPLDRConstants.TimeFormat),
+                             os.getpid(),
+                             os.path.join(os.path.dirname(sys.argv[0]),
+                                          'uploadr.ini')))
+    sys.stderr.flush()
+    sys.exit(2)    
+# -----------------------------------------------------------------------------
 # Obtain configuration from uploadr.ini
 # Refer to contents of uploadr.ini for explanation on configuration parameters
 # Obtain configuration LOGGING_LELVE from Configuration file.

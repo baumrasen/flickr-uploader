@@ -4224,8 +4224,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
         pass
 
-    @rate_limited(1) # 5 calls per second
-    def rate4maddAlbumsMigrate():
+    @rate_limited(1) # 1 calls per second
+    def rate4maddAlbumsMigrate(self):
         """
         """
         logging.debug('rate_limit timestamp:[{!s}]'
@@ -4316,7 +4316,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
             # Show number of files processed so far
             self.niceprocessedfiles(xcount, countTotal, False)
             
-            rate4maddAlbumsMigrate()
+            self.rate4maddAlbumsMigrate()
 
 
     # -------------------------------------------------------------------------

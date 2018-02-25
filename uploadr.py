@@ -626,8 +626,8 @@ if not INIFiles:
 LOGGING_LEVEL = (config.get('Config', 'LOGGING_LEVEL')
                 if config.has_option('Config', 'LOGGING_LEVEL')
                 else logging.WARNING)
-if (int(LOGGING_LEVEL) if str.isdigit(LOGGING_LEVEL) else 99) not in [
-                        logging.NOTSET,
+if (int(str(LOGGING_LEVEL)) if str.isdigit(str(LOGGING_LEVEL)) else 99) not in\
+                       [logging.NOTSET,
                         logging.DEBUG,
                         logging.INFO,
                         logging.WARNING,
@@ -641,7 +641,7 @@ if (int(LOGGING_LEVEL) if str.isdigit(LOGGING_LEVEL) else 99) not in [
                             os.path.join(os.path.dirname(sys.argv[0]),
                                          "uploadr.ini")))
     sys.stderr.flush()
-LOGGING_LEVEL = int(LOGGING_LEVEL)
+LOGGING_LEVEL = int(str(LOGGING_LEVEL))
 if config.has_option('Config', 'FILES_DIR'):
     try:
         FILES_DIR = unicode(eval(config.get('Config', 'FILES_DIR')), 'utf-8') \

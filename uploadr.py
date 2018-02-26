@@ -626,7 +626,7 @@ if not config.has_section('Config'):
                              os.path.join(os.path.dirname(sys.argv[0]),
                                           'uploadr.ini')))
     sys.stderr.flush()
-    sys.exit(2)    
+    sys.exit(2)
 # -----------------------------------------------------------------------------
 # Obtain configuration from uploadr.ini
 # Refer to contents of uploadr.ini for explanation on configuration parameters
@@ -947,9 +947,9 @@ class Uploadr:
                     raise
                 logging.info('===Multiprocessing=== out.lock.release')
 
-            logging.warning('Exiting useDBLock with useDBoperation:[{!s}]. '
-                            'Result:[{!s}]'
-                            .format(useDBoperation, useDBLockReturn))
+            logging.info('Exiting useDBLock with useDBoperation:[{!s}]. '
+                         'Result:[{!s}]'
+                         .format(useDBoperation, useDBLockReturn))
         else:
             useDBLockReturn = True
             logging.warning('(No multiprocessing. Nothing to do) '
@@ -1066,7 +1066,7 @@ class Uploadr:
                              .format(nuflickr.token_cache.token))
                 return nuflickr.token_cache.token
             else:
-                logging.info('Token Non-Existant.')
+                logging.warning('Token Non-Existant.')
                 return None
         except:
             reportError(Caught=True,
@@ -1376,24 +1376,27 @@ class Uploadr:
                     logging.info('===Will wait for 60 on {!s}.is_alive = {!s}'
                                  .format(uploadTaskActive.name,
                                          uploadTaskActive.is_alive()))
-                    niceprint('===Will wait for 60 on {!s}.is_alive = {!s}'
-                              .format(uploadTaskActive.name,
-                                      uploadTaskActive.is_alive()))
+                    if (args.verbose):
+                        niceprint('===Will wait for 60 on {!s}.is_alive = {!s}'
+                                  .format(uploadTaskActive.name,
+                                          uploadTaskActive.is_alive()))
 
                     uploadTaskActive.join(timeout=60)
                     logging.info('===Waited for 60s on {!s}.is_alive = {!s}'
                                  .format(uploadTaskActive.name,
                                          uploadTaskActive.is_alive()))
-                    niceprint('===Waited for 60s on {!s}.is_alive = {!s}'
-                              .format(uploadTaskActive.name,
-                                      uploadTaskActive.is_alive()))
+                    if (args.verbose):
+                        niceprint('===Waited for 60s on {!s}.is_alive = {!s}'
+                                  .format(uploadTaskActive.name,
+                                          uploadTaskActive.is_alive()))
 
                 # Wait for join all jobs/tasks in the Process Pool
                 # All should be done by now!
                 for j in uploadPool:
                     j.join()
-                    niceprint('==={!s} (is alive: {!s}).exitcode = {!s}'
-                              .format(j.name, j.is_alive(), j.exitcode))
+                    if (args.verbose):
+                        niceprint('==={!s} (is alive: {!s}).exitcode = {!s}'
+                                  .format(j.name, j.is_alive(), j.exitcode))
 
                 logging.warning('===Multiprocessing=== pool joined! '
                                 'All processes finished.')
@@ -1597,12 +1600,12 @@ class Uploadr:
 
             # CODING
             # For Debugging: UnicodeWarning comparison
-            logging.info('Check for UnicodeWarning comparison dirpath:[{!s}] '
-                         'type:[{!s}]'
-                         .format(StrUnicodeOut(os.path.basename(
-                                                os.path.normpath(dirpath))),
-                                 type(os.path.basename(
-                                                os.path.normpath(dirpath)))))
+            logging.debug('Check for UnicodeWarning comparison '
+                          'dirpath:[{!s}] type:[{!s}]'
+                          .format(StrUnicodeOut(os.path.basename(
+                                                  os.path.normpath(dirpath))),
+                                  type(os.path.basename(
+                                                  os.path.normpath(dirpath)))))
             if os.path.basename(os.path.normpath(dirpath)) \
                 in EXCLUDED_FOLDERS:
                 dirnames[:] = []
@@ -1610,11 +1613,10 @@ class Uploadr:
                 logging.warning('Folder [{!s}] on path [{!s}] excluded.'
                                 .format(
                                     StrUnicodeOut(os.path.basename(
-                                                     os.path.normpath(
-                                                        dirpath))
+                                                    os.path.normpath(dirpath))
                                                  ),
                                     StrUnicodeOut(os.path.normpath(dirpath)))
-                                )
+                               )
                 niceprint('Folder [{!s}] on path [{!s}] excluded.'
                           .format(StrUnicodeOut(os.path.basename(
                                                    os.path.normpath(dirpath))
@@ -2047,13 +2049,13 @@ class Uploadr:
                                     is_friend=str(FLICKR["is_friend"])
                                     )
 
-                            logging.info('uploadResp: ')
-                            logging.info(xml.etree.ElementTree.tostring(
+                            logging.debug('uploadResp: ')
+                            logging.debug(xml.etree.ElementTree.tostring(
                                                 uploadResp,
                                                 encoding='utf-8',
                                                 method='xml'))
-                            logging.warning('uploadResp:[{!s}]'
-                                            .format(self.isGood(uploadResp)))
+                            logging.info('uploadResp:[{!s}]'
+                                         .format(self.isGood(uploadResp)))
 
                             # Save photo_id returned from Flickr upload
                             photo_id = uploadResp.findall('photoid')[0].text
@@ -2156,11 +2158,11 @@ class Uploadr:
                     # attempt failed and when search_Result returns 1 entry
                     logging.info('search_result:[{!s}]'.format(search_result))
                     if search_result:
-                        logging.warning('len(search_result(photos)'
-                                        '.[photo]=[{!s}]'
-                                        .format(len(search_result
-                                                    .find('photos')
-                                                    .findall('photo'))))
+                        logging.info('len(search_result(photos)'
+                                     '.[photo]=[{!s}]'
+                                     .format(len(search_result
+                                                 .find('photos')
+                                                 .findall('photo'))))
                         if (len(search_result
                                .find('photos')
                                .findall('photo')) == 0):
@@ -2175,9 +2177,9 @@ class Uploadr:
                             file_id = search_result.find('photos')\
                                         .findall('photo')[0].attrib['id']
                             # file_id = uploadResp.findall('photoid')[0].text
-                            logging.info('Output for {!s}:'
+                            logging.debug('Output for {!s}:'
                                          .format('search_result'))
-                            logging.info(xml.etree.ElementTree.tostring(
+                            logging.debug(xml.etree.ElementTree.tostring(
                                                 search_result,
                                                 encoding='utf-8',
                                                 method='xml'))
@@ -2186,8 +2188,8 @@ class Uploadr:
                     else:
                         # Successful update given that search_result is None
                         file_id = uploadResp.findall('photoid')[0].text
-                        logging.info('Output for {!s}:'.format('uploadResp'))
-                        logging.info(xml.etree.ElementTree.tostring(
+                        logging.debug('Output for {!s}:'.format('uploadResp'))
+                        logging.debug(xml.etree.ElementTree.tostring(
                                             uploadResp,
                                             encoding='utf-8',
                                             method='xml'))
@@ -2426,13 +2428,13 @@ class Uploadr:
                                 photo_id=file_id
                                 )
 
-                    logging.info('replaceResp: ')
-                    logging.info(xml.etree.ElementTree.tostring(
+                    logging.debug('replaceResp: ')
+                    logging.debug(xml.etree.ElementTree.tostring(
                                                     replaceResp,
                                                     encoding='utf-8',
                                                     method='xml'))
-                    logging.warning('replaceResp:[{!s}]'
-                                    .format(self.isGood(replaceResp)))
+                    logging.info('replaceResp:[{!s}]'
+                                 .format(self.isGood(replaceResp)))
 
                     if (self.isGood(replaceResp)):
                         # Update checksum tag at this time.
@@ -2440,8 +2442,8 @@ class Uploadr:
                                         file_id,
                                         ['checksum:{}'.format(fileMd5)]
                                       )
-                        logging.info('res_add_tag: ')
-                        logging.info(xml.etree.ElementTree.tostring(
+                        logging.debug('res_add_tag: ')
+                        logging.debug(xml.etree.ElementTree.tostring(
                                                 res_add_tag,
                                                 encoding='utf-8',
                                                 method='xml'))
@@ -2451,8 +2453,8 @@ class Uploadr:
                             res_get_info = flick.photos_get_info(
                                                 photo_id=file_id
                                                 )
-                            logging.info('res_get_info: ')
-                            logging.info(xml.etree.ElementTree.tostring(
+                            logging.debug('res_get_info: ')
+                            logging.debug(xml.etree.ElementTree.tostring(
                                                     res_get_info,
                                                     encoding='utf-8',
                                                     method='xml'))
@@ -2481,11 +2483,11 @@ class Uploadr:
                                     logging.info('Will remove tag_id:[{!s}]'
                                                  .format(tag_id))
                                     remtagResp = self.photos_remove_tag(tag_id)
-                                    logging.info('remtagResp: ')
-                                    logging.info(xml.etree.ElementTree
-                                                 .tostring(remtagResp,
-                                                           encoding='utf-8',
-                                                           method='xml'))
+                                    logging.debug('remtagResp: ')
+                                    logging.debug(xml.etree.ElementTree
+                                                  .tostring(remtagResp,
+                                                            encoding='utf-8',
+                                                            method='xml'))
                                     if (self.isGood(remtagResp)):
                                         niceprint('Tag removed.')
                                     else:
@@ -2617,8 +2619,8 @@ class Uploadr:
             deleteResp = None
             deleteResp = R_photos_delete(dict(photo_id=str(file[0])))
 
-            logging.info('Output for {!s}:'.format('deleteResp'))
-            logging.info(xml.etree.ElementTree.tostring(
+            logging.debug('Output for {!s}:'.format('deleteResp'))
+            logging.debug(xml.etree.ElementTree.tostring(
                                     deleteResp,
                                     encoding='utf-8',
                                     method='xml'))
@@ -2906,8 +2908,8 @@ class Uploadr:
             addPhotoResp = R_photosets_addPhoto(dict(photoset_id=str(setId),
                                                      photo_id=str(file[0])))
 
-            logging.info('Output for addPhotoResp:')
-            logging.info(xml.etree.ElementTree.tostring(
+            logging.debug('Output for addPhotoResp:')
+            logging.debug(xml.etree.ElementTree.tostring(
                                                 addPhotoResp,
                                                 encoding='utf-8',
                                                 method='xml'))
@@ -3398,8 +3400,8 @@ class Uploadr:
         try:
             sets = nuflickr.photosets_getList()
 
-            logging.info('Output for {!s}'.format('photosets_getList:'))
-            logging.info(xml.etree.ElementTree.tostring(
+            logging.debug('Output for {!s}'.format('photosets_getList:'))
+            logging.debug(xml.etree.ElementTree.tostring(
                                                 sets,
                                                 encoding='utf-8',
                                                 method='xml'))
@@ -3435,8 +3437,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 cur = con.cursor()
 
                 for row in sets.find('photosets').findall('photoset'):
-                    logging.info('Output for {!s}:'.format('row'))
-                    logging.info(xml.etree.ElementTree.tostring(
+                    logging.debug('Output for {!s}:'.format('row'))
+                    logging.debug(xml.etree.ElementTree.tostring(
                                                         row,
                                                         encoding='utf-8',
                                                         method='xml'))
@@ -3699,21 +3701,21 @@ set0 = sets.find('photosets').findall('photoset')[0]
             freturnPhotoUploaded = 0
             for pic in searchIsUploaded.find('photos').findall('photo'):
                 freturnPhotoUploaded +=1
-                logging.info('idx=[{!s}] pic.id=[{!s}] '
-                             'pic.title=[{!s}] pic.tags=[{!s}]'
-                             .format(freturnPhotoUploaded,
-                                     pic.attrib['id'],
-                                     StrUnicodeOut(pic.attrib['title']),
-                                     StrUnicodeOut(pic.attrib['tags'])))
+                logging.debug('idx=[{!s}] pic.id=[{!s}] '
+                              'pic.title=[{!s}] pic.tags=[{!s}]'
+                              .format(freturnPhotoUploaded,
+                                      pic.attrib['id'],
+                                      StrUnicodeOut(pic.attrib['title']),
+                                      StrUnicodeOut(pic.attrib['tags'])))
 
                 # CODING: UnicodeWarning: Unicode equal comparison failed to
                 # convert both arguments to Unicode
-                logging.info('xtitle_filename/type=[{!s}]/[{!s}] '
-                             'pic.attrib[title]/type=[{!s}]/[{!s}]'
-                             .format(StrUnicodeOut(xtitle_filename),
-                                     type(xtitle_filename),
-                                     StrUnicodeOut(pic.attrib['title']),
-                                     type(pic.attrib['title'])))
+                logging.debug('xtitle_filename/type=[{!s}]/[{!s}] '
+                              'pic.attrib[title]/type=[{!s}]/[{!s}]'
+                              .format(StrUnicodeOut(xtitle_filename),
+                                      type(xtitle_filename),
+                                      StrUnicodeOut(pic.attrib['title']),
+                                      type(pic.attrib['title'])))
                 logging.info('Compare Titles=[{!s}]'
                             .format((StrUnicodeOut(xtitle_filename) ==
                                      StrUnicodeOut(pic.attrib['title']))))
@@ -4076,10 +4078,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
         if (not self.isGood(tagsResp)):
             raise IOError(tagsResp)
 
-        logging.info('Output for photo_find_tag:')
-        logging.info(xml.etree.ElementTree.tostring(tagsResp,
-                                                    encoding='utf-8',
-                                                    method='xml'))
+        logging.debug('Output for photo_find_tag:')
+        logging.debug(xml.etree.ElementTree.tostring(tagsResp,
+                                                     encoding='utf-8',
+                                                     method='xml'))
 
         tag_id = None
         for tag in tagsResp.find('photo').find('tags').findall('tag'):
@@ -4165,8 +4167,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
             #                     photo_id=photo_id,
             #                     date_taken='{!s}'.format(datetxt),
             #                     date_taken_granularity=0)
-            logging.info('Output for {!s}:'.format('respDate'))
-            logging.info(xml.etree.ElementTree.tostring(
+            logging.debug('Output for {!s}:'.format('respDate'))
+            logging.debug(xml.etree.ElementTree.tostring(
                                     respDate,
                                     encoding='utf-8',
                                     method='xml'))
@@ -4300,8 +4302,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                         if f[2] is not None
                                         else setName)]
                               )
-                logging.info('res_add_tag: ')
-                logging.info(xml.etree.ElementTree.tostring(
+                logging.debug('res_add_tag: ')
+                logging.debug(xml.etree.ElementTree.tostring(
                                         res_add_tag,
                                         encoding='utf-8',
                                         method='xml'))
@@ -4311,11 +4313,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
             running.value += 1
             xcount = running.value
             mutex.release()
-            logging.warning('===Multiprocessing=== out.mutex.release(w)')
+            logging.info('===Multiprocessing=== out.mutex.release(w)')
 
             # Show number of files processed so far
             self.niceprocessedfiles(xcount, countTotal, False)
-            
+
             self.rate4maddAlbumsMigrate()
 
 
@@ -4454,27 +4456,34 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                 niceprint('==={!s}.is_alive = {!s}'
                                           .format(p.name, p.is_alive()))
                             mTaskActive = p
-                        logging.info('===Will wait for 60 on {!s}.is_alive = {!s}'
+                        logging.info('===Will wait for 60 on '
+                                     '{!s}.is_alive = {!s}'
                                      .format(mTaskActive.name,
                                              mTaskActive.is_alive()))
-                        niceprint('===Will wait for 60 on {!s}.is_alive = {!s}'
-                                  .format(mTaskActive.name,
-                                          mTaskActive.is_alive()))
+                        if (args.verbose):
+                            niceprint('===Will wait for 60 on '
+                                      '{!s}.is_alive = {!s}'
+                                      .format(mTaskActive.name,
+                                              mTaskActive.is_alive()))
 
                         mTaskActive.join(timeout=60)
-                        logging.info('===Waited for 60s on {!s}.is_alive = {!s}'
+                        logging.info('===Waited for 60s on '
+                                     '{!s}.is_alive = {!s}'
                                      .format(mTaskActive.name,
                                              mTaskActive.is_alive()))
-                        niceprint('===Waited for 60s on {!s}.is_alive = {!s}'
-                                  .format(mTaskActive.name,
-                                          mTaskActive.is_alive()))
+                        if (args.verbose):
+                            niceprint('===Waited for 60s on '
+                                      '{!s}.is_alive = {!s}'
+                                      .format(mTaskActive.name,
+                                              mTaskActive.is_alive()))
 
                     # Wait for join all jobs/tasks in the Process Pool
                     # All should be done by now!
                     for j in migratePool:
                         j.join()
-                        niceprint('==={!s} (is alive: {!s}).exitcode = {!s}'
-                                  .format(j.name, j.is_alive(), j.exitcode))
+                        if (args.verbose):
+                            niceprint('==={!s} (is alive: {!s}).exitcode = {!s}'
+                                      .format(j.name, j.is_alive(), j.exitcode))
 
                     logging.warning('===Multiprocessing=== pool joined! '
                                     'All processes finished.')
@@ -4552,8 +4561,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                                 if row[2] is not None
                                                 else setName)]
                                       )
-                        logging.info('res_add_tag: ')
-                        logging.info(xml.etree.ElementTree.tostring(
+                        logging.debug('res_add_tag: ')
+                        logging.debug(xml.etree.ElementTree.tostring(
                                                 res_add_tag,
                                                 encoding='utf-8',
                                                 method='xml'))

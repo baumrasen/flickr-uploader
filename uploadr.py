@@ -541,7 +541,6 @@ class LastTime:
     last_time_called = 0.0
 
     def __init__(self):
-        last_time_called = 0.0
         logging.debug('\t__init__: last_time_called=[{!s}]'
                       .format(self.last_time_called))
         pass
@@ -577,7 +576,7 @@ def rate_limited(max_per_second):
             ratelock.acquire()
 
             # elapsed = time.time() - context.last_time_called
-            elapsed = xfrom - context.last_time_called
+            elapsed = xfrom - LastTime.last_time_called
             left_to_wait = min_interval - elapsed
             logging.debug('___Rate_limited f():[{!s}]: '
                           'elapsed:{!s}\ttime():{!s}\t'

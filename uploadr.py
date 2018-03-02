@@ -535,49 +535,66 @@ def retry(attempts=3, waittime=5, randtime=False):
 
 
 # -----------------------------------------------------------------------------
+# class LastTime to be used with rate_limited
+#
+class LastTime:
+    last_time_called = 0.0
+
+    def __init__(self):
+        last_time_called = 0.0
+        logging.debug('\t__init__: last_time_called=[{!s}]'
+                      .format(self.last_time_called))
+        pass
+# -----------------------------------------------------------------------------
 # rate_limited
 #
-# retries execution of a function
-#
-import threading
-
+# retries execution of a function    
 def rate_limited(max_per_second):
 
-    lock = threading.Lock()
+    ratelock = multiprocessing.Lock()
     min_interval = 1.0 / max_per_second
 
     def decorate(func):
-        # CODING: Python 2
-        class context:
-            last_time_called = 0
-
-        # CODING: Python 3
-        # context.last_time_called = time.perf_counter()
-        # CODING: Python 2
-        context.last_time_called = time.time()
-
+        ratelock.acquire()
+        logging.debug('1st decorate: last_time_called=[{!s}]'
+                      .format(LastTime.last_time_called))
+        if LastTime.last_time_called == 0:
+            LastTime.last_time_called = time.time()
+        logging.debug('2nd decorate: last_time_called=[{!s}]'
+                      .format(LastTime.last_time_called))
+        ratelock.release()
+        
         @wraps(func)
         def rate_limited_function(*args, **kwargs):
-            lock.acquire()
-            # CODING: Python 3
-            # nonlocal last_time_called
-            # CODING: Python 2
-            context.last_time_called
-            # CODING: Python 3
-            # elapsed = time.perf_counter() - context.last_time_called
-            # CODING: Python 2
-            elapsed = time.time() - context.last_time_called
-            left_to_wait = min_interval - elapsed
+            
+            logging.warning('___Rate_limited f():[{!s}]: '
+                            'Max_per_Second:[{!s}]'
+                            .format(f.__name__, max_per_second))
+            # CODING: xfrom before acquire will ensure rate limt is respected
+            # accross processes. If not all process will execute at the same
+            # time
+            xfrom = time.time()
+            ratelock.acquire()
 
+            # elapsed = time.time() - context.last_time_called
+            elapsed = xfrom - context.last_time_called
+            left_to_wait = min_interval - elapsed
+            logging.debug('___Rate_limited f():[{!s}]: '
+                          'elapsed:{!s}\ttime():{!s}\t'
+                          'last_called:{!s}\t'
+                          'min:{!s}\tto_wait:{!s}'
+                          .format(elapsed,
+                                  xfrom,
+                                  LastTime.last_time_called(),
+                                  min_interval,
+                                  left_to_wait))
             if left_to_wait > 0:
                 time.sleep(left_to_wait)
 
             ret = func(*args, **kwargs)
-            # CODING: Python 3
-            # context.last_time_called = time.perf_counter()
-            # CODING: Python 2
-            context.last_time_called = time.time()
-            lock.release()
+
+            LastTime.last_time_called = time.time()
+            ratelock.release()
             return ret
 
         return rate_limited_function

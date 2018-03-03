@@ -564,11 +564,11 @@ class LastTime:
     def set_last_time_called(self):
         xtime=time.time()
         logging.debug('Set xtime last_time_called:[{!s}]'
-                      .format(time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(xtime))))
+                      .format(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(xtime))))
         self.last_time_called.value = xtime 
         self.debug('set_last')
         logging.debug('Set real last_time_called:[{!s}]'
-                      .format(time.strftime('%Y-%m-%d %H:%M:%S',self.last_time_called.value)))
+                      .format(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.last_time_called.value))))
         
     def get_last_time_called(self):
         self.debug('get_last')

@@ -553,7 +553,6 @@ class LastTime:
         self.last_time_called = multiprocessing.Value('f', 0.0)
         self.debug('start')
 
-        
     def acquire(self):
         self.debug('acquire')
         self.ratelock.acquire()
@@ -563,9 +562,10 @@ class LastTime:
         self.ratelock.release()
 
     def set_last_time_called(self):
+        xtime=time.time()
         logging.debug('Set last_time_called:[{!s}]'
-                      .format(time.strftime('%Y-%m-%d %H:%M:%S')))
-        self.last_time_called.value = time.time()
+                      .format(time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(xfrom))))
+        self.last_time_called.value = xtime 
         self.debug('set_last')
         
     def get_last_time_called(self):
@@ -581,8 +581,8 @@ class LastTime:
         return self.cnt.value
         
     def debug(self, debugname):
-        logging.debug('___Rate name:[{!s}]'
-                      'debug=[{!s}]'
+        logging.debug('___Rate name:[{!s}] '
+                      'debug=[{!s}] '
                       'cnt:[{!s}] '
                       'last_called:{!s} '
                       'timenow():{!s} '

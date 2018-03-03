@@ -564,7 +564,7 @@ class LastTime:
     def set_last_time_called(self):
         xtime=time.time()
         logging.debug('Set last_time_called:[{!s}]'
-                      .format(time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(xfrom))))
+                      .format(time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(xtime))))
         self.last_time_called.value = xtime 
         self.debug('set_last')
         

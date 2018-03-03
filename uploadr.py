@@ -572,12 +572,10 @@ class LastTime:
         
     def debug(self):
         logging.debug('___Rate name:[{!s}]'
-                      'f():[{!s}] '
                       'cnt:[{!s}] '
                       'last_called:{!s} '
                       'timenow():{!s} '
-                      .format(func.__name__,
-                              self.name,
+                      .format(self.name,
                               self.cnt.value,
                               time.strftime('%T',
                                             time.localtime(

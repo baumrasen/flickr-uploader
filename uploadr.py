@@ -553,10 +553,10 @@ class LastTime:
         self.last_time_called = multiprocessing.Value('f', 0.0)
         
     def acquire(self):
-        self.ratelock.acquire(self)
+        self.ratelock.acquire()
 
     def release(self):
-        self.ratelock.release(self)
+        self.ratelock.release()
 
     def set_last_time_called(self):
         self.last_time_called.value = time.time()

@@ -568,32 +568,45 @@ def rate_limited(max_per_second):
             
             logging.warning('___Rate_limited f():[{!s}]: '
                             'Max_per_Second:[{!s}]'
-                            .format(f.__name__, max_per_second))
+                            .format(func.__name__, max_per_second))
             # CODING: xfrom before acquire will ensure rate limt is respected
             # accross processes. If not all process will execute at the same
             # time
-            xfrom = time.time()
-            ratelock.acquire()
-
-            # elapsed = time.time() - context.last_time_called
-            elapsed = xfrom - LastTime.last_time_called
-            left_to_wait = min_interval - elapsed
-            logging.debug('___Rate_limited f():[{!s}]: '
-                          'elapsed:{!s}\ttime():{!s}\t'
-                          'last_called:{!s}\t'
-                          'min:{!s}\tto_wait:{!s}'
-                          .format(elapsed,
-                                  xfrom,
-                                  LastTime.last_time_called(),
-                                  min_interval,
-                                  left_to_wait))
-            if left_to_wait > 0:
-                time.sleep(left_to_wait)
-
-            ret = func(*args, **kwargs)
-
-            LastTime.last_time_called = time.time()
-            ratelock.release()
+            try:
+                xfrom = time.time()
+                ratelock.acquire()
+    
+                # elapsed = time.time() - context.last_time_called
+                elapsed = xfrom - LastTime.last_time_called
+                left_to_wait = min_interval - elapsed
+                logging.debug('___Rate_limited f():[{!s}]: '
+                              'elapsed:{!s}\ttime():{!s}\t'
+                              'last_called:{!s}\t'
+                              'min:{!s}\tto_wait:{!s}'
+                              .format(func.__name__,
+                                      elapsed,
+                                      xfrom,
+                                      LastTime.last_time_called,
+                                      min_interval,
+                                      left_to_wait))
+                if left_to_wait > 0:
+                    time.sleep(left_to_wait)
+    
+                ret = func(*args, **kwargs)
+    
+                LastTime.last_time_called = time.time()
+            except Exception as ex:
+                reportError(Caught=True,
+                             CaughtPrefix='+++',
+                             CaughtCode='???',
+                             CaughtMsg='Exception on rate_limited_function',
+                             exceptUse=True,
+                             exceptCode=ex.code,
+                             exceptMsg=ex,
+                             NicePrint=False,
+                             exceptSysInfo=True)
+            finally:
+                ratelock.release()
             return ret
 
         return rate_limited_function

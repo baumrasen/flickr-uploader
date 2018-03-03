@@ -538,6 +538,9 @@ def retry(attempts=3, waittime=5, randtime=False):
 # class LastTime to be used with rate_limited
 #
 class LastTime:
+    ratelock = multiprocessing.Lock()
+    cnt = multiprocessing.Value('i', 0)
+
     last_time_called = 0.0
 
     def __init__(self):
@@ -550,11 +553,10 @@ class LastTime:
 # retries execution of a function    
 def rate_limited(max_per_second):
 
-    ratelock = multiprocessing.Lock()
     min_interval = 1.0 / max_per_second
 
     def decorate(func):
-        ratelock.acquire()
+        LastTime.ratelock.acquire()
         logging.debug('1st decorate: last_time_called=[{!s}]'
                       .format(time.strftime('%Y-%m-%d %H:%M:%S',
                                             time.localtime(
@@ -565,7 +567,7 @@ def rate_limited(max_per_second):
                       .format(time.strftime('%Y-%m-%d %H:%M:%S',
                                             time.localtime(
                                                 LastTime.last_time_called))))
-        ratelock.release()
+        LastTime.ratelock.release()
 
         @wraps(func)
         def rate_limited_function(*args, **kwargs):
@@ -573,12 +575,17 @@ def rate_limited(max_per_second):
             logging.warning('___Rate_limited f():[{!s}]: '
                             'Max_per_Second:[{!s}]'
                             .format(func.__name__, max_per_second))
-            # CODING: xfrom before acquire will ensure rate limt is respected
-            # accross processes. If not all process will execute at the same
-            # time
+
             try:
+                # CODING: xfrom before acquire will ensure rate limt is
+                # respected accross processes. If not all process will
+                # execute at the same time                
                 xfrom = time.time()
-                ratelock.acquire()
+                LastTime.ratelock.acquire()
+                
+                LastTime.cnt.value += 1
+                logging.debug('last_time_cnt=[{!s}]'
+                              .format(LastTime.cnt.value))
 
                 # elapsed = time.time() - context.last_time_called
                 elapsed = xfrom - LastTime.last_time_called
@@ -589,9 +596,9 @@ def rate_limited(max_per_second):
                               'min:{!s}\tto_wait:{!s}'
                               .format(func.__name__,
                                       elapsed,
-                                      time.strftime('%Y-%m-%d %H:%M:%S',
+                                      time.strftime('%T',
                                                     nutime.localtime(xfrom)),
-                                      time.strftime('%Y-%m-%d %H:%M:%S',
+                                      time.strftime('%T',
                                                     nutime.localtime(
                                                            LastTime
                                                            .last_time_called)),
@@ -606,7 +613,7 @@ def rate_limited(max_per_second):
             except Exception as ex:
                 reportError(Caught=True,
                              CaughtPrefix='+++',
-                             CaughtCode='???',
+                             CaughtCode='000',
                              CaughtMsg='Exception on rate_limited_function',
                              exceptUse=True,
                              exceptCode=ex.code,
@@ -614,7 +621,7 @@ def rate_limited(max_per_second):
                              NicePrint=False,
                              exceptSysInfo=True)
             finally:
-                ratelock.release()
+                LastTime.ratelock.release()
             return ret
 
         return rate_limited_function

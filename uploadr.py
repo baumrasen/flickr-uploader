@@ -538,14 +538,53 @@ def retry(attempts=3, waittime=5, randtime=False):
 # class LastTime to be used with rate_limited
 #
 class LastTime:
-    ratelock = multiprocessing.Lock()
-    cnt = multiprocessing.Value('i', 0)
-    last_time_called = multiprocessing.Value('d', 0.0)
 
-    def __init__(self):
-        logging.debug('\t__init__: last_time_called=[{!s}]'
-                      .format(self.last_time_called.value))
-        pass
+    def __init__(self, name):
+        self.name = name
+        self.ratelock = None
+        self.cnt = None
+        self.last_time_called = None
+        
+        logging.debug('\t__init__: name=[{!s}]'.format(self.name))
+
+    def start(self):
+        self.ratelock = multiprocessing.Lock()
+        self.cnt = multiprocessing.Value('i', 0)
+        self.last_time_called = multiprocessing.Value('f', 0.0)
+        
+    def acquire(self):
+        self.ratelock.acquire(self)
+
+    def release(self):
+        self.ratelock.release(self)
+
+    def set_last_time_called(self):
+        self.last_time_called.value = time.time()
+        
+    def get_last_time_called(self):
+        return self.last_time_called.value
+    
+    def add_cnt():
+        self.cnt.value += 1
+
+    def get_cnt():
+        return self.cnt.value
+        
+    def debug(self):
+        logging.debug('___Rate name:[{!s}]'
+                      'f():[{!s}] '
+                      'cnt:[{!s}] '
+                      'last_called:{!s} '
+                      'timenow():{!s} '
+                      .format(func.__name__,
+                              self.name,
+                              self.cnt.value,
+                              time.strftime('%T',
+                                            time.localtime(
+                                                self.last_time_called.value)),
+                              time.strftime('%T')))
+        
+
 # -----------------------------------------------------------------------------
 # rate_limited
 #
@@ -553,22 +592,25 @@ class LastTime:
 def rate_limited(max_per_second):
 
     min_interval = 1.0 / max_per_second
+    LT = LastTime('rate_limited')
+    LT.start()
 
     def decorate(func):
-        LastTime.ratelock.acquire()
+        LT.acquire()
         logging.debug('1st decorate: last_time_called=[{!s}]'
                       .format(time.strftime('%Y-%m-%d %H:%M:%S',
                                             time.localtime(
-                                                LastTime
+                                                LT
                                                 .last_time_called.value))))
-        if LastTime.last_time_called.value == 0:
-            LastTime.last_time_called.value = time.time()
+        if LT.get_last_time_called() == 0:
+            LT.set_last_time_called()
+            logging.debug('Setting last_time_called time to approx:[{!s}]'
+                          .format(time.time()))
         logging.debug('2nd decorate: last_time_called=[{!s}]'
                       .format(time.strftime('%Y-%m-%d %H:%M:%S',
                                             time.localtime(
-                                                LastTime
-                                                .last_time_called.value))))
-        LastTime.ratelock.release()
+                                                LT.get_last_time_called()))))
+        LT.release()
 
         @wraps(func)
         def rate_limited_function(*args, **kwargs):
@@ -582,11 +624,11 @@ def rate_limited(max_per_second):
                 # respected accross processes. If not all process will
                 # execute at the same time
                 xfrom = time.time()
-                LastTime.ratelock.acquire()
-                LastTime.cnt.value += 1
+                LT.acquire()
+                LT.add_cnt()
 
                 # elapsed = time.time() - context.last_time_called
-                elapsed = xfrom - LastTime.last_time_called.value
+                elapsed = xfrom - LT.get_last_time_called()
                 left_to_wait = min_interval - elapsed
                 logging.debug('___Rate f():[{!s}] '
                               'cnt:[{!s}] '
@@ -596,12 +638,11 @@ def rate_limited(max_per_second):
                               'min:{!s} '
                               'to_wait:{:6.2f}'
                               .format(func.__name__,
-                                      LastTime.cnt.value,
-                                      time.strftime('%T',
-                                                    nutime.localtime(
-                                                           LastTime
-                                                           .last_time_called
-                                                           .value)),
+                                      LT.get_cnt(),
+                                      time.strftime(
+                                            '%T',
+                                            nutime.localtime(
+                                                LT.get_last_time_called())),
                                       time.strftime('%T',
                                                     nutime.localtime(xfrom)),
                                       elapsed,
@@ -612,19 +653,21 @@ def rate_limited(max_per_second):
 
                 ret = func(*args, **kwargs)
 
-                LastTime.last_time_called = time.time()
+                LT.set_last_time_called()
+                LT.debug()
             except Exception as ex:
                 reportError(Caught=True,
                              CaughtPrefix='+++',
                              CaughtCode='000',
                              CaughtMsg='Exception on rate_limited_function',
                              exceptUse=True,
-                             exceptCode=ex.code,
+                             # exceptCode=ex.code,
                              exceptMsg=ex,
                              NicePrint=False,
                              exceptSysInfo=True)
+                raise
             finally:
-                LastTime.ratelock.release()
+                LT.release()
             return ret
 
         return rate_limited_function

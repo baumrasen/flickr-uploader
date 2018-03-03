@@ -551,31 +551,43 @@ class LastTime:
         self.ratelock = multiprocessing.Lock()
         self.cnt = multiprocessing.Value('i', 0)
         self.last_time_called = multiprocessing.Value('f', 0.0)
+        self.debug('start')
+
         
     def acquire(self):
+        self.debug('acquire')
         self.ratelock.acquire()
 
     def release(self):
+        self.debug('release')
         self.ratelock.release()
 
     def set_last_time_called(self):
+        logging.debug('Set last_time_called:[{!s}]'
+                      .format(time.strftime('%Y-%m-%d %H:%M:%S')))
         self.last_time_called.value = time.time()
+        self.debug('set_last')
         
     def get_last_time_called(self):
+        self.debug('get_last')
         return self.last_time_called.value
     
     def add_cnt(self):
         self.cnt.value += 1
+        self.debug('add_cnt')
 
     def get_cnt(self):
+        self.debug('get_cnt')
         return self.cnt.value
         
-    def debug(self):
+    def debug(self, debugname):
         logging.debug('___Rate name:[{!s}]'
+                      'debug=[{!s}]'
                       'cnt:[{!s}] '
                       'last_called:{!s} '
                       'timenow():{!s} '
                       .format(self.name,
+                              debugname,
                               self.cnt.value,
                               time.strftime('%T',
                                             time.localtime(
@@ -603,7 +615,7 @@ def rate_limited(max_per_second):
         if LT.get_last_time_called() == 0:
             LT.set_last_time_called()
             logging.debug('Setting last_time_called time to approx:[{!s}]'
-                          .format(time.time()))
+                          .format(time.strftime('%Y-%m-%d %H:%M:%S')))
         logging.debug('2nd decorate: last_time_called=[{!s}]'
                       .format(time.strftime('%Y-%m-%d %H:%M:%S',
                                             time.localtime(
@@ -652,7 +664,7 @@ def rate_limited(max_per_second):
                 ret = func(*args, **kwargs)
 
                 LT.set_last_time_called()
-                LT.debug()
+                LT.debug('OVER')
             except Exception as ex:
                 reportError(Caught=True,
                              CaughtPrefix='+++',

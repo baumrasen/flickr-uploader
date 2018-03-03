@@ -540,17 +540,16 @@ def retry(attempts=3, waittime=5, randtime=False):
 class LastTime:
     ratelock = multiprocessing.Lock()
     cnt = multiprocessing.Value('i', 0)
-
-    last_time_called = 0.0
+    last_time_called = multiprocessing.Value('d', 0.0)
 
     def __init__(self):
         logging.debug('\t__init__: last_time_called=[{!s}]'
-                      .format(self.last_time_called))
+                      .format(self.last_time_called.value))
         pass
 # -----------------------------------------------------------------------------
 # rate_limited
 #
-# retries execution of a function    
+# retries execution of a function
 def rate_limited(max_per_second):
 
     min_interval = 1.0 / max_per_second
@@ -560,13 +559,15 @@ def rate_limited(max_per_second):
         logging.debug('1st decorate: last_time_called=[{!s}]'
                       .format(time.strftime('%Y-%m-%d %H:%M:%S',
                                             time.localtime(
-                                                LastTime.last_time_called))))
-        if LastTime.last_time_called == 0:
-            LastTime.last_time_called = time.time()
+                                                LastTime
+                                                .last_time_called.value))))
+        if LastTime.last_time_called.value == 0:
+            LastTime.last_time_called.value = time.time()
         logging.debug('2nd decorate: last_time_called=[{!s}]'
                       .format(time.strftime('%Y-%m-%d %H:%M:%S',
                                             time.localtime(
-                                                LastTime.last_time_called))))
+                                                LastTime
+                                                .last_time_called.value))))
         LastTime.ratelock.release()
 
         @wraps(func)
@@ -579,29 +580,31 @@ def rate_limited(max_per_second):
             try:
                 # CODING: xfrom before acquire will ensure rate limt is
                 # respected accross processes. If not all process will
-                # execute at the same time                
+                # execute at the same time
                 xfrom = time.time()
                 LastTime.ratelock.acquire()
-                
                 LastTime.cnt.value += 1
-                logging.debug('last_time_cnt=[{!s}]'
-                              .format(LastTime.cnt.value))
 
                 # elapsed = time.time() - context.last_time_called
-                elapsed = xfrom - LastTime.last_time_called
+                elapsed = xfrom - LastTime.last_time_called.value
                 left_to_wait = min_interval - elapsed
-                logging.debug('___Rate_limited f():[{!s}]: '
-                              'elapsed:{!s}\ttime():{!s}\t'
-                              'last_called:{!s}\t'
-                              'min:{!s}\tto_wait:{!s}'
+                logging.debug('___Rate f():[{!s}] '
+                              'cnt:[{!s}] '
+                              'last_called:{!s} '
+                              'time():{!s} '
+                              'elapsed:{:6.2f} '
+                              'min:{!s} '
+                              'to_wait:{:6.2f}'
                               .format(func.__name__,
-                                      elapsed,
-                                      time.strftime('%T',
-                                                    nutime.localtime(xfrom)),
+                                      LastTime.cnt.value,
                                       time.strftime('%T',
                                                     nutime.localtime(
                                                            LastTime
-                                                           .last_time_called)),
+                                                           .last_time_called
+                                                           .value)),
+                                      time.strftime('%T',
+                                                    nutime.localtime(xfrom)),
+                                      elapsed,
                                       min_interval,
                                       left_to_wait))
                 if left_to_wait > 0:

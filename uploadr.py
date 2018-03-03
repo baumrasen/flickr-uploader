@@ -564,10 +564,10 @@ class LastTime:
     def get_last_time_called(self):
         return self.last_time_called.value
     
-    def add_cnt():
+    def add_cnt(self):
         self.cnt.value += 1
 
-    def get_cnt():
+    def get_cnt(self):
         return self.cnt.value
         
     def debug(self):

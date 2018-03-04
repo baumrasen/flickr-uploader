@@ -152,7 +152,8 @@ def rate_limited(max_per_second):
             except Exception as ex:
                 # CODING: To be changed once reportError is on a module
                 sys.stderr.write('+++000 '
-                                 'Exception on rate_limited_function')
+                                 'Exception on rate_limited_function: [{!s}]\n'
+                                 .format(ex))
                 sys.stderr.flush()
                 # reportError(Caught=True,
                 #              CaughtPrefix='+++',

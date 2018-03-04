@@ -123,7 +123,7 @@ script:
 
   - if [[ $TestScenario == ExcludedFolders ]]; then cp ./tests/uploadr_excluded.ini ./uploadr.ini; fi
 
-  - coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.err
+  - travis_wait coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.err
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.err
 
@@ -153,8 +153,8 @@ script:
 # after_script
 # Attempt to catch "Build times out because no output was received"
 after_failure:
-- tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
-- tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.err
+   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
+   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.err
   
 after_script:
 # MD5SUM Output for REFERENCE -------------------------------------------------

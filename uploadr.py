@@ -4340,7 +4340,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         """
         """
         logging.debug('rate_limit timestamp:[{!s}]'
-                      .format(int(round(nutime.time() * 1000))))
+                      .format(time.strftime('%T')))
 
 
     # -------------------------------------------------------------------------

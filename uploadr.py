@@ -179,11 +179,27 @@ except ImportError:
 import multiprocessing
 import flickrapi
 import xml
-# CODING: For some systems this second import is required. To confirm.
-# Seems to avoid problem
-# logging.info(xml.etree.ElementTree.tostring(
-# AttributeError: 'module' object has no attribute 'etree'
+# CODING: For some systems this second import is required.
+# Seems to avoid the following problem:
+#    logging.info(xml.etree.ElementTree.tostring(
+#    AttributeError: 'module' object has no attribute 'etree'
 # import xml.etree.ElementTree
+# try/exception/import xml.etree.ElementTree to address issue
+try:
+   dummyxml = xml.etree.ElementTree.tostring(
+                                xml.etree.ElementTree.Element('xml.etree'),
+                                encoding='utf-8',
+                                method='xml')
+except AttributeError:
+    sys.stderr.write('Importing xml.etree.ElementTree...')
+    try:
+        import xml.etree.ElementTree
+        sys.stderr.write('done.')
+    except ImportError:
+        sys.stderr.write('failed with ImportError.')
+        raise
+finally:
+    print(' Continuing.\n')
 import os.path
 import logging
 import pprint

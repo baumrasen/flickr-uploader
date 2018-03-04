@@ -59,7 +59,7 @@ class LastTime:
 
     def set_last_time_called(self):
         self.last_time_called.value = time.time()
-        self.debug('set_last_time_called')
+        # self.debug('set_last_time_called')
 
     def get_last_time_called(self):
         return self.last_time_called.value
@@ -70,7 +70,7 @@ class LastTime:
     def get_cnt(self):
         return self.cnt.value
 
-    def debug(self, debugname):
+    def debug(self, debugname='LT'):
         now=time.time()
         logging.debug('___Rate name:[{!s}] '
                       'debug=[{!s}] '
@@ -194,7 +194,7 @@ if __name__ == "__main__":
     doctest.testmod()
 
     # Comment following line to allow further debugging/testing
-    # sys.exit(0)
+    sys.exit(0)
 
     # n for n calls per second  (ex. 3 means 3 calls per second)
     # 1/n for n seconds per call (ex. 0.5 meand 4 seconds in between calls)
@@ -206,15 +206,12 @@ if __name__ == "__main__":
               'rate_limit timestamp:[{!s}]'
               .format(prc, num, time.strftime('%T')))
 
-
     print('-------------------------------------------------Single Processing')
-
     for process in range(1, 3):
         for j in range(1, 2):
             print_num(process, j)
 
     print('-------------------------------------------------Multi Processing')
-
     def fmulti(x, prc):
         import random
 
@@ -231,9 +228,6 @@ if __name__ == "__main__":
                   .format(prc, i, time.strftime('%T')))
 
     TaskPool = []
-    # l = multiprocessing.Lock()
-    # ltcalled = multiprocessing.Value('f', time.time())
-    # print('Last time called:', ltcalled, 'type(ltcalled)', type(ltcalled))
 
     for j in range(1,4):
         Task = multiprocessing.Process(target=fmulti, args=(5,j))

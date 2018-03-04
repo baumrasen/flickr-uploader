@@ -149,6 +149,13 @@ script:
 #  - coverage report -m uploadr.py
 #  - sqlite3 flickrdb "SELECT *, datetime( last_modified, 'unixepoch', 'localtime') FROM files;"
 
+# =============================================================================
+# after_script
+# Attempt to catch "Build times out because no output was received"
+after_failure:
+- tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
+- tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.err
+  
 after_script:
 # MD5SUM Output for REFERENCE -------------------------------------------------
 #  - if [[ $TestScenario == RemoveReplace ]]; then find "./tests/Test Photo Library" -type f -exec md5sum '{}' \; ; fi

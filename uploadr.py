@@ -159,6 +159,7 @@ try:
     import httplib as httplib      # Python 2
 except ImportError:
     import http.client as httplib  # Python 3
+    
 import sys
 import argparse
 import mimetypes
@@ -174,6 +175,7 @@ try:
     import ConfigParser as ConfigParser  # Python 2
 except ImportError:
     import configparser as ConfigParser  # Python 3
+
 import multiprocessing
 import flickrapi
 import xml
@@ -551,35 +553,40 @@ class LastTime:
         self.ratelock = multiprocessing.Lock()
         self.cnt = multiprocessing.Value('i', 0)
         self.last_time_called = multiprocessing.Value('f', 0.0)
-        self.debug('start')
+        # self.debug('start')
 
     def acquire(self):
-        self.debug('acquire')
+        # self.debug('acquire')
         self.ratelock.acquire()
 
     def release(self):
-        self.debug('release')
+        # self.debug('release')
         self.ratelock.release()
 
     def set_last_time_called(self):
         xtime=time.time()
-        logging.debug('Set xtime last_time_called:[{!s}]'
-                      .format(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(xtime))))
+        logging.debug('Set xtime last_time_called:[{!s}]/[{!s}]'
+                      .format(time.strftime('%Y-%m-%d %H:%M:%S',
+                                            time.localtime(xtime)),
+                              xtime))
         self.last_time_called.value = xtime 
-        self.debug('set_last')
-        logging.debug('Set real last_time_called:[{!s}]'
-                      .format(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.last_time_called.value))))
+        # self.debug('set_last')
+        logging.debug('Set real last_time_called:[{!s}]/[{!s}]'
+                      .format(time.strftime('%Y-%m-%d %H:%M:%S',
+                                            time.localtime(
+                                                self.last_time_called.value)),
+                              self.last_time_called.value))
         
     def get_last_time_called(self):
-        self.debug('get_last')
+        # self.debug('get_last')
         return self.last_time_called.value
     
     def add_cnt(self):
         self.cnt.value += 1
-        self.debug('add_cnt')
+        # self.debug('add_cnt')
 
     def get_cnt(self):
-        self.debug('get_cnt')
+        # self.debug('get_cnt')
         return self.cnt.value
         
     def debug(self, debugname):

@@ -1,6 +1,10 @@
 """
     by oPromessa, 2017
     Published on https://github.com/oPromessa/flickr-uploader/
+
+    Inspired by: https://gist.github.com/gregburek/1441055
+
+    Helper class and functions to allow
 """
 
 # ----------------------------------------------------------------------------
@@ -22,19 +26,30 @@ from functools import wraps
 # class LastTime to be used with rate_limited
 #
 class LastTime:
+    """
+        >>> import rate_limited as rt
+        >>> a = rt.LastTime()
+        >>> a.add_cnt()
+        >>> a.get_cnt()
+        1
+        >>> a.add_cnt()
+        >>> a.get_cnt()
+        2
+    """
 
-    def __init__(self, name):
+    def __init__(self, name='LT'):
+        # Init variables to None
         self.name = name
         self.ratelock = None
         self.cnt = None
         self.last_time_called = None
 
-        logging.debug('\t__init__: name=[{!s}]'.format(self.name))
-
-    def start(self):
+        # Instantiate control variables
         self.ratelock = multiprocessing.Lock()
         self.cnt = multiprocessing.Value('i', 0)
         self.last_time_called = multiprocessing.Value('d', 0.0)
+
+        logging.debug('\t__init__: name=[{!s}]'.format(self.name))
 
     def acquire(self):
         self.ratelock.acquire()
@@ -43,18 +58,8 @@ class LastTime:
         self.ratelock.release()
 
     def set_last_time_called(self):
-        xtime=time.time()
-        logging.debug('Set xtime last_time_called:[{!s}]/[{!s}]'
-                      .format(time.strftime('%Y-%m-%d %H:%M:%S',
-                                            time.localtime(xtime)),
-                              xtime))
-        self.last_time_called.value = xtime
-        logging.debug('Set real last_time_called:[{!s}]/[{!s}]'
-                      .format(time.strftime('%Y-%m-%d %H:%M:%S',
-                                            time.localtime(
-                                                self.last_time_called.value)),
-                              self.last_time_called.value))
-        # self.debug('set_last_time_called')
+        self.last_time_called.value = time.time()
+        self.debug('set_last_time_called')
 
     def get_last_time_called(self):
         return self.last_time_called.value
@@ -66,18 +71,27 @@ class LastTime:
         return self.cnt.value
 
     def debug(self, debugname):
+        now=time.time()
         logging.debug('___Rate name:[{!s}] '
                       'debug=[{!s}] '
-                      'cnt:[{!s}] '
-                      'last_called:{!s} '
-                      'timenow():{!s} '
+                      '\n\t        cnt:[{!s}] '
+                      '\n\tlast_called:{!s} '
+                      '\n\t  timenow():{!s} '
                       .format(self.name,
                               debugname,
                               self.cnt.value,
-                              time.strftime('%T',
-                                            time.localtime(
-                                                self.last_time_called.value)),
-                              time.strftime('%T')))
+                              time.strftime(
+                                '%T.{}'
+                                .format(str(self.last_time_called.value -
+                                            int(self.last_time_called.value))
+                                            .split('.')[1][:3]),
+                                time.localtime(self.last_time_called.value)),
+                              time.strftime(
+                                '%T.{}'
+                                .format(str(now -
+                                            int(now))
+                                            .split('.')[1][:3]),
+                                time.localtime(now))))
 
 
 # -----------------------------------------------------------------------------
@@ -88,23 +102,12 @@ def rate_limited(max_per_second):
 
     min_interval = 1.0 / max_per_second
     LT = LastTime('rate_limited')
-    LT.start()
 
     def decorate(func):
         LT.acquire()
-        logging.debug('1st decorate: last_time_called=[{!s}]'
-                      .format(time.strftime('%Y-%m-%d %H:%M:%S',
-                                            time.localtime(
-                                                LT
-                                                .last_time_called.value))))
         if LT.get_last_time_called() == 0:
             LT.set_last_time_called()
-            logging.debug('Setting last_time_called time to approx:[{!s}]'
-                          .format(time.strftime('%Y-%m-%d %H:%M:%S')))
-        logging.debug('2nd decorate: last_time_called=[{!s}]'
-                      .format(time.strftime('%Y-%m-%d %H:%M:%S',
-                                            time.localtime(
-                                                LT.get_last_time_called()))))
+        LT.debug('DECORATE')
         LT.release()
 
         @wraps(func)
@@ -115,9 +118,6 @@ def rate_limited(max_per_second):
                             .format(func.__name__, max_per_second))
 
             try:
-                # CODING: xfrom before acquire will ensure rate limt is
-                # respected accross processes. If not all process will
-                # execute at the same time. OR NOT??
                 LT.acquire()
                 LT.add_cnt()
                 xfrom = time.time()
@@ -126,8 +126,8 @@ def rate_limited(max_per_second):
                 left_to_wait = min_interval - elapsed
                 logging.debug('___Rate f():[{!s}] '
                               'cnt:[{!s}] '
-                              'last_called:{!s} '
-                              'time():{!s} '
+                              '\n\tlast_called:{!s} '
+                              '\n\t time now():{!s} '
                               'elapsed:{:6.2f} '
                               'min:{!s} '
                               'to_wait:{:6.2f}'
@@ -147,8 +147,10 @@ def rate_limited(max_per_second):
 
                 ret = func(*args, **kwargs)
 
-                LT.set_last_time_called()
                 LT.debug('OVER')
+                LT.set_last_time_called()
+                LT.debug('NEXT')
+
             except Exception as ex:
                 # CODING: To be changed once reportError is on a module
                 sys.stderr.write('+++000 '
@@ -177,3 +179,88 @@ def rate_limited(max_per_second):
 # @rate_limited(5) # 5 calls per second
 # def print_num(num):
 #     print (num )
+
+
+# -----------------------------------------------------------------------------
+# If called directly run doctests
+#
+if __name__ == "__main__":
+
+    logging.basicConfig(level=logging.DEBUG,
+                        format='[%(asctime)s]:[%(processName)-11s]' +
+                               '[%(levelname)-8s]:[%(name)s] %(message)s')
+
+    import doctest
+    doctest.testmod()
+
+    # Comment following line to allow further debugging/testing
+    # sys.exit(0)
+
+    # n for n calls per second  (ex. 3 means 3 calls per second)
+    # 1/n for n seconds per call (ex. 0.5 meand 4 seconds in between calls)
+    @rate_limited(1)
+    def print_num(prc, num):
+        """
+        """
+        print('\t\t***prc:[{!s}] num:[{!s}] '
+              'rate_limit timestamp:[{!s}]'
+              .format(prc, num, time.strftime('%T')))
+
+
+    print('-------------------------------------------------Single Processing')
+
+    for process in range(1, 3):
+        for j in range(1, 2):
+            print_num(process, j)
+
+    print('-------------------------------------------------Multi Processing')
+
+    def fmulti(x, prc):
+        import random
+
+        for i in range(1,x):
+            r = random.randrange(6)
+            print('\t\t[prc:{!s}] [{!s}]'
+                  '->- WORKing {!s}s----[{!s}]'
+                  .format(prc, i, r, time.strftime('%T')))
+            time.sleep(r)
+            print('\t\t[prc:{!s}] [{!s}]--> Before:---[{!s}]'
+                  .format(prc, i, time.strftime('%T')))
+            print_num(prc, i)
+            print('\t\t[prc:{!s}] [{!s}]<-- After----[{!s}]'
+                  .format(prc, i, time.strftime('%T')))
+
+    TaskPool = []
+    # l = multiprocessing.Lock()
+    # ltcalled = multiprocessing.Value('f', time.time())
+    # print('Last time called:', ltcalled, 'type(ltcalled)', type(ltcalled))
+
+    for j in range(1,4):
+        Task = multiprocessing.Process(target=fmulti, args=(5,j))
+        TaskPool.append(Task)
+        Task.start()
+
+    for j in TaskPool:
+        print('{!s}.is_alive = {!s}'.format(j.name, j.is_alive()))
+
+    while (True):
+        if not (any(multiprocessing.active_children())):
+            print('===No active children Processes.')
+            break
+        for p in multiprocessing.active_children():
+            print('==={!s}.is_alive = {!s}'.format(p.name, p.is_alive()))
+            uploadTaskActive = p
+        print('===Will wait for 60 on {!s}.is_alive = {!s}'
+              .format(uploadTaskActive.name,
+                      uploadTaskActive.is_alive()))
+        uploadTaskActive.join(timeout=60)
+        print('===Waited for 60s on {!s}.is_alive = {!s}'
+              .format(uploadTaskActive.name,
+                      uploadTaskActive.is_alive()))
+
+    # Wait for join all jobs/tasks in the Process Pool
+    # All should be done by now!
+    for j in TaskPool:
+        j.join()
+        print('==={!s} (is alive: {!s}).exitcode = {!s}'
+              .format(j.name, j.is_alive(), j.exitcode))

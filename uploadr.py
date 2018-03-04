@@ -150,6 +150,31 @@
 # from __future__ import absolute_import, division, print_function, unicode_literals
 from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 
+
+# ----------------------------------------------------------------------------
+# Initial Import section
+import sys
+import logging
+
+
+# =============================================================================
+# Init code
+#
+# Python version must be greater than 2.7 for this script to run
+#
+if sys.version_info < (2, 7):
+    sys.stderr.write("This script requires Python 2.7 or newer.\n")
+    sys.stderr.write("Current version: " + sys.version + "\n")
+    sys.stderr.flush()
+    sys.exit(1)
+else:
+    # Define LOGGING_LEVEL to allow logging even if everything's else is wrong!
+    LOGGING_LEVEL = logging.WARNING
+    sys.stderr.write('--------- ' + 'Init: ' + ' ---------\n')
+    sys.stderr.write('Python version on this system: ' + sys.version + '\n')
+    sys.stderr.flush()
+
+
 # ----------------------------------------------------------------------------
 # Import section
 #
@@ -160,7 +185,6 @@ try:
 except ImportError:
     import http.client as httplib  # Python 3
 
-import sys
 import argparse
 import mimetypes
 import os
@@ -201,28 +225,10 @@ except AttributeError:
 finally:
     print(' Continuing.\n')
 import os.path
-import logging
 import pprint
 # For repeating functions
 from functools import wraps
 import random
-
-# =============================================================================
-# Init code
-#
-# Python version must be greater than 2.7 for this script to run
-#
-if sys.version_info < (2, 7):
-    sys.stderr.write("This script requires Python 2.7 or newer.\n")
-    sys.stderr.write("Current version: " + sys.version + "\n")
-    sys.stderr.flush()
-    sys.exit(1)
-else:
-    # Define LOGGING_LEVEL to allow logging even if everything's else is wrong!
-    LOGGING_LEVEL = logging.WARNING
-    sys.stderr.write('--------- ' + 'Init: ' + ' ---------\n')
-    sys.stderr.write('Python version on this system: ' + sys.version + '\n')
-    sys.stderr.flush()
 
 
 # ----------------------------------------------------------------------------
@@ -4191,7 +4197,14 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
         pass
 
-    @rate_limited.rate_limited(4) # 1 calls per second
+    # -------------------------------------------------------------------------
+    # rate4maddAlbumsMigrate
+    #
+    # Pace the calls to flickr on maddAlbumsMigrate
+    #
+    #   n   = for n calls per second  (ex. 3 means 3 calls per second)
+    #   1/n = for n seconds per call (ex. 0.5 meand 4 seconds in between calls)
+    @rate_limited.rate_limited(5) # 5 calls per second
     def rate4maddAlbumsMigrate(self):
         """
         """

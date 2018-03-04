@@ -11,6 +11,7 @@ from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 # ----------------------------------------------------------------------------
 # Import section
 #
+import sys
 import logging
 import multiprocessing
 import time
@@ -27,21 +28,18 @@ class LastTime:
         self.ratelock = None
         self.cnt = None
         self.last_time_called = None
-        
+
         logging.debug('\t__init__: name=[{!s}]'.format(self.name))
 
     def start(self):
         self.ratelock = multiprocessing.Lock()
         self.cnt = multiprocessing.Value('i', 0)
         self.last_time_called = multiprocessing.Value('d', 0.0)
-        # self.debug('start')
 
     def acquire(self):
-        # self.debug('acquire')
         self.ratelock.acquire()
 
     def release(self):
-        # self.debug('release')
         self.ratelock.release()
 
     def set_last_time_called(self):
@@ -50,26 +48,23 @@ class LastTime:
                       .format(time.strftime('%Y-%m-%d %H:%M:%S',
                                             time.localtime(xtime)),
                               xtime))
-        self.last_time_called.value = xtime 
-        # self.debug('set_last')
+        self.last_time_called.value = xtime
         logging.debug('Set real last_time_called:[{!s}]/[{!s}]'
                       .format(time.strftime('%Y-%m-%d %H:%M:%S',
                                             time.localtime(
                                                 self.last_time_called.value)),
                               self.last_time_called.value))
-        
+        # self.debug('set_last_time_called')
+
     def get_last_time_called(self):
-        # self.debug('get_last')
         return self.last_time_called.value
-    
+
     def add_cnt(self):
         self.cnt.value += 1
-        # self.debug('add_cnt')
 
     def get_cnt(self):
-        # self.debug('get_cnt')
         return self.cnt.value
-        
+
     def debug(self, debugname):
         logging.debug('___Rate name:[{!s}] '
                       'debug=[{!s}] '
@@ -83,7 +78,7 @@ class LastTime:
                                             time.localtime(
                                                 self.last_time_called.value)),
                               time.strftime('%T')))
-        
+
 
 # -----------------------------------------------------------------------------
 # rate_limited
@@ -122,12 +117,11 @@ def rate_limited(max_per_second):
             try:
                 # CODING: xfrom before acquire will ensure rate limt is
                 # respected accross processes. If not all process will
-                # execute at the same time
-                xfrom = time.time()
+                # execute at the same time. OR NOT??
                 LT.acquire()
                 LT.add_cnt()
+                xfrom = time.time()
 
-                # elapsed = time.time() - context.last_time_called
                 elapsed = xfrom - LT.get_last_time_called()
                 left_to_wait = min_interval - elapsed
                 logging.debug('___Rate f():[{!s}] '
@@ -141,10 +135,10 @@ def rate_limited(max_per_second):
                                       LT.get_cnt(),
                                       time.strftime(
                                             '%T',
-                                            nutime.localtime(
+                                            time.localtime(
                                                 LT.get_last_time_called())),
                                       time.strftime('%T',
-                                                    nutime.localtime(xfrom)),
+                                                    time.localtime(xfrom)),
                                       elapsed,
                                       min_interval,
                                       left_to_wait))
@@ -168,7 +162,7 @@ def rate_limited(max_per_second):
                 #              # exceptCode=ex.code,
                 #              exceptMsg=ex,
                 #              NicePrint=False,
-                #              exceptSysInfo=True)                
+                #              exceptSysInfo=True)
                 raise
             finally:
                 LT.release()

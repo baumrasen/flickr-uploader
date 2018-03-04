@@ -159,7 +159,7 @@ try:
     import httplib as httplib      # Python 2
 except ImportError:
     import http.client as httplib  # Python 3
-    
+
 import sys
 import argparse
 import mimetypes
@@ -4175,7 +4175,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
         pass
 
-    @rate_limited.rate_limited(1) # 1 calls per second
+    @rate_limited.rate_limited(4) # 1 calls per second
     def rate4maddAlbumsMigrate(self):
         """
         """

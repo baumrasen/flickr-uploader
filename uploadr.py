@@ -552,7 +552,7 @@ class LastTime:
     def start(self):
         self.ratelock = multiprocessing.Lock()
         self.cnt = multiprocessing.Value('i', 0)
-        self.last_time_called = multiprocessing.Value('f', 0.0)
+        self.last_time_called = multiprocessing.Value('d', 0.0)
         # self.debug('start')
 
     def acquire(self):

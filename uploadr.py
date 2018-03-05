@@ -18,15 +18,15 @@
         Check error:  DuplicateSectionError or DuplicateOptionError.
         Check also: api_key. KeyError(key)
     * CODING Logging/Messaging groundrules:
-      niceprint
-      niceprint with verbose
-      logging.critical: Blocking situations
-      logging.error: Relevant errors
-      Handled Exceptions: Messages controlled via reportError function
-      logging.warning: relevant conclusions/situations
-      logging.info: relevant output of variables
-      logging.debug: entering and exiting functions
-      Note: Consider using assertions: check niceassert function.
+        niceprint
+        niceprint with verbose
+        logging.critical: Blocking situations
+        logging.error: Relevant errors
+        Handled Exceptions: Messages controlled via reportError function
+        logging.warning: relevant conclusions/situations
+        logging.info: relevant output of variables
+        logging.debug: entering and exiting functions
+        Note: Consider using assertions: check niceassert function.
 
     * Change code to insert on database prior to upload and then update result
     * Protect all DB access (single processing or multiprocessing) with:
@@ -73,9 +73,6 @@
       and configured as RAW_TOOL_PATH in INI file. Make sure to leave
       CONVERT_RAW_FILES = False in INI file or use at your own risk.
     * Consider using python module exiftool?
-    * On some systems it may be required to also import xml.etree.ElementTree
-    * If one changes the FILES_DIR folder and do not DELETE all from flickr,
-      uploadr WILL not delete the files.
     * Would be nice to update ALL tags on replacePhoto and not only the
       mandatory checksum tag as FLICKR maintains the tags from the first load.
     * If local flickrdb is deleted it will re-upload entire local Library.
@@ -89,6 +86,8 @@
       that some processes have more work than others defeating the purpose
       of multiprocessing. When loading from scratch a big Library it works
       like a charm.
+    * If one changes the FILES_DIR folder and do not DELETE all from flickr,
+      uploadr WILL not delete the files.
     * If you reduce FILE_MAX_SIZE in settings, the previously loaded files
       (over such size) are not removed.
     * If you change IGNORED_REGEX in settings, the previously loaded files
@@ -184,7 +183,6 @@ try:
     import httplib as httplib      # Python 2
 except ImportError:
     import http.client as httplib  # Python 3
-
 import argparse
 import mimetypes
 import os
@@ -199,7 +197,6 @@ try:
     import ConfigParser as ConfigParser  # Python 2
 except ImportError:
     import configparser as ConfigParser  # Python 3
-
 import multiprocessing
 import flickrapi
 import xml
@@ -210,7 +207,7 @@ import xml
 # import xml.etree.ElementTree
 # try/exception/import xml.etree.ElementTree to address issue
 try:
-   dummyxml = xml.etree.ElementTree.tostring(
+    dummyxml = xml.etree.ElementTree.tostring(
                                 xml.etree.ElementTree.Element('xml.etree'),
                                 encoding='utf-8',
                                 method='xml')
@@ -223,7 +220,8 @@ except AttributeError:
         sys.stderr.write('failed with ImportError.')
         raise
 finally:
-    print(' Continuing.\n')
+    sys.stderr.write(' Continuing.\n')
+    sys.stderr.flush()
 import os.path
 import pprint
 # For repeating functions

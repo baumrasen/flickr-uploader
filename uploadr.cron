@@ -3,7 +3,7 @@
 #
 # Shell Script file to be called by cron or Synology Task Scheduler
 # For use with https://github.com/oPromessa/flickr-uploader
-# 
+#
 
 # Edit the following line to refer to the folder where uploadr.py is located:
 FOLDER=/full/path/to/apps/flickr-uploader
@@ -20,19 +20,16 @@ export PYTHONPATH=~/apps/Python/lib/python2.7/site-packages
 echo Start
 date +"[%F %T] Start ----"
 # Set parameters as appropriate to your system
-# python2.7 $FOLDER/uploadr.py -v -b -p 10 >>$FOLDER/uploadr.out 2>&1 
+# python2.7 $FOLDER/uploadr.py -v -b -p 10 >>$FOLDER/uploadr.out 2>&1
 python2.7 $FOLDER/uploadr.py -v -b -p 10 >>$FOLDER/uploadr.out 2>>$FOLDER/uploadr.err
-echo Result
-echo $?
+echo Result: $?
 echo End
-date +"[%F %T] End ----"    
-echo ---------
+date +"[%F %T] End ----"
+echo --------- uploadr.err
+tail -20 $FOLDER/uploadr.err
+echo --------- uploadr.out
 tail -100 $FOLDER/uploadr.out
 echo ---------
 echo ---------
-echo Further output on file: $FOLDER/uploadr.out
+echo Further output on file: $FOLDER/uploadr.out and $FOLDER/uploadr.err
 echo ---------
-
-
-
-

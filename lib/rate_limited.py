@@ -21,7 +21,7 @@ import logging
 import multiprocessing
 import time
 from functools import wraps
-
+import niceprint
 
 # -----------------------------------------------------------------------------
 # class LastTime to be used with rate_limited
@@ -105,6 +105,7 @@ def rate_limited(max_per_second):
 
     min_interval = 1.0 / max_per_second
     LT = LastTime('rate_limited')
+    np = niceprint.niceprint()
 
     def decorate(func):
         LT.acquire()
@@ -156,19 +157,19 @@ def rate_limited(max_per_second):
 
             except Exception as ex:
                 # CODING: To be changed once reportError is on a module
-                sys.stderr.write('+++000 '
-                                 'Exception on rate_limited_function: [{!s}]\n'
-                                 .format(ex))
-                sys.stderr.flush()
-                # reportError(Caught=True,
-                #              CaughtPrefix='+++',
-                #              CaughtCode='000',
-                #              CaughtMsg='Exception on rate_limited_function',
-                #              exceptUse=True,
-                #              # exceptCode=ex.code,
-                #              exceptMsg=ex,
-                #              NicePrint=False,
-                #              exceptSysInfo=True)
+                # sys.stderr.write('+++000 '
+                #                  'Exception on rate_limited_function: [{!s}]\n'
+                #                  .format(ex))
+                # sys.stderr.flush()
+                np.reportError(Caught=True,
+                               CaughtPrefix='+++',
+                               CaughtCode='000',
+                               CaughtMsg='Exception on rate_limited_function',
+                               exceptUse=True,
+                               # exceptCode=ex.code,
+                               exceptMsg=ex,
+                               NicePrint=False,
+                               exceptSysInfo=True)
                 raise
             finally:
                 LT.release()

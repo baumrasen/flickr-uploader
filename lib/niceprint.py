@@ -39,7 +39,7 @@ class niceprint:
         """ class niceprint __init__
         """
         pass
-        
+
     # -------------------------------------------------------------------------
     # isThisStringUnicode
     #
@@ -49,7 +49,7 @@ class niceprint:
         """
         Determines if a string is Unicode (return True) or not (returns False)
         to allow correct print operations.
-    
+
         Used by StrUnicodeOut function.
         Example:
             niceprint('Checking file:[{!s}]...'.format(
@@ -80,8 +80,8 @@ class niceprint:
             return False
         else:
             return False
-    
-    
+
+
     # -------------------------------------------------------------------------
     # StrUnicodeOut
     #
@@ -91,19 +91,19 @@ class niceprint:
         """
         Outputs s.encode('utf-8') if isThisStringUnicode(s) else s
             niceprint('Checking file:[{!s}]...'.format(StrUnicodeOut(file))
-            
+
         >>> import niceprint as npc
         >>> np = npc.niceprint()
         >>> np.StrUnicodeOut('Hello')
         'Hello'
-            
+
         """
         if s is not None:
             return s.encode('utf-8') if self.isThisStringUnicode(s) else s
         else:
             return ''.encode('utf-8') if self.isThisStringUnicode('') else ''
-    
-    
+
+
     # -------------------------------------------------------------------------
     # niceprint
     #
@@ -115,12 +115,12 @@ class niceprint:
         Print a message with the format:
             [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
             Accounts for UTF-8 Messages
-            
+
         >>> import niceprint as npc
         >>> np = npc.niceprint()
         >>> np.niceprint('Hello')
         ... Hello
-            
+
         """
         print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'.format(
                 UPLDRConstants.G,
@@ -131,8 +131,8 @@ class niceprint:
                 'PRINT',
                 self.StrUnicodeOut(fname),
                 self.StrUnicodeOut(s)))
-    
-    
+
+
     # -------------------------------------------------------------------------
     # niceassert
     #
@@ -141,7 +141,7 @@ class niceprint:
          Returns a message with the format:
              [2017.11.19 01:53:57]:[PID       ][ASSERT  ]:[uploadr] Message
              Accounts for UTF-8 Messages
-    
+
          Usage:
              assert param1 >= 0, niceassert('param1 is not >= 0:'
                                             .format(param1))
@@ -155,7 +155,7 @@ class niceprint:
                'ASSERT',
                'uploadr',
                self.StrUnicodeOut(s)))
-    
+
     # -------------------------------------------------------------------------
     # reportError
     #
@@ -196,7 +196,7 @@ class niceprint:
                     exceptUse=False, exceptCode=0, exceptMsg='',
                     exceptSysInfo=''):
         """ reportError
-    
+
           Caught = True/False
           CaughtPrefix
             ===     Multiprocessing related
@@ -211,7 +211,7 @@ class niceprint:
           exceptMsg = ex
           exceptSysInfo = True/False
         """
-    
+
         if Caught is not None and Caught:
             logging.error('{!s}#{!s}: {!s}'.format(CaughtPrefix,
                                                    CaughtCode,
@@ -224,17 +224,17 @@ class niceprint:
             logging.error('Error code: [{!s}]'.format(exceptCode))
             logging.error('Error code: [{!s}]'.format(exceptMsg))
             if NicePrint is not None and NicePrint:
-                niceprint('Error code: [{!s}]'.format(exceptCode))
-                niceprint('Error code: [{!s}]'.format(exceptMsg))
+                self.niceprint('Error code: [{!s}]'.format(exceptCode))
+                self.niceprint('Error code: [{!s}]'.format(exceptMsg))
         if exceptSysInfo is not None and exceptSysInfo:
             logging.error(str(sys.exc_info()))
             if NicePrint is not None and NicePrint:
                 self.niceprint(str(sys.exc_info()))
-    
+
         sys.stderr.flush()
         if NicePrint is not None and NicePrint:
             sys.stdout.flush()
-    
+
 
 # -----------------------------------------------------------------------------
 # If called directly run doctests

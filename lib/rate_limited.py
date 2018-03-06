@@ -31,9 +31,7 @@ class LastTime:
         >>> import rate_limited as rt
         >>> a = rt.LastTime()
         >>> a.add_cnt()
-        >>> a.get_cnt()
-        1
-        >>> a.add_cnt()
+            >>> a.add_cnt()
         >>> a.get_cnt()
         2
     """
@@ -62,7 +60,6 @@ class LastTime:
 
     def set_last_time_called(self):
         self.last_time_called.value = time.time()
-        # self.debug('set_last_time_called')
 
     def get_last_time_called(self):
         return self.last_time_called.value
@@ -111,7 +108,7 @@ def rate_limited(max_per_second):
         LT.acquire()
         if LT.get_last_time_called() == 0:
             LT.set_last_time_called()
-        LT.debug('DECORATE')
+        # LT.debug('DECORATE')
         LT.release()
 
         @wraps(func)

@@ -12,10 +12,10 @@ python:
 
 # =============================================================================
 # branches blacklist for TravisCI testing
-branches:
-  except:
-  - dev-mar18
-  
+#branches:
+#  except:
+#  - dev-mar18
+
 before_install:
 # For use with wget into github account
   - echo -e "machine github.com\n  login $CI_USER\n  password $CI_USER_PASSWORD" >> ~/.netrc
@@ -78,7 +78,7 @@ before_script:
   - pythonVersion=`python -V 2>&1 | cut -d\  -f2`
   - echo $pythonVersion
   - echo Travis Python Version
-  - echo ${TRAVIS_PYTHON_VERSION}  
+  - echo ${TRAVIS_PYTHON_VERSION}
 #  - ls -laR
   - cp tests/uploadr.ini .
   - cp tests/uploadr.ini /home/travis/virtualenv/python$pythonVersion/bin/uploadr.ini || cp tests/uploadr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/uploadr.ini
@@ -161,7 +161,7 @@ script:
 after_failure:
    - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
    - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.err
-  
+
 after_script:
 # MD5SUM Output for REFERENCE -------------------------------------------------
 #  - if [[ $TestScenario == RemoveReplace ]]; then find "./tests/Test Photo Library" -type f -exec md5sum '{}' \; ; fi

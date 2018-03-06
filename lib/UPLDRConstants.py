@@ -20,7 +20,7 @@ import time
 #
 class UPLDRConstants:
     """ UPLDRConstants class
-    
+
         >>> import UPLDRConstants as UPLDRConstantsClass
         >>> UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
         >>> UPLDRConstants.nuMediacount = 999
@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
     import logging
     import sys
-    
+
     logging.basicConfig(level=logging.DEBUG,
                         format='[%(asctime)s]:[%(processName)-11s]' +
                                '[%(levelname)-8s]:[%(name)s] %(message)s')

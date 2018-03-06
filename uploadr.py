@@ -4517,7 +4517,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
             # Print total stats counters
             np.niceprint('\n  Initial Found Files:[{!s:>6s}]\n'
                          '          - Bad Files:[{!s:>6s}] = [{!s:>6s}]\n'
-                         '         Note: some Bad files may no longer exist!\n'
+                         '                 Note: some Bad files may no '
+                         'longer exist!\n'
                          'Photos count:\n'
                          '                Local:[{!s:>6s}]\n'
                          '               Flickr:[{!s:>6s}]\n'

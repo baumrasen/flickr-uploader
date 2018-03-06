@@ -31,7 +31,7 @@ class LastTime:
         >>> import rate_limited as rt
         >>> a = rt.LastTime()
         >>> a.add_cnt()
-            >>> a.add_cnt()
+        >>> a.add_cnt()
         >>> a.get_cnt()
         2
     """

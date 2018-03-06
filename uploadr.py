@@ -294,179 +294,14 @@ nurunning = None
 # CODING: To be changed to x=UPLDRContants() and x.nuMediacount = 0
 UPLDRConstants.nuMediacount = 0
 
-# -----------------------------------------------------------------------------
-# isThisStringUnicode
-#
-# Returns true if String is Unicode
-#
-def isThisStringUnicode(s):
-    """
-    Determines if a string is Unicode (return True) or not (returns False)
-    to allow correct print operations.
-
-    Used by StrUnicodeOut function.
-    Example:
-        niceprint('Checking file:[{!s}]...'.format(
-                                 file.encode('utf-8') \
-                                 if isThisStringUnicode(file) \
-                                 else file))
-
-    """
-    # CODING: Python 2 and 3 compatibility
-    # CODING: On Python 3 should always return False to return s
-    # in the example
-    #    s.encode('utf-8') if isThisStringUnicode(s) else s
-    if sys.version_info < (3, ):
-        if isinstance(s, unicode):
-            return True
-        elif isinstance(s, str):
-            return False
-        else:
-            return False
-    elif isinstance(s, str):
-        return False
-    else:
-        return False
-
-
-# -----------------------------------------------------------------------------
-# StrUnicodeOut
-#
-# Returns true if String is Unicode
-#
-def StrUnicodeOut(s):
-    """
-    Outputs s.encode('utf-8') if isThisStringUnicode(s) else s
-        niceprint('Checking file:[{!s}]...'.format(StrUnicodeOut(file))
-    """
-    if s is not None:
-        return s.encode('utf-8') if isThisStringUnicode(s) else s
-    else:
-        return ''.encode('utf-8') if isThisStringUnicode('') else ''
-
-
-# -----------------------------------------------------------------------------
-# niceprint
-#
-# Print a message with the format:
-#   [2017.10.25 22:32:03]:[PRINT   ]:[uploadr] Some Message
-#
-def niceprint(s, fname='uploadr'):
-    """
-    Print a message with the format:
-        [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
-        Accounts for UTF-8 Messages
-    """
-    print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'.format(
-            UPLDRConstants.G,
-            UPLDRConstants.Run,
-            nutime.strftime(UPLDRConstants.TimeFormat),
-            os.getpid(),
-            UPLDRConstants.W,
-            'PRINT',
-            StrUnicodeOut(fname),
-            StrUnicodeOut(s)))
-
-
-# -----------------------------------------------------------------------------
-# niceassert
-#
-def niceassert(s):
-    """
-     Returns a message with the format:
-         [2017.11.19 01:53:57]:[PID       ][ASSERT  ]:[uploadr] Message
-         Accounts for UTF-8 Messages
-
-     Usage:
-         assert param1 >= 0, niceassert('param1 is not >= 0:'.format(param1))
-    """
-    return('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'.format(
-           UPLDRConstants.R,
-           UPLDRConstants.Run,
-           nutime.strftime(UPLDRConstants.TimeFormat),
-           os.getpid(),
-           UPLDRConstants.W,
-           'ASSERT',
-           'uploadr',
-           StrUnicodeOut(s)))
-
-# -----------------------------------------------------------------------------
-# reportError
-#
-# Provides a messaging wrapper for logging.error, niprint & str(sys.exc_info()
-#
-# Examples of use of reportError:
-# except flickrapi.exceptions.FlickrError as ex:
-#     reportError(Caught=True,
-#                 CaughtPrefix='+++',
-#                 CaughtCode='990',
-#                 CaughtMsg='Flickrapi exception on photos.setdates',
-#                 exceptUse=True,
-#                 exceptCode=ex.code,
-#                 exceptMsg=ex,
-#                 NicePrint=True,
-#                 exceptSysInfo=True)
-# except lite.Error as e:
-#     reportError(Caught=True,
-#                 CaughtPrefix='+++ DB',
-#                 CaughtCode='991',
-#                 CaughtMsg='DB error on INSERT: [{!s}]'
-#                           .format(e.args[0]),
-#                 NicePrint=True)
-#     # Release the lock on error.
-#     self.useDBLock(lock, False)
-#     success = False
-# except:
-#     reportError(Caught=True,
-#                 CaughtPrefix='+++',
-#                 CaughtCode='992',
-#                 CaughtMsg='Caught exception in XXXX',
-#                 exceptSysInfo=True)
-#
-def reportError(Caught=False, CaughtPrefix='', CaughtCode=0, CaughtMsg='',
-                NicePrint=False,
-                exceptUse=False, exceptCode=0, exceptMsg='',
-                exceptSysInfo=''):
-    """ reportError
-
-      Caught = True/False
-      CaughtPrefix
-        ===     Multiprocessing related
-        +++     Exceptions handling related
-        +++ DB  Database Exceptions handling related
-        xxx     Error related
-      CaughtCode = '010'
-      CaughtMsg = 'Flickrapi exception on...'/'DB Error on INSERT'
-      NicePrint = True/False
-      exceptUse = True/False
-      exceptCode = ex.code
-      exceptMsg = ex
-      exceptSysInfo = True/False
-    """
-
-    if Caught is not None and Caught:
-        logging.error('{!s}#{!s}: {!s}'.format(CaughtPrefix,
-                                               CaughtCode,
-                                               CaughtMsg))
-        if NicePrint is not None and NicePrint:
-            niceprint('{!s}#{!s}: {!s}'.format(CaughtPrefix,
-                                               CaughtCode,
-                                               CaughtMsg))
-    if exceptUse is not None and exceptUse:
-        logging.error('Error code: [{!s}]'.format(exceptCode))
-        logging.error('Error code: [{!s}]'.format(exceptMsg))
-        if NicePrint is not None and NicePrint:
-            niceprint('Error code: [{!s}]'.format(exceptCode))
-            niceprint('Error code: [{!s}]'.format(exceptMsg))
-    if exceptSysInfo is not None and exceptSysInfo:
-        logging.error(str(sys.exc_info()))
-        if NicePrint is not None and NicePrint:
-            niceprint(str(sys.exc_info()))
-
-    sys.stderr.flush()
-    if NicePrint is not None and NicePrint:
-        sys.stdout.flush()
-
+# =============================================================================
+# CODING: code moved to lib/rate_limited.py
+# np.isThisStringUnicode
+# np.StrUnicodeOut
+# np.niceprint
+# np.niceassert
+# np.reportError
+import lib.niceprint as np
 
 # -----------------------------------------------------------------------------
 # retry
@@ -555,7 +390,7 @@ def retry(attempts=3, waittime=5, randtime=False):
 # nargslist=dict(Caught=True, CaughtPrefix='+++')
 # retry_reportError(nargslist)
 
-
+# =============================================================================
 # CODING: code moved to lib/rate_limited.py
 import lib.rate_limited as rate_limited
 

@@ -37,7 +37,9 @@ class LastTime:
         >>> a.get_cnt()
         2
     """
-
+    # -------------------------------------------------------------------------
+    # class LastTime __init__
+    #
     def __init__(self, name='LT'):
         # Init variables to None
         self.name = name

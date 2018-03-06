@@ -116,11 +116,6 @@ class niceprint:
             [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
             Accounts for UTF-8 Messages
 
-        >>> import niceprint as npc
-        >>> np = npc.niceprint()
-        >>> np.niceprint('Hello')
-        ... Hello
-
         """
         print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'.format(
                 UPLDRConstants.G,

@@ -21,7 +21,7 @@ import logging
 import multiprocessing
 import time
 from functools import wraps
-import niceprint
+from . import niceprint
 
 # -----------------------------------------------------------------------------
 # class LastTime to be used with rate_limited

@@ -26,19 +26,7 @@ class UPLDRConstants:
         >>> UPLDRConstants.nuMediacount = 999
         >>> print(UPLDRConstants.nuMediacount)
         999
-        >>> for j in range(2):
-        ...     print(j)
-        ... 
-        0
-        1
-        >>> for j in range(2):
-        ...    print(UPLDRConstants.Run)
-        ...    print(0 < UPLDRConstants.Run < 10000 )
-        ...    time.sleep(60)
-        ...
-        ...
-        True
-        ...
+        >>> print(0 < UPLDRConstants.Run < 10000 )
         True
     """
 
@@ -76,7 +64,6 @@ class UPLDRConstants:
         #   nuMediacount = counter of total files to initially upload
         #
         self.nuMediacount = None
-        pass
 
 
 # -----------------------------------------------------------------------------

@@ -2,8 +2,6 @@
     by oPromessa, 2017
     Published on https://github.com/oPromessa/flickr-uploader/
 
-    Inspired by: https://gist.github.com/gregburek/1441055
-
     Helper class and functions to print messages.
 """
 
@@ -19,6 +17,8 @@ import sys
 import os
 import logging
 import time
+import lib.UPLDRConstants as UPLDRConstantsClass
+UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 
 # -----------------------------------------------------------------------------
 # class niceprint to be used to print messages.
@@ -250,5 +250,3 @@ if __name__ == "__main__":
 
     # Comment following line to allow further debugging/testing
     sys.exit(0)
-
-

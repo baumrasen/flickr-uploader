@@ -10,6 +10,12 @@ python:
 # nightly gets the latest nightly version of python... python 3 in the case. For now I don't want that!
 #  - "nightly"
 
+# =============================================================================
+# branches blacklist for TravisCI testing
+branches:
+  except:
+  - dev-mar18
+  
 before_install:
 # For use with wget into github account
   - echo -e "machine github.com\n  login $CI_USER\n  password $CI_USER_PASSWORD" >> ~/.netrc

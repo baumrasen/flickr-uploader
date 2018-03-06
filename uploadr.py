@@ -227,52 +227,18 @@ import pprint
 # For repeating functions
 from functools import wraps
 import random
+# =============================================================================
+# CODING: code moved to lib/UPLDRConstants.py
+import lib.UPLDRConstants as UPLDRConstantsClass
+# =============================================================================
+# CODING: code moved to lib/niceprint.py
+# np.isThisStringUnicode
+# np.StrUnicodeOut
+# np.niceprint
+# np.niceassert
+# np.reportError
+import lib.niceprint as niceprint
 
-
-# ----------------------------------------------------------------------------
-# Constants class
-#
-# List out the constants to be used
-#
-class UPLDRConstants:
-    """ UPLDRConstants class
-    """
-
-    # -------------------------------------------------------------------------
-    # Class Global Variables
-    #   class variable shared by all instances
-    #
-    #   TimeFormat = Format to display date and time. Used with strftime
-    #   Version    = Version Major.Minor.Fix
-    #   Run        = Identify the execution Run of this process. Unique number
-    #
-    TimeFormat = '%Y.%m.%d %H:%M:%S'
-    Version = '2.7.1'
-    Run = eval(time.strftime('int("%j")+int("%H")*100+int("%M")'))
-
-    # -------------------------------------------------------------------------
-    # Color Codes for colorful output
-    W = '\033[0m'    # white (normal)
-    R = '\033[31m'   # red
-    G = '\033[32m'   # green
-    O = '\033[33m'   # orange
-    B = '\033[34m'   # blue
-    P = '\033[35m'   # purple
-
-    # -------------------------------------------------------------------------
-    # class UPLDRConstants __init__
-    #
-    def __init__(self):
-        """ class UPLDRConstants __init__
-        """
-        # ---------------------------------------------------------------------
-        # Instance Global Variables
-        #   instance variable unique to each instance
-        #
-        #   nuMediacount = counter of total files to initially upload
-        #
-        self.nuMediacount = None
-        pass
 
 # -----------------------------------------------------------------------------
 # Global Variables
@@ -291,17 +257,10 @@ nuflickr = None
 nulockDB = None
 numutex = None
 nurunning = None
-# CODING: To be changed to x=UPLDRContants() and x.nuMediacount = 0
+UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 UPLDRConstants.nuMediacount = 0
+np = niceprint.niceprint()
 
-# =============================================================================
-# CODING: code moved to lib/rate_limited.py
-# np.isThisStringUnicode
-# np.StrUnicodeOut
-# np.niceprint
-# np.niceassert
-# np.reportError
-import lib.niceprint as np
 
 # -----------------------------------------------------------------------------
 # retry
@@ -4596,7 +4555,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
 # =============================================================================
 # Main code
 #
-niceprint('--------- (V{!s}) Start time: {!s} ---------'
+np.niceprint('--------- (V{!s}) Start time: {!s} ---------'
           .format(UPLDRConstants.Version,
                   nutime.strftime(UPLDRConstants.TimeFormat)))
 if __name__ == "__main__":

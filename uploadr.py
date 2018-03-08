@@ -266,96 +266,11 @@ niceassert = np.niceassert
 reportError = np.reportError
 
 
-# -----------------------------------------------------------------------------
-# retry
-#
-# retries execution of a function
-#
-def retry(attempts=3, waittime=5, randtime=False):
-    """
-    Catches exceptions while running a supplied function
-    Re-runs it for times while sleeping X seconds in-between
-    outputs 3 types of errors (coming from the parameters)
-
-    attempts = Max Number of Attempts
-    waittime = Wait time in between Attempts
-    randtime = Randomize the Wait time from 1 to randtime for each Attempt
-    """
-    def wrapper_fn(f):
-        @wraps(f)
-        def new_wrapper(*args, **kwargs):
-
-            rtime = time
-            error = None
-
-            if LOGGING_LEVEL <= logging.WARNING:
-                if args is not None:
-                    logging.info('___Retry f():[{!s}] '
-                                 'Max:[{!s}] Delay:[{!s}] Rnd[{!s}]'
-                                 .format(f.__name__, attempts,
-                                         waittime, randtime))
-                    for i, a in enumerate(args):
-                        logging.info('___Retry f():[{!s}] arg[{!s}]={!s}'
-                                     .format(f.__name__, i, a))
-            for i in range(attempts if attempts > 0 else 1):
-                try:
-                    logging.info('___Retry f():[{!s}]: '
-                                 'Attempt:[{!s}] of [{!s}]'
-                                 .format(f.__name__, i+1, attempts))
-                    return f(*args, **kwargs)
-                except Exception as e:
-                    logging.error('___Retry f():[{!s}]: Error code A: [{!s}]'
-                                  .format(f.__name__, e))
-                    error = e
-                except flickrapi.exceptions.FlickrError as ex:
-                    logging.error('___Retry f():[{!s}]: Error code B: [{!s}]'
-                                  .format(f.__name__, ex))
-                except lite.Error as e:
-                    logging.error('___Retry f():[{!s}]: Error code C: [{!s}]'
-                                  .format(f.__name__, e))
-                    error = e
-                    # Release the lock on error.
-                    # CODING: Check how to handle this particular scenario.
-                    # flick.useDBLock(nulockDB, False)
-                    # self.useDBLock( lock, True)
-                except:
-                    logging.error('___Retry f():[{!s}]: Error code D: Catchall'
-                                  .format(f.__name__))
-
-                logging.warning('___Function:[{!s}] Waiting:[{!s}] Rnd:[{!s}]'
-                                .format(f.__name__, waittime, randtime))
-                if randtime:
-                    rtime.sleep(random.randrange(0,
-                                                 (waittime+1)
-                                                 if waittime >= 0
-                                                 else 1))
-                else:
-                    rtime.sleep(waittime if waittime >= 0 else 0)
-            logging.error('___Retry f():[{!s}] '
-                            'Max:[{!s}] Delay:[{!s}] Rnd[{!s}]: Raising ERROR!'
-                            .format(f.__name__, attempts,
-                                    waittime, randtime))
-            raise error
-        return new_wrapper
-    return wrapper_fn
-# -----------------------------------------------------------------------------
-# Samples
-# @retry(attempts=3, waittime=2)
-# def retry_divmod(argslist):
-#     return divmod(*argslist)
-# print retry_divmod([5, 3])
-# try:
-#     print(retry_divmod([5, 'H']))
-# except:
-#     logging.error('Error Caught (Overall Catchall)...')
-# finally:
-#     logging.error('...Continuing')
-# nargslist=dict(Caught=True, CaughtPrefix='+++')
-# retry_reportError(nargslist)
-
 # =============================================================================
-# CODING: code moved to lib/rate_limited.py
+# CODING: retry code moved to lib/rate_limited.py
+# CODING: rate_limited code moved to lib/rate_limited.py
 import lib.rate_limited as rate_limited
+retry = rate_limited.retry
 
 # =============================================================================
 # Look for Config file uploadr.ini
@@ -752,7 +667,6 @@ class Uploadr:
                              .format(count, cTotal))
 
         sys.stdout.flush()
-
 
     # -------------------------------------------------------------------------
     # authenticate
@@ -1552,7 +1466,6 @@ class Uploadr:
 
             # Show number of files processed so far
             self.niceprocessedfiles(xcount, UPLDRConstants.nuMediacount, False)
-
 
     # -------------------------------------------------------------------------
     # uploadFile
@@ -2549,6 +2462,7 @@ class Uploadr:
             logging.warning('Running in Daemon mode. Sleep [{!s}] seconds.'
                             .format(SLEEP_TIME))
             nutime.sleep(SLEEP_TIME)
+
     # -------------------------------------------------------------------------
     # getSetNameFromFile
     #
@@ -4379,8 +4293,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             NicePrint=True)
                 return False
 
-            count=0
-            countTotal=len(badFiles)
+            count = 0
+            countTotal = len(badFiles)
             for row in badFiles:
                 count += 1
                 # row[0] = files_id
@@ -4403,8 +4317,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
             self.niceprocessedfiles(count, countTotal, True)
 
         return True
-
-
 
     # -------------------------------------------------------------------------
     # printStat
@@ -4752,7 +4664,7 @@ if __name__ == "__main__":
                              'on upload. '
                              'Please check logs, correct, and retry.',
                              fname='addAlbumsMigrate')
-        elif  args.list_bad_files:
+        elif args.list_bad_files:
             np.niceprint('Listing badfiles: Start.',
                          fname='listBadFiles')
             flick.listBadFiles()

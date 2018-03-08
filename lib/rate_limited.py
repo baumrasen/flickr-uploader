@@ -6,7 +6,7 @@
 
     rate_limited = Helper class and functions to rate limiting function calls
                    with Python Decorators.
-                   
+
     retry        = Helper function to run function calls multiple times on
                    error with Python Decorators.
 """
@@ -33,6 +33,7 @@ class LastTime:
     """
         >>> import rate_limited as rt
         >>> a = rt.LastTime()
+        ...
         >>> a.add_cnt()
         >>> a.add_cnt()
         >>> a.get_cnt()
@@ -183,6 +184,110 @@ def rate_limited(max_per_second):
 #@rate_limited(5) # 5 calls per second
 # def print_num(num):
 #     print (num )
+
+
+# -----------------------------------------------------------------------------
+# retry
+#
+# retries execution of a function
+#
+def retry(attempts=3, waittime=5, randtime=False):
+    """
+    Catches exceptions while running a supplied function
+    Re-runs it for times while sleeping X seconds in-between
+    outputs 3 types of errors (coming from the parameters)
+
+    attempts = Max Number of Attempts
+    waittime = Wait time in between Attempts
+    randtime = Randomize the Wait time from 1 to randtime for each Attempt
+
+    >>> import lib.rate_limited as rt
+    >>> @rt.retry()
+    ... def f():
+    ...     print(x)
+    ...
+    >>> f()
+    Traceback (most recent call last):
+        ...
+    NameError: multi
+        line
+    detail
+    """
+
+    #     ...
+    # NameError: global name 'x' is not defined
+
+    def wrapper_fn(f):
+        @wraps(f)
+        def new_wrapper(*args, **kwargs):
+
+            rtime = time
+            error = None
+
+            if logging.getLogger().getEffectiveLevel() <= logging.WARNING:
+                if args is not None:
+                    logging.info('___Retry f():[{!s}] '
+                                 'Max:[{!s}] Delay:[{!s}] Rnd[{!s}]'
+                                 .format(f.__name__, attempts,
+                                         waittime, randtime))
+                    for i, a in enumerate(args):
+                        logging.info('___Retry f():[{!s}] arg[{!s}]={!s}'
+                                     .format(f.__name__, i, a))
+            for i in range(attempts if attempts > 0 else 1):
+                try:
+                    logging.info('___Retry f():[{!s}]: '
+                                 'Attempt:[{!s}] of [{!s}]'
+                                 .format(f.__name__, i+1, attempts))
+                    return f(*args, **kwargs)
+                except Exception as e:
+                    logging.error('___Retry f():[{!s}]: Error code A: [{!s}]'
+                                  .format(f.__name__, e))
+                    error = e
+                except flickrapi.exceptions.FlickrError as ex:
+                    logging.error('___Retry f():[{!s}]: Error code B: [{!s}]'
+                                  .format(f.__name__, ex))
+                except lite.Error as e:
+                    logging.error('___Retry f():[{!s}]: Error code C: [{!s}]'
+                                  .format(f.__name__, e))
+                    error = e
+                    # Release the lock on error.
+                    # CODING: Check how to handle this particular scenario.
+                    # flick.useDBLock(nulockDB, False)
+                    # self.useDBLock( lock, True)
+                except:
+                    logging.error('___Retry f():[{!s}]: Error code D: Catchall'
+                                  .format(f.__name__))
+
+                logging.warning('___Function:[{!s}] Waiting:[{!s}] Rnd:[{!s}]'
+                                .format(f.__name__, waittime, randtime))
+                if randtime:
+                    rtime.sleep(random.randrange(0,
+                                                 (waittime+1)
+                                                 if waittime >= 0
+                                                 else 1))
+                else:
+                    rtime.sleep(waittime if waittime >= 0 else 0)
+            logging.error('___Retry f():[{!s}] '
+                            'Max:[{!s}] Delay:[{!s}] Rnd[{!s}]: Raising ERROR!'
+                            .format(f.__name__, attempts,
+                                    waittime, randtime))
+            raise error
+        return new_wrapper
+    return wrapper_fn
+# -----------------------------------------------------------------------------
+# Samples
+# @retry(attempts=3, waittime=2)
+# def retry_divmod(argslist):
+#     return divmod(*argslist)
+# print retry_divmod([5, 3])
+# try:
+#     print(retry_divmod([5, 'H']))
+# except:
+#     logging.error('Error Caught (Overall Catchall)...')
+# finally:
+#     logging.error('...Continuing')
+# nargslist=dict(Caught=True, CaughtPrefix='+++')
+# retry_reportError(nargslist)
 
 
 # -----------------------------------------------------------------------------

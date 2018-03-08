@@ -4,8 +4,11 @@
 
     Inspired by: https://gist.github.com/gregburek/1441055
 
-    Helper class and functions to rate limiting function calls
-    with Python Decorators.
+    rate_limited = Helper class and functions to rate limiting function calls
+                   with Python Decorators.
+                   
+    retry        = Helper function to run function calls multiple times on
+                   error with Python Decorators.
 """
 
 # ----------------------------------------------------------------------------
@@ -114,9 +117,9 @@ def rate_limited(max_per_second):
         @wraps(func)
         def rate_limited_function(*args, **kwargs):
 
-            logging.warning('___Rate_limited f():[{!s}]: '
-                            'Max_per_Second:[{!s}]'
-                            .format(func.__name__, max_per_second))
+            logging.info('___Rate_limited f():[{!s}]: '
+                         'Max_per_Second:[{!s}]'
+                         .format(func.__name__, max_per_second))
 
             try:
                 LT.acquire()

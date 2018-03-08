@@ -290,18 +290,18 @@ def retry(attempts=3, waittime=5, randtime=False):
 
             if LOGGING_LEVEL <= logging.WARNING:
                 if args is not None:
-                    logging.warning('___Retry f():[{!s}] '
-                                    'Max:[{!s}] Delay:[{!s}] Rnd[{!s}]'
-                                    .format(f.__name__, attempts,
-                                            waittime, randtime))
+                    logging.info('___Retry f():[{!s}] '
+                                 'Max:[{!s}] Delay:[{!s}] Rnd[{!s}]'
+                                 .format(f.__name__, attempts,
+                                         waittime, randtime))
                     for i, a in enumerate(args):
-                        logging.warning('___Retry f():[{!s}] arg[{!s}]={!s}'
-                                        .format(f.__name__, i, a))
+                        logging.info('___Retry f():[{!s}] arg[{!s}]={!s}'
+                                     .format(f.__name__, i, a))
             for i in range(attempts if attempts > 0 else 1):
                 try:
-                    logging.warning('___Retry f():[{!s}]: '
-                                    'Attempt:[{!s}] of [{!s}]'
-                                    .format(f.__name__, i+1, attempts))
+                    logging.info('___Retry f():[{!s}]: '
+                                 'Attempt:[{!s}] of [{!s}]'
+                                 .format(f.__name__, i+1, attempts))
                     return f(*args, **kwargs)
                 except Exception as e:
                     logging.error('___Retry f():[{!s}]: Error code A: [{!s}]'
@@ -1136,14 +1136,14 @@ class Uploadr:
                     for p in multiprocessing.active_children():
                         logging.debug('==={!s}.is_alive = {!s}'
                                       .format(p.name, p.is_alive()))
-                        if (args.verbose):
+                        if (args.verbose_progress):
                             np.niceprint('==={!s}.is_alive = {!s}'
                                          .format(p.name, p.is_alive()))
                         uploadTaskActive = p
                     logging.info('===Will wait for 60 on {!s}.is_alive = {!s}'
                                  .format(uploadTaskActive.name,
                                          uploadTaskActive.is_alive()))
-                    if (args.verbose):
+                    if (args.verbose_progress):
                         np.niceprint('===Will wait for 60 on '
                                      '{!s}.is_alive = {!s}'
                                      .format(uploadTaskActive.name,
@@ -1169,19 +1169,16 @@ class Uploadr:
 
                 logging.warning('===Multiprocessing=== pool joined! '
                                 'All processes finished.')
-                np.niceprint('===Multiprocessing=== pool joined! '
-                             'All processes finished.')
 
                 # Will release (set to None) the nulockDB lock control
                 # this prevents subsequent calls to useDBLock( nuLockDB, False)
                 # to raise exception:
                 #    ValueError('semaphore or lock released too many times')
-                if (args.verbose):
-                    np.niceprint('===Multiprocessing=== pool joined! '
-                                 'What happens to nulockDB is None:[{!s}]? '
-                                 'It seems not, it still has a value! '
-                                 'Setting it to None!'
-                                 .format(nulockDB is None))
+                logging.info('===Multiprocessing=== pool joined! '
+                             'What happens to nulockDB is None:[{!s}]? '
+                             'It seems not, it still has a value! '
+                             'Setting it to None!'
+                             .format(nulockDB is None))
                 nulockDB = None
 
                 # Show number of total files processed
@@ -4235,7 +4232,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         for p in multiprocessing.active_children():
                             logging.debug('==={!s}.is_alive = {!s}'
                                           .format(p.name, p.is_alive()))
-                            if (args.verbose):
+                            if (args.verbose_progress):
                                 np.niceprint('==={!s}.is_alive = {!s}'
                                              .format(p.name, p.is_alive()))
                             mTaskActive = p
@@ -4243,7 +4240,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                      '{!s}.is_alive = {!s}'
                                      .format(mTaskActive.name,
                                              mTaskActive.is_alive()))
-                        if (args.verbose):
+                        if (args.verbose_progress):
                             np.niceprint('===Will wait for 60 on '
                                          '{!s}.is_alive = {!s}'
                                          .format(mTaskActive.name,
@@ -4270,19 +4267,16 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
                     logging.warning('===Multiprocessing=== pool joined! '
                                     'All processes finished.')
-                    np.niceprint('===Multiprocessing=== pool joined! '
-                                 'All processes finished.')
 
                     # Will release (set to None) the nulockDB lock control
                     # this prevents subsequent calls to useDBLock( nuLockDB, False)
                     # to raise exception:
                     #    ValueError('semaphore or lock released too many times')
-                    if (args.verbose):
-                        np.niceprint('===Multiprocessing=== pool joined! '
-                                     'What happens to mlockDB is None:[{!s}]? '
-                                     'It seems not, it still has a value! '
-                                     'Setting it to None!'
-                                     .format(mlockDB is None))
+                    logging.info('===Multiprocessing=== pool joined! '
+                                 'What happens to mlockDB is None:[{!s}]? '
+                                 'It seems not, it still has a value! '
+                                 'Setting it to None!'
+                                 .format(mlockDB is None))
                     mlockDB = None
 
                     # Show number of total files processed

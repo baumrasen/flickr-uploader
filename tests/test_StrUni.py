@@ -1,7 +1,7 @@
 # content of test_StrUni.py
 
 import sys
-import StrUni
+from ..lib import niceprint as niceprint
 import time
 
 def test_Unicode():

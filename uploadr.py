@@ -144,13 +144,13 @@
 
 """
 
-# ----------------------------------------------------------------------------
+# =============================================================================
 # Import section for Python 2 and 3 compatible code
 # from __future__ import absolute_import, division, print_function, unicode_literals
 from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 
 
-# ----------------------------------------------------------------------------
+# =============================================================================
 # Initial Import section
 import sys
 import logging
@@ -174,7 +174,7 @@ else:
     sys.stderr.flush()
 
 
-# ----------------------------------------------------------------------------
+# =============================================================================
 # Import section
 #
 # Check if it is still required httplib
@@ -224,23 +224,19 @@ finally:
     sys.stderr.flush()
 import os.path
 import pprint
-# For repeating functions
-from functools import wraps
-import random
-# =============================================================================
-# CODING: code moved to lib/UPLDRConstants.py
-import lib.UPLDRConstants as UPLDRConstantsClass
-# =============================================================================
-# CODING: code moved to lib/niceprint.py
-# np.isThisStringUnicode
-# np.StrUnicodeOut
-# np.niceprint
-# np.niceassert
-# np.reportError
-import lib.niceprint as niceprint
-
-
 # -----------------------------------------------------------------------------
+# Helper class and functions for UPLoaDeR Global Constants.
+import lib.UPLDRConstants as UPLDRConstantsClass
+# -----------------------------------------------------------------------------
+# Helper class and functions to print messages.
+import lib.niceprint as niceprint
+# -----------------------------------------------------------------------------
+# Helper class and functions to rate limiting function calls and run function
+# multiple attempts/times on error
+import lib.rate_limited as rate_limited
+retry = rate_limited.retry
+
+# =============================================================================
 # Global Variables
 # CODING: Consider moving them into Class UPLDRConstants!!!
 #
@@ -252,25 +248,22 @@ import lib.niceprint as niceprint
 #   nurunning    = multiprocessing Value to count processed photos
 #   nuMediacount = counter of total files to initially upload
 #                = moved to class UPLDRConstants
+# -----------------------------------------------------------------------------
 nutime = time
 nuflickr = None
 nulockDB = None
 numutex = None
 nurunning = None
+# -----------------------------------------------------------------------------
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 UPLDRConstants.nuMediacount = 0
+# -----------------------------------------------------------------------------
 np = niceprint.niceprint()
 StrUnicodeOut = np.StrUnicodeOut
 isThisStringUnicode = np.isThisStringUnicode
 niceassert = np.niceassert
 reportError = np.reportError
 
-
-# =============================================================================
-# CODING: retry code moved to lib/rate_limited.py
-# CODING: rate_limited code moved to lib/rate_limited.py
-import lib.rate_limited as rate_limited
-retry = rate_limited.retry
 
 # =============================================================================
 # Look for Config file uploadr.ini
@@ -686,7 +679,20 @@ class Uploadr:
                                        token_cache_location=TOKEN_CACHE)
         # Get request token
         np.niceprint('Getting new token.')
-        nuflickr.get_request_token(oauth_callback='oob')
+        try:
+            nuflickr.get_request_token(oauth_callback='oob')
+        except Exception as ex:
+            reportError(Caught=True,
+                         CaughtPrefix='+++',
+                         CaughtCode='004',
+                         CaughtMsg='Exception on get_request_token. '
+                                   'Exiting...',
+                         exceptUse=True,
+                         # exceptCode=ex.code,
+                         exceptMsg=ex,
+                         NicePrint=True,
+                         exceptSysInfo=True)
+            sys.exit(4)
 
         # Show url. Copy and paste it in your browser
         authorize_url = nuflickr.auth_url(perms=u'delete')
@@ -713,7 +719,7 @@ class Uploadr:
                         exceptMsg=ex,
                         NicePrint=True,
                         exceptSysInfo=True)
-            sys.exit(4)
+            sys.exit(5)
 
         np.niceprint('{!s} with {!s} permissions: {!s}'.format(
                                     'Check Authentication',
@@ -2847,10 +2853,10 @@ class Uploadr:
             if (row[0] == 2):
                 np.niceprint('Database version: [{!s}]'.format(row[0]))
                 # Database version 3 <=========================DB VERSION: 3===
-                np.niceprint('Adding album tags to pics on upload... ')
+                np.niceprint('Adding album tags to pics already uploaded... ')
                 if flick.addAlbumsMigrate():
                     np.niceprint('Successfully added album tags to pics '
-                                 'on upload. Updating Database version.',
+                                 'already upload. Updating Database version.',
                                  fname='addAlbumsMigrate')
 
                     cur.execute('PRAGMA user_version="3"')
@@ -2884,7 +2890,7 @@ class Uploadr:
 
             if con is not None:
                 con.close()
-            sys.exit(5)
+            sys.exit(6)
         finally:
             np.niceprint('Completed database setup')
 
@@ -2941,7 +2947,7 @@ class Uploadr:
                         NicePrint=True)
             if con is not None:
                 con.close()
-            sys.exit(6)
+            sys.exit(7)
         finally:
             np.niceprint('Completed cleaning up badfiles table '
                          'from the database.')
@@ -4614,18 +4620,18 @@ if __name__ == "__main__":
         np.niceprint('Please configure the name of the folder [FILES_DIR] '
                      'in the INI file [normally uploadr.ini], '
                      'with media available to sync with Flickr.')
-        sys.exit(7)
+        sys.exit(8)
     else:
         if not os.path.isdir(FILES_DIR):
             np.niceprint('Please configure the name of an existant folder '
                          'in the INI file [normally uploadr.ini] '
                          'with media available to sync with Flickr.')
-            sys.exit(8)
+            sys.exit(9)
 
     if FLICKR["api_key"] == "" or FLICKR["secret"] == "":
         np.niceprint('Please enter an API key and secret in the configuration '
                      'script file, normaly uploadr.ini (see README).')
-        sys.exit(9)
+        sys.exit(10)
 
     # Instantiate class Uploadr
     logging.debug('Instantiating the Main class flick = Uploadr()')

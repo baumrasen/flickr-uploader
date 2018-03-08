@@ -1,5 +1,5 @@
 >>> import sys
->>> import StrUni
+>>> import lib.niceprint as StrUni
 >>> StrUni.isThisStringUnicode(u'Something')
 True
 >>> StrUni.isThisStringUnicode('Something')

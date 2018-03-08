@@ -59,11 +59,12 @@ class niceprint:
 
         >>> import niceprint as npc
         >>> np = npc.niceprint()
-        >>> np.isThisStringUnicode('Hello')
+        >>> np.isThisStringUnicode('No Unicode string')
         False
-        >>> np.isThisStringUnicode(u'With u prefix')
+        >>> np.isThisStringUnicode(u'Unicode string')
         True
-
+        >>> isThisStringUnicode(2)
+        False
         """
         # CODING: Python 2 and 3 compatibility
         # CODING: On Python 3 should always return False to return s
@@ -96,7 +97,6 @@ class niceprint:
         >>> np = npc.niceprint()
         >>> np.StrUnicodeOut('Hello')
         'Hello'
-
         """
         if s is not None:
             return s.encode('utf-8') if self.isThisStringUnicode(s) else s

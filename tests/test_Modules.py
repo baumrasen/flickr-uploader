@@ -9,8 +9,7 @@ from lib import niceprint as niceprint
 import lib.UPLDRConstants as UPLDRConstantsClass
             
 import unittest
-import test.test_support
-# Note The test.test_support module has been renamed to test.support in Python 3.x and 2.7.14. The name test.test_support has been retained as an alias in 2.7.
+import test.support
 class TestNicePrintMethods(unittest.TestCase):
     
     def test_niceprint(self):
@@ -20,7 +19,7 @@ class TestNicePrintMethods(unittest.TestCase):
         # assert s.getvalue() == "hello\n", 'not ok'
         np = niceprint.niceprint()
 
-        with test.test_support.captured_stdout() as s:
+        with test.support.captured_stdout() as s:
             np.niceprint('hello')
 
         print(s.getvalue())

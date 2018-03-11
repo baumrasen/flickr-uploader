@@ -4,12 +4,12 @@ import sys
 import time
 
 # -----------------------------------------------------------------------------
-from lib import niceprint as niceprint
-# import lib.niceprint as niceprint
+import lib.niceprint as niceprint
 import lib.UPLDRConstants as UPLDRConstantsClass
             
 import unittest
 import test.support
+
 class TestNicePrintMethods(unittest.TestCase):
     
     def test_niceprint(self):
@@ -77,7 +77,7 @@ class TestMethods(unittest.TestCase):
                     self.assertTrue(np.isThisStringUnicode(
                                            unicode(chr(i).decode('utf-8'))))
             else:
-                self.assertFalse(niceprint.isThisStringUnicode(chr(i)))
+                self.assertFalse(np.isThisStringUnicode(chr(i)))
 
 
 class TestUPLDRConstantsMethods(unittest.TestCase):

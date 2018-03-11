@@ -126,6 +126,11 @@
             error setting video date
             error 502: flickrapi
             error 504: flickrapi
+    * While testing with pytest --flakes Python 2 and 3 compatibility is
+      achieved by avoiding warnings on lines that contain a # noqa comment at
+      the end will not issue warnings. Applicable on use of unicode for
+      instance. Please note. "# noqa" must appear **as is** at the end of the
+      line to be ignores.
 
     ## README.md
     ------------
@@ -329,7 +334,8 @@ if (int(str(LOGGING_LEVEL)) if str.isdigit(str(LOGGING_LEVEL)) else 99) not in\
 LOGGING_LEVEL = int(str(LOGGING_LEVEL))
 if config.has_option('Config', 'FILES_DIR'):
     try:
-        FILES_DIR = unicode(eval(config.get('Config', 'FILES_DIR')), 'utf-8') \
+        FILES_DIR = unicode(  # noqa
+                            eval(config.get('Config', 'FILES_DIR')), 'utf-8') \
                     if sys.version_info < (3, ) \
                     else str(eval(config.get('Config', 'FILES_DIR')))
     except Exception as err:
@@ -342,7 +348,8 @@ if config.has_option('Config', 'FILES_DIR'):
         sys.exit(3)
 else:
     # Undefined FILES_DIR. Will be reported as an error later on Main code.
-    FILES_DIR = unicode('', 'utf-8') if sys.version_info < (3, ) else str('')
+    FILES_DIR = unicode(  # noqa
+                        '', 'utf-8') if sys.version_info < (3, ) else str('')
 FLICKR = eval(config.get('Config', 'FLICKR'))
 SLEEP_TIME = eval(config.get('Config', 'SLEEP_TIME'))
 DRIP_TIME = eval(config.get('Config', 'DRIP_TIME'))
@@ -370,7 +377,7 @@ inEXCLUDED_FOLDERS = eval(config.get('Config', 'EXCLUDED_FOLDERS'))
 EXCLUDED_FOLDERS = []
 for folder in inEXCLUDED_FOLDERS:
     # CODING: Python 2 and 3 compatibility
-    EXCLUDED_FOLDERS.append(unicode(folder, 'utf-8')
+    EXCLUDED_FOLDERS.append(unicode(folder, 'utf-8')  # noqa
                             if sys.version_info < (3, )
                             else str(folder))
     if LOGGING_LEVEL <= logging.INFO:
@@ -699,7 +706,8 @@ class Uploadr:
         print(authorize_url)
 
         # Prompt for verifier code from the user.
-        verifier = unicode(raw_input('Verifier code (NNN-NNN-NNN): ')) \
+        verifier = unicode(raw_input(  # noqa
+                                     'Verifier code (NNN-NNN-NNN): ')) \
                    if sys.version_info < (3, ) \
                    else input('Verifier code (NNN-NNN-NNN): ')
 
@@ -828,7 +836,7 @@ class Uploadr:
                 # row[1] is filename
                 # CODING
                 # debug#A with unicode
-                if (self.isFileExcluded(unicode(row[1], 'utf-8')
+                if (self.isFileExcluded(unicode(row[1], 'utf-8')  # noqa
                                         if sys.version_info < (3, )
                                         else str(row[1]))):
                 # debug#B with StrUnicodeOut

@@ -93,6 +93,22 @@ before_script:
 # =============================================================================
 # run script for tests
 script:
+
+# pytest --flakes (Code analysis) ---------------------------------------------
+# FOR NOW WITH PYTHON 2.* Versions only. Will edit tests for PYTHON 3.* Versions
+  - pytest -v --flakes
+  #- if [[ $TRAVIS_PYTHON_VERSION == 2* ]]; then pytest -v --flakes; fi
+  #- if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then pytest -v --flakes tests/test_StrUni.py::test_Unicode tests/test_StrUni.py::test_RUN tests/test_sys_argv.txt::test_sys_argv.txt; fi
+
+# pytest ----------------------------------------------------------------------
+# FOR NOW WITH PYTHON 2.* Versions only. Will edit tests for PYTHON 3.* Versions
+  - pytest -v
+# pytest --doctest-modules ----------------------------------------------------
+  - pytest --doctest-modules
+#  - pytest -v # or py.test for Python versions 3.5 and below
+  #- if [[ $TRAVIS_PYTHON_VERSION == 2* ]]; then pytest --doctest-modules; fi # Attempt to run test_*.txt with doctest
+#  - pytest --doctest-modules # Attempt to run test_*.txt with doctest
+  
 # DELETE RUN ------------------------------------------------------------------
 # !!!!!!!!!!!!!!!!!!!!!!!!!! CAREFULL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # COMPATIBLE WITH PYTHON 2.7 ONLY
@@ -137,19 +153,6 @@ script:
   - coverage report -m uploadr.py
   - sleep $WAIT_TIME
 
-# pytest --flakes (Code analysis) ---------------------------------------------
-# FOR NOW WITH PYTHON 2.* Versions only. Will edit tests for PYTHON 3.* Versions
-  - pytest -v --flakes
-  #- if [[ $TRAVIS_PYTHON_VERSION == 2* ]]; then pytest -v --flakes; fi
-  #- if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then pytest -v --flakes tests/test_StrUni.py::test_Unicode tests/test_StrUni.py::test_RUN tests/test_sys_argv.txt::test_sys_argv.txt; fi
-
-# FOR NOW WITH PYTHON 2.* Versions only. Will edit tests for PYTHON 3.* Versions
-  - pytest -v
-  - pytest --doctest-modules
-#  - pytest -v # or py.test for Python versions 3.5 and below
-  #- if [[ $TRAVIS_PYTHON_VERSION == 2* ]]; then pytest --doctest-modules; fi # Attempt to run test_*.txt with doctest
-#  - pytest --doctest-modules # Attempt to run test_*.txt with doctest
-
 # Deleted Pics Non existant on FLickr -----------------------------------------
 # For testing a local deleted file also not available in flickr
 # - sleep $WAIT_TIME
@@ -158,13 +161,13 @@ script:
 #  - coverage report -m uploadr.py
 #  - sqlite3 flickrdb "SELECT *, datetime( last_modified, 'unixepoch', 'localtime') FROM files;"
 
-# =============================================================================
-# after_script
+# after_failure ---------------------------------------------------------------
 # Attempt to catch "Build times out because no output was received"
 after_failure:
    - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
    - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.err
 
+# after_script ----------------------------------------------------------------
 after_script:
 # MD5SUM Output for REFERENCE -------------------------------------------------
 #  - if [[ $TestScenario == RemoveReplace ]]; then find "./tests/Test Photo Library" -type f -exec md5sum '{}' \; ; fi

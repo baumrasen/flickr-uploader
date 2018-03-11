@@ -139,16 +139,12 @@ script:
 
 # pytest --flakes (Code analysis) ---------------------------------------------
 # FOR NOW WITH PYTHON 2.* Versions only. Will edit tests for PYTHON 3.* Versions
-# Test...both python versions
-   - pytest -v --flakes; 
-  #- if [[ $TRAVIS_PYTHON_VERSION == 2* ]]; then pytest -v --flakes; fi
-  #- if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then pytest -v --flakes tests/test_StrUni.py::test_Unicode tests/test_StrUni.py::test_RUN tests/test_sys_argv.txt::test_sys_argv.txt; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 2* ]]; then pytest -v --flakes; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then pytest -v --flakes tests/test_StrUni.py::test_Unicode tests/test_StrUni.py::test_RUN tests/test_sys_argv.txt::test_sys_argv.txt; fi
 
 # FOR NOW WITH PYTHON 2.* Versions only. Will edit tests for PYTHON 3.* Versions
-# Test...both python versions
-   - pytest --doctest-modules
 #  - pytest -v # or py.test for Python versions 3.5 and below
-  #- if [[ $TRAVIS_PYTHON_VERSION == 2* ]]; then pytest --doctest-modules; fi # Attempt to run test_*.txt with doctest
+  - if [[ $TRAVIS_PYTHON_VERSION == 2* ]]; then pytest --doctest-modules; fi # Attempt to run test_*.txt with doctest
 #  - pytest --doctest-modules # Attempt to run test_*.txt with doctest
 
 # Deleted Pics Non existant on FLickr -----------------------------------------

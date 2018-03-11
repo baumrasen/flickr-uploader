@@ -95,19 +95,11 @@ before_script:
 script:
 
 # pytest --flakes (Code analysis) ---------------------------------------------
-# FOR NOW WITH PYTHON 2.* Versions only. Will edit tests for PYTHON 3.* Versions
   - pytest -v --flakes
-  #- if [[ $TRAVIS_PYTHON_VERSION == 2* ]]; then pytest -v --flakes; fi
-  #- if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then pytest -v --flakes tests/test_StrUni.py::test_Unicode tests/test_StrUni.py::test_RUN tests/test_sys_argv.txt::test_sys_argv.txt; fi
-
 # pytest ----------------------------------------------------------------------
-# FOR NOW WITH PYTHON 2.* Versions only. Will edit tests for PYTHON 3.* Versions
   - pytest -v
 # pytest --doctest-modules ----------------------------------------------------
   - pytest --doctest-modules
-#  - pytest -v # or py.test for Python versions 3.5 and below
-  #- if [[ $TRAVIS_PYTHON_VERSION == 2* ]]; then pytest --doctest-modules; fi # Attempt to run test_*.txt with doctest
-#  - pytest --doctest-modules # Attempt to run test_*.txt with doctest
   
 # DELETE RUN ------------------------------------------------------------------
 # !!!!!!!!!!!!!!!!!!!!!!!!!! CAREFULL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -117,7 +109,8 @@ script:
   - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then coverage run -a --concurrency multiprocessing ./flickr-deletr-master/delete.py; fi
 
 # First RUN -------------------------------------------------------------------
-  - coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log 2> /home/travis/build/oPromessa/flickr-uploader/nohup.err
+  #- coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log 2> /home/travis/build/oPromessa/flickr-uploader/nohup.err
+  - coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log 
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.err
 

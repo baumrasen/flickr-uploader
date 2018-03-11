@@ -15,8 +15,14 @@ True
 False
 >>> StrUni.StrUnicodeOut(str(2)+u'some text')
 '2some text'
->>> a = unicode('hello')
->>> StrUni.isThisStringUnicode(a)
+>>> if sys.version_info < (3, ):
+...     a = unicode('hello')
+... else:
+...     a = u'hello'
+>>> if sys.version_info < (3, ):
+...     StrUni.isThisStringUnicode(a) == True
+... else:
+...     StrUni.isThisStringUnicode(a) == False
 True
 >>> b = u'Árvore'
 >>> print('a:[{!s}] b:[{!s}]'.format(StrUni.StrUnicodeOut(a), StrUni.StrUnicodeOut(b)))
@@ -24,7 +30,3 @@ a:[hello] b:[Árvore]
 >>> c = unicode('Árvore'.decode('utf-8')) if sys.version_info < (2, 7) else b
 >>> print('c:[{!s}]'.format(StrUni.StrUnicodeOut(c)))
 c:[Árvore]
-
-
-
-        >>> if sys.version_info < (3, ):

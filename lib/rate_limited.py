@@ -22,6 +22,9 @@ import sys
 import logging
 import multiprocessing
 import time
+import random
+import sqlite3 as lite
+import flickrapi
 from functools import wraps
 from . import niceprint
 
@@ -201,21 +204,14 @@ def retry(attempts=3, waittime=5, randtime=False):
     randtime = Randomize the Wait time from 1 to randtime for each Attempt
 
     >>> import lib.rate_limited as rt
-    >>> @rt.retry()
+    >>> @rt.retry(attempts=3, waittime=3, randtime=True)
     ... def f():
     ...     print(x)
     ...
     >>> f()
     Traceback (most recent call last):
-        ...
-    NameError: multi
-        line
-    detail
+    NameError: global name 'x' is not defined
     """
-
-    #     ...
-    # NameError: global name 'x' is not defined
-
     def wrapper_fn(f):
         @wraps(f)
         def new_wrapper(*args, **kwargs):
@@ -321,7 +317,6 @@ if __name__ == "__main__":
 
     print('-------------------------------------------------Multi Processing')
     def fmulti(x, prc):
-        import random
 
         for i in range(1,x):
             r = random.randrange(6)

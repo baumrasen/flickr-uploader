@@ -63,7 +63,7 @@ class niceprint:
         False
         >>> np.isThisStringUnicode(u'Unicode string')
         True
-        >>> isThisStringUnicode(2)
+        >>> np.isThisStringUnicode(2)
         False
         """
         # CODING: Python 2 and 3 compatibility

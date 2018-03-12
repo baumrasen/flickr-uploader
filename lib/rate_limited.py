@@ -210,7 +210,7 @@ def retry(attempts=3, waittime=5, randtime=False):
     ...
     >>> f()
     Traceback (most recent call last):
-    NameError: global name 'x' is not defined
+    NameError: name 'x' is not defined
     """
     def wrapper_fn(f):
         @wraps(f)

@@ -25,12 +25,21 @@ UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 #
 class niceprint:
     """
+        >>> import sys
         >>> import lib.niceprint as npc
         >>> np = npc.niceprint()
-        >>> np.isThisStringUnicode('Hello')
-        False
-        >>> np.isThisStringUnicode(u'With u prefix')
+        >>> if sys.version_info < (3, ):
+        ...     np.isThisStringUnicode('Something') == False
+        ... else:
+        ...     no.isThisStringUnicode('Something') == False
         True
+        >>> if sys.version_info < (3, ):
+        ...     np.isThisStringUnicode(u'With u prefix') == True
+        ... else:
+        ...     np.isThisStringUnicode(u'With u prefix') == False
+        True
+        >>> np.isThisStringUnicode(245)
+        False
     """
     # -------------------------------------------------------------------------
     # class niceprint __init__
@@ -56,15 +65,6 @@ class niceprint:
                                      file.encode('utf-8') \
                                      if isThisStringUnicode(file) \
                                      else file))
-
-        >>> import lib.niceprint as npc
-        >>> np = npc.niceprint()
-        >>> np.isThisStringUnicode('No Unicode string')
-        False
-        >>> np.isThisStringUnicode(u'Unicode string')
-        True
-        >>> np.isThisStringUnicode(2)
-        False
         """
         # CODING: Python 2 and 3 compatibility
         # CODING: On Python 3 should always return False to return s

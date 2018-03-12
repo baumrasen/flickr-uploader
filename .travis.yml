@@ -47,7 +47,7 @@ env:
     - VerboseVar=-v
     - BadFilesVar=-b
     - ExcludedVar=--remove-excluded
-    - ListPhotosNotInSet=-l
+    - ListPhotosNotInSet="-l 100"
     - TAIL_LINES=200  # Tail $TAIL_LINES for output logging. Default: 20
     - WAIT_TIME=2     # Sleep time between first and second run
 # Delete !!!!!!!!!!!!!!!!!!! CAREFULL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

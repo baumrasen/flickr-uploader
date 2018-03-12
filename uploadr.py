@@ -3702,8 +3702,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
         notinsetResp = R_photos_getNotInSet(dict(per_page=per_page))
 
-        # notinsetResp = nuflickr.photos.getNotInSet(per_page=per_page)
-
         return notinsetResp
 
     # -------------------------------------------------------------------------
@@ -3868,10 +3866,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                      date_taken='{!s}'.format(datetxt),
                                      date_taken_granularity=0))
 
-            # respDate = nuflickr.photos.setdates(
-            #                     photo_id=photo_id,
-            #                     date_taken='{!s}'.format(datetxt),
-            #                     date_taken_granularity=0)
             logging.debug('Output for {!s}:'.format('respDate'))
             logging.debug(xml.etree.ElementTree.tostring(
                                     respDate,
@@ -3891,9 +3885,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         exceptCode=ex.code,
                         exceptMsg=ex,
                         NicePrint=True)
-            # logging.error('Sleep 10 and try to set date again.')
-            # np.niceprint('Sleep 10 and try to set date again.')
-            # nutime.sleep(10)
         except (IOError, httplib.HTTPException):
             reportError(Caught=True,
                         CaughtPrefix='+++',
@@ -3901,9 +3892,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         CaughtMsg='Caught IOError, HTTP exception'
                                   'on photos.setdates',
                         NicePrint=True)
-            # logging.error('Sleep 10 and try to set date again.')
-            # np.niceprint('Sleep 10 and try to set date again.')
-            # nutime.sleep(10)
         except:
             reportError(Caught=True,
                         CaughtPrefix='+++',
@@ -3911,9 +3899,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         CaughtMsg='Caught exception on photos.setdates',
                         NicePrint=True,
                         exceptSysInfo=True)
-            # logging.error('Sleep 10 and try to set date again.')
-            # np.niceprint('Sleep 10 and try to set date again.')
-            # nutime.sleep(10)
         finally:
             if (respDate is not None) and self.isGood(respDate):
                 logging.debug('Set Date Response: OK!')
@@ -4346,10 +4331,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
         Shows Total photos and Photos Not in Sets on Flickr
         InitialFoundFiles = shows the Found files prior to processing
         """
-        # Total Local photos count
+        # Total Local photos count --------------------------------------------
         con = lite.connect(DB_PATH)
         con.text_factory = str
-
         countlocal = 0
         with con:
             try:
@@ -4365,7 +4349,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                       .format(e.args[0]),
                             NicePrint=True)
 
-        # Total Local badfiles photos count
+        # Total Local badfiles photos count -----------------------------------
         BadFilesCount = 0
         with con:
             try:
@@ -4383,21 +4367,18 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                       .format(e.args[0]),
                             NicePrint=True)
 
-        # Total FLickr photos count:
-        #       find('photos').attrib['total']
-        countflickr = 0
+        # Total FLickr photos count: find('photos').attrib['total'] -----------
+        countflickr = -1
         res = self.people_get_photos()
-        if not self.isGood(res):
-            raise IOError(res)
         logging.debug('Output for people_get_photos:')
         logging.debug(xml.etree.ElementTree.tostring(res,
                                                      encoding='utf-8',
                                                      method='xml'))
-
-        countflickr = format(res.find('photos').attrib['total'])
-        logging.debug('Total photos on flickr: {!s}'.format(countflickr))
-
-        # Total photos not on Sets/Albums on FLickr
+        if self.isGood(res):
+            countflickr = format(res.find('photos').attrib['total'])
+            logging.debug('Total photos on flickr: {!s}'.format(countflickr))
+          
+        # Total photos not on Sets/Albums on FLickr ---------------------------
         # (per_page=1 as only the header is required to obtain total):
         #       find('photos').attrib['total']
         try:
@@ -4438,7 +4419,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 logging.debug('Photos not in sets on flickr: {!s}'
                               .format(countnotinsets))
 
-            # Print total stats counters
+            # Print total stats counters --------------------------------------
             np.niceprint('\n  Initial Found Files:[{!s:>6s}]\n'
                          '          - Bad Files:[{!s:>6s}] = [{!s:>6s}]\n'
                          '                 Note: some Bad files may no '
@@ -4454,7 +4435,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                  str(countflickr),
                                  str(countnotinsets)))
 
-        # List pics not in sets (if within a parameter)
+        # List pics not in sets (if within a parameter) -----------------------
         # Maximum allowed per_page by Flickr is 500.
         # Avoid going over in order not to have to handle multipl pages.
         if (args.list_photos_not_in_set and
@@ -4466,29 +4447,34 @@ set0 = sets.find('photosets').findall('photoset')[0]
             #       find('photos').attrib['total']
             res = self.photos_get_not_in_set(min(args.list_photos_not_in_set,
                                                  500))
-            if not self.isGood(res):
-                raise IOError(res)
             logging.debug('Output for list get_not_in_set:')
             logging.debug(xml.etree.ElementTree.tostring(res,
                                                          encoding='utf-8',
                                                          method='xml'))
-            for count, row in enumerate(res.find('photos').findall('photo')):
-                logging.info('Photo get_not_in_set id:[{!s}] title:[{!s}]'
-                             .format(row.attrib['id'],
-                                     row.attrib['title']))
-                logging.debug(xml.etree.ElementTree.tostring(row,
-                                                             encoding='utf-8',
-                                                             method='xml'))
-                np.niceprint('Photo get_not_in_set: id:[{!s}] title:[{!s}] '
-                             .format(row.attrib['id'],
-                                     row.attrib['title']))
-                logging.info('count=[{!s}]'.format(count))
-                if (count == 500) or \
-                        (count >= (args.list_photos_not_in_set-1)) or \
-                        (count >= (countnotinsets-1)):
-                    logging.info('Stopped at photo [{!s}] listing '
-                                  'photos not in a set'.format(count))
-                    break
+
+            if self.isGood(res):
+                for count, row in enumerate(res.find('photos')
+                                            .findall('photo')):
+                    logging.info('Photo get_not_in_set id:[{!s}] title:[{!s}]'
+                                 .format(row.attrib['id'],
+                                         row.attrib['title']))
+                    logging.debug(xml.etree.ElementTree.tostring(
+                                                            row,
+                                                            encoding='utf-8',
+                                                            method='xml'))
+                    np.niceprint('Photo get_not_in_set: id:[{!s}] title:[{!s}] '
+                                 .format(row.attrib['id'],
+                                         row.attrib['title']))
+                    logging.info('count=[{!s}]'.format(count))
+                    if (count == 500) or \
+                            (count >= (args.list_photos_not_in_set-1)) or \
+                            (count >= (countnotinsets-1)):
+                        logging.info('Stopped at photo [{!s}] listing '
+                                      'photos not in a set'.format(count))
+                        break
+            else:
+                np.niceprint('Error in list get_not_in_set. No output.')
+
             np.niceprint('*****Completed Listing Photos not in a set '
                       'in Flickr******')
 

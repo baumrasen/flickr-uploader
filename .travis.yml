@@ -27,7 +27,7 @@ before_install:
 # command to install dependencies
 install:
   - pip install -r requirements.txt
-# Get deletr. For future use to delete all pics frmo Flickr prior to a run
+# Get deletr to delete all pics Flickr prior to a run
   - wget https://github.com/oPromessa/flickr-deletr/archive/master.tar.gz -O flickr-deletr-master.tar.gz
   - tar zxvf flickr-deletr-master.tar.gz
 # Get papertrail.com remote_syslog2
@@ -47,6 +47,7 @@ env:
     - VerboseVar=-v
     - BadFilesVar=-b
     - ExcludedVar=--remove-excluded
+    - ListPhotosNotInSet=-l
     - TAIL_LINES=200  # Tail $TAIL_LINES for output logging. Default: 20
     - WAIT_TIME=2     # Sleep time between first and second run
 # Delete !!!!!!!!!!!!!!!!!!! CAREFULL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -65,21 +66,20 @@ env:
 # addAlbumsMigrate. Option --add-albums-migrate is added on SECOND RUN
     - TestScenario=addAlbumsMigrate UploadrOptions="$VerboseVar $BadFilesVar -p 20"
 # RemoveReplace, Multiprocessing. Also test cleaning up badfiles database entries
-    - TestScenario=RemoveReplace UploadrOptions="$VerboseVar $BadFilesVar -p 10 -c"
+    - TestScenario=RemoveReplace UploadrOptions="$VerboseVar $BadFilesVar $ListPhotosNotInSet -p 10 -c"
 # ExcludedFolders+IgnoredFiles in Single Processing mode. Also test cleaning up badfiles database entries
     - TestScenario=ExcludedFolders UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -c"
 # =============================================================================
 # before_script
-# Get database token ready
-# Get uploadr.ini from tests
-# Use environment secure variable for private settings
+#    - Get database token ready
+#    - Get uploadr.ini from tests
+#    - Use environment secure variable for private settings
 before_script:
   - pwd
   - pythonVersion=`python -V 2>&1 | cut -d\  -f2`
   - echo $pythonVersion
   - echo Travis Python Version
   - echo ${TRAVIS_PYTHON_VERSION}
-#  - ls -laR
   - cp tests/uploadr.ini .
   - cp tests/uploadr.ini /home/travis/virtualenv/python$pythonVersion/bin/uploadr.ini || cp tests/uploadr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/uploadr.ini
   - grep FILES_DIR uploadr.ini
@@ -88,12 +88,14 @@ before_script:
   - sqlite3 token/oauth-tokens.sqlite 'SELECT * FROM oauth_tokens;'
   - find "./tests/Test Photo Library" -type f -exec md5sum '{}' \;
   - remote_syslog/remote_syslog -c ~/syslog2.yml
+# Prevent errors in case log and err files are not generated
+  - touch /home/travis/build/oPromessa/flickr-uploader/nohup.log
+  - touch /home/travis/build/oPromessa/flickr-uploader/nohup.err
 
 
 # =============================================================================
 # run script for tests
 script:
-
 # pytest --flakes (Code analysis) ---------------------------------------------
   - pytest -v --flakes
 # pytest ----------------------------------------------------------------------

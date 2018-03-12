@@ -21,7 +21,7 @@ import time
 class UPLDRConstants:
     """ UPLDRConstants class
 
-        >>> import UPLDRConstants as UPLDRConstantsClass
+        >>> import lib.UPLDRConstants as UPLDRConstantsClass
         >>> UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
         >>> UPLDRConstants.nuMediacount = 999
         >>> print(UPLDRConstants.nuMediacount)

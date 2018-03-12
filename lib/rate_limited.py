@@ -33,7 +33,7 @@ from . import niceprint
 #
 class LastTime:
     """
-        >>> import rate_limited as rt
+        >>> import lib.rate_limited as rt
         >>> a = rt.LastTime()
         ...
         >>> a.add_cnt()

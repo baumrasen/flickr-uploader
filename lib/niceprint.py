@@ -25,7 +25,7 @@ UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 #
 class niceprint:
     """
-        >>> import niceprint as npc
+        >>> import lib.niceprint as npc
         >>> np = npc.niceprint()
         >>> np.isThisStringUnicode('Hello')
         False
@@ -57,7 +57,7 @@ class niceprint:
                                      if isThisStringUnicode(file) \
                                      else file))
 
-        >>> import niceprint as npc
+        >>> import lib.niceprint as npc
         >>> np = npc.niceprint()
         >>> np.isThisStringUnicode('No Unicode string')
         False
@@ -93,7 +93,7 @@ class niceprint:
         Outputs s.encode('utf-8') if isThisStringUnicode(s) else s
             niceprint('Checking file:[{!s}]...'.format(StrUnicodeOut(file))
 
-        >>> import niceprint as npc
+        >>> import lib.niceprint as npc
         >>> np = npc.niceprint()
         >>> np.StrUnicodeOut('Hello')
         'Hello'

@@ -210,7 +210,7 @@ def retry(attempts=3, waittime=5, randtime=False):
     ...
     >>> f()
     Traceback (most recent call last):
-    NameError: name 'x' is not defined
+    NameError: ...
     """
     def wrapper_fn(f):
         @wraps(f)

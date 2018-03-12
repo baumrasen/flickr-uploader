@@ -3345,7 +3345,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         CaughtMsg='Flickrapi exception on photos.search',
                         exceptUse=True,
                         exceptCode=ex.code,
-                        exceptMsg=ex)
+                        exceptMsg=ex,
+                        NicePrint=True,
+                        exceptSysInfo=True)
         except (IOError, httplib.HTTPException):
             reportError(Caught=True,
                         CaughtPrefix='+++',
@@ -3659,7 +3661,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         CaughtMsg='Error in photos.search',
                         exceptUse=True,
                         exceptCode=ex.code,
-                        exceptMsg=ex)
+                        exceptMsg=ex,
+                        NicePrint=True,
+                        exceptSysInfo=True)
         except (IOError, httplib.HTTPException):
             reportError(Caught=True,
                         CaughtPrefix='+++',
@@ -4521,9 +4525,10 @@ if __name__ == "__main__":
                                  'See also -x option. '
                                  'See also LOGGING_LEVEL value in INI file.')
     vgrpparser.add_argument('-x', '--verbose-progress', action='store_true',
-                             help='Provides progress indicator on each upload. '
-                                  'Normally used in conjunction with -v option.'
-                                  ' See also LOGGING_LEVEL value in INI file.')
+                             help='Provides progress indicator on each upload.'
+                                  ' Normally used in conjunction with '
+                                  '-v option. '
+                                  'See also LOGGING_LEVEL value in INI file.')
     vgrpparser.add_argument('-n', '--dry-run', action='store_true',
                             help='Dry run. No changes are actually performed.')
 

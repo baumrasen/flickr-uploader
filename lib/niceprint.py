@@ -31,7 +31,7 @@ class niceprint:
         >>> if sys.version_info < (3, ):
         ...     np.isThisStringUnicode('Something') == False
         ... else:
-        ...     no.isThisStringUnicode('Something') == False
+        ...     np.isThisStringUnicode('Something') == False
         True
         >>> if sys.version_info < (3, ):
         ...     np.isThisStringUnicode(u'With u prefix') == True

@@ -16,7 +16,7 @@ setup(
       url='https://github.com/oPromessa/flickr-uploader/',
 
       # Packages
-      packages=['uploadr'],
+      packages=['.'],
 
       # Include additional files into the package
       #include_package_data=True,
@@ -26,7 +26,7 @@ setup(
       # long_description=open("README.md").read(),
 
       # Dependent packages (distributions)
-      install_requires=[
-          "flickrapi",
-      ],
+      #install_requires=[
+      #    "flickrapi",
+      #],
 )

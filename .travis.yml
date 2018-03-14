@@ -14,7 +14,7 @@ python:
 # branches blacklist for TravisCI testing
 #branches:
 #  except:
-#  - dev-mar18
+  - dev-mar18-app
 
 before_install:
 # For use with wget into github account

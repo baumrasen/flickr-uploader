@@ -19,8 +19,8 @@ URL = 'https://github.com/oPromessa/flickr-uploader/',
 EMAIL = 'oPromessa@github.com'
 AUTHOR = 'oPromessa'
 REQUIRES_PYTHON = '>=2.7.*, >=3.6.*, <4'
-# VERSION = None # Load from __version__.py dictionary
-VERSION = '2.7.1'
+VERSION = None # Load from __version__.py dictionary
+# VERSION = '2.7.0'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
@@ -42,11 +42,11 @@ with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
 # Load the package's __version__.py module as a dictionary.
 about = {}
 if not VERSION:
-    with open(os.path.join(here, NAME, '__version__.py')) as f:
+    # with open(os.path.join(here, NAME, '__version__.py')) as f:
+    with open(os.path.join(here, '__version__.py')) as f:
         exec(f.read(), about)
 else:
     about['__version__'] = VERSION
-
 
 class UploadCommand(Command):
     """Support setup.py upload."""

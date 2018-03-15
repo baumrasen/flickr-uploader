@@ -12,8 +12,8 @@ python:
 
 # =============================================================================
 # branches blacklist for TravisCI testing
-#branches:
-#  except:
+branches:
+  except:
   - dev-mar18-app
 
 before_install:

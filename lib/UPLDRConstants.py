@@ -39,8 +39,18 @@ class UPLDRConstants:
     #   Run        = Identify the execution Run of this process. Unique number
     #
     TimeFormat = '%Y.%m.%d %H:%M:%S'
-    Version = '2.7.1'
     Run = eval(time.strftime('int("%j")+int("%H")*100+int("%M")'))
+    try:
+        __version__ = None
+        fname = '__version__.py'
+        exec(compile(open(fname, "rb").read(), fname, 'exec'))
+    except:
+        Version = '2.7.0'
+    finally:
+        if __version__ is not None:
+            Version = __version__
+        else:
+            Version = '2.7.0'
 
     # -------------------------------------------------------------------------
     # Color Codes for colorful output

@@ -5,3 +5,5 @@
 .flickrlock
 flickrdb
 *.pyc
+dist
+flickr_uploader.egg-info/*

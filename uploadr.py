@@ -4616,18 +4616,25 @@ if __name__ == "__main__":
 
     logging.warning('FILES_DIR: [{!s}]'.format(StrUnicodeOut(FILES_DIR)))
     if FILES_DIR == "":
-        np.niceprint('Please configure the name of the folder [FILES_DIR] '
-                     'in the INI file [normally uploadr.ini], '
+        np.niceprint('Please configure in the INI file [normally uploadr.ini],'
+                     ' the name of the folder [FILES_DIR] '
                      'with media available to sync with Flickr.')
         sys.exit(8)
     else:
         if not os.path.isdir(FILES_DIR):
+            logging.critical('FILES_DIR: [{!s}] is not valid.'
+                             .format(StrUnicodeOut(FILES_DIR)))
             np.niceprint('Please configure the name of an existant folder '
                          'in the INI file [normally uploadr.ini] '
-                         'with media available to sync with Flickr.')
+                         'with media available to sync with Flickr.'
+                         'FILES_DIR: [{!s}] is not valid.'
+                         .format(StrUnicodeOut(FILES_DIR)))
             sys.exit(9)
 
     if FLICKR["api_key"] == "" or FLICKR["secret"] == "":
+        logging.critical('Please enter an API key and secret in the '
+                         'configuration '
+                         'script file, normaly uploadr.ini (see README).')
         np.niceprint('Please enter an API key and secret in the configuration '
                      'script file, normaly uploadr.ini (see README).')
         sys.exit(10)

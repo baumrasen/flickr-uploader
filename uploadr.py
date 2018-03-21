@@ -548,7 +548,7 @@ class Uploadr:
         self.token = self.getCachedToken()
 
         # Add mimetype .3gp to allow detection of .3gp as video
-        logging.info('Adding mimetpye "video/3gp"/".3gp"')
+        logging.info('Adding mimetype "video/3gp"/".3gp"')
         mimetypes.add_type('video/3gpp', '.3gp')
         if not mimetypes.types_map['.3gp'] == 'video/3gpp':
             reportError(Caught=True,
@@ -4626,7 +4626,7 @@ if __name__ == "__main__":
                              .format(StrUnicodeOut(FILES_DIR)))
             np.niceprint('Please configure the name of an existant folder '
                          'in the INI file [normally uploadr.ini] '
-                         'with media available to sync with Flickr.'
+                         'with media available to sync with Flickr. '
                          'FILES_DIR: [{!s}] is not valid.'
                          .format(StrUnicodeOut(FILES_DIR)))
             sys.exit(9)

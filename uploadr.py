@@ -4,14 +4,16 @@
     by oPromessa, 2017
     Published on https://github.com/oPromessa/flickr-uploader/
 
-    THIS SCRIPT IS PROVIDED WITH NO WARRANTY WHATSOEVER.
-    PLEASE REVIEW THE SOURCE CODE TO MAKE SURE IT WILL WORK FOR YOUR NEEDS.
-    FEEDBACK ON ANY TESTING AND FEEDBACK YOU DO IS GREATLY APPRECIATED.
-    IF YOU FIND A BUG, PLEASE REPORT IT.
+    ## LICENSE.txt
+    --------------
+    * Check usage and licensing notice on LICENSE.txt file.
+    * PLEASE REVIEW THE SOURCE CODE TO MAKE SURE IT WILL WORK FOR YOUR NEEDS.
 
     ## CONTRIBUTIONS ARE WELCOME!
     -----------------------------
     * Check CONTRIBUTING and TODO files
+    * FEEDBACK ON ANY TESTING AND FEEDBACK YOU DO IS GREATLY APPRECIATED.
+    * IF YOU FIND A BUG, PLEASE REPORT IT.
 
     ## Recognition
     --------------
@@ -33,7 +35,6 @@
         ### Recognition
         ### Final remarks
         ### Q&A
-
 """
 
 # =============================================================================

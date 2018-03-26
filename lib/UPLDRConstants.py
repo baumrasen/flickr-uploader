@@ -48,8 +48,6 @@ class UPLDRConstants:
             Version = '2.7.0'
     except:
         Version = '2.7.0'
-    finally:
-
 
     # -------------------------------------------------------------------------
     # Color Codes for colorful output

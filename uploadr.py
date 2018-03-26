@@ -936,9 +936,6 @@ class Uploadr:
                     for p in multiprocessing.active_children():
                         logging.debug('==={!s}.is_alive = {!s}'
                                       .format(p.name, p.is_alive()))
-                        if (args.verbose_progress):
-                            np.niceprint('==={!s}.is_alive = {!s}'
-                                         .format(p.name, p.is_alive()))
                         uploadTaskActive = p
                     logging.info('===Will wait for 60 on {!s}.is_alive = {!s}'
                                  .format(uploadTaskActive.name,
@@ -1421,10 +1418,23 @@ class Uploadr:
                     self.useDBLock(lock, False)
 
                 if DBexception:
-                    logging.error('Sleep 2 and retry SQL...')
-                    np.niceprint('Sleep 2 and retry SQL...')
+                    reportError(Caught=True,
+                                CaughtPrefix='+++ DB',
+                                CaughtCode='031',
+                                CaughtMsg='Sleep 2 and retry SQL...'
+                                          '[{!s}/{!s} attempts]'
+                                          .format(x, MAX_SQL_ATTEMPTS),
+                                NicePrint=True)
                     nutime.sleep(2)
                 else:
+                    if (x > 0):
+                        reportError(Caught=True,
+                                CaughtPrefix='+++ DB',
+                                CaughtCode='032',
+                                CaughtMsg='Succeeded at retry SQL...'
+                                          '[{!s}/{!s} attempts]'
+                                          .format(x, MAX_SQL_ATTEMPTS),
+                                NicePrint=True)
                     logging.info(
                         'END SQL:[{!s}]...[{!s}/{!s} attempts].'
                         .format('INSERT INTO files',
@@ -4032,9 +4042,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         for p in multiprocessing.active_children():
                             logging.debug('==={!s}.is_alive = {!s}'
                                           .format(p.name, p.is_alive()))
-                            if (args.verbose_progress):
-                                np.niceprint('==={!s}.is_alive = {!s}'
-                                             .format(p.name, p.is_alive()))
                             mTaskActive = p
                         logging.info('===Will wait for 60 on '
                                      '{!s}.is_alive = {!s}'

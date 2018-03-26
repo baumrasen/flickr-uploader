@@ -42,7 +42,6 @@
    * successful update of date/time in videos
    * successful replacement of photos
 * Change code to insert on database prior to upload and then update result.
-* On first authenticate... removedeletemedia seems to fail
 * Test if it Re-upload or not pictures removed from flickr Web interface.
 * CODING: Should extend this control to other parameters (Enhancement #7)
    * Check error:  DuplicateSectionError or DuplicateOptionError.

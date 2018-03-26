@@ -14,6 +14,7 @@ from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 # Import section
 #
 import time
+from . import __version__
 
 # -----------------------------------------------------------------------------
 # class UPLDRConstants wiht Global Constants and Variables for flickr-uploadr.
@@ -41,16 +42,14 @@ class UPLDRConstants:
     TimeFormat = '%Y.%m.%d %H:%M:%S'
     Run = eval(time.strftime('int("%j")+int("%H")*100+int("%M")'))
     try:
-        __version__ = None
-        fname = '__version__.py'
-        exec(compile(open(fname, "rb").read(), fname, 'exec'))
+        if __version__.__version__ is not None:
+            Version = __version__.__version__
+        else:
+            Version = '2.7.0'
     except:
         Version = '2.7.0'
     finally:
-        if __version__ is not None:
-            Version = __version__
-        else:
-            Version = '2.7.0'
+
 
     # -------------------------------------------------------------------------
     # Color Codes for colorful output

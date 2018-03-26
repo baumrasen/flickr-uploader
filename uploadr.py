@@ -1478,7 +1478,7 @@ class Uploadr:
             except lite.Error as e:
                 reportError(Caught=True,
                             CaughtPrefix='+++ DB',
-                            CaughtCode='015',
+                            CaughtCode='035',
                             CaughtMsg='DB error on SELECT: [{!s}]'
                                       .format(e.args[0]),
                             NicePrint=True)
@@ -1657,7 +1657,7 @@ class Uploadr:
                         except (IOError, httplib.HTTPException):
                             reportError(Caught=True,
                                         CaughtPrefix='+++',
-                                        CaughtCode='020',
+                                        CaughtCode='038',
                                         CaughtMsg='Caught IOError, '
                                         'HTTP exception',
                                         NicePrint=True)

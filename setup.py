@@ -108,6 +108,7 @@ setup(
     # },
     install_requires=REQUIRED,
     include_package_data=True,
+    scripts=['uploadr.py'],
     license='MIT',
     classifiers=[
         # Trove classifiers

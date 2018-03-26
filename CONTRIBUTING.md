@@ -13,8 +13,8 @@
   sure to break lines with \ correctly. Be careful.
 * Use niceprint function to output messages to stdout.
 * Use logging. for CRITICAL, ERROR, WARNING, INFO, DEBUG messages to stderr
-* Some ocasional critical messages are generated with `sys.stderr.write()C
-* Specific CODING related comments are marked with 'CODING' keyword
+* Some ocasional critical messages are generated with `sys.stderr.write()`
+* Specific CODING related comments are marked with CODING` keyword
 * Prefix coding for some output messages:
    * `*****`   Section informative
    * `===`     Multiprocessing related
@@ -62,7 +62,11 @@
       * error 502: flickrapi
       * error 504: flickrapi
 * While testing with pytest --flakes Python 2 and 3 compatibility is
-  achieved by avoiding warnings on lines that contain a # noqa comment at
+  achieved by avoiding warnings on lines that contain a `# noqa comment at
   the end will not issue warnings. Applicable on use of unicode for
-  instance. Please note. "# noqa" must appear **as is** at the end of the
-  line to be ignores.
+  instance. Please note. `# noqa` must appear **as is** at the end of the
+  line to be ignored.
+    ```python
+          FILES_DIR = unicode(  # noqa
+                            '', 'utf-8') if sys.version_info < (3, ) else str('')
+    ```

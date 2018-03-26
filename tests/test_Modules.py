@@ -58,7 +58,7 @@ class TestMethods(unittest.TestCase):
         for j in range(1, 366+1):
             for h in range(24):
                 for m in range(60):
-                    self.assertTrue (1 <= eval(time.strftime(
+                    self.assertTrue(1 <= eval(time.strftime(
                                 'int("%j")+int("%H")*100+int("%M")')) <= 2725)
 
     def test_Unicode(self):

@@ -128,6 +128,8 @@ nurunning = None
 # -----------------------------------------------------------------------------
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 UPLDRConstants.nuMediacount = 0
+sys.stderr.write('Before baseDir: ' + UPLDRConstants.baseDir + '\n')
+sys.stderr.write('argv[0]: ' + os.path.dirname(sys.argv[0]) + '\n')
 UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
 sys.stderr.write('baseDir: ' + UPLDRConstants.baseDir + '\n')
 UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")

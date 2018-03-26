@@ -124,7 +124,6 @@ else:
 
 # =============================================================================
 # Global Variables
-# CODING: Consider moving them into Class UPLDRConstants!!!
 #
 #   nutime       = for working with time module (import time)
 #   nuflickr     = object for flickr API module (import flickrapi)
@@ -132,8 +131,12 @@ else:
 #   nulockDB     = multiprocessing Lock for access to Database
 #   numutex      = multiprocessing mutex to control access to value nurunning
 #   nurunning    = multiprocessing Value to count processed photos
-#   nuMediacount = counter of total files to initially upload
-#                = moved to class UPLDRConstants
+#
+# =============================================================================
+# Class UPLDRConstants
+#
+#   nuMediacount = Counter of total files to initially upload
+#   baseDir      = Base configuration directory for files
 # -----------------------------------------------------------------------------
 nutime = time
 nuflickr = None
@@ -143,6 +146,24 @@ nurunning = None
 # -----------------------------------------------------------------------------
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 UPLDRConstants.nuMediacount = 0
+try:
+    UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
+    UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir,
+                                          "uploadr.ini")
+    if not (os.path.isdir(UPLDRConstants.baseDir) and
+                os.path.isfile(UPLDRConstants.INIfile)):
+        raise OSError('[Errno 2] No such file or directory')
+except Exception as err:
+    sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] config folder [{!s}] '
+                     'and/or INI file: [{!s}] '
+                     'not found or incorrect format: [{!s}]! Exiting...\n'
+                     .format(nutime.strftime(UPLDRConstants.TimeFormat),
+                             os.getpid(),
+                             UPLDRConstants.baseDir,
+                             UPLDRConstants.INIfile,
+                             str(err)))
+    sys.stderr.flush()
+    sys.exit(2)
 # -----------------------------------------------------------------------------
 np = niceprint.niceprint()
 StrUnicodeOut = np.StrUnicodeOut
@@ -157,15 +178,13 @@ reportError = np.reportError
 config = ConfigParser.ConfigParser()
 try:
     INIFiles = None
-    INIFiles = config.read(os.path.join(os.path.dirname(sys.argv[0]),
-                                        "uploadr.ini"))
+    INIFiles = config.read(UPLDRConstants.INIfile)
 except Exception as err:
     sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] INI file: [{!s}] '
                      'not found or incorrect format: [{!s}]!\n'
                      .format(nutime.strftime(UPLDRConstants.TimeFormat),
                              os.getpid(),
-                             os.path.join(os.path.dirname(sys.argv[0]),
-                                          'uploadr.ini'),
+                             UPLDRConstants.INIfile,
                              str(err)))
     sys.stderr.flush()
 if not INIFiles:
@@ -173,8 +192,7 @@ if not INIFiles:
                      'not found or incorrect format! Exiting...\n'
                      .format(nutime.strftime(UPLDRConstants.TimeFormat),
                              os.getpid(),
-                             os.path.join(os.path.dirname(sys.argv[0]),
-                                          'uploadr.ini')))
+                             UPLDRConstants.INIfile))
     sys.stderr.flush()
     sys.exit(2)
 # -----------------------------------------------------------------------------
@@ -184,8 +202,7 @@ if not config.has_section('Config'):
                      'has no [Config] section! Exiting...\n'
                      .format(nutime.strftime(UPLDRConstants.TimeFormat),
                              os.getpid(),
-                             os.path.join(os.path.dirname(sys.argv[0]),
-                                          'uploadr.ini')))
+                            UPLDRConstants.INIfile))
     sys.stderr.flush()
     sys.exit(2)
 # -----------------------------------------------------------------------------
@@ -209,8 +226,7 @@ if (int(str(LOGGING_LEVEL)) if str.isdigit(str(LOGGING_LEVEL)) else 99) not in\
                      'not defined or incorrect on INI file: [{!s}]. '
                      'Assuming WARNING level.\n'.format(
                          nutime.strftime(UPLDRConstants.TimeFormat),
-                         os.path.join(os.path.dirname(sys.argv[0]),
-                                      "uploadr.ini")))
+                         UPLDRConstants.INIfile))
     sys.stderr.flush()
 LOGGING_LEVEL = int(str(LOGGING_LEVEL))
 if config.has_option('Config', 'FILES_DIR'):
@@ -245,12 +261,11 @@ except (ConfigParser.NoOptionError, ConfigParser.NoOptionError) as err:
                      .format(nutime.strftime(UPLDRConstants.TimeFormat),
                              os.getpid(),
                              str(err),
-                             os.path.join(os.path.dirname(sys.argv[0]),
-                                          "uploadr.ini"),
-                             os.path.join(os.path.dirname(sys.argv[0]),
+                             UPLDRConstants.INIfile,
+                             os.path.join(UPLDRConstants.baseDir,
                                           "token")))
     sys.stderr.flush()
-    TOKEN_CACHE = os.path.join(os.path.dirname(sys.argv[0]), "token")
+    TOKEN_CACHE = os.path.join(UPLDRConstants.baseDir, "token")
 LOCK_PATH = eval(config.get('Config', 'LOCK_PATH'))
 TOKEN_PATH = eval(config.get('Config', 'TOKEN_PATH'))
 # Read EXCLUDED_FOLDERS and convert them into Unicode folders
@@ -968,7 +983,7 @@ class Uploadr:
                                 'All processes finished.')
 
                 # Will release (set to None) the nulockDB lock control
-                # this prevents subsequent calls to useDBLock( nuLockDB, False)
+                # this prevents subsequent calls to useDBLock(nuLockDB, False)
                 # to raise exception:
                 #    ValueError('semaphore or lock released too many times')
                 logging.info('===Multiprocessing=== pool joined! '
@@ -4395,12 +4410,11 @@ if __name__ == "__main__":
         raise
 
     parser = argparse.ArgumentParser(
-        description='Upload files to Flickr. '
-        'Uses uploadr.ini as config file.',
+        description='Upload files to Flickr. Uses uploadr.ini as config file.',
         epilog='by oPromessa, 2017, 2018'
     )
 
-    # Verbose related options
+    # Verbose related options -------------------------------------------------
     vgrpparser = parser.add_argument_group('Verbose and dry-run options')
     vgrpparser.add_argument('-v', '--verbose', action='store_true',
                             help='Provides some more verbose output. '
@@ -4414,7 +4428,7 @@ if __name__ == "__main__":
     vgrpparser.add_argument('-n', '--dry-run', action='store_true',
                             help='Dry run. No changes are actually performed.')
 
-    # Information related options
+    # Information related options ---------------------------------------------
     igrpparser = parser.add_argument_group('Information options')
     igrpparser.add_argument('-i', '--title', action='store',
                             help='Title for uploaded files. '
@@ -4439,7 +4453,7 @@ if __name__ == "__main__":
                                  'same title, list SetName (if different). '
                                  'Not operational at this time.')
 
-    # Processing related options
+    # Processing related options ----------------------------------------------
     pgrpparser = parser.add_argument_group('Processing related options')
     pgrpparser.add_argument('-r', '--drip-feed', action='store_true',
                             help='Wait a bit between uploading individual '
@@ -4457,8 +4471,8 @@ if __name__ == "__main__":
                                  'Uploading every SLEEP_TIME seconds. Please '
                                  'note it only performs upload/replace.')
 
+    # Bad files related options -----------------------------------------------
     # Cater for bad files. files in your Library that flickr does not recognize
-    # Options: -b, -c, -s and -g
     bgrpparser = parser.add_argument_group('Handling bad and excluded files')
     # -b add files to badfiles table
     bgrpparser.add_argument('-b', '--bad-files', action='store_true',
@@ -4487,7 +4501,7 @@ if __name__ == "__main__":
                                  'in favor of --remove-excluded or -r. '
                                  'From version 2.7.0 it will be dropped.')
 
-    # Migration related options
+    # Migration related options -----------------------------------------------
     # 2.7.0 Version will add album/setName as one
     agrpparser = parser.add_argument_group('Migrate to v2.7.0')
     agrpparser.add_argument('--add-albums-migrate', action='store_true',

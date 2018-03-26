@@ -35,9 +35,12 @@ class UPLDRConstants:
     # Class Global Variables
     #   class variable shared by all instances
     #
-    #   TimeFormat = Format to display date and time. Used with strftime
-    #   Version    = Version Major.Minor.Fix
-    #   Run        = Identify the execution Run of this process. Unique number
+    #   TimeFormat   = Format to display date and time. Used with strftime
+    #   Version      = Version Major.Minor.Fix
+    #   Run          = Identify the execution Run of this process. Unique number
+    #   nuMediacount = Counter of total files to initially upload
+    #   baseDir      = Base configuration directory for files
+    #   INIfile      = Location of INI file, normally named "uploadr.ini"
     #
     TimeFormat = '%Y.%m.%d %H:%M:%S'
     Run = eval(time.strftime('int("%j")+int("%H")*100+int("%M")'))
@@ -71,6 +74,8 @@ class UPLDRConstants:
         #   nuMediacount = counter of total files to initially upload
         #
         self.nuMediacount = None
+        self.baseDir = str('.')
+        self.INIfile = str('uploadr.ini')
 
 
 # -----------------------------------------------------------------------------

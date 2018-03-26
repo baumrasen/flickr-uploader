@@ -45,7 +45,8 @@
 * Test if it Re-upload or not pictures removed from flickr Web interface.
 * CODING: Should extend this control to other parameters (Enhancement #7)
    * Check error:  DuplicateSectionError or DuplicateOptionError.
-   * Check also: api_key. KeyError(key)   
+   * Check also: api_key. KeyError(key)
+* Use argument or current working directory for INI, token and config files
    
 ## Update History
 * Functions to be migrated...

@@ -38,39 +38,16 @@
 
 # =============================================================================
 # Import section for Python 2 and 3 compatible code
-# from __future__ import absolute_import, division, print_function, unicode_literals
+# from __future__ import absolute_import, division, print_function,
+#    unicode_literals
 from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 
 
 # =============================================================================
-# Initial Import section
+# Import section
 import sys
 import logging
-
-
-# =============================================================================
-# Init code
-#
-# Python version must be greater than 2.7 for this script to run
-#
-if sys.version_info < (2, 7):
-    sys.stderr.write("This script requires Python 2.7 or newer.\n")
-    sys.stderr.write("Current version: " + sys.version + "\n")
-    sys.stderr.flush()
-    sys.exit(1)
-else:
-    # Define LOGGING_LEVEL to allow logging even if everything's else is wrong!
-    LOGGING_LEVEL = logging.WARNING
-    sys.stderr.write('--------- ' + 'Init: ' + ' ---------\n')
-    sys.stderr.write('Python version on this system: ' + sys.version + '\n')
-    sys.stderr.flush()
-
-
-# =============================================================================
-# Import section
-#
-# Check if it is still required httplib
-#     Only use is for exception httplib.HTTPException
+# Check if required httplib: Used only on exception httplib.HTTPException
 try:
     import httplib as httplib      # Python 2
 except ImportError:
@@ -92,12 +69,9 @@ except ImportError:
 import multiprocessing
 import flickrapi
 import xml
-# CODING: For some systems this second import is required.
-# Seems to avoid the following problem:
-#    logging.info(xml.etree.ElementTree.tostring(
+# CODING: Avoids error on some systems:
 #    AttributeError: 'module' object has no attribute 'etree'
-# import xml.etree.ElementTree
-# try/exception/import xml.etree.ElementTree to address issue
+#    on logging.info(xml.etree.ElementTree.tostring(...
 try:
     dummyxml = xml.etree.ElementTree.tostring(
         xml.etree.ElementTree.Element('xml.etree'),
@@ -127,6 +101,25 @@ import lib.niceprint as niceprint
 # multiple attempts/times on error
 import lib.rate_limited as rate_limited
 retry = rate_limited.retry
+
+
+# =============================================================================
+# Init code
+#
+# Python version must be greater than 2.7 for this script to run
+#
+if sys.version_info < (2, 7):
+    sys.stderr.write("This script requires Python 2.7 or newer.\n")
+    sys.stderr.write("Current version: " + sys.version + "\n")
+    sys.stderr.flush()
+    sys.exit(1)
+else:
+    # Define LOGGING_LEVEL to allow logging even if everything's else is wrong!
+    LOGGING_LEVEL = logging.WARNING
+    sys.stderr.write('--------- ' + 'Init: ' + ' ---------\n')
+    sys.stderr.write('Python version on this system: ' + sys.version + '\n')
+    sys.stderr.flush()
+
 
 # =============================================================================
 # Global Variables
@@ -721,20 +714,10 @@ class Uploadr:
                 logging.debug('type(row[1]):[{!s}]'.format(type(row[1])))
                 # row[0] is photo_id
                 # row[1] is filename
-                # CODING
-                # debug#A with unicode
                 if (self.isFileExcluded(unicode(row[1], 'utf-8')  # noqa
                                         if sys.version_info < (3, )
                                         else str(row[1]))):
-                # CODING: Eliminate debug#B and debug#C comments
-                # debug#B with StrUnicodeOut
-                # if (self.isFileExcluded(StrUnicodeOut(row[1])
-                #                         if sys.version_info < (3, )
-                #                         else str(row[1]))):
-                # debug#C with row[1] => Fails TravisCI test 331.5
-                # if (self.isFileExcluded(row[1]
-                #                         if sys.version_info < (3, )
-                #                         else str(row[1]))):
+
                     self.deleteFile(row, cur)
 
         # Closing DB connection
@@ -1664,7 +1647,8 @@ class Uploadr:
                             reportError(Caught=True,
                                         CaughtPrefix='+++',
                                         CaughtCode='020',
-                                        CaughtMsg='Caught IOError, HTTP exception',
+                                        CaughtMsg='Caught IOError, '
+                                        'HTTP exception',
                                         NicePrint=True)
                             logging.error('Sleep 10 and check if file is '
                                           'already uploaded')
@@ -1866,8 +1850,8 @@ class Uploadr:
                         reportError(Caught=True,
                                     CaughtPrefix='+++ DB',
                                     CaughtCode='045',
-                                    CaughtMsg='DB error on UPDATE: [{!s}]'.format(
-                                        e.args[0]),
+                                    CaughtMsg='DB error on UPDATE: [{!s}]'
+                                              .format(e.args[0]),
                                     NicePrint=True)
                     finally:
                         con.commit()
@@ -3359,7 +3343,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                               else self.isGood(resp)))
                         # CODING: how to indicate an error?
                         # Possibly raising an exception?
-                        # raise Exception('photos_getAllContexts: Max attempts exhausted.')
+                        # raise Exception('photos_getAllContexts: '
+                        #                 'Max attempts exhausted.')
                         np.niceprint('return: IS_PHOTO_UPLOADED: ERROR#2',
                                      fname='is_photo_already_uploaded')
                         logging.warning('return: IS_PHOTO_UPLOADED: ERROR#2')
@@ -3376,7 +3361,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 logging.info('len(resp.findall(''set'')):[{!s}]'
                              .format(len(resp.findall('set'))))
 
-                # B) checksum, title, empty setName,       Count=1  THEN EXISTS, ASSIGN SET
+                # B) checksum, title, empty setName,       Count=1
+                #                                       THEN EXISTS, ASSIGN SET
                 # IF tag album IS FOUND
                 if (len(resp.findall('set')) == 0):
                     # CODING returnList not being used
@@ -3454,8 +3440,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     # logging.info('output for returnList:[{!s}]'
                     #              .format(returnList))
 
-                    # C) checksum, title, setName (1 or more), Count>=1 THEN
-                    # EXISTS
+                    # C) checksum, title, setName (1 or more), Count>=1
+                    #                                               THEN EXISTS
                     if (StrUnicodeOut(xsetName) ==
                             StrUnicodeOut(setinlist.attrib['title'])):
                         np.niceprint('return: IS PHOTO UPLOADED='
@@ -3471,8 +3457,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             returnPhotoID, \
                             returnUploadedNoSet
                     else:
-                        # D) checksum, title, other setName,       Count>=1 THEN
-                        # NOT EXISTS
+                        # D) checksum, title, other setName,       Count>=1
+                        #                                       THEN NOT EXISTS
                         if args.verbose_progress:
                             np.niceprint('IS PHOTO UPLOADED=FALSE OTHER SET, '
                                          'CONTINUING SEARCH IN SETS',
@@ -3486,16 +3472,22 @@ set0 = sets.find('photosets').findall('photoset')[0]
 # <?xml version="1.0" encoding="utf-8" ?>
 # <rsp stat="ok">
 #   <photos page="1" pages="1" perpage="100" total="2">
-#     <photo id="37564183184" owner="146995488@N03" secret="5390570f1c" server="4540" farm="5" title="DSC01397" ispublic="0" isfriend="0" isfamily="0" tags="autoupload checksum1133825cea9d605f332d04b40a44a6d6" />
-#     <photo id="38210659646" owner="146995488@N03" secret="2786b173f4" server="4536" farm="5" title="DSC01397" ispublic="0" isfriend="0" isfamily="0" tags="autoupload checksum1133825cea9d605f332d04b40a44a6d6" />
+#     <photo id="37564183184" owner="146995488@N03" secret="5390570f1c"
+# server="4540" farm="5" title="DSC01397" ispublic="0" isfriend="0"
+# isfamily="0" tags="autoupload checksum1133825cea9d605f332d04b40a44a6d6" />
+#     <photo id="38210659646" owner="146995488@N03" secret="2786b173f4"
+# server="4536" farm="5" title="DSC01397" ispublic="0" isfriend="0"
+# isfamily="0" tags="autoupload checksum1133825cea9d605f332d04b40a44a6d6" />
 #   </photos>
 # </rsp>
-# CAREFULL... flickrapi on occasion indicates total=2 but the list only brings 1
+# CAREFULL... flickrapi on occasion indicates total=2 but list only brings 1
 #
 # <?xml version="1.0" encoding="utf-8" ?>
 # <rsp stat="ok">
 #   <photos page="1" pages="1" perpage="100" total="2">
-#     <photo id="26486922439" owner="146995488@N03" secret="7657801015" server="4532" farm="5" title="017_17a-5" ispublic="0" isfriend="0" isfamily="0" tags="autoupload checksum0449d770558cfac7a6786e468f917b9c joana" />
+#     <photo id="26486922439" owner="146995488@N03" secret="7657801015"
+# server="4532" farm="5" title="017_17a-5" ispublic="0" isfriend="0"
+# isfamily="0" tags="autoupload checksum0449d770558cfac7a6786e468f917b9c" />
 #   </photos>
 # </rsp>
 
@@ -4350,14 +4342,14 @@ set0 = sets.find('photosets').findall('photoset')[0]
             if self.isGood(res):
                 for count, row in enumerate(res.find('photos')
                                             .findall('photo')):
-                    logging.info('Photo get_not_in_set id:[{!s}] title:[{!s}]'
+                    logging.info('Photo get_not_in_set: id:[{!s}] title:[{!s}]'
                                  .format(row.attrib['id'],
                                          row.attrib['title']))
                     logging.debug(xml.etree.ElementTree.tostring(
                         row,
                         encoding='utf-8',
                         method='xml'))
-                    np.niceprint('Photo get_not_in_set: id:[{!s}] title:[{!s}] '
+                    np.niceprint('Photo get_not_in_set: id:[{!s}] title:[{!s}]'
                                  .format(row.attrib['id'],
                                          row.attrib['title']))
                     logging.info('count=[{!s}]'.format(count))

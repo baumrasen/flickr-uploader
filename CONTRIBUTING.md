@@ -14,7 +14,7 @@
 * Use niceprint function to output messages to stdout.
 * Use logging. for CRITICAL, ERROR, WARNING, INFO, DEBUG messages to stderr
 * Some ocasional critical messages are generated with `sys.stderr.write()`
-* Specific CODING related comments are marked with CODING` keyword
+* Specific CODING related comments are marked with `CODING` keyword
 * Prefix coding for some output messages:
    * `*****`   Section informative
    * `===`     Multiprocessing related

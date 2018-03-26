@@ -161,9 +161,9 @@ else:
 # -----------------------------------------------------------------------------
 try:
     if not (
-        (UPLDRConstants.baseDir == '' or os.path.isdir(UPLDRConstants.baseDir))
-        and os.path.isfile(UPLDRConstants.INIfile)
-        ):
+        (UPLDRConstants.baseDir == '' or os.path.isdir(
+            UPLDRConstants.baseDir)) and os.path.isfile(
+            UPLDRConstants.INIfile)):
         raise OSError('[Errno 2] No such file or directory')
 except Exception as err:
     sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] config folder [{!s}] '
@@ -208,7 +208,7 @@ if not config.has_section('Config'):
                      'has no [Config] section! Exiting...\n'
                      .format(nutime.strftime(UPLDRConstants.TimeFormat),
                              os.getpid(),
-                            UPLDRConstants.INIfile))
+                             UPLDRConstants.INIfile))
     sys.stderr.flush()
     sys.exit(2)
 # -----------------------------------------------------------------------------
@@ -1450,12 +1450,12 @@ class Uploadr:
                 else:
                     if (x > 0):
                         reportError(Caught=True,
-                                CaughtPrefix='+++ DB',
-                                CaughtCode='032',
-                                CaughtMsg='Succeeded at retry SQL...'
-                                          '[{!s}/{!s} attempts]'
-                                          .format(x, MAX_SQL_ATTEMPTS),
-                                NicePrint=True)
+                                    CaughtPrefix='+++ DB',
+                                    CaughtCode='032',
+                                    CaughtMsg='Succeeded at retry SQL...'
+                                    '[{!s}/{!s} attempts]'
+                                    .format(x, MAX_SQL_ATTEMPTS),
+                                    NicePrint=True)
                     logging.info(
                         'END SQL:[{!s}]...[{!s}/{!s} attempts].'
                         .format('INSERT INTO files',

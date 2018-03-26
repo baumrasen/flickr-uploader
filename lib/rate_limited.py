@@ -10,12 +10,13 @@
                    error with Python Decorators.
 """
 
-# ----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Import section for Python 2 and 3 compatible code
-# from __future__ import absolute_import, division, print_function, unicode_literals
+# from __future__ import absolute_import, division, print_function,
+#    unicode_literals
 from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 
-# ----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Import section
 #
 import sys
@@ -318,7 +319,7 @@ if __name__ == "__main__":
     print('-------------------------------------------------Multi Processing')
     def fmulti(x, prc):
 
-        for i in range(1,x):
+        for i in range(1, x):
             r = random.randrange(6)
             print('\t\t[prc:{!s}] [{!s}]'
                   '->- WORKing {!s}s----[{!s}]'
@@ -332,8 +333,8 @@ if __name__ == "__main__":
 
     TaskPool = []
 
-    for j in range(1,4):
-        Task = multiprocessing.Process(target=fmulti, args=(5,j))
+    for j in range(1, 4):
+        Task = multiprocessing.Process(target=fmulti, args=(5, j))
         TaskPool.append(Task)
         Task.start()
 

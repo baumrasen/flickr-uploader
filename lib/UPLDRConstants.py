@@ -5,16 +5,18 @@
     Helper class and functions for UPLoaDeR Global Constants.
 """
 
-# ----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Import section for Python 2 and 3 compatible code
-# from __future__ import absolute_import, division, print_function, unicode_literals
+# from __future__ import absolute_import, division, print_function,
+#    unicode_literals
 from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 
-# ----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Import section
 #
 import time
 from . import __version__
+
 
 # -----------------------------------------------------------------------------
 # class UPLDRConstants wiht Global Constants and Variables for flickr-uploadr.
@@ -37,7 +39,7 @@ class UPLDRConstants:
     #
     #   TimeFormat   = Format to display date and time. Used with strftime
     #   Version      = Version Major.Minor.Fix
-    #   Run          = Identify the execution Run of this process. Unique number
+    #   Run          = Unique identifier for the execution Run of this process.
     #   nuMediacount = Counter of total files to initially upload
     #   baseDir      = Base configuration directory for files
     #   INIfile      = Location of INI file, normally named "uploadr.ini"

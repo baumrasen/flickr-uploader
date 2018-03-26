@@ -5,12 +5,13 @@
     Helper class and functions to print messages.
 """
 
-# ----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Import section for Python 2 and 3 compatible code
-# from __future__ import absolute_import, division, print_function, unicode_literals
+# from __future__ import absolute_import, division, print_function,
+#    unicode_literals
 from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 
-# ----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Import section
 #
 import sys
@@ -19,6 +20,7 @@ import logging
 import time
 from . import UPLDRConstants as UPLDRConstantsClass
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
+
 
 # -----------------------------------------------------------------------------
 # class niceprint to be used to print messages.
@@ -82,7 +84,6 @@ class niceprint:
         else:
             return False
 
-
     # -------------------------------------------------------------------------
     # StrUnicodeOut
     #
@@ -126,7 +127,6 @@ class niceprint:
                 'PRINT',
                 self.StrUnicodeOut(fname),
                 self.StrUnicodeOut(s)))
-
 
     # -------------------------------------------------------------------------
     # niceassert

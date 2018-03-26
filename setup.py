@@ -13,7 +13,8 @@ from setuptools import find_packages, setup, Command
 
 # Package meta-data.
 NAME = 'flickr-uploader'
-DESCRIPTION = 'Upload a directory of media to Flickr to use as a backup to your local storage. flickr-uploader designed primarly for Synology Devices. '
+DESCRIPTION = 'Upload a directory of media to Flickr to use as a backup to '
+'your local storage. flickr-uploader designed primarly for Synology Devices.'
 URL = 'https://github.com/oPromessa/flickr-uploader/',
 
 EMAIL = 'oPromessa@github.com'
@@ -30,12 +31,12 @@ REQUIRED = [
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
 # Except, perhaps the License and Trove Classifiers!
-# If you do change the License, remember to change the Trove Classifier for that!
+# If you change the License, remember to change the Trove Classifier for that!
 
 here = os.path.abspath(os.path.dirname(__file__))
 
 # Import the README and use it as the long-description.
-# Note: this will only work if 'README.rst' is present in your MANIFEST.in file!
+# Note: this only works if 'README.rst' is present in your MANIFEST.in file!
 with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = '\n' + f.read()
 
@@ -73,7 +74,8 @@ class UploadCommand(Command):
             pass
 
         self.status('Building Source and Wheel (universal) distribution…')
-        os.system('{0} setup.py sdist bdist_wheel --universal'.format(sys.executable))
+        os.system('{0} setup.py sdist bdist_wheel --universal'
+                  .format(sys.executable))
 
         self.status('Uploading the package to PyPi via Twine…')
         os.system('twine upload dist/*')

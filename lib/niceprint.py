@@ -104,7 +104,6 @@ class niceprint:
         else:
             return ''.encode('utf-8') if self.isThisStringUnicode('') else ''
 
-
     # -------------------------------------------------------------------------
     # niceprint
     #

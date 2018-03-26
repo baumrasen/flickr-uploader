@@ -33,6 +33,7 @@ class TestNicePrintMethods(unittest.TestCase):
             [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
         """
 
+
 class TestMethods(unittest.TestCase):
 
     def test_upper(self):
@@ -54,7 +55,7 @@ class TestMethods(unittest.TestCase):
         self.assertTrue(1 <=
                        eval(time.strftime('int("%j")+int("%H")*100+int("%M")'))
                        <= 2725)
-        for j in range(1,366+1):
+        for j in range(1, 366+1):
             for h in range(24):
                 for m in range(60):
                     self.assertTrue (1 <= eval(time.strftime(
@@ -62,7 +63,7 @@ class TestMethods(unittest.TestCase):
 
     def test_Unicode(self):
         np = niceprint.niceprint()
-        for i in range(1,500):
+        for i in range(1, 500):
             if sys.version_info < (3, ):
                 if i < 127:
                     self.assertFalse(np.isThisStringUnicode(chr(i)))
@@ -77,7 +78,7 @@ class TestUPLDRConstantsMethods(unittest.TestCase):
     def test_nuMediaCount(self):
         UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 
-        for j in range(1,20):
+        for j in range(1, 20):
             UPLDRConstants.nuMediacount = j
             self.assertEqual(UPLDRConstants.nuMediacount, j)
 

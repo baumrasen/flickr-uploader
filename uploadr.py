@@ -128,7 +128,7 @@ nurunning = None
 # -----------------------------------------------------------------------------
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 UPLDRConstants.nuMediacount = 0
-UPLDRConstants.baseDir = os.path.dirname(sys.argv[0]) 
+UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
 UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")
 # -----------------------------------------------------------------------------
 np = niceprint.niceprint()

@@ -29,6 +29,7 @@ import flickrapi
 from functools import wraps
 from . import niceprint
 
+
 # -----------------------------------------------------------------------------
 # class LastTime to be used with rate_limited
 #
@@ -77,7 +78,7 @@ class LastTime:
     def get_cnt(self):
         return self.cnt.value
 
-    def debug(self, debugname='LT'):
+    def debug(self, debugname = 'LT'):
         now=time.time()
         logging.debug('___Rate name:[{!s}] '
                       'debug=[{!s}] '
@@ -160,11 +161,6 @@ def rate_limited(max_per_second):
                 LT.debug('NEXT')
 
             except Exception as ex:
-                # CODING: To be changed once reportError is on a module
-                # sys.stderr.write('+++000 '
-                #                  'Exception on rate_limited_function: [{!s}]\n'
-                #                  .format(ex))
-                # sys.stderr.flush()
                 np.reportError(Caught=True,
                                CaughtPrefix='+++',
                                CaughtCode='000',

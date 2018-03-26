@@ -9,48 +9,9 @@
     FEEDBACK ON ANY TESTING AND FEEDBACK YOU DO IS GREATLY APPRECIATED.
     IF YOU FIND A BUG, PLEASE REPORT IT.
 
-    Some giberish. Please ignore!
+    ## CONTRIBUTIONS ARE WELCOME!
     -----------------------------
-    Area for my personal notes on on-going work! Please ignore!
-    * On first authenticate... removedeletemedia seems to fail
-    * Test if it Re-upload or not pictures removed from flickr Web interface.
-    * CODING: Should extend this control to other parameters (Enhancement #7)
-        Check error:  DuplicateSectionError or DuplicateOptionError.
-        Check also: api_key. KeyError(key)
-    * CODING Logging/Messaging groundrules:
-        niceprint
-        niceprint with verbose
-        logging.critical: Blocking situations
-        logging.error: Relevant errors
-        Handled Exceptions: Messages controlled via reportError function
-        logging.warning: relevant conclusions/situations
-        logging.info: relevant output of variables
-        logging.debug: entering and exiting functions
-        Note: Consider using assertions: check niceassert function.
-
-    * Change code to insert on database prior to upload and then update result
-    * Protect all DB access (single processing or multiprocessing) with:
-      And even more:
-        try:
-            # Acquire DB lock if running in multiprocessing mode
-            self.useDBLock( lock, True)
-            cur.execute('SELECT rowid,files_id,path,set_id,md5,tagged,'
-                      'last_modified FROM files WHERE path = ?', (file,))
-        except lite.Error as e:
-            reportError(Caught=True,
-                CaughtPrefix='+++ DB',
-                CaughtCode='990',
-                CaughtMsg='DB error on SELECT: [{!s}]'
-                          .format(e.args[0]),
-                NicePrint=True)
-        finally:
-            # Release DB lock if running in multiprocessing mode
-            self.useDBLock( lock, False)
-
-    ## Update History
-    -----------------
-    * Functions to be migrated...
-       * convertRawFiles
+    * Check CONTRIBUTING and TODO files
 
     ## Recognition
     --------------
@@ -59,93 +20,19 @@
     * http://micampe.it/things/flickruploadr
     * https://github.com/joelmx/flickrUploadr/blob/master/python3/uploadr.py
 
-    ## Pending improvements/Known issues
-    ------------------------------------
-    * AVOID using uploadr when performing massive delete operations on flicr.
-      While deleting many files on flickr some of the function calls return
-      values like the title of a Set as empty(None). This prompts printing
-      information to fail with TypeError: cannot concatenate 'str' and
-      'NoneType' objects. Added specific control on function upload:
-      setName if setName is not None else 'None'
-      BUT worst than that is that one will be saving on the local database
-      sets with name (title) empty which will cause other functions to fail.
-    * converRawFiles is not tested. Also requires an exif tool to be installed
-      and configured as RAW_TOOL_PATH in INI file. Make sure to leave
-      CONVERT_RAW_FILES = False in INI file or use at your own risk.
-    * Consider using python module exiftool?
-    * Would be nice to update ALL tags on replacePhoto and not only the
-      mandatory checksum tag as FLICKR maintains the tags from the first load.
-    * If local flickrdb is deleted it will re-upload entire local Library.
-      It would be interesting to attempt to rebuild local database. With the
-      exception of tags (would require use of exiftool) almost all other
-      information could be obtained. On V2.6.8, the function
-      is_photo_already_uploaded would already search pics with checksum+Set
-      and, if it finds it it will update the local DB.
-    * In multiprocessing mode, when uploading additional files to your library
-      the work is divided into sorted chunks by each process and it may occur
-      that some processes have more work than others defeating the purpose
-      of multiprocessing. When loading from scratch a big Library it works
-      like a charm.
-    * If one changes the FILES_DIR folder and do not DELETE all from flickr,
-      uploadr WILL not delete the files.
-    * If you reduce FILE_MAX_SIZE in settings, the previously loaded files
-      (over such size) are not removed.
-    * If you change IGNORED_REGEX in settings, the previously loaded files
-      (which match such regular expression) are not removed.
-    * Arguments not fully tested:
-        -z (not yet fully developed)
-    * Regular Output needs to be aligned/simplified to include:
-        successful uploads
-        successful update of date/time in videos
-        successful replacement of photos
-
-    ## Programming Remarks
-    ----------------------
-    * Follow PEP8 coding guidelines. (see http://pep8online.com/checkresult)
-    * If using isThisStringUnicode for (something) if test else (other) make
-      sure to break lines with \ correctly. Be careful.
-    * Use niceprint function to output messages to stdout.
-    * Use logging. for CRITICAL, ERROR, WARNING, INFO, DEBUG messages to stderr
-    * Some ocasional critical messages are generated with sys.stderr.write()
-    * Specific CODING related comments are marked with 'CODING' keyword
-    * Prefix coding for some output messages:
-        *****   Section informative
-        ===     Multiprocessing related
-        ___     Retry related (check retry function)
-        +++     Exceptions handling related
-        +++ DB  Database Exceptions handling related
-        xxx     Error related
-    * As far as my testing goes :) the following errors are handled:
-            Flickr reports file not loaded due to error: 5
-                [flickr:Error: 5: Filetype was not recognised]
-                Such files are recorded so that they are not reloaded again.
-                Check -b and -c options.
-            Flickr reports file not loaded due to error: 8
-                [flickr:Error: 8: Filesize was too large]
-            Database is locked
-            error setting video date
-            error 502: flickrapi
-            error 504: flickrapi
-    * While testing with pytest --flakes Python 2 and 3 compatibility is
-      achieved by avoiding warnings on lines that contain a # noqa comment at
-      the end will not issue warnings. Applicable on use of unicode for
-      instance. Please note. "# noqa" must appear **as is** at the end of the
-      line to be ignores.
-
     ## README.md
     ------------
-    * Check README.md file for much more information including:
-
-    ## Description
-    ## Features
-    ## Requirements
-    ## Setup on Synology
-    ## Configuration
-    ## Usage/Arguments/Options
-    ## Task Scheduler (cron)
-    ## Recognition
-    ## Final remarks
-    ## Q&A
+    * Check README.md file for information including:
+        ### Description
+        ### Features
+        ### Requirements
+        ### Setup on Synology
+        ### Configuration
+        ### Usage/Arguments/Options
+        ### Task Scheduler (cron)
+        ### Recognition
+        ### Final remarks
+        ### Q&A
 
 """
 

@@ -128,12 +128,8 @@ nurunning = None
 # -----------------------------------------------------------------------------
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 UPLDRConstants.nuMediacount = 0
-sys.stderr.write('Before baseDir: ' + UPLDRConstants.baseDir + '\n')
-sys.stderr.write('argv[0]: ' + os.path.dirname(sys.argv[0]) + '\n')
-UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
-sys.stderr.write('baseDir: ' + UPLDRConstants.baseDir + '\n')
+UPLDRConstants.baseDir = os.path.dirname(sys.argv[0]) 
 UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")
-sys.stderr.write('INIfile: ' + UPLDRConstants.INIfile + '\n')
 # -----------------------------------------------------------------------------
 np = niceprint.niceprint()
 StrUnicodeOut = np.StrUnicodeOut
@@ -164,8 +160,10 @@ else:
 
 # -----------------------------------------------------------------------------
 try:
-    if not (os.path.isdir(UPLDRConstants.baseDir) and
-                os.path.isfile(UPLDRConstants.INIfile)):
+    if not (
+        (UPLDRConstants.baseDir == '' or os.path.isdir(UPLDRConstants.baseDir))
+        and os.path.isfile(UPLDRConstants.INIfile)
+        ):
         raise OSError('[Errno 2] No such file or directory')
 except Exception as err:
     sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] config folder [{!s}] '

@@ -1,11 +1,6 @@
 # flickr-uploader
 ----------------
-by oPromessa, 2017, V2.7.1 [![Master Build Status](https://travis-ci.org/oPromessa/flickr-uploader.svg?branch=master)](https://travis-ci.org/oPromessa/flickr-uploader)
-
-## IMPORTANT NOTE: (MOST OF THE WORK DONE). MORE IN PROGRESS...
-* Updated to use sybrenstuvel's flickrapi and OAuth...
-* V2.6.8 is stable.
-* V2.7.0 includes several enhancements (check details prior to use).
+by oPromessa, 2017, V2.7.2 [![Master Build Status](https://travis-ci.org/oPromessa/flickr-uploader.svg?branch=master)](https://travis-ci.org/oPromessa/flickr-uploader)
 
 ## Description
 --------------

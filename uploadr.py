@@ -105,24 +105,6 @@ retry = rate_limited.retry
 
 
 # =============================================================================
-# Init code
-#
-# Python version must be greater than 2.7 for this script to run
-#
-if sys.version_info < (2, 7):
-    sys.stderr.write("This script requires Python 2.7 or newer.\n")
-    sys.stderr.write("Current version: " + sys.version + "\n")
-    sys.stderr.flush()
-    sys.exit(1)
-else:
-    # Define LOGGING_LEVEL to allow logging even if everything's else is wrong!
-    LOGGING_LEVEL = logging.WARNING
-    sys.stderr.write('--------- ' + 'Init: ' + ' ---------\n')
-    sys.stderr.write('Python version on this system: ' + sys.version + '\n')
-    sys.stderr.flush()
-
-
-# =============================================================================
 # Global Variables
 #
 #   nutime       = for working with time module (import time)
@@ -132,24 +114,52 @@ else:
 #   numutex      = multiprocessing mutex to control access to value nurunning
 #   nurunning    = multiprocessing Value to count processed photos
 #
-# =============================================================================
-# Class UPLDRConstants
-#
-#   nuMediacount = Counter of total files to initially upload
-#   baseDir      = Base configuration directory for files
 # -----------------------------------------------------------------------------
 nutime = time
 nuflickr = None
 nulockDB = None
 numutex = None
 nurunning = None
+# =============================================================================
+# Class UPLDRConstants
+#
+#   nuMediacount = Counter of total files to initially upload
+#   baseDir      = Base configuration directory for files
 # -----------------------------------------------------------------------------
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 UPLDRConstants.nuMediacount = 0
+UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
+UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")
+# -----------------------------------------------------------------------------
+np = niceprint.niceprint()
+StrUnicodeOut = np.StrUnicodeOut
+isThisStringUnicode = np.isThisStringUnicode
+niceassert = np.niceassert
+reportError = np.reportError
+
+
+# =============================================================================
+# Init code
+#
+# Python version must be greater than 2.7 for this script to run
+#
+if sys.version_info < (2, 7):
+    sys.stderr.write('--------- (V' + UPLDRConstants.Version +
+                     ') Error Init: ' + ' ---------\n')
+    sys.stderr.write("This script requires Python 2.7 or newer.\n")
+    sys.stderr.write("Current version: " + sys.version + "\n")
+    sys.stderr.flush()
+    sys.exit(1)
+else:
+    # Define LOGGING_LEVEL to allow logging even if everything's else is wrong!
+    LOGGING_LEVEL = logging.WARNING
+    sys.stderr.write('--------- (V' + UPLDRConstants.Version +
+                     ') Init: ' + ' ---------\n')
+    sys.stderr.write('Python version on this system: ' + sys.version + '\n')
+    sys.stderr.flush()
+
+# -----------------------------------------------------------------------------
 try:
-    UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
-    UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir,
-                                          "uploadr.ini")
     if not (os.path.isdir(UPLDRConstants.baseDir) and
                 os.path.isfile(UPLDRConstants.INIfile)):
         raise OSError('[Errno 2] No such file or directory')
@@ -164,12 +174,6 @@ except Exception as err:
                              str(err)))
     sys.stderr.flush()
     sys.exit(2)
-# -----------------------------------------------------------------------------
-np = niceprint.niceprint()
-StrUnicodeOut = np.StrUnicodeOut
-isThisStringUnicode = np.isThisStringUnicode
-niceassert = np.niceassert
-reportError = np.reportError
 
 
 # =============================================================================

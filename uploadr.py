@@ -129,7 +129,9 @@ nurunning = None
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 UPLDRConstants.nuMediacount = 0
 UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
+sys.stderr.write('baseDir: ' + UPLDRConstants.baseDir + '\n')
 UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")
+sys.stderr.write('INIfile: ' + UPLDRConstants.INIfile + '\n')
 # -----------------------------------------------------------------------------
 np = niceprint.niceprint()
 StrUnicodeOut = np.StrUnicodeOut

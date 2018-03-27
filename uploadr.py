@@ -4,53 +4,16 @@
     by oPromessa, 2017
     Published on https://github.com/oPromessa/flickr-uploader/
 
-    THIS SCRIPT IS PROVIDED WITH NO WARRANTY WHATSOEVER.
-    PLEASE REVIEW THE SOURCE CODE TO MAKE SURE IT WILL WORK FOR YOUR NEEDS.
-    FEEDBACK ON ANY TESTING AND FEEDBACK YOU DO IS GREATLY APPRECIATED.
-    IF YOU FIND A BUG, PLEASE REPORT IT.
+    ## LICENSE.txt
+    --------------
+    * Check usage and licensing notice on LICENSE.txt file.
+    * PLEASE REVIEW THE SOURCE CODE TO MAKE SURE IT WILL WORK FOR YOUR NEEDS.
 
-    Some giberish. Please ignore!
+    ## CONTRIBUTIONS ARE WELCOME!
     -----------------------------
-    Area for my personal notes on on-going work! Please ignore!
-    * On first authenticate... removedeletemedia seems to fail
-    * Test if it Re-upload or not pictures removed from flickr Web interface.
-    * CODING: Should extend this control to other parameters (Enhancement #7)
-        Check error:  DuplicateSectionError or DuplicateOptionError.
-        Check also: api_key. KeyError(key)
-    * CODING Logging/Messaging groundrules:
-      niceprint
-      niceprint with verbose
-      logging.critical: Blocking situations
-      logging.error: Relevant errors
-      Handled Exceptions: Messages controlled via reportError function
-      logging.warning: relevant conclusions/situations
-      logging.info: relevant output of variables
-      logging.debug: entering and exiting functions
-      Note: Consider using assertions: check niceassert function.
-
-    * Change code to insert on database prior to upload and then update result
-    * Protect all DB access (single processing or multiprocessing) with:
-      And even more:
-        try:
-            # Acquire DB lock if running in multiprocessing mode
-            self.useDBLock( lock, True)
-            cur.execute('SELECT rowid,files_id,path,set_id,md5,tagged,'
-                      'last_modified FROM files WHERE path = ?', (file,))
-        except lite.Error as e:
-            reportError(Caught=True,
-                CaughtPrefix='+++ DB',
-                CaughtCode='990',
-                CaughtMsg='DB error on SELECT: [{!s}]'
-                          .format(e.args[0]),
-                NicePrint=True)
-        finally:
-            # Release DB lock if running in multiprocessing mode
-            self.useDBLock( lock, False)
-
-    ## Update History
-    -----------------
-    * Functions to be migrated...
-       * convertRawFiles
+    * Check CONTRIBUTING and TODO files
+    * FEEDBACK ON ANY TESTING AND FEEDBACK YOU DO IS GREATLY APPRECIATED.
+    * IF YOU FIND A BUG, PLEASE REPORT IT.
 
     ## Recognition
     --------------
@@ -59,132 +22,37 @@
     * http://micampe.it/things/flickruploadr
     * https://github.com/joelmx/flickrUploadr/blob/master/python3/uploadr.py
 
-    ## Pending improvements/Known issues
-    ------------------------------------
-    * AVOID using uploadr when performing massive delete operations on flicr.
-      While deleting many files on flickr some of the function calls return
-      values like the title of a Set as empty(None). This prompts printing
-      information to fail with TypeError: cannot concatenate 'str' and
-      'NoneType' objects. Added specific control on function upload:
-      setName if setName is not None else 'None'
-      BUT worst than that is that one will be saving on the local database
-      sets with name (title) empty which will cause other functions to fail.
-    * converRawFiles is not tested. Also requires an exif tool to be installed
-      and configured as RAW_TOOL_PATH in INI file. Make sure to leave
-      CONVERT_RAW_FILES = False in INI file or use at your own risk.
-    * Consider using python module exiftool?
-    * On some systems it may be required to also import xml.etree.ElementTree
-    * If one changes the FILES_DIR folder and do not DELETE all from flickr,
-      uploadr WILL not delete the files.
-    * Would be nice to update ALL tags on replacePhoto and not only the
-      mandatory checksum tag as FLICKR maintains the tags from the first load.
-    * If local flickrdb is deleted it will re-upload entire local Library.
-      It would be interesting to attempt to rebuild local database. With the
-      exception of tags (would require use of exiftool) almost all other
-      information could be obtained. On V2.6.8, the function
-      is_photo_already_uploaded would already search pics with checksum+Set
-      and, if it finds it it will update the local DB.
-    * In multiprocessing mode, when uploading additional files to your library
-      the work is divided into sorted chunks by each process and it may occur
-      that some processes have more work than others defeating the purpose
-      of multiprocessing. When loading from scratch a big Library it works
-      like a charm.
-    * If you reduce FILE_MAX_SIZE in settings, the previously loaded files
-      (over such size) are not removed.
-    * If you change IGNORED_REGEX in settings, the previously loaded files
-      (which match such regular expression) are not removed.
-    * Arguments not fully tested:
-        -z (not yet fully developed)
-    * Regular Output needs to be aligned/simplified to include:
-        successful uploads
-        successful update of date/time in videos
-        successful replacement of photos
-
-    ## Programming Remarks
-    ----------------------
-    * Follow PEP8 coding guidelines. (see http://pep8online.com/checkresult)
-    * If using isThisStringUnicode for (something) if test else (other) make
-      sure to break lines with \ correctly. Be careful.
-    * Use niceprint function to output messages to stdout.
-    * Use logging. for CRITICAL, ERROR, WARNING, INFO, DEBUG messages to stderr
-    * Some ocasional critical messages are generated with sys.stderr.write()
-    * Specific CODING related comments are marked with 'CODING' keyword
-    * Prefix coding for some output messages:
-        *****   Section informative
-        ===     Multiprocessing related
-        ___     Retry related (check retry function)
-        +++     Exceptions handling related
-        +++ DB  Database Exceptions handling related
-        xxx     Error related
-    * As far as my testing goes :) the following errors are handled:
-            Flickr reports file not loaded due to error: 5
-                [flickr:Error: 5: Filetype was not recognised]
-                Such files are recorded so that they are not reloaded again.
-                Check -b and -c options.
-            Flickr reports file not loaded due to error: 8
-                [flickr:Error: 8: Filesize was too large]
-            Database is locked
-            error setting video date
-            error 502: flickrapi
-            error 504: flickrapi
-
     ## README.md
     ------------
-    * Check README.md file for much more information including:
-
-    ## Description
-    ## Features
-    ## Requirements
-    ## Setup on Synology
-    ## Configuration
-    ## Usage/Arguments/Options
-    ## Task Scheduler (cron)
-    ## Recognition
-    ## Final remarks
-    ## Q&A
-
+    * Check README.md file for information including:
+        ### Description
+        ### Features
+        ### Requirements
+        ### Setup on Synology
+        ### Configuration
+        ### Usage/Arguments/Options
+        ### Task Scheduler (cron)
+        ### Recognition
+        ### Final remarks
+        ### Q&A
 """
 
-# ----------------------------------------------------------------------------
+# =============================================================================
 # Import section for Python 2 and 3 compatible code
-# from __future__ import absolute_import, division, print_function, unicode_literals
+# from __future__ import absolute_import, division, print_function,
+#    unicode_literals
 from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 
 
-# ----------------------------------------------------------------------------
-# Initial Import section
+# =============================================================================
+# Import section
 import sys
 import logging
-
-
-# =============================================================================
-# Init code
-#
-# Python version must be greater than 2.7 for this script to run
-#
-if sys.version_info < (2, 7):
-    sys.stderr.write("This script requires Python 2.7 or newer.\n")
-    sys.stderr.write("Current version: " + sys.version + "\n")
-    sys.stderr.flush()
-    sys.exit(1)
-else:
-    # Define LOGGING_LEVEL to allow logging even if everything's else is wrong!
-    LOGGING_LEVEL = logging.WARNING
-    sys.stderr.write('--------- ' + 'Init: ' + ' ---------\n')
-    sys.stderr.write('Python version on this system: ' + sys.version + '\n')
-    sys.stderr.flush()
-
-
-# ----------------------------------------------------------------------------
-# Import section
-#
-# Check if it is still required httplib
-#     Only use is for exception httplib.HTTPException
+# Check if required httplib: Used only on exception httplib.HTTPException
 try:
     import httplib as httplib      # Python 2
 except ImportError:
     import http.client as httplib  # Python 3
-
 import argparse
 import mimetypes
 import os
@@ -199,21 +67,17 @@ try:
     import ConfigParser as ConfigParser  # Python 2
 except ImportError:
     import configparser as ConfigParser  # Python 3
-
 import multiprocessing
 import flickrapi
 import xml
-# CODING: For some systems this second import is required.
-# Seems to avoid the following problem:
-#    logging.info(xml.etree.ElementTree.tostring(
+# CODING: Avoids error on some systems:
 #    AttributeError: 'module' object has no attribute 'etree'
-# import xml.etree.ElementTree
-# try/exception/import xml.etree.ElementTree to address issue
+#    on logging.info(xml.etree.ElementTree.tostring(...
 try:
-   dummyxml = xml.etree.ElementTree.tostring(
-                                xml.etree.ElementTree.Element('xml.etree'),
-                                encoding='utf-8',
-                                method='xml')
+    dummyxml = xml.etree.ElementTree.tostring(
+        xml.etree.ElementTree.Element('xml.etree'),
+        encoding='utf-8',
+        method='xml')
 except AttributeError:
     sys.stderr.write('Importing xml.etree.ElementTree...')
     try:
@@ -223,62 +87,25 @@ except AttributeError:
         sys.stderr.write('failed with ImportError.')
         raise
 finally:
-    print(' Continuing.\n')
+    sys.stderr.write(' Continuing.\n')
+    sys.stderr.flush()
 import os.path
 import pprint
-# For repeating functions
-from functools import wraps
-import random
-
-
-# ----------------------------------------------------------------------------
-# Constants class
-#
-# List out the constants to be used
-#
-class UPLDRConstants:
-    """ UPLDRConstants class
-    """
-
-    # -------------------------------------------------------------------------
-    # Class Global Variables
-    #   class variable shared by all instances
-    #
-    #   TimeFormat = Format to display date and time. Used with strftime
-    #   Version    = Version Major.Minor.Fix
-    #   Run        = Identify the execution Run of this process. Unique number
-    #
-    TimeFormat = '%Y.%m.%d %H:%M:%S'
-    Version = '2.7.1'
-    Run = eval(time.strftime('int("%j")+int("%H")*100+int("%M")'))
-
-    # -------------------------------------------------------------------------
-    # Color Codes for colorful output
-    W = '\033[0m'    # white (normal)
-    R = '\033[31m'   # red
-    G = '\033[32m'   # green
-    O = '\033[33m'   # orange
-    B = '\033[34m'   # blue
-    P = '\033[35m'   # purple
-
-    # -------------------------------------------------------------------------
-    # class UPLDRConstants __init__
-    #
-    def __init__(self):
-        """ class UPLDRConstants __init__
-        """
-        # ---------------------------------------------------------------------
-        # Instance Global Variables
-        #   instance variable unique to each instance
-        #
-        #   nuMediacount = counter of total files to initially upload
-        #
-        self.nuMediacount = None
-        pass
-
 # -----------------------------------------------------------------------------
+# Helper class and functions for UPLoaDeR Global Constants.
+import lib.UPLDRConstants as UPLDRConstantsClass
+# -----------------------------------------------------------------------------
+# Helper class and functions to print messages.
+import lib.niceprint as niceprint
+# -----------------------------------------------------------------------------
+# Helper class and functions to rate limiting function calls and run function
+# multiple attempts/times on error
+import lib.rate_limited as rate_limited
+retry = rate_limited.retry
+
+
+# =============================================================================
 # Global Variables
-# CODING: Consider moving them into Class UPLDRConstants!!!
 #
 #   nutime       = for working with time module (import time)
 #   nuflickr     = object for flickr API module (import flickrapi)
@@ -286,280 +113,70 @@ class UPLDRConstants:
 #   nulockDB     = multiprocessing Lock for access to Database
 #   numutex      = multiprocessing mutex to control access to value nurunning
 #   nurunning    = multiprocessing Value to count processed photos
-#   nuMediacount = counter of total files to initially upload
-#                = moved to class UPLDRConstants
+#
+# -----------------------------------------------------------------------------
 nutime = time
 nuflickr = None
 nulockDB = None
 numutex = None
 nurunning = None
-# CODING: To be changed to x=UPLDRContants() and x.nuMediacount = 0
+# =============================================================================
+# Class UPLDRConstants
+#
+#   nuMediacount = Counter of total files to initially upload
+#   baseDir      = Base configuration directory for files
+# -----------------------------------------------------------------------------
+UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 UPLDRConstants.nuMediacount = 0
-
+UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
+UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")
 # -----------------------------------------------------------------------------
-# isThisStringUnicode
+np = niceprint.niceprint()
+StrUnicodeOut = np.StrUnicodeOut
+isThisStringUnicode = np.isThisStringUnicode
+niceassert = np.niceassert
+reportError = np.reportError
+
+
+# =============================================================================
+# Init code
 #
-# Returns true if String is Unicode
+# Python version must be greater than 2.7 for this script to run
 #
-def isThisStringUnicode(s):
-    """
-    Determines if a string is Unicode (return True) or not (returns False)
-    to allow correct print operations.
-
-    Used by StrUnicodeOut function.
-    Example:
-        niceprint('Checking file:[{!s}]...'.format(
-                                 file.encode('utf-8') \
-                                 if isThisStringUnicode(file) \
-                                 else file))
-
-    """
-    # CODING: Python 2 and 3 compatibility
-    # CODING: On Python 3 should always return False to return s
-    # in the example
-    #    s.encode('utf-8') if isThisStringUnicode(s) else s
-    if sys.version_info < (3, ):
-        if isinstance(s, unicode):
-            return True
-        elif isinstance(s, str):
-            return False
-        else:
-            return False
-    elif isinstance(s, str):
-        return False
-    else:
-        return False
-
-
-# -----------------------------------------------------------------------------
-# StrUnicodeOut
-#
-# Returns true if String is Unicode
-#
-def StrUnicodeOut(s):
-    """
-    Outputs s.encode('utf-8') if isThisStringUnicode(s) else s
-        niceprint('Checking file:[{!s}]...'.format(StrUnicodeOut(file))
-    """
-    if s is not None:
-        return s.encode('utf-8') if isThisStringUnicode(s) else s
-    else:
-        return ''.encode('utf-8') if isThisStringUnicode('') else ''
-
-
-# -----------------------------------------------------------------------------
-# niceprint
-#
-# Print a message with the format:
-#   [2017.10.25 22:32:03]:[PRINT   ]:[uploadr] Some Message
-#
-def niceprint(s, fname='uploadr'):
-    """
-    Print a message with the format:
-        [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
-        Accounts for UTF-8 Messages
-    """
-    print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'.format(
-            UPLDRConstants.G,
-            UPLDRConstants.Run,
-            nutime.strftime(UPLDRConstants.TimeFormat),
-            os.getpid(),
-            UPLDRConstants.W,
-            'PRINT',
-            StrUnicodeOut(fname),
-            StrUnicodeOut(s)))
-
-
-# -----------------------------------------------------------------------------
-# niceassert
-#
-def niceassert(s):
-    """
-     Returns a message with the format:
-         [2017.11.19 01:53:57]:[PID       ][ASSERT  ]:[uploadr] Message
-         Accounts for UTF-8 Messages
-
-     Usage:
-         assert param1 >= 0, niceassert('param1 is not >= 0:'.format(param1))
-    """
-    return('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'.format(
-           UPLDRConstants.R,
-           UPLDRConstants.Run,
-           nutime.strftime(UPLDRConstants.TimeFormat),
-           os.getpid(),
-           UPLDRConstants.W,
-           'ASSERT',
-           'uploadr',
-           StrUnicodeOut(s)))
-
-# -----------------------------------------------------------------------------
-# reportError
-#
-# Provides a messaging wrapper for logging.error, niprint & str(sys.exc_info()
-#
-# Examples of use of reportError:
-# except flickrapi.exceptions.FlickrError as ex:
-#     reportError(Caught=True,
-#                 CaughtPrefix='+++',
-#                 CaughtCode='990',
-#                 CaughtMsg='Flickrapi exception on photos.setdates',
-#                 exceptUse=True,
-#                 exceptCode=ex.code,
-#                 exceptMsg=ex,
-#                 NicePrint=True,
-#                 exceptSysInfo=True)
-# except lite.Error as e:
-#     reportError(Caught=True,
-#                 CaughtPrefix='+++ DB',
-#                 CaughtCode='991',
-#                 CaughtMsg='DB error on INSERT: [{!s}]'
-#                           .format(e.args[0]),
-#                 NicePrint=True)
-#     # Release the lock on error.
-#     self.useDBLock(lock, False)
-#     success = False
-# except:
-#     reportError(Caught=True,
-#                 CaughtPrefix='+++',
-#                 CaughtCode='992',
-#                 CaughtMsg='Caught exception in XXXX',
-#                 exceptSysInfo=True)
-#
-def reportError(Caught=False, CaughtPrefix='', CaughtCode=0, CaughtMsg='',
-                NicePrint=False,
-                exceptUse=False, exceptCode=0, exceptMsg='',
-                exceptSysInfo=''):
-    """ reportError
-
-      Caught = True/False
-      CaughtPrefix
-        ===     Multiprocessing related
-        +++     Exceptions handling related
-        +++ DB  Database Exceptions handling related
-        xxx     Error related
-      CaughtCode = '010'
-      CaughtMsg = 'Flickrapi exception on...'/'DB Error on INSERT'
-      NicePrint = True/False
-      exceptUse = True/False
-      exceptCode = ex.code
-      exceptMsg = ex
-      exceptSysInfo = True/False
-    """
-
-    if Caught is not None and Caught:
-        logging.error('{!s}#{!s}: {!s}'.format(CaughtPrefix,
-                                               CaughtCode,
-                                               CaughtMsg))
-        if NicePrint is not None and NicePrint:
-            niceprint('{!s}#{!s}: {!s}'.format(CaughtPrefix,
-                                               CaughtCode,
-                                               CaughtMsg))
-    if exceptUse is not None and exceptUse:
-        logging.error('Error code: [{!s}]'.format(exceptCode))
-        logging.error('Error code: [{!s}]'.format(exceptMsg))
-        if NicePrint is not None and NicePrint:
-            niceprint('Error code: [{!s}]'.format(exceptCode))
-            niceprint('Error code: [{!s}]'.format(exceptMsg))
-    if exceptSysInfo is not None and exceptSysInfo:
-        logging.error(str(sys.exc_info()))
-        if NicePrint is not None and NicePrint:
-            niceprint(str(sys.exc_info()))
-
+if sys.version_info < (2, 7):
+    sys.stderr.write('--------- (V' + UPLDRConstants.Version +
+                     ') Error Init: ' + ' ---------\n')
+    sys.stderr.write("This script requires Python 2.7 or newer.\n")
+    sys.stderr.write("Current version: " + sys.version + "\n")
     sys.stderr.flush()
-    if NicePrint is not None and NicePrint:
-        sys.stdout.flush()
-
+    sys.exit(1)
+else:
+    # Define LOGGING_LEVEL to allow logging even if everything's else is wrong!
+    LOGGING_LEVEL = logging.WARNING
+    sys.stderr.write('--------- (V' + UPLDRConstants.Version +
+                     ') Init: ' + ' ---------\n')
+    sys.stderr.write('Python version on this system: ' + sys.version + '\n')
+    sys.stderr.flush()
 
 # -----------------------------------------------------------------------------
-# retry
-#
-# retries execution of a function
-#
-def retry(attempts=3, waittime=5, randtime=False):
-    """
-    Catches exceptions while running a supplied function
-    Re-runs it for times while sleeping X seconds in-between
-    outputs 3 types of errors (coming from the parameters)
+try:
+    if not (
+        (UPLDRConstants.baseDir == '' or os.path.isdir(
+            UPLDRConstants.baseDir)) and os.path.isfile(
+            UPLDRConstants.INIfile)):
+        raise OSError('[Errno 2] No such file or directory')
+except Exception as err:
+    sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] config folder [{!s}] '
+                     'and/or INI file: [{!s}] '
+                     'not found or incorrect format: [{!s}]! Exiting...\n'
+                     .format(nutime.strftime(UPLDRConstants.TimeFormat),
+                             os.getpid(),
+                             UPLDRConstants.baseDir,
+                             UPLDRConstants.INIfile,
+                             str(err)))
+    sys.stderr.flush()
+    sys.exit(2)
 
-    attempts = Max Number of Attempts
-    waittime = Wait time in between Attempts
-    randtime = Randomize the Wait time from 1 to randtime for each Attempt
-    """
-    def wrapper_fn(f):
-        @wraps(f)
-        def new_wrapper(*args, **kwargs):
-
-            rtime = time
-            error = None
-
-            if LOGGING_LEVEL <= logging.WARNING:
-                if args is not None:
-                    logging.warning('___Retry f():[{!s}] '
-                                    'Max:[{!s}] Delay:[{!s}] Rnd[{!s}]'
-                                    .format(f.__name__, attempts,
-                                            waittime, randtime))
-                    for i, a in enumerate(args):
-                        logging.warning('___Retry f():[{!s}] arg[{!s}]={!s}'
-                                        .format(f.__name__, i, a))
-            for i in range(attempts if attempts > 0 else 1):
-                try:
-                    logging.warning('___Retry f():[{!s}]: '
-                                    'Attempt:[{!s}] of [{!s}]'
-                                    .format(f.__name__, i+1, attempts))
-                    return f(*args, **kwargs)
-                except Exception as e:
-                    logging.error('___Retry f():[{!s}]: Error code A: [{!s}]'
-                                  .format(f.__name__, e))
-                    error = e
-                except flickrapi.exceptions.FlickrError as ex:
-                    logging.error('___Retry f():[{!s}]: Error code B: [{!s}]'
-                                  .format(f.__name__, ex))
-                except lite.Error as e:
-                    logging.error('___Retry f():[{!s}]: Error code C: [{!s}]'
-                                  .format(f.__name__, e))
-                    error = e
-                    # Release the lock on error.
-                    # CODING: Check how to handle this particular scenario.
-                    # flick.useDBLock(nulockDB, False)
-                    # self.useDBLock( lock, True)
-                except:
-                    logging.error('___Retry f():[{!s}]: Error code D: Catchall'
-                                  .format(f.__name__))
-
-                logging.warning('___Function:[{!s}] Waiting:[{!s}] Rnd:[{!s}]'
-                                .format(f.__name__, waittime, randtime))
-                if randtime:
-                    rtime.sleep(random.randrange(0,
-                                                 (waittime+1)
-                                                 if waittime >= 0
-                                                 else 1))
-                else:
-                    rtime.sleep(waittime if waittime >= 0 else 0)
-            logging.error('___Retry f():[{!s}] '
-                            'Max:[{!s}] Delay:[{!s}] Rnd[{!s}]: Raising ERROR!'
-                            .format(f.__name__, attempts,
-                                    waittime, randtime))
-            raise error
-        return new_wrapper
-    return wrapper_fn
-# -----------------------------------------------------------------------------
-# Samples
-# @retry(attempts=3, waittime=2)
-# def retry_divmod(argslist):
-#     return divmod(*argslist)
-# print retry_divmod([5, 3])
-# try:
-#     print(retry_divmod([5, 'H']))
-# except:
-#     logging.error('Error Caught (Overall Catchall)...')
-# finally:
-#     logging.error('...Continuing')
-# nargslist=dict(Caught=True, CaughtPrefix='+++')
-# retry_reportError(nargslist)
-
-
-# CODING: code moved to lib/rate_limited.py
-import lib.rate_limited as rate_limited
 
 # =============================================================================
 # Look for Config file uploadr.ini
@@ -567,15 +184,13 @@ import lib.rate_limited as rate_limited
 config = ConfigParser.ConfigParser()
 try:
     INIFiles = None
-    INIFiles = config.read(os.path.join(os.path.dirname(sys.argv[0]),
-                                        "uploadr.ini"))
+    INIFiles = config.read(UPLDRConstants.INIfile)
 except Exception as err:
     sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] INI file: [{!s}] '
                      'not found or incorrect format: [{!s}]!\n'
                      .format(nutime.strftime(UPLDRConstants.TimeFormat),
                              os.getpid(),
-                             os.path.join(os.path.dirname(sys.argv[0]),
-                                          'uploadr.ini'),
+                             UPLDRConstants.INIfile,
                              str(err)))
     sys.stderr.flush()
 if not INIFiles:
@@ -583,8 +198,7 @@ if not INIFiles:
                      'not found or incorrect format! Exiting...\n'
                      .format(nutime.strftime(UPLDRConstants.TimeFormat),
                              os.getpid(),
-                             os.path.join(os.path.dirname(sys.argv[0]),
-                                          'uploadr.ini')))
+                             UPLDRConstants.INIfile))
     sys.stderr.flush()
     sys.exit(2)
 # -----------------------------------------------------------------------------
@@ -594,8 +208,7 @@ if not config.has_section('Config'):
                      'has no [Config] section! Exiting...\n'
                      .format(nutime.strftime(UPLDRConstants.TimeFormat),
                              os.getpid(),
-                             os.path.join(os.path.dirname(sys.argv[0]),
-                                          'uploadr.ini')))
+                             UPLDRConstants.INIfile))
     sys.stderr.flush()
     sys.exit(2)
 # -----------------------------------------------------------------------------
@@ -605,27 +218,27 @@ if not config.has_section('Config'):
 # If not available or not valid assume WARNING level and notify of that fact.
 # Force conversion of LOGGING_LEVEL into int() for later use in conditionals
 LOGGING_LEVEL = (config.get('Config', 'LOGGING_LEVEL')
-                if config.has_option('Config', 'LOGGING_LEVEL')
-                else logging.WARNING)
+                 if config.has_option('Config', 'LOGGING_LEVEL')
+                 else logging.WARNING)
 if (int(str(LOGGING_LEVEL)) if str.isdigit(str(LOGGING_LEVEL)) else 99) not in\
-                       [logging.NOTSET,
-                        logging.DEBUG,
-                        logging.INFO,
-                        logging.WARNING,
-                        logging.ERROR,
-                        logging.CRITICAL]:
+    [logging.NOTSET,
+     logging.DEBUG,
+     logging.INFO,
+     logging.WARNING,
+     logging.ERROR,
+     logging.CRITICAL]:
     LOGGING_LEVEL = logging.WARNING
     sys.stderr.write('[{!s}]:[WARNING ]:[uploadr] LOGGING_LEVEL '
                      'not defined or incorrect on INI file: [{!s}]. '
                      'Assuming WARNING level.\n'.format(
-                            nutime.strftime(UPLDRConstants.TimeFormat),
-                            os.path.join(os.path.dirname(sys.argv[0]),
-                                         "uploadr.ini")))
+                         nutime.strftime(UPLDRConstants.TimeFormat),
+                         UPLDRConstants.INIfile))
     sys.stderr.flush()
 LOGGING_LEVEL = int(str(LOGGING_LEVEL))
 if config.has_option('Config', 'FILES_DIR'):
     try:
-        FILES_DIR = unicode(eval(config.get('Config', 'FILES_DIR')), 'utf-8') \
+        FILES_DIR = unicode(  # noqa
+                            eval(config.get('Config', 'FILES_DIR')), 'utf-8') \
                     if sys.version_info < (3, ) \
                     else str(eval(config.get('Config', 'FILES_DIR')))
     except Exception as err:
@@ -638,7 +251,8 @@ if config.has_option('Config', 'FILES_DIR'):
         sys.exit(3)
 else:
     # Undefined FILES_DIR. Will be reported as an error later on Main code.
-    FILES_DIR = unicode('', 'utf-8') if sys.version_info < (3, ) else str('')
+    FILES_DIR = unicode(  # noqa
+                        '', 'utf-8') if sys.version_info < (3, ) else str('')
 FLICKR = eval(config.get('Config', 'FLICKR'))
 SLEEP_TIME = eval(config.get('Config', 'SLEEP_TIME'))
 DRIP_TIME = eval(config.get('Config', 'DRIP_TIME'))
@@ -653,12 +267,11 @@ except (ConfigParser.NoOptionError, ConfigParser.NoOptionError) as err:
                      .format(nutime.strftime(UPLDRConstants.TimeFormat),
                              os.getpid(),
                              str(err),
-                             os.path.join(os.path.dirname(sys.argv[0]),
-                                          "uploadr.ini"),
-                             os.path.join(os.path.dirname(sys.argv[0]),
+                             UPLDRConstants.INIfile,
+                             os.path.join(UPLDRConstants.baseDir,
                                           "token")))
     sys.stderr.flush()
-    TOKEN_CACHE = os.path.join(os.path.dirname(sys.argv[0]), "token")
+    TOKEN_CACHE = os.path.join(UPLDRConstants.baseDir, "token")
 LOCK_PATH = eval(config.get('Config', 'LOCK_PATH'))
 TOKEN_PATH = eval(config.get('Config', 'TOKEN_PATH'))
 # Read EXCLUDED_FOLDERS and convert them into Unicode folders
@@ -666,7 +279,7 @@ inEXCLUDED_FOLDERS = eval(config.get('Config', 'EXCLUDED_FOLDERS'))
 EXCLUDED_FOLDERS = []
 for folder in inEXCLUDED_FOLDERS:
     # CODING: Python 2 and 3 compatibility
-    EXCLUDED_FOLDERS.append(unicode(folder, 'utf-8')
+    EXCLUDED_FOLDERS.append(unicode(folder, 'utf-8')  # noqa
                             if sys.version_info < (3, )
                             else str(folder))
     if LOGGING_LEVEL <= logging.INFO:
@@ -676,9 +289,9 @@ for folder in inEXCLUDED_FOLDERS:
                          .format(nutime.strftime(UPLDRConstants.TimeFormat),
                                  os.getpid(),
                                  StrUnicodeOut(EXCLUDED_FOLDERS[
-                                            len(EXCLUDED_FOLDERS)-1]),
+                                     len(EXCLUDED_FOLDERS) - 1]),
                                  type(EXCLUDED_FOLDERS[
-                                        len(EXCLUDED_FOLDERS)-1])))
+                                     len(EXCLUDED_FOLDERS) - 1])))
         sys.stderr.flush()
 del inEXCLUDED_FOLDERS
 # Consider Unicode Regular expressions
@@ -725,11 +338,11 @@ MAX_UPLOAD_ATTEMPTS = eval(config.get('Config', 'MAX_UPLOAD_ATTEMPTS'))
 logging.basicConfig(stream=sys.stderr,
                     level=int(LOGGING_LEVEL),
                     datefmt=UPLDRConstants.TimeFormat,
-                    format=UPLDRConstants.P+'[' +
-                           str(UPLDRConstants.Run)+']' +
-                           '[%(asctime)s]:[%(processName)-11s]' +
-                           UPLDRConstants.W +
-                           '[%(levelname)-8s]:[%(name)s] %(message)s')
+                    format=UPLDRConstants.P + '[' +
+                    str(UPLDRConstants.Run) + ']' +
+                    '[%(asctime)s]:[%(processName)-11s]' +
+                    UPLDRConstants.W +
+                    '[%(levelname)-8s]:[%(name)s] %(message)s')
 # =============================================================================
 # Test section for logging.
 # CODING: Uncomment for testing.
@@ -749,7 +362,7 @@ logging.basicConfig(stream=sys.stderr,
 #         logging.info('Message with {!s}'.format(
 #                                     'INFO UNDER min WARNING LEVEL'))
 if LOGGING_LEVEL <= logging.INFO:
-    niceprint('Output for FLICKR Configuration:')
+    np.niceprint('Output for FLICKR Configuration:')
     pprint.pprint(FLICKR)
 
 # =============================================================================
@@ -837,7 +450,7 @@ class Uploadr:
         self.token = self.getCachedToken()
 
         # Add mimetype .3gp to allow detection of .3gp as video
-        logging.info('Adding mimetpye "video/3gp"/".3gp"')
+        logging.info('Adding mimetype "video/3gp"/".3gp"')
         mimetypes.add_type('video/3gpp', '.3gp')
         if not mimetypes.types_map['.3gp'] == 'video/3gpp':
             reportError(Caught=True,
@@ -892,7 +505,7 @@ class Uploadr:
                     #     logging.warning('===Multiprocessing=== '
                     #                     'TIMEOUT in.lock.acquire')
                     #     useDBLockReturn = False
-                except:
+                except BaseException:
                     reportError(Caught=True,
                                 CaughtPrefix='+++ ',
                                 CaughtCode='002',
@@ -907,7 +520,7 @@ class Uploadr:
                 try:
                     useDBthisLock.release()
                     useDBLockReturn = True
-                except:
+                except BaseException:
                     reportError(Caught=True,
                                 CaughtPrefix='+++ ',
                                 CaughtCode='003',
@@ -946,17 +559,16 @@ class Uploadr:
 
         if not total:
             if (int(count) % 100 == 0):
-                niceprint('\t{!s} of \t{!s} files processed (uploaded, md5ed '
-                          'or timestamp checked).'
-                          .format(count, cTotal))
+                np.niceprint('\t{!s} of \t{!s} files processed (uploaded, '
+                             'md5ed or timestamp checked).'
+                             .format(count, cTotal))
         else:
             if (int(count) % 100 > 0):
-                niceprint('\t{!s} of \t{!s} files processed (uploaded, md5ed '
-                          'or timestamp checked).'
-                          .format(count, cTotal))
+                np.niceprint('\t{!s} of \t{!s} files processed (uploaded, '
+                             'md5ed or timestamp checked).'
+                             .format(count, cTotal))
 
         sys.stdout.flush()
-
 
     # -------------------------------------------------------------------------
     # authenticate
@@ -975,15 +587,29 @@ class Uploadr:
                                        FLICKR["secret"],
                                        token_cache_location=TOKEN_CACHE)
         # Get request token
-        niceprint('Getting new token.')
-        nuflickr.get_request_token(oauth_callback='oob')
+        np.niceprint('Getting new token.')
+        try:
+            nuflickr.get_request_token(oauth_callback='oob')
+        except Exception as ex:
+            reportError(Caught=True,
+                        CaughtPrefix='+++',
+                        CaughtCode='004',
+                        CaughtMsg='Exception on get_request_token. '
+                                   'Exiting...',
+                        exceptUse=True,
+                        # exceptCode=ex.code,
+                        exceptMsg=ex,
+                        NicePrint=True,
+                        exceptSysInfo=True)
+            sys.exit(4)
 
         # Show url. Copy and paste it in your browser
         authorize_url = nuflickr.auth_url(perms=u'delete')
         print(authorize_url)
 
         # Prompt for verifier code from the user.
-        verifier = unicode(raw_input('Verifier code (NNN-NNN-NNN): ')) \
+        verifier = unicode(raw_input(  # noqa
+                                     'Verifier code (NNN-NNN-NNN): ')) \
                    if sys.version_info < (3, ) \
                    else input('Verifier code (NNN-NNN-NNN): ')
 
@@ -1003,12 +629,12 @@ class Uploadr:
                         exceptMsg=ex,
                         NicePrint=True,
                         exceptSysInfo=True)
-            sys.exit(4)
+            sys.exit(5)
 
-        niceprint('{!s} with {!s} permissions: {!s}'.format(
-                                    'Check Authentication',
-                                    'delete',
-                                    nuflickr.token_valid(perms='delete')))
+        np.niceprint('{!s} with {!s} permissions: {!s}'.format(
+            'Check Authentication',
+            'delete',
+            nuflickr.token_valid(perms='delete')))
         # logging.critical('Token Cache: {!s}', nuflickr.token_cache.token)
 
     # -------------------------------------------------------------------------
@@ -1039,7 +665,7 @@ class Uploadr:
             else:
                 logging.warning('Token Non-Existant.')
                 return None
-        except:
+        except BaseException:
             reportError(Caught=True,
                         CaughtPrefix='+++',
                         CaughtCode='007',
@@ -1090,7 +716,7 @@ class Uploadr:
         Remove previously uploaded files, that are now being excluded due to
         change of the INI file configuration EXCLUDED_FOLDERS.
         """
-        niceprint('*****Removing files from Excluded Folders*****')
+        np.niceprint('*****Removing files from Excluded Folders*****')
 
         if (not flick.checkToken()):
             flick.authenticate()
@@ -1110,26 +736,17 @@ class Uploadr:
                 logging.debug('type(row[1]):[{!s}]'.format(type(row[1])))
                 # row[0] is photo_id
                 # row[1] is filename
-                # CODING
-                # debug#A with unicode
-                if (self.isFileExcluded(unicode(row[1], 'utf-8')
+                if (self.isFileExcluded(unicode(row[1], 'utf-8')  # noqa
                                         if sys.version_info < (3, )
                                         else str(row[1]))):
-                # debug#B with StrUnicodeOut
-                # if (self.isFileExcluded(StrUnicodeOut(row[1])
-                #                         if sys.version_info < (3, )
-                #                         else str(row[1]))):
-                # debug#C with row[1] => Fails TravisCI test 331.5
-                # if (self.isFileExcluded(row[1]
-                #                         if sys.version_info < (3, )
-                #                         else str(row[1]))):
+
                     self.deleteFile(row, cur)
 
         # Closing DB connection
         if con is not None:
             con.close()
 
-        niceprint('*****Completed files from Excluded Folders*****')
+        np.niceprint('*****Completed files from Excluded Folders*****')
 
     # -------------------------------------------------------------------------
     # removeDeleteMedia
@@ -1145,7 +762,7 @@ class Uploadr:
             if not exists, delete photo from fickr (flickr.photos.delete.html)
         """
 
-        niceprint('*****Removing deleted files*****')
+        np.niceprint('*****Removing deleted files*****')
 
         if (not flick.checkToken()):
             flick.authenticate()
@@ -1157,15 +774,15 @@ class Uploadr:
                 cur = con.cursor()
                 cur.execute("SELECT files_id, path FROM files")
                 rows = cur.fetchall()
-                niceprint('[{!s}] will be checked for Removal...'
-                          .format(str(len(rows))))
+                np.niceprint('[{!s}] will be checked for Removal...'
+                             .format(str(len(rows))))
             except lite.Error as e:
                 reportError(Caught=True,
-                    CaughtPrefix='+++ DB',
-                    CaughtCode='008',
-                    CaughtMsg='DB error on SELECT: [{!s}]'
-                              .format(e.args[0]),
-                    NicePrint=True)
+                            CaughtPrefix='+++ DB',
+                            CaughtCode='008',
+                            CaughtMsg='DB error on SELECT: [{!s}]'
+                            .format(e.args[0]),
+                            NicePrint=True)
                 if con is not None:
                     con.close()
                 return False
@@ -1179,17 +796,17 @@ class Uploadr:
                     logging.warning('deleteFile result: {!s}'.format(success))
                     count = count + 1
                     if (count % 3 == 0):
-                        niceprint('\t[{!s}] files removed...'
-                                  .format(str(count)))
+                        np.niceprint('\t[{!s}] files removed...'
+                                     .format(str(count)))
             if (count % 100 > 0):
-                niceprint('\t[{!s}] files removed...'
-                          .format(str(count)))
+                np.niceprint('\t[{!s}] files removed...'
+                             .format(str(count)))
 
         # Closing DB connection
         if con is not None:
             con.close()
 
-        niceprint('*****Completed deleted files*****')
+        np.niceprint('*****Completed deleted files*****')
 
     # -------------------------------------------------------------------------
     # upload
@@ -1206,7 +823,7 @@ class Uploadr:
         global numutex
         global nurunning
 
-        niceprint("*****Uploading files*****")
+        np.niceprint("*****Uploading files*****")
 
         allMedia = self.grabNewFiles()
         # If managing changes, consider all files
@@ -1228,8 +845,8 @@ class Uploadr:
 
         changedMedia_count = len(changedMedia)
         UPLDRConstants.nuMediacount = changedMedia_count
-        niceprint('Found [{!s}] files to upload.'
-                  .format(str(changedMedia_count)))
+        np.niceprint('Found [{!s}] files to upload.'
+                     .format(str(changedMedia_count)))
 
         if (args.bad_files):
             # Cater for bad files
@@ -1245,9 +862,9 @@ class Uploadr:
             changedMedia_count = len(changedMedia)
             # Careful with control on "i != changedMedia_count - 1"
             # UPLDRConstants.nuMediacount = changedMedia_count
-            niceprint('Removing {!s} badfiles. Found {!s} files to upload.'
-                      .format(len(badMedia),
-                              changedMedia_count))
+            np.niceprint('Removing {!s} badfiles. Found {!s} files to upload.'
+                         .format(len(badMedia),
+                                 changedMedia_count))
 
         # running in multi processing mode
         if (args.processes and args.processes > 0):
@@ -1289,8 +906,8 @@ class Uploadr:
                 numutex = multiprocessing.Lock()
 
                 sz = (len(changedMedia) // int(args.processes)) \
-                     if ((len(changedMedia) // int(args.processes)) > 0) \
-                     else 1
+                    if ((len(changedMedia) // int(args.processes)) > 0) \
+                    else 1
 
                 logging.debug('len(changedMedia):[{!s}] '
                               'int(args.processes):[{!s}] '
@@ -1308,27 +925,27 @@ class Uploadr:
                                   .format(type(nuChangeMedia)))
                     logging.debug('===Job/Task Process: Creating...')
                     uploadTask = multiprocessing.Process(
-                                        target=self.uploadFileX,
-                                        args=(nulockDB,
-                                              nurunning,
-                                              numutex,
-                                              nuChangeMedia,))
+                        target=self.uploadFileX,
+                        args=(nulockDB,
+                              nurunning,
+                              numutex,
+                              nuChangeMedia,))
                     uploadPool.append(uploadTask)
                     logging.debug('===Job/Task Process: Starting...')
                     uploadTask.start()
                     logging.debug('===Job/Task Process: Started')
                     if (args.verbose):
-                        niceprint('===Job/Task Process: [{!s}] Started '
-                                  'with pid:[{!s}]'
-                                  .format(uploadTask.name,
-                                          uploadTask.pid))
+                        np.niceprint('===Job/Task Process: [{!s}] Started '
+                                     'with pid:[{!s}]'
+                                     .format(uploadTask.name,
+                                             uploadTask.pid))
 
                 # Check status of jobs/tasks in the Process Pool
                 if LOGGING_LEVEL <= logging.DEBUG:
                     logging.debug('===Checking Processes launched/status:')
                     for j in uploadPool:
-                        niceprint('{!s}.is_alive = {!s}'
-                                  .format(j.name, j.is_alive()))
+                        np.niceprint('{!s}.is_alive = {!s}'
+                                     .format(j.name, j.is_alive()))
 
                 # Regularly print status of jobs/tasks in the Process Pool
                 # Prints status while there are processes active
@@ -1340,50 +957,46 @@ class Uploadr:
                     for p in multiprocessing.active_children():
                         logging.debug('==={!s}.is_alive = {!s}'
                                       .format(p.name, p.is_alive()))
-                        if (args.verbose):
-                            niceprint('==={!s}.is_alive = {!s}'
-                                      .format(p.name, p.is_alive()))
                         uploadTaskActive = p
                     logging.info('===Will wait for 60 on {!s}.is_alive = {!s}'
                                  .format(uploadTaskActive.name,
                                          uploadTaskActive.is_alive()))
-                    if (args.verbose):
-                        niceprint('===Will wait for 60 on {!s}.is_alive = {!s}'
-                                  .format(uploadTaskActive.name,
-                                          uploadTaskActive.is_alive()))
+                    if (args.verbose_progress):
+                        np.niceprint('===Will wait for 60 on '
+                                     '{!s}.is_alive = {!s}'
+                                     .format(uploadTaskActive.name,
+                                             uploadTaskActive.is_alive()))
 
                     uploadTaskActive.join(timeout=60)
                     logging.info('===Waited for 60s on {!s}.is_alive = {!s}'
                                  .format(uploadTaskActive.name,
                                          uploadTaskActive.is_alive()))
                     if (args.verbose):
-                        niceprint('===Waited for 60s on {!s}.is_alive = {!s}'
-                                  .format(uploadTaskActive.name,
-                                          uploadTaskActive.is_alive()))
+                        np.niceprint('===Waited for 60s on '
+                                     '{!s}.is_alive = {!s}'
+                                     .format(uploadTaskActive.name,
+                                             uploadTaskActive.is_alive()))
 
                 # Wait for join all jobs/tasks in the Process Pool
                 # All should be done by now!
                 for j in uploadPool:
                     j.join()
                     if (args.verbose):
-                        niceprint('==={!s} (is alive: {!s}).exitcode = {!s}'
-                                  .format(j.name, j.is_alive(), j.exitcode))
+                        np.niceprint('==={!s} (is alive: {!s}).exitcode = {!s}'
+                                     .format(j.name, j.is_alive(), j.exitcode))
 
                 logging.warning('===Multiprocessing=== pool joined! '
                                 'All processes finished.')
-                niceprint('===Multiprocessing=== pool joined! '
-                          'All processes finished.')
 
                 # Will release (set to None) the nulockDB lock control
-                # this prevents subsequent calls to useDBLock( nuLockDB, False)
+                # this prevents subsequent calls to useDBLock(nuLockDB, False)
                 # to raise exception:
                 #    ValueError('semaphore or lock released too many times')
-                if (args.verbose):
-                    niceprint('===Multiprocessing=== pool joined! '
-                              'What happens to nulockDB is None:[{!s}]? '
-                              'It seems not, it still has a value! '
-                              'Setting it to None!'
-                              .format(nulockDB is None))
+                logging.info('===Multiprocessing=== pool joined! '
+                             'What happens to nulockDB is None:[{!s}]? '
+                             'It seems not, it still has a value! '
+                             'Setting it to None!'
+                             .format(nulockDB is None))
                 nulockDB = None
 
                 # Show number of total files processed
@@ -1392,9 +1005,9 @@ class Uploadr:
                                         True)
 
             else:
-                niceprint('Pool not in __main__ process. '
-                          'Windows or recursive?'
-                          'Not possible to run Multiprocessing mode')
+                np.niceprint('Pool not in __main__ process. '
+                             'Windows or recursive?'
+                             'Not possible to run Multiprocessing mode')
         # running in single processing mode
         else:
             count = 0
@@ -1404,8 +1017,8 @@ class Uploadr:
                 # lock parameter not used (set to None) under single processing
                 success = self.uploadFile(lock=None, file=file)
                 if args.drip_feed and success and i != changedMedia_count - 1:
-                    niceprint('Waiting [{!s}] seconds before next upload'
-                              .format(str(DRIP_TIME)))
+                    np.niceprint('Waiting [{!s}] seconds before next upload'
+                                 .format(str(DRIP_TIME)))
                     nutime.sleep(DRIP_TIME)
                 count = count + 1
                 self.niceprocessedfiles(count,
@@ -1415,7 +1028,7 @@ class Uploadr:
             # Show number of total files processed
             self.niceprocessedfiles(count, UPLDRConstants.nuMediacount, True)
 
-        niceprint("*****Completed uploading files*****")
+        np.niceprint("*****Completed uploading files*****")
 
     # -------------------------------------------------------------------------
     # convertRawFiles
@@ -1437,14 +1050,14 @@ class Uploadr:
         if (not CONVERT_RAW_FILES):
             return
 
-        niceprint('*****Converting files*****')
+        np.niceprint('*****Converting files*****')
         for ext in RAW_EXT:
-            niceprint('About to convert files with extension: [{!s}]'
-                      .format(StrUnicodeOut(ext)))
+            np.niceprint('About to convert files with extension: [{!s}]'
+                         .format(StrUnicodeOut(ext)))
 
             for dirpath, dirnames, filenames in os.walk(
-                                                FILES_DIR,
-                                                followlinks=True):
+                    FILES_DIR,
+                    followlinks=True):
                 if '.picasaoriginals' in dirnames:
                     dirnames.remove('.picasaoriginals')
                 if '@eaDir' in dirnames:
@@ -1457,9 +1070,10 @@ class Uploadr:
 
                         if (not os.path.exists(dirpath + "/" +
                                                filename + ".JPG")):
-                            niceprint('About to create JPG from raw[{!s}/{!s}]'
-                                      .format(StrUnicodeOut(dirpath),
-                                              StrUnicodeOut(f)))
+                            np.niceprint('About to create JPG from '
+                                         'raw[{!s}/{!s}]'
+                                         .format(StrUnicodeOut(dirpath),
+                                                 StrUnicodeOut(f)))
                             # CODING if previous like ok, eliminate next line:
                             # if isThisStringUnicode(dirpath):
                             #     if isThisStringUnicode(f):
@@ -1488,9 +1102,9 @@ class Uploadr:
                                 flag = "JpgFromRaw"
 
                             command = RAW_TOOL_PATH + "exiftool -b -" + flag +\
-                                      " -w .JPG -ext " + ext + " -r '" +\
-                                      dirpath + "/" +\
-                                      filename + "." + fileExt + "'"
+                                " -w .JPG -ext " + ext + " -r '" +\
+                                dirpath + "/" +\
+                                filename + "." + fileExt + "'"
                             logging.info(command)
 
                             p = subprocess.call(command, shell=True)
@@ -1498,13 +1112,14 @@ class Uploadr:
                         if (not os.path.exists(dirpath + "/" +
                                                filename + ".JPG_original")):
 
-                            niceprint('About to copy tags from:[{!s}/{!s}]'
-                                      .format(dirpath.encode('utf-8')
-                                              if isThisStringUnicode(dirpath)
-                                              else dirpath,
-                                              f.encode('utf-8')
-                                              if isThisStringUnicode(f)
-                                              else f))
+                            np.niceprint('About to copy tags from:[{!s}/{!s}]'
+                                         .format(dirpath.encode('utf-8')
+                                                 if
+                                                 isThisStringUnicode(dirpath)
+                                                 else dirpath,
+                                                 f.encode('utf-8')
+                                                 if isThisStringUnicode(f)
+                                                 else f))
                             # CODING if line above ok remove next lines
                             # if isThisStringUnicode(dirpath):
                             #     if isThisStringUnicode(f):
@@ -1533,23 +1148,23 @@ class Uploadr:
                             #           " to JPG.")
 
                             command = RAW_TOOL_PATH +\
-                                      "exiftool -tagsfromfile '" +\
-                                      dirpath + "/" + f +\
-                                      "' -r -all:all -ext JPG '" +\
-                                      dirpath + "/" + filename + ".JPG'"
+                                "exiftool -tagsfromfile '" +\
+                                dirpath + "/" + f +\
+                                "' -r -all:all -ext JPG '" +\
+                                dirpath + "/" + filename + ".JPG'"
                             logging.info(command)
 
                             p = subprocess.call(command, shell=True)
 
-                            niceprint('Finished copying tags.')
+                            np.niceprint('Finished copying tags.')
 
-            niceprint('Finished converting files with extension:[{!s}]'
-                      .format(StrUnicodeOut(ext)))
+            np.niceprint('Finished converting files with extension:[{!s}]'
+                         .format(StrUnicodeOut(ext)))
 
         if p is None:
             del p
 
-        niceprint('*****Completed converting files*****')
+        np.niceprint('*****Completed converting files*****')
 
     # -------------------------------------------------------------------------
     # grabNewFiles
@@ -1574,25 +1189,24 @@ class Uploadr:
             logging.debug('Check for UnicodeWarning comparison '
                           'dirpath:[{!s}] type:[{!s}]'
                           .format(StrUnicodeOut(os.path.basename(
-                                                  os.path.normpath(dirpath))),
-                                  type(os.path.basename(
-                                                  os.path.normpath(dirpath)))))
+                              os.path.normpath(dirpath))),
+                              type(os.path.basename(
+                                  os.path.normpath(dirpath)))))
             if os.path.basename(os.path.normpath(dirpath)) \
-                in EXCLUDED_FOLDERS:
+                    in EXCLUDED_FOLDERS:
                 dirnames[:] = []
                 filenames[:] = []
                 logging.warning('Folder [{!s}] on path [{!s}] excluded.'
                                 .format(
                                     StrUnicodeOut(os.path.basename(
-                                                    os.path.normpath(dirpath))
-                                                 ),
+                                        os.path.normpath(dirpath))
+                                    ),
                                     StrUnicodeOut(os.path.normpath(dirpath)))
-                               )
-                niceprint('Folder [{!s}] on path [{!s}] excluded.'
-                          .format(StrUnicodeOut(os.path.basename(
-                                                   os.path.normpath(dirpath))
-                                               ),
-                                StrUnicodeOut(os.path.normpath(dirpath))))
+                                )
+                np.niceprint('Folder [{!s}] on path [{!s}] excluded.'
+                             .format(StrUnicodeOut(os.path.basename(
+                                 os.path.normpath(dirpath))),
+                                 StrUnicodeOut(os.path.normpath(dirpath))))
 
             for f in filenames:
                 filePath = os.path.join(dirpath, f)
@@ -1616,15 +1230,15 @@ class Uploadr:
                                 StrUnicodeOut("/") +
                                 StrUnicodeOut(f).replace("'", "\'")))
                     else:
-                        niceprint('Skipping file due to '
-                                  'size restriction: [{!s}]'.format(
-                                        os.path.normpath(
-                                            StrUnicodeOut(dirpath) +
-                                            StrUnicodeOut('/') +
-                                            StrUnicodeOut(f))))
+                        np.niceprint('Skipping file due to '
+                                     'size restriction: [{!s}]'.format(
+                                         os.path.normpath(
+                                             StrUnicodeOut(dirpath) +
+                                             StrUnicodeOut('/') +
+                                             StrUnicodeOut(f))))
         files.sort()
         if LOGGING_LEVEL <= logging.DEBUG:
-            niceprint('Pretty Print Output for {!s}:'.format('files'))
+            np.niceprint('Pretty Print Output for {!s}:'.format('files'))
             pprint.pprint(files)
 
         return files
@@ -1652,7 +1266,7 @@ class Uploadr:
                           .format(isThisStringUnicode(filename)))
             logging.debug('is os.path.dirname(filename) unicode?[{!s}]'
                           .format(isThisStringUnicode(
-                                        os.path.dirname(filename))))
+                              os.path.dirname(filename))))
             logging.debug('excluded_dir:[{!s}] filename:[{!s}]'
                           .format(StrUnicodeOut(excluded_dir),
                                   StrUnicodeOut(filename)))
@@ -1671,6 +1285,7 @@ class Uploadr:
 
     Update the video date taken based on last_modified time of file
     """
+
     def updatedVideoDate(self, xfile_id, xfile, xlast_modified):
 
         # Update Date/Time on Flickr for Video files
@@ -1693,13 +1308,14 @@ class Uploadr:
                                                       str(video_date))
                 logging.debug('Output for {!s}:'.format('res_set_date'))
                 logging.debug(xml.etree.ElementTree.tostring(
-                                                       res_set_date,
-                                                       encoding='utf-8',
-                                                       method='xml'))
+                    res_set_date,
+                    encoding='utf-8',
+                    method='xml'))
                 if self.isGood(res_set_date):
-                    niceprint('Successfully set date [{!s}] for file:[{!s}].'
-                              .format(StrUnicodeOut(video_date),
-                                      StrUnicodeOut(xfile)))
+                    np.niceprint('Successfully set date [{!s}] '
+                                 'for file:[{!s}].'
+                                 .format(StrUnicodeOut(video_date),
+                                         StrUnicodeOut(xfile)))
             except (IOError, ValueError, httplib.HTTPException):
                 reportError(Caught=True,
                             CaughtPrefix='+++',
@@ -1714,9 +1330,9 @@ class Uploadr:
                 if not self.isGood(res_set_date):
                     raise IOError(res_set_date)
 
-            niceprint('Successfully set date [{!s}] for pic [{!s}]'
-                      .format(StrUnicodeOut(video_date),
-                              StrUnicodeOut(xfile)))
+            np.niceprint('Successfully set date [{!s}] for pic [{!s}]'
+                         .format(StrUnicodeOut(video_date),
+                                 StrUnicodeOut(xfile)))
             return True
         else:
             return True
@@ -1754,7 +1370,6 @@ class Uploadr:
 
             # Show number of files processed so far
             self.niceprocessedfiles(xcount, UPLDRConstants.nuMediacount, False)
-
 
     # -------------------------------------------------------------------------
     # uploadFile
@@ -1824,10 +1439,23 @@ class Uploadr:
                     self.useDBLock(lock, False)
 
                 if DBexception:
-                    logging.error('Sleep 2 and retry SQL...')
-                    niceprint('Sleep 2 and retry SQL...')
+                    reportError(Caught=True,
+                                CaughtPrefix='+++ DB',
+                                CaughtCode='031',
+                                CaughtMsg='Sleep 2 and retry SQL...'
+                                          '[{!s}/{!s} attempts]'
+                                          .format(x, MAX_SQL_ATTEMPTS),
+                                NicePrint=True)
                     nutime.sleep(2)
                 else:
+                    if (x > 0):
+                        reportError(Caught=True,
+                                    CaughtPrefix='+++ DB',
+                                    CaughtCode='032',
+                                    CaughtMsg='Succeeded at retry SQL...'
+                                    '[{!s}/{!s} attempts]'
+                                    .format(x, MAX_SQL_ATTEMPTS),
+                                    NicePrint=True)
                     logging.info(
                         'END SQL:[{!s}]...[{!s}/{!s} attempts].'
                         .format('INSERT INTO files',
@@ -1838,13 +1466,13 @@ class Uploadr:
         # ---------------------------------------------------------------------
 
         if (args.dry_run is True):
-            niceprint('Dry Run Uploading file:[{!s}]...'
-                      .format(StrUnicodeOut(file)))
+            np.niceprint('Dry Run Uploading file:[{!s}]...'
+                         .format(StrUnicodeOut(file)))
             return True
 
         if (args.verbose):
-            niceprint('Checking file:[{!s}]...'
-                      .format(StrUnicodeOut(file)))
+            np.niceprint('Checking file:[{!s}]...'
+                         .format(StrUnicodeOut(file)))
 
         setName = self.getSetNameFromFile(file, FILES_DIR, FULL_SET_NAME)
 
@@ -1871,7 +1499,7 @@ class Uploadr:
             except lite.Error as e:
                 reportError(Caught=True,
                             CaughtPrefix='+++ DB',
-                            CaughtCode='015',
+                            CaughtCode='035',
                             CaughtMsg='DB error on SELECT: [{!s}]'
                                       .format(e.args[0]),
                             NicePrint=True)
@@ -1896,16 +1524,16 @@ class Uploadr:
             else:
                 file_checksum = self.md5Checksum(file)
                 isLoaded, isCount, isfile_id, isNoSet = \
-                                self.is_photo_already_uploaded(file,
-                                                               file_checksum,
-                                                               setName)
+                    self.is_photo_already_uploaded(file,
+                                                   file_checksum,
+                                                   setName)
                 logging.info('is_photo_already_uploaded:[{!s}] '
-                              'count:[{!s}] pic:[{!s}] '
-                              'row is None == [{!s}] '
-                              'isNoSet:[{!s}]'
-                              .format(isLoaded, isCount,
-                                      isfile_id, row is None,
-                                      isNoSet))
+                             'count:[{!s}] pic:[{!s}] '
+                             'row is None == [{!s}] '
+                             'isNoSet:[{!s}]'
+                             .format(isLoaded, isCount,
+                                     isfile_id, row is None,
+                                     isNoSet))
 
             if isLoaded and row is None:
                 if file_checksum is None:
@@ -1915,10 +1543,10 @@ class Uploadr:
                 logging.warning('ALREADY LOADED. '
                                 'DO NOT PERFORM ANYTHING ELSE. '
                                 'ROW IS NONE... UPDATING LOCAL DATABASE.')
-                niceprint('Already loaded file:[{!s}]...'
-                          'On Album:[{!s}]... UPDATING LOCAL DATABASE.'
-                          .format(StrUnicodeOut(file),
-                                  StrUnicodeOut(setName)))
+                np.niceprint('Already loaded file:[{!s}]...'
+                             'On Album:[{!s}]... UPDATING LOCAL DATABASE.'
+                             .format(StrUnicodeOut(file),
+                                     StrUnicodeOut(setName)))
                 dbInsertIntoFiles(lock, isfile_id, file,
                                   file_checksum, last_modified)
 
@@ -1927,10 +1555,10 @@ class Uploadr:
 
             elif row is None:
                 if (args.verbose):
-                    niceprint('Uploading file:[{!s}]...'
-                              'On Album:[{!s}]...'
-                              .format(StrUnicodeOut(file),
-                                      StrUnicodeOut(setName)))
+                    np.niceprint('Uploading file:[{!s}]...'
+                                 'On Album:[{!s}]...'
+                                 .format(StrUnicodeOut(file),
+                                         StrUnicodeOut(setName)))
 
                 logging.warning('Uploading file:[{!s}]... '
                                 'On Album:[{!s}]...'
@@ -1948,9 +1576,9 @@ class Uploadr:
                 if args.tags:  # Append a space to later add -t TAGS
                     FLICKR["tags"] += " "
                     if args.verbose:
-                        niceprint('TAGS:[{} {}]'
-                                  .format(FLICKR["tags"],
-                                         args.tags).replace(',', ''))
+                        np.niceprint('TAGS:[{} {}]'
+                                     .format(FLICKR["tags"],
+                                             args.tags).replace(',', ''))
 
                 # if FLICKR["title"] is empty...
                 # if filename's exif title is empty...
@@ -1968,9 +1596,9 @@ class Uploadr:
                     logging.info('path:[{!s}] '
                                  'filename:[{!s}] '
                                  'ext=[{!s}]'.format(
-                                      path_filename,
-                                      title_filename,
-                                      os.path.splitext(title_filename)[1]))
+                                     path_filename,
+                                     title_filename,
+                                     os.path.splitext(title_filename)[1]))
                     title_filename = os.path.splitext(title_filename)[0]
                     logging.warning('title_name:[{!s}]'.format(title_filename))
                 else:
@@ -1990,41 +1618,40 @@ class Uploadr:
                                         '[{!s}/{!s} attempts].'
                                         .format(x, MAX_UPLOAD_ATTEMPTS))
                         if (x > 0):
-                            niceprint('Reuploading:[{!s}]...'
-                                      '[{!s}/{!s} attempts].'
-                                      .format(StrUnicodeOut(file),
-                                              x,
-                                              MAX_UPLOAD_ATTEMPTS))
-
+                            np.niceprint('Reuploading:[{!s}]...'
+                                         '[{!s}/{!s} attempts].'
+                                         .format(StrUnicodeOut(file),
+                                                 x,
+                                                 MAX_UPLOAD_ATTEMPTS))
                         # Upload file to Flickr
                         # replace commas from tags and checksum tags
                         # to avoid tags conflicts
                         try:
                             uploadResp = nuflickr.upload(
-                                    filename=file,
-                                    fileobj=FileWithCallback(file,
-                                                             callback),
-                                    title=title_filename
-                                          if FLICKR["title"] == ""
-                                          else str(FLICKR["title"]),
-                                    description=str(FLICKR["description"]),
-                                    tags='{} checksum:{} album:"{}" {}'
-                                         .format(
-                                                FLICKR["tags"],
-                                                file_checksum,
-                                                StrUnicodeOut(setName),
-                                                args.tags if args.tags else '')
-                                                .replace(',', ''),
-                                    is_public=str(FLICKR["is_public"]),
-                                    is_family=str(FLICKR["is_family"]),
-                                    is_friend=str(FLICKR["is_friend"])
-                                    )
+                                filename=file,
+                                fileobj=FileWithCallback(file,
+                                                         callback),
+                                title=title_filename
+                                if FLICKR["title"] == ""
+                                else str(FLICKR["title"]),
+                                description=str(FLICKR["description"]),
+                                tags='{} checksum:{} album:"{}" {}'
+                                .format(
+                                    FLICKR["tags"],
+                                    file_checksum,
+                                    StrUnicodeOut(setName),
+                                    args.tags if args.tags else '')
+                                .replace(',', ''),
+                                is_public=str(FLICKR["is_public"]),
+                                is_family=str(FLICKR["is_family"]),
+                                is_friend=str(FLICKR["is_friend"])
+                            )
 
                             logging.debug('uploadResp: ')
                             logging.debug(xml.etree.ElementTree.tostring(
-                                                uploadResp,
-                                                encoding='utf-8',
-                                                method='xml'))
+                                uploadResp,
+                                encoding='utf-8',
+                                method='xml'))
                             logging.info('uploadResp:[{!s}]'
                                          .format(self.isGood(uploadResp)))
 
@@ -2036,11 +1663,11 @@ class Uploadr:
                                             .format(StrUnicodeOut(file),
                                                     photo_id))
                             if (args.verbose):
-                                niceprint('Uploaded [{!s}] photo_id=[{!s}] '
-                                          'Ok. Will check for issues ('
-                                          'duplicates or wrong checksum)'
-                                          .format(StrUnicodeOut(file),
-                                                  photo_id))
+                                np.niceprint('Uploaded [{!s}] photo_id=[{!s}] '
+                                             'Ok. Will check for issues ('
+                                             'duplicates or wrong checksum)'
+                                             .format(StrUnicodeOut(file),
+                                                     photo_id))
 
                             # Successful upload. Break attempts cycle
                             break
@@ -2050,14 +1677,15 @@ class Uploadr:
                         # Error #5 invalid videos format loading...
                         except (IOError, httplib.HTTPException):
                             reportError(Caught=True,
-                                CaughtPrefix='+++',
-                                CaughtCode='020',
-                                CaughtMsg='Caught IOError, HTTP exception',
-                                NicePrint=True)
+                                        CaughtPrefix='+++',
+                                        CaughtCode='038',
+                                        CaughtMsg='Caught IOError, '
+                                        'HTTP exception',
+                                        NicePrint=True)
                             logging.error('Sleep 10 and check if file is '
                                           'already uploaded')
-                            niceprint('Sleep 10 and check if file is '
-                                      'already uploaded')
+                            np.niceprint('Sleep 10 and check if file is '
+                                         'already uploaded')
                             nutime.sleep(10)
 
                             # on error, check if exists a photo
@@ -2067,9 +1695,9 @@ class Uploadr:
                             # CODING: but checking without SET
                             ZisLoaded, ZisCount, Zisfile_id, zisNoSet = \
                                 self.is_photo_already_uploaded(
-                                                                file,
-                                                                file_checksum,
-                                                                setName)
+                                    file,
+                                    file_checksum,
+                                    setName)
                             logging.debug('CODING NEW CODE: '
                                           'is_photo_already_uploaded:[{!s}] '
                                           'Zcount:[{!s}] Zpic:[{!s}] '
@@ -2084,22 +1712,22 @@ class Uploadr:
                             logging.warning('Output for {!s}:'
                                             .format('search_result'))
                             logging.warning(xml.etree.ElementTree.tostring(
-                                                   search_result,
-                                                   encoding='utf-8',
-                                                   method='xml'))
+                                search_result,
+                                encoding='utf-8',
+                                method='xml'))
 
                             if int(search_result.find('photos')
                                    .attrib['total']) == 0:
                                 if x == MAX_UPLOAD_ATTEMPTS - 1:
-                                    niceprint('Reached maximum number '
-                                              'of attempts to upload, '
-                                              'file: [{!s}]'.format(file))
+                                    np.niceprint('Reached maximum number '
+                                                 'of attempts to upload, '
+                                                 'file: [{!s}]'.format(file))
                                     raise ValueError('Reached maximum number '
                                                      'of attempts to upload, '
                                                      'skipping')
-                                niceprint('Not found, reuploading '
-                                          '[{!s}/{!s} attempts].'
-                                          .format(x, MAX_UPLOAD_ATTEMPTS))
+                                np.niceprint('Not found, reuploading '
+                                             '[{!s}/{!s} attempts].'
+                                             .format(x, MAX_UPLOAD_ATTEMPTS))
                                 continue
 
                             if int(search_result.find('photos')
@@ -2110,19 +1738,20 @@ class Uploadr:
 
                             if int(search_result.find('photos')
                                    .attrib['total']) == 1:
-                                niceprint('Found, continuing with next image.')
+                                np.niceprint('Found, '
+                                             'continuing with next image.')
                                 break
 
                     # Error on upload and search for photo not performed/empty
                     if not search_result and not self.isGood(uploadResp):
-                        niceprint('A problem occurred while attempting to '
-                                  'upload the file:[{!s}]'
-                                  .format(StrUnicodeOut(file)))
+                        np.niceprint('A problem occurred while attempting to '
+                                     'upload the file:[{!s}]'
+                                     .format(StrUnicodeOut(file)))
                         raise IOError(uploadResp)
 
                     # Successful update
-                    niceprint('Successfully uploaded the file:[{!s}].'
-                              .format(StrUnicodeOut(file)))
+                    np.niceprint('Successfully uploaded the file:[{!s}].'
+                                 .format(StrUnicodeOut(file)))
 
                     # Save file_id... from uploadResp or search_result
                     # CODING: Obtained IndexOut of Range error after 1st load
@@ -2135,8 +1764,8 @@ class Uploadr:
                                                  .find('photos')
                                                  .findall('photo'))))
                         if (len(search_result
-                               .find('photos')
-                               .findall('photo')) == 0):
+                                .find('photos')
+                                .findall('photo')) == 0):
                             logging.error('xxx #E10 Error: '
                                           'IndexError: search_result yields '
                                           'Index out of range. '
@@ -2146,14 +1775,14 @@ class Uploadr:
                             TraceBackIndexError = True
                         else:
                             file_id = search_result.find('photos')\
-                                        .findall('photo')[0].attrib['id']
+                                .findall('photo')[0].attrib['id']
                             # file_id = uploadResp.findall('photoid')[0].text
                             logging.debug('Output for {!s}:'
-                                         .format('search_result'))
+                                          .format('search_result'))
                             logging.debug(xml.etree.ElementTree.tostring(
-                                                search_result,
-                                                encoding='utf-8',
-                                                method='xml'))
+                                search_result,
+                                encoding='utf-8',
+                                method='xml'))
                             logging.warning('SEARCH_RESULT file_id={!s}'
                                             .format(file_id))
                     else:
@@ -2161,9 +1790,9 @@ class Uploadr:
                         file_id = uploadResp.findall('photoid')[0].text
                         logging.debug('Output for {!s}:'.format('uploadResp'))
                         logging.debug(xml.etree.ElementTree.tostring(
-                                            uploadResp,
-                                            encoding='utf-8',
-                                            method='xml'))
+                            uploadResp,
+                            encoding='utf-8',
+                            method='xml'))
 
                     # For tracking bad response from search_photos
                     logging.info('TraceBackIndexError:[{!s}]'
@@ -2193,24 +1822,24 @@ class Uploadr:
                     # Error code: [Error: 5: Filetype was not recognised]
                     # Error code: [8]
                     # Error code: [Error: 8: Filesize was too large]
-                    if (((format(ex.code) == '5') or (format(ex.code) == '8'))
-                        and (args.bad_files)):
+                    if (((format(ex.code) == '5') or (
+                            format(ex.code) == '8')) and (args.bad_files)):
                         # Add to db the file NOT uploaded
                         # Control for when running multiprocessing set locking
-                        niceprint('Adding to Bad files table:[{!s}] '
-                                  'due to [{!s}]'
-                                  .format(file,
-                                          'Filetype was not recognised'
-                                          if (format(ex.code) == '5')
-                                          else 'Filesize was too large'))
+                        np.niceprint('Adding to Bad files table:[{!s}] '
+                                     'due to [{!s}]'
+                                     .format(file,
+                                             'Filetype was not recognised'
+                                             if (format(ex.code) == '5')
+                                             else 'Filesize was too large'))
                         logging.info('Bad file:[{!s}]'.format(file))
 
                         self.useDBLock(lock, True)
                         # files_id column is autoincrement. No need to specify
                         cur.execute(
-                          'INSERT INTO badfiles ( path, md5, '
-                          'last_modified, tagged) VALUES (?, ?, ?, 1)',
-                          (file, file_checksum, last_modified))
+                            'INSERT INTO badfiles ( path, md5, '
+                            'last_modified, tagged) VALUES (?, ?, ?, 1)',
+                            (file, file_checksum, last_modified))
                         # Control for when running multiprocessing
                         # release locking
                         self.useDBLock(lock, False)
@@ -2240,7 +1869,7 @@ class Uploadr:
                 if (isLoaded and
                     isNoSet and
                     (row is not None) and
-                    (str(row[1]) == str(isfile_id))):
+                        (str(row[1]) == str(isfile_id))):
 
                     logging.info('Will UPDATE files SET set_id = null '
                                  'for pic:[{!s}] '
@@ -2251,10 +1880,11 @@ class Uploadr:
                                     'WHERE files_id = ?', (row[1],))
                     except lite.Error as e:
                         reportError(Caught=True,
-                            CaughtPrefix='+++ DB',
-                            CaughtCode='045',
-                            CaughtMsg='DB error on UPDATE: [{!s}]'.format(e.args[0]),
-                            NicePrint=True)
+                                    CaughtPrefix='+++ DB',
+                                    CaughtCode='045',
+                                    CaughtMsg='DB error on UPDATE: [{!s}]'
+                                              .format(e.args[0]),
+                                    NicePrint=True)
                     finally:
                         con.commit()
                         self.useDBLock(lock, False)
@@ -2276,9 +1906,9 @@ class Uploadr:
                 try:
                     logging.warning('CHANGES row[6]=[{!s}-({!s})]'
                                     .format(nutime.strftime(
-                                                    UPLDRConstants.TimeFormat,
-                                                    nutime.localtime(row[6])),
-                                            row[6]))
+                                        UPLDRConstants.TimeFormat,
+                                        nutime.localtime(row[6])),
+                                        row[6]))
                     if (row[6] is None):
                         # Update db the last_modified time of file
 
@@ -2360,12 +1990,13 @@ class Uploadr:
         global nuflickr
 
         if (args.dry_run is True):
-            niceprint('Dry Run Replacing file:[{!s}]...'
-                      .format(StrUnicodeOut(file)))
+            np.niceprint('Dry Run Replacing file:[{!s}]...'
+                         .format(StrUnicodeOut(file)))
             return True
 
         if (args.verbose):
-            niceprint('Replacing file:[{!s}]...'.format(StrUnicodeOut(file)))
+            np.niceprint('Replacing file:[{!s}]...'
+                         .format(StrUnicodeOut(file)))
 
         success = False
         try:
@@ -2374,8 +2005,8 @@ class Uploadr:
             #    - the flickrapi seems to fail with filename
             # so I've used photo FileObj and filename='dummy'
             photo = open(file.encode('utf-8'), 'rb')\
-                    if isThisStringUnicode(file)\
-                    else open(file, 'rb')
+                if isThisStringUnicode(file)\
+                else open(file, 'rb')
             logging.debug('photo:[{!s}] type(photo):[{!s}]'
                           .format(photo, type(photo)))
 
@@ -2386,67 +2017,68 @@ class Uploadr:
 
                 try:
                     if (x > 0):
-                        niceprint('Re-Replacing:[{!s}]...[{!s}/{!s} attempts].'
-                                  .format(StrUnicodeOut(file),
-                                          x,
-                                          MAX_UPLOAD_ATTEMPTS))
+                        np.niceprint('Re-Replacing:'
+                                     '[{!s}]...[{!s}/{!s} attempts].'
+                                     .format(StrUnicodeOut(file),
+                                             x,
+                                             MAX_UPLOAD_ATTEMPTS))
 
                     # Use fileobj with filename='dummy'to accept unicode file.
                     replaceResp = nuflickr.replace(
-                                filename='dummy',
-                                fileobj=photo,
-                                # fileobj=FileWithCallback(file, callback),
-                                photo_id=file_id
-                                )
+                        filename='dummy',
+                        fileobj=photo,
+                        # fileobj=FileWithCallback(file, callback),
+                        photo_id=file_id
+                    )
 
                     logging.debug('replaceResp: ')
                     logging.debug(xml.etree.ElementTree.tostring(
-                                                    replaceResp,
-                                                    encoding='utf-8',
-                                                    method='xml'))
+                        replaceResp,
+                        encoding='utf-8',
+                        method='xml'))
                     logging.info('replaceResp:[{!s}]'
                                  .format(self.isGood(replaceResp)))
 
                     if (self.isGood(replaceResp)):
                         # Update checksum tag at this time.
                         res_add_tag = flick.photos_add_tags(
-                                        file_id,
-                                        ['checksum:{}'.format(fileMd5)]
-                                      )
+                            file_id,
+                            ['checksum:{}'.format(fileMd5)]
+                        )
                         logging.debug('res_add_tag: ')
                         logging.debug(xml.etree.ElementTree.tostring(
-                                                res_add_tag,
-                                                encoding='utf-8',
-                                                method='xml'))
+                            res_add_tag,
+                            encoding='utf-8',
+                            method='xml'))
                         if (self.isGood(res_add_tag)):
                             # Gets Flickr file info to obtain all tags
                             # in order to update checksum tag if exists
                             res_get_info = flick.photos_get_info(
-                                                photo_id=file_id
-                                                )
+                                photo_id=file_id
+                            )
                             logging.debug('res_get_info: ')
                             logging.debug(xml.etree.ElementTree.tostring(
-                                                    res_get_info,
-                                                    encoding='utf-8',
-                                                    method='xml'))
+                                res_get_info,
+                                encoding='utf-8',
+                                method='xml'))
                             # find tag checksum with oldFileMd5
                             # later use such tag_id to delete it
                             if (self.isGood(res_get_info)):
                                 tag_id = None
                                 for tag in res_get_info\
-                                                .find('photo')\
-                                                .find('tags')\
-                                                .findall('tag'):
+                                    .find('photo')\
+                                    .find('tags')\
+                                        .findall('tag'):
                                     if (tag.attrib['raw'] ==
-                                           'checksum:{}'.format(oldFileMd5)):
+                                            'checksum:{}'.format(oldFileMd5)):
                                         tag_id = tag.attrib['id']
                                         logging.info('Found tag_id:[{!s}]'
                                                      .format(tag_id))
                                         break
                                 if not tag_id:
-                                    niceprint('Can\'t find tag [{!s}]'
-                                              'for file [{!s}]'
-                                              .format(tag_id, file_id))
+                                    np.niceprint('Can\'t find tag [{!s}]'
+                                                 'for file [{!s}]'
+                                                 .format(tag_id, file_id))
                                     # break from attempting to update tag_id
                                     break
                                 else:
@@ -2460,9 +2092,9 @@ class Uploadr:
                                                             encoding='utf-8',
                                                             method='xml'))
                                     if (self.isGood(remtagResp)):
-                                        niceprint('Tag removed.')
+                                        np.niceprint('Tag removed.')
                                     else:
-                                        niceprint('Tag Not removed.')
+                                        np.niceprint('Tag Not removed.')
 
                     break
                 # Exceptions for flickr.upload function call...
@@ -2475,7 +2107,7 @@ class Uploadr:
                                 NicePrint=True,
                                 exceptSysInfo=True)
                     logging.error('Sleep 10 and try to replace again.')
-                    niceprint('Sleep 10 and try to replace again.')
+                    np.niceprint('Sleep 10 and try to replace again.')
                     nutime.sleep(10)
 
                     if x == MAX_UPLOAD_ATTEMPTS - 1:
@@ -2484,11 +2116,11 @@ class Uploadr:
                     continue
 
             if (not self.isGood(replaceResp)) or \
-                   (not self.isGood(res_add_tag)) or \
-                   (not self.isGood(res_get_info)):
-                niceprint('A problem occurred while attempting to '
-                          'replace the file:[{!s}]'
-                          .format(StrUnicodeOut(file)))
+                (not self.isGood(res_add_tag)) or \
+                    (not self.isGood(res_get_info)):
+                np.niceprint('A problem occurred while attempting to '
+                             'replace the file:[{!s}]'
+                             .format(StrUnicodeOut(file)))
 
             if (not self.isGood(replaceResp)):
                 raise IOError(replaceResp)
@@ -2499,8 +2131,8 @@ class Uploadr:
             if (not self.isGood(res_get_info)):
                 raise IOError(res_get_info)
 
-            niceprint('Successfully replaced the file:[{!s}].'
-                      .format(StrUnicodeOut(file)))
+            np.niceprint('Successfully replaced the file:[{!s}].'
+                         .format(StrUnicodeOut(file)))
 
             # Update the db the file uploaded
             # Control for when running multiprocessing set locking
@@ -2546,7 +2178,7 @@ class Uploadr:
             # Release the lock on error.
             self.useDBLock(lock, False)
             success = False
-        except:
+        except BaseException:
             reportError(Caught=True,
                         CaughtPrefix='+++',
                         CaughtCode='082',
@@ -2574,15 +2206,15 @@ class Uploadr:
         global nuflickr
 
         if args.dry_run:
-            niceprint('Dry Run Deleting file:[{!s}]'
-                      .format(StrUnicodeOut(file[1])))
+            np.niceprint('Dry Run Deleting file:[{!s}]'
+                         .format(StrUnicodeOut(file[1])))
             return True
 
         @retry(attempts=2, waittime=2, randtime=False)
         def R_photos_delete(kwargs):
             return nuflickr.photos.delete(**kwargs)
 
-        niceprint('Deleting file:[{!s}]'.format(StrUnicodeOut(file[1])))
+        np.niceprint('Deleting file:[{!s}]'.format(StrUnicodeOut(file[1])))
 
         success = False
 
@@ -2592,9 +2224,9 @@ class Uploadr:
 
             logging.debug('Output for {!s}:'.format('deleteResp'))
             logging.debug(xml.etree.ElementTree.tostring(
-                                    deleteResp,
-                                    encoding='utf-8',
-                                    method='xml'))
+                deleteResp,
+                encoding='utf-8',
+                method='xml'))
             if (self.isGood(deleteResp)):
                 # Find out if the file is the last item in a set, if so,
                 # remove the set from the local db
@@ -2605,13 +2237,13 @@ class Uploadr:
                             (row[0],))
                 rows = cur.fetchall()
                 if (len(rows) == 1):
-                    niceprint('File is the last of the set, '
-                              'deleting the set ID: ' + str(row[0]))
+                    np.niceprint('File is the last of the set, '
+                                 'deleting the set ID: ' + str(row[0]))
                     cur.execute("DELETE FROM sets WHERE set_id = ?", (row[0],))
 
                 # Delete file record from the local db
                 cur.execute("DELETE FROM files WHERE files_id = ?", (file[0],))
-                niceprint("Successful deletion.")
+                np.niceprint("Successful deletion.")
                 success = True
             else:
                 reportError(Caught=True,
@@ -2653,7 +2285,7 @@ class Uploadr:
                             CaughtCode='092',
                             CaughtMsg='Failed delete photo (deleteFile)',
                             NicePrint=True)
-        except:
+        except BaseException:
             # If you get 'attempt to write a readonly database', set 'admin'
             # as owner of the DB file (fickerdb) and 'users' as group
             reportError(Caught=True,
@@ -2683,8 +2315,8 @@ class Uploadr:
         logging.warning('Adding set: [{!s}] to database log.'
                         .format(StrUnicodeOut(setName)))
         if (args.verbose):
-            niceprint('Adding set: [{!s}] to database log.'
-                      .format(StrUnicodeOut(setName)))
+            np.niceprint('Adding set: [{!s}] to database log.'
+                         .format(StrUnicodeOut(setName)))
 
         try:
             cur.execute('INSERT INTO sets (set_id, name, primary_photo_id) '
@@ -2692,21 +2324,22 @@ class Uploadr:
                         (setId, setName, primaryPhotoId))
         except lite.Error as e:
             reportError(Caught=True,
-                CaughtPrefix='+++ DB',
-                CaughtCode='094',
-                CaughtMsg='DB error on INSERT: [{!s}]'
-                          .format(e.args[0]),
-                NicePrint=True)
+                        CaughtPrefix='+++ DB',
+                        CaughtCode='094',
+                        CaughtMsg='DB error on INSERT: [{!s}]'
+                        .format(e.args[0]),
+                        NicePrint=True)
 
         try:
             cur.execute('UPDATE files SET set_id = ? WHERE files_id = ?',
                         (setId, primaryPhotoId))
         except lite.Error as e:
             reportError(Caught=True,
-                CaughtPrefix='+++ DB',
-                CaughtCode='095',
-                CaughtMsg='DB error on UPDATE: [{!s}]'.format(e.args[0]),
-                NicePrint=True)
+                        CaughtPrefix='+++ DB',
+                        CaughtCode='095',
+                        CaughtMsg='DB error on UPDATE: [{!s}]'.format(
+                            e.args[0]),
+                        NicePrint=True)
 
         con.commit()
 
@@ -2740,15 +2373,16 @@ class Uploadr:
 
         logging.warning('Running in Daemon mode.')
         while (True):
-            niceprint('Running in Daemon mode. Execute at [{!s}].'
-                      .format(nutime.strftime(UPLDRConstants.TimeFormat)))
+            np.niceprint('Running in Daemon mode. Execute at [{!s}].'
+                         .format(nutime.strftime(UPLDRConstants.TimeFormat)))
             # run upload
             self.upload()
-            niceprint('Last check: [{!s}]'
-                      .format(str(nutime.asctime(time.localtime()))))
+            np.niceprint('Last check: [{!s}]'
+                         .format(str(nutime.asctime(time.localtime()))))
             logging.warning('Running in Daemon mode. Sleep [{!s}] seconds.'
                             .format(SLEEP_TIME))
             nutime.sleep(SLEEP_TIME)
+
     # -------------------------------------------------------------------------
     # getSetNameFromFile
     #
@@ -2794,10 +2428,10 @@ class Uploadr:
         """
             Creates a set (Album) in Flickr
         """
-        niceprint('*****Creating Sets*****')
+        np.niceprint('*****Creating Sets*****')
 
         if args.dry_run:
-                return True
+            return True
 
         con = lite.connect(DB_PATH)
         con.text_factory = str
@@ -2822,8 +2456,8 @@ class Uploadr:
                 if set is None:
                     # row[0] = files_id from files table
                     setId = self.createSet(setName, row[0], cur, con)
-                    niceprint('Created the set: [{!s}]'.
-                              format(StrUnicodeOut(setName)))
+                    np.niceprint('Created the set: [{!s}]'.
+                                 format(StrUnicodeOut(setName)))
                     newSetCreated = True
                 else:
                     # set[0] = set_id from sets table
@@ -2835,15 +2469,15 @@ class Uploadr:
                 # row[1] = path for the file from table files
                 # row[2] = set_id from files table
                 if row[2] is None and newSetCreated is False:
-                    niceprint('adding file to set [{!s}]...'
-                              .format(StrUnicodeOut(row[1])))
+                    np.niceprint('adding file to set [{!s}]...'
+                                 .format(StrUnicodeOut(row[1])))
 
                     self.addFileToSet(setId, row, cur)
 
         # Closing DB connection
         if con is not None:
             con.close()
-        niceprint('*****Completed creating sets*****')
+        np.niceprint('*****Completed creating sets*****')
 
     # -------------------------------------------------------------------------
     # addFiletoSet
@@ -2860,7 +2494,7 @@ class Uploadr:
         global nuflickr
 
         if args.dry_run:
-                return True
+            return True
 
         @retry(attempts=2, waittime=0, randtime=False)
         def R_photosets_addPhoto(kwargs):
@@ -2881,13 +2515,13 @@ class Uploadr:
 
             logging.debug('Output for addPhotoResp:')
             logging.debug(xml.etree.ElementTree.tostring(
-                                                addPhotoResp,
-                                                encoding='utf-8',
-                                                method='xml'))
+                addPhotoResp,
+                encoding='utf-8',
+                method='xml'))
 
             if (self.isGood(addPhotoResp)):
-                niceprint('Successfully added file:[{!s}] to its set.'
-                          .format(StrUnicodeOut(file[1])))
+                np.niceprint('Successfully added file:[{!s}] to its set.'
+                             .format(StrUnicodeOut(file[1])))
                 try:
                     cur.execute("UPDATE files SET set_id = ? "
                                 "WHERE files_id = ?",
@@ -2924,7 +2558,7 @@ class Uploadr:
                         NicePrint=True)
             # Error: 1: Photoset not found
             if (ex.code == 1):
-                niceprint('Photoset not found, creating new set...')
+                np.niceprint('Photoset not found, creating new set...')
                 setName = self.getSetNameFromFile(file[1],
                                                   FILES_DIR,
                                                   FULL_SET_NAME)
@@ -2932,9 +2566,9 @@ class Uploadr:
             # Error: 3: Photo Already in set
             elif (ex.code == 3):
                 try:
-                    niceprint('Photo already in set... updating DB'
-                              'set_id=[{!s}] photo_id=[{!s}]'
-                              .format(setId, file[0]))
+                    np.niceprint('Photo already in set... updating DB'
+                                 'set_id=[{!s}] photo_id=[{!s}]'
+                                 .format(setId, file[0]))
                     cur.execute('UPDATE files SET set_id = ? '
                                 'WHERE files_id = ?', (setId, file[0]))
                     con.commit()
@@ -2958,7 +2592,7 @@ class Uploadr:
                         CaughtMsg='DB error on UPDATE files: [{!s}]'
                                   .format(e.args[0]),
                         NicePrint=True)
-        except:
+        except BaseException:
             reportError(Caught=True,
                         CaughtPrefix='+++',
                         CaughtCode='121',
@@ -2980,8 +2614,8 @@ class Uploadr:
 
         logging.info('Creating new set:[{!s}]'
                      .format(StrUnicodeOut(setName)))
-        niceprint('Creating new set:[{!s}]'
-                  .format(StrUnicodeOut(setName)))
+        np.niceprint('Creating new set:[{!s}]'
+                     .format(StrUnicodeOut(setName)))
 
         if args.dry_run:
             return True
@@ -2993,8 +2627,8 @@ class Uploadr:
         try:
             createResp = None
             createResp = R_photosets_create(dict(
-                                        title=setName,
-                                        primary_photo_id=str(primaryPhotoId)))
+                title=setName,
+                primary_photo_id=str(primaryPhotoId)))
 
         except flickrapi.exceptions.FlickrError as ex:
             reportError(Caught=True,
@@ -3013,23 +2647,23 @@ class Uploadr:
             # are not loaded into Flickr.
             # FlickrError(u'Error: 2: Invalid primary photo id (nnnnnn)
             if (format(ex.code) == '2'):
-                niceprint('Primary photo [{!s}] for Set [{!s}] '
-                          'does not exist on Flickr. '
-                          'Probably deleted from Flickr but still on local db '
-                          'and local file.'
-                          .format(primaryPhotoId,
-                                  StrUnicodeOut(setName)))
+                np.niceprint('Primary photo [{!s}] for Set [{!s}] '
+                             'does not exist on Flickr. '
+                             'Probably deleted from Flickr but still '
+                             'on local db and local file.'
+                             .format(primaryPhotoId,
+                                     StrUnicodeOut(setName)))
                 logging.error(
-                          'Primary photo [{!s}] for Set [{!s}] '
-                          'does not exist on Flickr. '
-                          'Probably deleted from Flickr but still on local db '
-                          'and local file.'
-                          .format(primaryPhotoId,
-                                  StrUnicodeOut(setName)))
+                    'Primary photo [{!s}] for Set [{!s}] '
+                    'does not exist on Flickr. '
+                    'Probably deleted from Flickr but still on local db '
+                    'and local file.'
+                    .format(primaryPhotoId,
+                            StrUnicodeOut(setName)))
 
                 return False
 
-        except:
+        except BaseException:
             reportError(Caught=True,
                         CaughtPrefix='+++',
                         CaughtCode='140',
@@ -3053,16 +2687,16 @@ class Uploadr:
                     logging.warning('None')
                 else:
                     logging.warning(xml.etree.ElementTree.tostring(
-                                                        createResp,
-                                                        encoding='utf-8',
-                                                        method='xml'))
+                        createResp,
+                        encoding='utf-8',
+                        method='xml'))
                     reportError(exceptUse=False,
                                 exceptCode=createResp['code']
-                                           if 'code' in createResp
-                                           else createResp,
+                                if 'code' in createResp
+                                else createResp,
                                 exceptMsg=createResp['message']
-                                          if 'message' in createResp
-                                          else createResp,
+                                if 'message' in createResp
+                                else createResp,
                                 NicePrint=True)
 
         return False
@@ -3079,7 +2713,7 @@ class Uploadr:
             Creates the control database
         """
 
-        niceprint('Setting up database:[{!s}]'.format(DB_PATH))
+        np.niceprint('Setting up database:[{!s}]'.format(DB_PATH))
         con = None
         try:
             con = lite.connect(DB_PATH)
@@ -3106,7 +2740,7 @@ class Uploadr:
             row = cur.fetchone()
             if (row[0] == 0):
                 # Database version 1 <=========================DB VERSION: 1===
-                niceprint('Adding last_modified column to database')
+                np.niceprint('Adding last_modified column to database')
                 cur = con.cursor()
                 cur.execute('PRAGMA user_version="1"')
                 cur.execute('ALTER TABLE files ADD COLUMN last_modified REAL')
@@ -3118,7 +2752,7 @@ class Uploadr:
             if (row[0] == 1):
                 # Database version 2 <=========================DB VERSION: 2===
                 # Cater for badfiles
-                niceprint('Adding table badfiles to database')
+                np.niceprint('Adding table badfiles to database')
                 cur.execute('PRAGMA user_version="2"')
                 cur.execute('CREATE TABLE IF NOT EXISTS badfiles '
                             '(files_id INTEGER PRIMARY KEY AUTOINCREMENT, '
@@ -3131,13 +2765,13 @@ class Uploadr:
                 cur.execute('PRAGMA user_version')
                 row = cur.fetchone()
             if (row[0] == 2):
-                niceprint('Database version: [{!s}]'.format(row[0]))
+                np.niceprint('Database version: [{!s}]'.format(row[0]))
                 # Database version 3 <=========================DB VERSION: 3===
-                niceprint('Adding album tags to pics on upload... ')
+                np.niceprint('Adding album tags to pics already uploaded... ')
                 if flick.addAlbumsMigrate():
-                    niceprint('Successfully added album tags to pics '
-                              'on upload. Updating Database version.',
-                              fname='addAlbumsMigrate')
+                    np.niceprint('Successfully added album tags to pics '
+                                 'already upload. Updating Database version.',
+                                 fname='addAlbumsMigrate')
 
                     cur.execute('PRAGMA user_version="3"')
                     con.commit()
@@ -3148,13 +2782,13 @@ class Uploadr:
                     logging.warning('Failed adding album tags to pics '
                                     'on upload. Not updating Database version.'
                                     'please check logs, correct, and retry.')
-                    niceprint('Failed adding album tags to pics '
-                              'on upload. Not updating Database version.'
-                              'Please check logs, correct, and retry.',
-                              fname='addAlbumsMigrate')
+                    np.niceprint('Failed adding album tags to pics '
+                                 'on upload. Not updating Database version.'
+                                 'Please check logs, correct, and retry.',
+                                 fname='addAlbumsMigrate')
 
             if (row[0] == 3):
-                niceprint('Database version: [{!s}]'.format(row[0]))
+                np.niceprint('Database version: [{!s}]'.format(row[0]))
                 # Database version 4 <=========================DB VERSION: 4===
                 # ...for future use!
             # Closing DB connection
@@ -3162,17 +2796,17 @@ class Uploadr:
                 con.close()
         except lite.Error as e:
             reportError(Caught=True,
-                       CaughtPrefix='+++ DB',
-                       CaughtCode='145',
-                       CaughtMsg='DB error on DB create: [{!s}]'
-                                 .format(e.args[0]),
-                       NicePrint=True)
+                        CaughtPrefix='+++ DB',
+                        CaughtCode='145',
+                        CaughtMsg='DB error on DB create: [{!s}]'
+                        .format(e.args[0]),
+                        NicePrint=True)
 
             if con is not None:
                 con.close()
-            sys.exit(5)
+            sys.exit(6)
         finally:
-            niceprint('Completed database setup')
+            np.niceprint('Completed database setup')
 
     # -------------------------------------------------------------------------
     # cleanDBbadfiles
@@ -3185,8 +2819,8 @@ class Uploadr:
 
             Cleans up (deletes) contents from DB badfiles table
         """
-        niceprint('Cleaning up badfiles table from the database: [{!s}]'
-                  .format(DB_PATH))
+        np.niceprint('Cleaning up badfiles table from the database: [{!s}]'
+                     .format(DB_PATH))
         con = None
         try:
             con = lite.connect(DB_PATH)
@@ -3196,7 +2830,8 @@ class Uploadr:
             row = cur.fetchone()
             if (row[0] >= 2):
                 # delete from badfiles table and reset SEQUENCE
-                niceprint('Deleting from badfiles table. Reseting sequence.')
+                np.niceprint('Deleting from badfiles table. '
+                             'Reseting sequence.')
                 try:
                     cur.execute('DELETE FROM badfiles')
                     cur.execute('DELETE FROM SQLITE_SEQUENCE '
@@ -3212,8 +2847,8 @@ class Uploadr:
                                 NicePrint=True)
                     raise
             else:
-                niceprint('Wrong DB version. '
-                          'Expected 2 or higher and not:[{!s}]'.format(row[0]))
+                np.niceprint('Wrong DB version. Expected 2 or higher '
+                             'and not:[{!s}]'.format(row[0]))
             # Closing DB connection
             if con is not None:
                 con.close()
@@ -3226,9 +2861,10 @@ class Uploadr:
                         NicePrint=True)
             if con is not None:
                 con.close()
-            sys.exit(6)
+            sys.exit(7)
         finally:
-            niceprint('Completed cleaning up badfiles table from the database')
+            np.niceprint('Completed cleaning up badfiles table '
+                         'from the database.')
 
     # -------------------------------------------------------------------------
     # md5Checksum
@@ -3257,9 +2893,9 @@ class Uploadr:
 
         Remove unused Sets (Sets not listed on Flickr) form local DB
         """
-        niceprint('*****Removing empty Sets from DB*****')
+        np.niceprint('*****Removing empty Sets from DB*****')
         if args.dry_run:
-                return True
+            return True
 
         con = lite.connect(DB_PATH)
         con.text_factory = str
@@ -3287,9 +2923,9 @@ class Uploadr:
 
             for row in unusedsets:
                 if args.verbose:
-                    niceprint('Removing set [{!s}] ({!s}).'
-                              .format(StrUnicodeOut(row[0]),
-                                      StrUnicodeOut(row[1])))
+                    np.niceprint('Removing set [{!s}] ({!s}).'
+                                 .format(StrUnicodeOut(row[0]),
+                                         StrUnicodeOut(row[1])))
 
                 try:
                     # Acquire DB lock if running in multiprocessing mode
@@ -3312,7 +2948,7 @@ class Uploadr:
         # Closing DB connection
         if con is not None:
             con.close()
-        niceprint('*****Completed removing empty Sets from DB*****')
+        np.niceprint('*****Completed removing empty Sets from DB*****')
 
     # -------------------------------------------------------------------------
     # Display Sets
@@ -3339,7 +2975,7 @@ class Uploadr:
                                       .format(e.args[0]),
                             NicePrint=True)
             for row in allsets:
-                niceprint('Set: [{!s}] ({!s})'.format(str(row[0]), row[1]))
+                np.niceprint('Set: [{!s}] ({!s})'.format(str(row[0]), row[1]))
 
         # Closing DB connection
         if con is not None:
@@ -3362,9 +2998,9 @@ class Uploadr:
         """
         global nuflickr
 
-        niceprint('*****Adding Flickr Sets to DB*****')
+        np.niceprint('*****Adding Flickr Sets to DB*****')
         if args.dry_run:
-                return True
+            return True
 
         con = lite.connect(DB_PATH)
         con.text_factory = str
@@ -3373,9 +3009,9 @@ class Uploadr:
 
             logging.debug('Output for {!s}'.format('photosets_getList:'))
             logging.debug(xml.etree.ElementTree.tostring(
-                                                sets,
-                                                encoding='utf-8',
-                                                method='xml'))
+                sets,
+                encoding='utf-8',
+                method='xml'))
 
             """
 
@@ -3410,9 +3046,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 for row in sets.find('photosets').findall('photoset'):
                     logging.debug('Output for {!s}:'.format('row'))
                     logging.debug(xml.etree.ElementTree.tostring(
-                                                        row,
-                                                        encoding='utf-8',
-                                                        method='xml'))
+                        row,
+                        encoding='utf-8',
+                        method='xml'))
 
                     setId = row.attrib['id']
                     setName = row.find('title').text
@@ -3429,14 +3065,14 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                           isThisStringUnicode(primaryPhotoId)))
 
                     if (args.verbose):
-                        niceprint('setName=[{!s}] '
-                                  'setId=[{!s}] '
-                                  'primaryPhotoId=[{!s}]'
-                                  .format('None'
-                                          if setName is None
-                                          else StrUnicodeOut(setName),
-                                          setId,
-                                          primaryPhotoId))
+                        np.niceprint('setName=[{!s}] '
+                                     'setId=[{!s}] '
+                                     'primaryPhotoId=[{!s}]'
+                                     .format('None'
+                                             if setName is None
+                                             else StrUnicodeOut(setName),
+                                             setId,
+                                             primaryPhotoId))
 
                     # Control for when flickr return a setName (title) as None
                     # Occurred while simultaneously performing massive delete
@@ -3486,9 +3122,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             logging.info('Adding set [{!s}] ({!s}) '
                                          'with primary photo [{!s}].'
                                          .format(
-                                            setId,
-                                            StrUnicodeOut(setName),
-                                            primaryPhotoId))
+                                             setId,
+                                             StrUnicodeOut(setName),
+                                             primaryPhotoId))
                         try:
                             cur.execute('INSERT INTO sets (set_id, name, '
                                         'primary_photo_id) VALUES (?,?,?)',
@@ -3505,8 +3141,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         logging.info('Flickr Set/Album already on '
                                      'local database.')
                         if (args.verbose):
-                            niceprint('Flickr Set/Album already on '
-                                      'local database.')
+                            np.niceprint('Flickr Set/Album already on '
+                                         'local database.')
 
                 con.commit()
 
@@ -3514,16 +3150,16 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     con.close()
             else:
                 logging.warning(xml.etree.ElementTree.tostring(
-                                    sets,
-                                    encoding='utf-8',
-                                    method='xml'))
+                    sets,
+                    encoding='utf-8',
+                    method='xml'))
                 reportError(exceptUse=True,
                             exceptCode=sets['code']
-                                       if 'code' in sets
-                                       else sets,
+                            if 'code' in sets
+                            else sets,
                             exceptMsg=sets['message']
-                                      if 'message' in sets
-                                      else sets,
+                            if 'message' in sets
+                            else sets,
                             NicePrint=True)
 
         except flickrapi.exceptions.FlickrError as ex:
@@ -3540,7 +3176,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         # Closing DB connection
         if con is not None:
             con.close()
-        niceprint('*****Completed adding Flickr Sets to DB*****')
+        np.niceprint('*****Completed adding Flickr Sets to DB*****')
 
     # -------------------------------------------------------------------------
     # is_photo_already_uploaded
@@ -3615,13 +3251,15 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         CaughtMsg='Flickrapi exception on photos.search',
                         exceptUse=True,
                         exceptCode=ex.code,
-                        exceptMsg=ex)
+                        exceptMsg=ex,
+                        NicePrint=True,
+                        exceptSysInfo=True)
         except (IOError, httplib.HTTPException):
             reportError(Caught=True,
                         CaughtPrefix='+++',
                         CaughtCode='181',
                         CaughtMsg='Caught IO/HTTP Error in photos.search')
-        except:
+        except BaseException:
             reportError(Caught=True,
                         CaughtPrefix='+++',
                         CaughtCode='182',
@@ -3636,13 +3274,13 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 # CODING: how to indicate an error... different from False?
                 # Possibly raising an exception?
                 # raise Exception('photos_search: Max attempts exhausted.')
-                niceprint('return: IS_PHOTO_UPLOADED: ERROR#1',
-                          fname='is_photo_already_uploaded')
+                np.niceprint('return: IS_PHOTO_UPLOADED: ERROR#1',
+                             fname='is_photo_already_uploaded')
                 logging.warning('return: IS_PHOTO_UPLOADED: ERROR#1')
                 return returnIsPhotoUploaded, \
-                       returnPhotoUploaded, \
-                       returnPhotoID, \
-                       returnUploadedNoSet
+                    returnPhotoUploaded, \
+                    returnPhotoID, \
+                    returnUploadedNoSet
 
         logging.debug('searchIsUploaded:')
         logging.debug(xml.etree.ElementTree.tostring(searchIsUploaded,
@@ -3671,7 +3309,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
             # returnList = []
             freturnPhotoUploaded = 0
             for pic in searchIsUploaded.find('photos').findall('photo'):
-                freturnPhotoUploaded +=1
+                freturnPhotoUploaded += 1
                 logging.debug('idx=[{!s}] pic.id=[{!s}] '
                               'pic.title=[{!s}] pic.tags=[{!s}]'
                               .format(freturnPhotoUploaded,
@@ -3688,12 +3326,12 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                       StrUnicodeOut(pic.attrib['title']),
                                       type(pic.attrib['title'])))
                 logging.info('Compare Titles=[{!s}]'
-                            .format((StrUnicodeOut(xtitle_filename) ==
-                                     StrUnicodeOut(pic.attrib['title']))))
+                             .format((StrUnicodeOut(xtitle_filename) ==
+                                      StrUnicodeOut(pic.attrib['title']))))
 
                 # if pic with checksum has a different title, continue
                 if not (StrUnicodeOut(xtitle_filename) ==
-                            StrUnicodeOut(pic.attrib['title'])):
+                        StrUnicodeOut(pic.attrib['title'])):
                     logging.info('Different titles: File:[{!s}] Flickr:[{!s}]'
                                  .format(StrUnicodeOut(xtitle_filename),
                                          StrUnicodeOut(pic.attrib['title'])))
@@ -3706,7 +3344,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 try:
                     resp = None
                     resp = R_photos_getAllContexts(
-                                            dict(photo_id=pic.attrib['id']))
+                        dict(photo_id=pic.attrib['id']))
                 except flickrapi.exceptions.FlickrError as ex:
                     reportError(Caught=True,
                                 CaughtPrefix='+++',
@@ -3722,7 +3360,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                 CaughtCode='196',
                                 CaughtMsg='Caught IO/HTTP Error in '
                                           'getAllContexts')
-                except:
+                except BaseException:
                     reportError(Caught=True,
                                 CaughtPrefix='+++',
                                 CaughtCode='197',
@@ -3733,29 +3371,31 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     if resp is None or not self.isGood(resp):
                         logging.error('resp.getAllContextsOK:[{!s}]'
                                       .format('None'
-                                               if resp is None
-                                               else self.isGood(resp)))
+                                              if resp is None
+                                              else self.isGood(resp)))
                         # CODING: how to indicate an error?
                         # Possibly raising an exception?
-                        # raise Exception('photos_getAllContexts: Max attempts exhausted.')
-                        niceprint('return: IS_PHOTO_UPLOADED: ERROR#2',
-                                  fname='is_photo_already_uploaded')
+                        # raise Exception('photos_getAllContexts: '
+                        #                 'Max attempts exhausted.')
+                        np.niceprint('return: IS_PHOTO_UPLOADED: ERROR#2',
+                                     fname='is_photo_already_uploaded')
                         logging.warning('return: IS_PHOTO_UPLOADED: ERROR#2')
                         return returnIsPhotoUploaded, \
-                               returnPhotoUploaded, \
-                               returnPhotoID, \
-                               returnUploadedNoSet
+                            returnPhotoUploaded, \
+                            returnPhotoID, \
+                            returnUploadedNoSet
                     logging.debug('resp.getAllContextsOK:')
                     logging.debug(xml.etree.ElementTree.tostring(
-                                                        resp,
-                                                        encoding='utf-8',
-                                                        method='xml'))
+                        resp,
+                        encoding='utf-8',
+                        method='xml'))
 
                 logging.info('len(resp.findall(''set'')):[{!s}]'
                              .format(len(resp.findall('set'))))
 
-                # B) checksum, title, empty setName,       Count=1  THEN EXISTS, ASSIGN SET
-                #                                                   IF tag album IS FOUND
+                # B) checksum, title, empty setName,       Count=1
+                #                                       THEN EXISTS, ASSIGN SET
+                # IF tag album IS FOUND
                 if (len(resp.findall('set')) == 0):
                     # CODING returnList not being used
                     # returnList.append({'id': pic.attrib['id'],
@@ -3774,54 +3414,54 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     # such row on the database files.set_id to null
                     # to force re-assigning to Album/Set on flickr.
                     tfind, tid = self.photos_find_tag(
-                                            photo_id = pic.attrib['id'],
-                                            intag = 'album:{}'
-                                                    .format(xsetName))
+                        photo_id=pic.attrib['id'],
+                        intag='album:{}'
+                        .format(xsetName))
                     if tfind:
-                        niceprint('return: PHOTO UPLOADED WITHOUT SET '
-                                  'WITH ALBUM TAG',
-                                  fname='is_photo_already_uploaded')
+                        np.niceprint('return: PHOTO UPLOADED WITHOUT SET '
+                                     'WITH ALBUM TAG',
+                                     fname='is_photo_already_uploaded')
                         logging.warning('return: PHOTO UPLOADED WITHOUT SET '
                                         'WITH ALBUM TAG')
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
                         returnUploadedNoSet = True
                         return returnIsPhotoUploaded, \
-                               returnPhotoUploaded, \
-                               returnPhotoID, \
-                               returnUploadedNoSet
+                            returnPhotoUploaded, \
+                            returnPhotoID, \
+                            returnUploadedNoSet
                     else:
                         if args.verbose_progress:
-                            niceprint('PHOTO UPLOADED WITHOUT SET '
-                                      'WITHOUT ALBUM TAG',
-                                      fname='is_photo_already_uploaded')
+                            np.niceprint('PHOTO UPLOADED WITHOUT SET '
+                                         'WITHOUT ALBUM TAG',
+                                         fname='is_photo_already_uploaded')
                         logging.warning('PHOTO UPLOADED WITHOUT SET '
                                         'WITHOUT ALBUM TAG')
 
                 for setinlist in resp.findall('set'):
                     logging.warning('setinlist:')
                     logging.warning(xml.etree.ElementTree.tostring(
-                                                        setinlist,
-                                                        encoding='utf-8',
-                                                        method='xml'))
+                        setinlist,
+                        encoding='utf-8',
+                        method='xml'))
 
                     logging.warning(
-                              '\nCheck : id=[{!s}] File=[{!s}]\n'
-                              'Check : Title:[{!s}] Set:[{!s}]\n'
-                              'Flickr: Title:[{!s}] Set:[{!s}] Tags:[{!s}]\n'
-                              .format(pic.attrib['id'],
-                                      StrUnicodeOut(xfile),
-                                      StrUnicodeOut(xtitle_filename),
-                                      StrUnicodeOut(xsetName),
-                                      StrUnicodeOut(pic.attrib['title']),
-                                      StrUnicodeOut(setinlist.attrib['title']),
-                                      StrUnicodeOut(pic.attrib['tags'])))
+                        '\nCheck : id=[{!s}] File=[{!s}]\n'
+                        'Check : Title:[{!s}] Set:[{!s}]\n'
+                        'Flickr: Title:[{!s}] Set:[{!s}] Tags:[{!s}]\n'
+                        .format(pic.attrib['id'],
+                                StrUnicodeOut(xfile),
+                                StrUnicodeOut(xtitle_filename),
+                                StrUnicodeOut(xsetName),
+                                StrUnicodeOut(pic.attrib['title']),
+                                StrUnicodeOut(setinlist.attrib['title']),
+                                StrUnicodeOut(pic.attrib['tags'])))
 
                     logging.warning(
-                              'Compare Sets=[{!s}]'
-                              .format((StrUnicodeOut(xsetName) ==
-                                          StrUnicodeOut(setinlist
-                                                        .attrib['title']))))
+                        'Compare Sets=[{!s}]'
+                        .format((StrUnicodeOut(xsetName) ==
+                                 StrUnicodeOut(setinlist
+                                               .attrib['title']))))
 
                     # CODING returnList not being used
                     # returnList.append({'id': pic.attrib['id'],
@@ -3832,45 +3472,54 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     # logging.info('output for returnList:[{!s}]'
                     #              .format(returnList))
 
-                    # C) checksum, title, setName (1 or more), Count>=1 THEN EXISTS
+                    # C) checksum, title, setName (1 or more), Count>=1
+                    #                                               THEN EXISTS
                     if (StrUnicodeOut(xsetName) ==
                             StrUnicodeOut(setinlist.attrib['title'])):
-                        niceprint('return: IS PHOTO UPLOADED='
-                                  'TRUE WITH SET',
-                                  fname='is_photo_already_uploaded')
-                        logging.warning('return: IS PHOTO UPLOADED=TRUE WITH SET')
+                        np.niceprint('return: IS PHOTO UPLOADED='
+                                     'TRUE WITH SET',
+                                     fname='is_photo_already_uploaded')
+                        logging.warning(
+                            'return: IS PHOTO UPLOADED=TRUE WITH SET')
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
                         returnUploadedNoSet = False
                         return returnIsPhotoUploaded, \
-                               returnPhotoUploaded, \
-                               returnPhotoID, \
-                               returnUploadedNoSet
+                            returnPhotoUploaded, \
+                            returnPhotoID, \
+                            returnUploadedNoSet
                     else:
-                        # D) checksum, title, other setName,       Count>=1 THEN NOT EXISTS
+                        # D) checksum, title, other setName,       Count>=1
+                        #                                       THEN NOT EXISTS
                         if args.verbose_progress:
-                            niceprint('IS PHOTO UPLOADED=FALSE OTHER SET, '
-                                      'CONTINUING SEARCH IN SETS',
-                                      fname='is_photo_already_uploaded')
+                            np.niceprint('IS PHOTO UPLOADED=FALSE OTHER SET, '
+                                         'CONTINUING SEARCH IN SETS',
+                                         fname='is_photo_already_uploaded')
                         logging.warning('IS PHOTO UPLOADED=FALSE OTHER SET, '
                                         'CONTINUING SEARCH IN SETS')
                         continue
 
         return returnIsPhotoUploaded, returnPhotoUploaded, \
-               returnPhotoID, returnUploadedNoSet
+            returnPhotoID, returnUploadedNoSet
 # <?xml version="1.0" encoding="utf-8" ?>
 # <rsp stat="ok">
 #   <photos page="1" pages="1" perpage="100" total="2">
-#     <photo id="37564183184" owner="146995488@N03" secret="5390570f1c" server="4540" farm="5" title="DSC01397" ispublic="0" isfriend="0" isfamily="0" tags="autoupload checksum1133825cea9d605f332d04b40a44a6d6" />
-#     <photo id="38210659646" owner="146995488@N03" secret="2786b173f4" server="4536" farm="5" title="DSC01397" ispublic="0" isfriend="0" isfamily="0" tags="autoupload checksum1133825cea9d605f332d04b40a44a6d6" />
+#     <photo id="37564183184" owner="146995488@N03" secret="5390570f1c"
+# server="4540" farm="5" title="DSC01397" ispublic="0" isfriend="0"
+# isfamily="0" tags="autoupload checksum1133825cea9d605f332d04b40a44a6d6" />
+#     <photo id="38210659646" owner="146995488@N03" secret="2786b173f4"
+# server="4536" farm="5" title="DSC01397" ispublic="0" isfriend="0"
+# isfamily="0" tags="autoupload checksum1133825cea9d605f332d04b40a44a6d6" />
 #   </photos>
 # </rsp>
-# CAREFULL... flickrapi on occasion indicates total=2 but the list only brings 1
+# CAREFULL... flickrapi on occasion indicates total=2 but list only brings 1
 #
 # <?xml version="1.0" encoding="utf-8" ?>
 # <rsp stat="ok">
 #   <photos page="1" pages="1" perpage="100" total="2">
-#     <photo id="26486922439" owner="146995488@N03" secret="7657801015" server="4532" farm="5" title="017_17a-5" ispublic="0" isfriend="0" isfamily="0" tags="autoupload checksum0449d770558cfac7a6786e468f917b9c joana" />
+#     <photo id="26486922439" owner="146995488@N03" secret="7657801015"
+# server="4532" farm="5" title="017_17a-5" ispublic="0" isfriend="0"
+# isfamily="0" tags="autoupload checksum0449d770558cfac7a6786e468f917b9c" />
 #   </photos>
 # </rsp>
 
@@ -3929,13 +3578,15 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         CaughtMsg='Error in photos.search',
                         exceptUse=True,
                         exceptCode=ex.code,
-                        exceptMsg=ex)
+                        exceptMsg=ex,
+                        NicePrint=True,
+                        exceptSysInfo=True)
         except (IOError, httplib.HTTPException):
             reportError(Caught=True,
                         CaughtPrefix='+++',
                         CaughtCode='201',
                         CaughtMsg='Caught IO/HTTP Error in photos.search')
-        except:
+        except BaseException:
             reportError(Caught=True,
                         CaughtPrefix='+++',
                         CaughtCode='202',
@@ -3967,8 +3618,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
             return nuflickr.photos.getNotInSet(**kwargs)
 
         notinsetResp = R_photos_getNotInSet(dict(per_page=per_page))
-
-        # notinsetResp = nuflickr.photos.getNotInSet(per_page=per_page)
 
         return notinsetResp
 
@@ -4029,11 +3678,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                 'Photo_id:[{!s}] Flickr: Photo not found '
                                 'on getListPhoto.'
                                 .format(photo_id))
-                niceprint('+++206: '
-                          'Photo_id:[{!s}] Flickr: Photo not found '
-                          'on getListPhoto.'
-                          .format(photo_id),
-                          fname='photos_find_tag')
+                np.niceprint('+++206: '
+                             'Photo_id:[{!s}] Flickr: Photo not found '
+                             'on getListPhoto.'
+                             .format(photo_id),
+                             fname='photos_find_tag')
             else:
                 reportError(Caught=True,
                             CaughtPrefix='+++',
@@ -4065,7 +3714,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 return True, tag_id
 
         return False, ''
-
 
     # -------------------------------------------------------------------------
     # photos_add_tags
@@ -4118,8 +3766,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
         global nuflickr
 
         if (args.verbose):
-            niceprint('Setting Date photo_id=[{!s}] date_taken=[{!s}]'
-                      .format(photo_id, datetxt))
+            np.niceprint('Setting Date photo_id=[{!s}] date_taken=[{!s}]'
+                         .format(photo_id, datetxt))
         logging.warning('Setting Date photo_id=[{!s}] date_taken=[{!s}]'
                         .format(photo_id, datetxt))
 
@@ -4130,23 +3778,19 @@ set0 = sets.find('photosets').findall('photoset')[0]
         try:
             respDate = None
             respDate = R_photos_setdates(
-                                dict(photo_id=photo_id,
-                                     date_taken='{!s}'.format(datetxt),
-                                     date_taken_granularity=0))
+                dict(photo_id=photo_id,
+                     date_taken='{!s}'.format(datetxt),
+                     date_taken_granularity=0))
 
-            # respDate = nuflickr.photos.setdates(
-            #                     photo_id=photo_id,
-            #                     date_taken='{!s}'.format(datetxt),
-            #                     date_taken_granularity=0)
             logging.debug('Output for {!s}:'.format('respDate'))
             logging.debug(xml.etree.ElementTree.tostring(
-                                    respDate,
-                                    encoding='utf-8',
-                                    method='xml'))
+                respDate,
+                encoding='utf-8',
+                method='xml'))
 
             if (args.verbose):
-                niceprint('Set Date Response:[{!s}]'
-                          .format(self.isGood(respDate)))
+                np.niceprint('Set Date Response:[{!s}]'
+                             .format(self.isGood(respDate)))
 
         except flickrapi.exceptions.FlickrError as ex:
             reportError(Caught=True,
@@ -4157,9 +3801,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         exceptCode=ex.code,
                         exceptMsg=ex,
                         NicePrint=True)
-            # logging.error('Sleep 10 and try to set date again.')
-            # niceprint('Sleep 10 and try to set date again.')
-            # nutime.sleep(10)
         except (IOError, httplib.HTTPException):
             reportError(Caught=True,
                         CaughtPrefix='+++',
@@ -4167,19 +3808,13 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         CaughtMsg='Caught IOError, HTTP exception'
                                   'on photos.setdates',
                         NicePrint=True)
-            # logging.error('Sleep 10 and try to set date again.')
-            # niceprint('Sleep 10 and try to set date again.')
-            # nutime.sleep(10)
-        except:
+        except BaseException:
             reportError(Caught=True,
                         CaughtPrefix='+++',
                         CaughtCode='212',
                         CaughtMsg='Caught exception on photos.setdates',
                         NicePrint=True,
                         exceptSysInfo=True)
-            # logging.error('Sleep 10 and try to set date again.')
-            # niceprint('Sleep 10 and try to set date again.')
-            # nutime.sleep(10)
         finally:
             if (respDate is not None) and self.isGood(respDate):
                 logging.debug('Set Date Response: OK!')
@@ -4204,13 +3839,12 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #
     #   n   = for n calls per second  (ex. 3 means 3 calls per second)
     #   1/n = for n seconds per call (ex. 0.5 meand 4 seconds in between calls)
-    @rate_limited.rate_limited(5) # 5 calls per second
+    @rate_limited.rate_limited(5)  # 5 calls per second
     def rate4maddAlbumsMigrate(self):
         """
         """
         logging.debug('rate_limit timestamp:[{!s}]'
                       .format(time.strftime('%T')))
-
 
     # -------------------------------------------------------------------------
     # maddAlbumsMigrate
@@ -4236,9 +3870,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
             # f[1] = path
             # f[2] = set_name
             # f[3] = set_id
-            niceprint('ID:[{!s}] Path:[{!s}] Set:[{!s}] SetID:[{!s}]'
-                      .format(str(f[0]), f[1], f[2], f[3]),
-                      fname='addAlbumMigrate')
+            np.niceprint('ID:[{!s}] Path:[{!s}] Set:[{!s}] SetID:[{!s}]'
+                         .format(str(f[0]), f[1], f[2], f[3]),
+                         fname='addAlbumMigrate')
 
             # row[1] = path for the file from table files
             setName = self.getSetNameFromFile(f[1],
@@ -4247,44 +3881,44 @@ set0 = sets.find('photosets').findall('photoset')[0]
             try:
                 terr = False
                 tfind, tid = self.photos_find_tag(
-                                    photo_id = f[0],
-                                    intag = 'album:{}'.format(f[2] \
-                                    if f[2] is not None
-                                    else setName))
-                niceprint('Found:[{!s}] TagId:[{!s}]'
-                          .format(tfind, tid))
+                    photo_id=f[0],
+                    intag='album:{}'.format(f[2]
+                                            if f[2] is not None
+                                            else setName))
+                np.niceprint('Found:[{!s}] TagId:[{!s}]'
+                             .format(tfind, tid))
             except Exception as ex:
                 reportError(Caught=True,
-                             CaughtPrefix='+++',
-                             CaughtCode='216',
-                             CaughtMsg='Exception on photos_find_tag',
-                             exceptUse=True,
-                             exceptCode=ex.code,
-                             exceptMsg=ex,
-                             NicePrint=False,
-                             exceptSysInfo=True)
+                            CaughtPrefix='+++',
+                            CaughtCode='216',
+                            CaughtMsg='Exception on photos_find_tag',
+                            exceptUse=True,
+                            exceptCode=ex.code,
+                            exceptMsg=ex,
+                            NicePrint=False,
+                            exceptSysInfo=True)
 
                 logging.warning('Error processing Photo_id:[{!s}]. '
                                 'Continuing...'
                                 .format(str(f[0])))
-                niceprint('Error processing Photo_id:[{!s}]. Continuing...'
-                          .format(str(f[0])),
-                          fname='addAlbumMigrate')
+                np.niceprint('Error processing Photo_id:[{!s}]. Continuing...'
+                             .format(str(f[0])),
+                             fname='addAlbumMigrate')
 
                 terr = True
 
             if not terr and not tfind:
                 res_add_tag = self.photos_add_tags(
-                                f[0],
-                                ['album:"{}"'.format(f[2] \
-                                        if f[2] is not None
-                                        else setName)]
-                              )
+                    f[0],
+                    ['album:"{}"'.format(f[2]
+                                         if f[2] is not None
+                                         else setName)]
+                )
                 logging.debug('res_add_tag: ')
                 logging.debug(xml.etree.ElementTree.tostring(
-                                        res_add_tag,
-                                        encoding='utf-8',
-                                        method='xml'))
+                    res_add_tag,
+                    encoding='utf-8',
+                    method='xml'))
 
             logging.debug('===Multiprocessing=== in.mutex.acquire(w)')
             mutex.acquire()
@@ -4298,7 +3932,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
             self.rate4maddAlbumsMigrate()
 
-
     # -------------------------------------------------------------------------
     # addAlbumsMigrate
     #
@@ -4306,7 +3939,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #
     def addAlbumsMigrate(self):
 
-        # -----------------------------------------------------------------------------
+        # ---------------------------------------------------------------------
         # Local Variables
         #
         #   mlockDB     = multiprocessing Lock for access to Database
@@ -4337,7 +3970,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             NicePrint=True)
                 return False
 
-            countTotal=len(existingMedia)
+            countTotal = len(existingMedia)
             # running in multi processing mode
             if (args.processes and args.processes > 0):
                 logging.debug('Running Pool of [{!s}] processes...'
@@ -4378,8 +4011,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     mmutex = multiprocessing.Lock()
 
                     sz = (len(existingMedia) // int(args.processes)) \
-                         if ((len(existingMedia) // int(args.processes)) > 0) \
-                         else 1
+                        if ((len(existingMedia) // int(args.processes)) > 0) \
+                        else 1
 
                     logging.debug('len(existingMedia):[{!s}] '
                                   'int(args.processes):[{!s}] '
@@ -4397,28 +4030,28 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                       .format(type(mexistingMedia)))
                         logging.debug('===Job/Task Process: Creating...')
                         migrateTask = multiprocessing.Process(
-                                            target=self.maddAlbumsMigrate,
-                                            args=(mlockDB,
-                                                  mrunning,
-                                                  mmutex,
-                                                  mexistingMedia,
-                                                  countTotal,))
+                            target=self.maddAlbumsMigrate,
+                            args=(mlockDB,
+                                  mrunning,
+                                  mmutex,
+                                  mexistingMedia,
+                                  countTotal,))
                         migratePool.append(migrateTask)
                         logging.debug('===Job/Task Process: Starting...')
                         migrateTask.start()
                         logging.debug('===Job/Task Process: Started')
                         if (args.verbose):
-                            niceprint('===Job/Task Process: [{!s}] Started '
-                                      'with pid:[{!s}]'
-                                      .format(migrateTask.name,
-                                              migrateTask.pid))
+                            np.niceprint('===Job/Task Process: [{!s}] Started '
+                                         'with pid:[{!s}]'
+                                         .format(migrateTask.name,
+                                                 migrateTask.pid))
 
                     # Check status of jobs/tasks in the Process Pool
                     if LOGGING_LEVEL <= logging.DEBUG:
                         logging.debug('===Checking Processes launched/status:')
                         for j in migratePool:
-                            niceprint('{!s}.is_alive = {!s}'
-                                      .format(j.name, j.is_alive()))
+                            np.niceprint('{!s}.is_alive = {!s}'
+                                         .format(j.name, j.is_alive()))
 
                     # Regularly print status of jobs/tasks in the Process Pool
                     # Prints status while there are processes active
@@ -4430,19 +4063,16 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         for p in multiprocessing.active_children():
                             logging.debug('==={!s}.is_alive = {!s}'
                                           .format(p.name, p.is_alive()))
-                            if (args.verbose):
-                                niceprint('==={!s}.is_alive = {!s}'
-                                          .format(p.name, p.is_alive()))
                             mTaskActive = p
                         logging.info('===Will wait for 60 on '
                                      '{!s}.is_alive = {!s}'
                                      .format(mTaskActive.name,
                                              mTaskActive.is_alive()))
-                        if (args.verbose):
-                            niceprint('===Will wait for 60 on '
-                                      '{!s}.is_alive = {!s}'
-                                      .format(mTaskActive.name,
-                                              mTaskActive.is_alive()))
+                        if (args.verbose_progress):
+                            np.niceprint('===Will wait for 60 on '
+                                         '{!s}.is_alive = {!s}'
+                                         .format(mTaskActive.name,
+                                                 mTaskActive.is_alive()))
 
                         mTaskActive.join(timeout=60)
                         logging.info('===Waited for 60s on '
@@ -4450,34 +4080,35 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                      .format(mTaskActive.name,
                                              mTaskActive.is_alive()))
                         if (args.verbose):
-                            niceprint('===Waited for 60s on '
-                                      '{!s}.is_alive = {!s}'
-                                      .format(mTaskActive.name,
-                                              mTaskActive.is_alive()))
+                            np.niceprint('===Waited for 60s on '
+                                         '{!s}.is_alive = {!s}'
+                                         .format(mTaskActive.name,
+                                                 mTaskActive.is_alive()))
 
                     # Wait for join all jobs/tasks in the Process Pool
                     # All should be done by now!
                     for j in migratePool:
                         j.join()
                         if (args.verbose):
-                            niceprint('==={!s} (is alive: {!s}).exitcode = {!s}'
-                                      .format(j.name, j.is_alive(), j.exitcode))
+                            np.niceprint('==={!s} '
+                                         '(is alive: {!s}).exitcode = {!s}'
+                                         .format(j.name,
+                                                 j.is_alive(),
+                                                 j.exitcode))
 
                     logging.warning('===Multiprocessing=== pool joined! '
                                     'All processes finished.')
-                    niceprint('===Multiprocessing=== pool joined! '
-                              'All processes finished.')
 
                     # Will release (set to None) the nulockDB lock control
-                    # this prevents subsequent calls to useDBLock( nuLockDB, False)
+                    # this prevents subsequent calls to
+                    # useDBLock( nuLockDB, False)
                     # to raise exception:
-                    #    ValueError('semaphore or lock released too many times')
-                    if (args.verbose):
-                        niceprint('===Multiprocessing=== pool joined! '
-                                  'What happens to mlockDB is None:[{!s}]? '
-                                  'It seems not, it still has a value! '
-                                  'Setting it to None!'
-                                  .format(mlockDB is None))
+                    #   ValueError('semaphore or lock released too many times')
+                    logging.info('===Multiprocessing=== pool joined! '
+                                 'What happens to mlockDB is None:[{!s}]? '
+                                 'It seems not, it still has a value! '
+                                 'Setting it to None!'
+                                 .format(mlockDB is None))
                     mlockDB = None
 
                     # Show number of total files processed
@@ -4486,17 +4117,19 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                             True)
 
             else:
-                count=0
-                countTotal=len(existingMedia)
+                count = 0
+                countTotal = len(existingMedia)
                 for row in existingMedia:
                     count += 1
                     # row[0] = files_id
                     # row[1] = path
                     # row[2] = set_name
                     # row[3] = set_id
-                    niceprint('ID:[{!s}] Path:[{!s}] Set:[{!s}] SetID:[{!s}]'
-                              .format(str(row[0]), row[1], row[2], row[3]),
-                              fname='addAlbumMigrate')
+                    np.niceprint('ID:[{!s}] Path:[{!s}] '
+                                 'Set:[{!s}] SetID:[{!s}]'
+                                 .format(str(row[0]), row[1],
+                                         row[2], row[3]),
+                                 fname='addAlbumMigrate')
 
                     # row[1] = path for the file from table files
                     setName = self.getSetNameFromFile(row[1],
@@ -4504,29 +4137,30 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                                       FULL_SET_NAME)
                     try:
                         tfind, tid = self.photos_find_tag(
-                                            photo_id = row[0],
-                                            intag = 'album:{}'.format(row[2] \
-                                            if row[2] is not None
-                                            else setName))
-                        niceprint('Found:[{!s}] TagId:[{!s}]'
-                                  .format(tfind, tid))
+                            photo_id=row[0],
+                            intag='album:{}'.format(row[2]
+                                                    if row[2] is not None
+                                                    else setName))
+                        np.niceprint('Found:[{!s}] TagId:[{!s}]'
+                                     .format(tfind, tid))
                     except Exception as ex:
                         reportError(Caught=True,
-                                     CaughtPrefix='+++',
-                                     CaughtCode='216',
-                                     CaughtMsg='Exception on photos_find_tag',
-                                     exceptUse=True,
-                                     exceptCode=ex.code,
-                                     exceptMsg=ex,
-                                     NicePrint=False,
-                                     exceptSysInfo=True)
+                                    CaughtPrefix='+++',
+                                    CaughtCode='216',
+                                    CaughtMsg='Exception on photos_find_tag',
+                                    exceptUse=True,
+                                    exceptCode=ex.code,
+                                    exceptMsg=ex,
+                                    NicePrint=False,
+                                    exceptSysInfo=True)
 
                         logging.warning('Error processing Photo_id:[{!s}]. '
                                         'Continuing...'
                                         .format(str(row[0])))
-                        niceprint('Error processing Photo_id:[{!s}]. Continuing...'
-                                  .format(str(row[0])),
-                                  fname='addAlbumMigrate')
+                        np.niceprint('Error processing Photo_id:[{!s}]. '
+                                     'Continuing...'
+                                     .format(str(row[0])),
+                                     fname='addAlbumMigrate')
 
                         self.niceprocessedfiles(count, countTotal, False)
 
@@ -4534,16 +4168,16 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
                     if not tfind:
                         res_add_tag = self.photos_add_tags(
-                                        row[0],
-                                        ['album:"{}"'.format(row[2] \
-                                                if row[2] is not None
-                                                else setName)]
-                                      )
+                            row[0],
+                            ['album:"{}"'.format(row[2]
+                                                 if row[2] is not None
+                                                 else setName)]
+                        )
                         logging.debug('res_add_tag: ')
                         logging.debug(xml.etree.ElementTree.tostring(
-                                                res_add_tag,
-                                                encoding='utf-8',
-                                                method='xml'))
+                            res_add_tag,
+                            encoding='utf-8',
+                            method='xml'))
                     self.niceprocessedfiles(count, countTotal, False)
 
                 self.niceprocessedfiles(count, countTotal, True)
@@ -4578,8 +4212,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             NicePrint=True)
                 return False
 
-            count=0
-            countTotal=len(badFiles)
+            count = 0
+            countTotal = len(badFiles)
             for row in badFiles:
                 count += 1
                 # row[0] = files_id
@@ -4603,8 +4237,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
         return True
 
-
-
     # -------------------------------------------------------------------------
     # printStat
     #
@@ -4615,10 +4247,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
         Shows Total photos and Photos Not in Sets on Flickr
         InitialFoundFiles = shows the Found files prior to processing
         """
-        # Total Local photos count
+        # Total Local photos count --------------------------------------------
         con = lite.connect(DB_PATH)
         con.text_factory = str
-
         countlocal = 0
         with con:
             try:
@@ -4634,7 +4265,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                       .format(e.args[0]),
                             NicePrint=True)
 
-        # Total Local badfiles photos count
+        # Total Local badfiles photos count -----------------------------------
         BadFilesCount = 0
         with con:
             try:
@@ -4652,21 +4283,18 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                       .format(e.args[0]),
                             NicePrint=True)
 
-        # Total FLickr photos count:
-        #       find('photos').attrib['total']
-        countflickr = 0
+        # Total FLickr photos count: find('photos').attrib['total'] -----------
+        countflickr = -1
         res = self.people_get_photos()
-        if not self.isGood(res):
-            raise IOError(res)
         logging.debug('Output for people_get_photos:')
         logging.debug(xml.etree.ElementTree.tostring(res,
                                                      encoding='utf-8',
                                                      method='xml'))
+        if self.isGood(res):
+            countflickr = format(res.find('photos').attrib['total'])
+            logging.debug('Total photos on flickr: {!s}'.format(countflickr))
 
-        countflickr = format(res.find('photos').attrib['total'])
-        logging.debug('Total photos on flickr: {!s}'.format(countflickr))
-
-        # Total photos not on Sets/Albums on FLickr
+        # Total photos not on Sets/Albums on FLickr ---------------------------
         # (per_page=1 as only the header is required to obtain total):
         #       find('photos').attrib['total']
         try:
@@ -4687,7 +4315,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         CaughtCode='401',
                         CaughtMsg='Caught IO/HTTP Error in '
                                   'getNotInSet')
-        except:
+        except BaseException:
             reportError(Caught=True,
                         CaughtPrefix='+++',
                         CaughtCode='402',
@@ -4697,75 +4325,82 @@ set0 = sets.find('photosets').findall('photoset')[0]
         finally:
             logging.debug('Output for get_not_in_set:')
             logging.debug(xml.etree.ElementTree.tostring(
-                                    res,
-                                    encoding='utf-8',
-                                    method='xml'))
+                res,
+                encoding='utf-8',
+                method='xml'))
             countnotinsets = 0
             if self.isGood(res):
                 countnotinsets = int(format(
-                                        res.find('photos').attrib['total']))
+                    res.find('photos').attrib['total']))
                 logging.debug('Photos not in sets on flickr: {!s}'
                               .format(countnotinsets))
 
-            # Print total stats counters
-            niceprint('\n  Initial Found Files:[{!s:>6s}]\n'
-                      '          - Bad Files:[{!s:>6s}] = [{!s:>6s}] \n'
-                      '          Note: some Bad files may no longer exist!\n'
-                      'Photos count:\n'
-                      '                Local:[{!s:>6s}] \n'
-                      '               Flickr:[{!s:>6s}] \n'
-                      'Not in sets on Flickr:[{!s:>6s}]'
-                      .format(str(InitialFoundFiles),
-                              str(BadFilesCount),
-                              str(InitialFoundFiles-BadFilesCount),
-                              str(countlocal),
-                              str(countflickr),
-                              str(countnotinsets)))
+            # Print total stats counters --------------------------------------
+            np.niceprint('\n  Initial Found Files:[{!s:>6s}]\n'
+                         '          - Bad Files:[{!s:>6s}] = [{!s:>6s}]\n'
+                         '                 Note: some Bad files may no '
+                         'longer exist!\n'
+                         'Photos count:\n'
+                         '                Local:[{!s:>6s}]\n'
+                         '               Flickr:[{!s:>6s}]\n'
+                         'Not in sets on Flickr:[{!s:>6s}]'
+                         .format(str(InitialFoundFiles),
+                                 str(BadFilesCount),
+                                 str(InitialFoundFiles - BadFilesCount),
+                                 str(countlocal),
+                                 str(countflickr),
+                                 str(countnotinsets)))
 
-        # List pics not in sets (if within a parameter)
+        # List pics not in sets (if within a parameter) -----------------------
         # Maximum allowed per_page by Flickr is 500.
         # Avoid going over in order not to have to handle multipl pages.
         if (args.list_photos_not_in_set and
                 args.list_photos_not_in_set > 0 and
                 countnotinsets > 0):
-            niceprint('*****Listing Photos not in a set in Flickr******')
+            np.niceprint('*****Listing Photos not in a set in Flickr******')
             # List pics not in sets (if within a parameter, default 10)
             # (per_page=min(args.list_photos_not_in_set, 500):
             #       find('photos').attrib['total']
             res = self.photos_get_not_in_set(min(args.list_photos_not_in_set,
                                                  500))
-            if not self.isGood(res):
-                raise IOError(res)
             logging.debug('Output for list get_not_in_set:')
             logging.debug(xml.etree.ElementTree.tostring(res,
                                                          encoding='utf-8',
                                                          method='xml'))
-            for count, row in enumerate(res.find('photos').findall('photo')):
-                logging.info('Photo get_not_in_set id:[{!s}] title:[{!s}]'
-                             .format(row.attrib['id'],
-                                     row.attrib['title']))
-                logging.debug(xml.etree.ElementTree.tostring(row,
-                                                             encoding='utf-8',
-                                                             method='xml'))
-                niceprint('Photo get_not_in_set: id:[{!s}] title:[{!s}] '
-                          .format(row.attrib['id'],
-                                  row.attrib['title']))
-                logging.info('count=[{!s}]'.format(count))
-                if (count == 500) or \
-                        (count >= (args.list_photos_not_in_set-1)) or \
-                        (count >= (countnotinsets-1)):
-                    logging.info('Stopped at photo [{!s}] listing '
-                                  'photos not in a set'.format(count))
-                    break
-            niceprint('*****Completed Listing Photos not in a set '
-                      'in Flickr******')
+
+            if self.isGood(res):
+                for count, row in enumerate(res.find('photos')
+                                            .findall('photo')):
+                    logging.info('Photo get_not_in_set: id:[{!s}] title:[{!s}]'
+                                 .format(row.attrib['id'],
+                                         row.attrib['title']))
+                    logging.debug(xml.etree.ElementTree.tostring(
+                        row,
+                        encoding='utf-8',
+                        method='xml'))
+                    np.niceprint('Photo get_not_in_set: id:[{!s}] title:[{!s}]'
+                                 .format(row.attrib['id'],
+                                         row.attrib['title']))
+                    logging.info('count=[{!s}]'.format(count))
+                    if (count == 500) or \
+                            (count >= (args.list_photos_not_in_set - 1)) or \
+                            (count >= (countnotinsets - 1)):
+                        logging.info('Stopped at photo [{!s}] listing '
+                                     'photos not in a set'.format(count))
+                        break
+            else:
+                np.niceprint('Error in list get_not_in_set. No output.')
+
+            np.niceprint('*****Completed Listing Photos not in a set '
+                         'in Flickr******')
+
 
 # =============================================================================
 # Main code
 #
-niceprint('--------- (V{!s}) Start time: {!s} ---------'
-          .format(UPLDRConstants.Version,
-                  nutime.strftime(UPLDRConstants.TimeFormat)))
+np.niceprint('--------- (V{!s}) Start time: {!s} ---------'
+             .format(UPLDRConstants.Version,
+                     nutime.strftime(UPLDRConstants.TimeFormat)))
 if __name__ == "__main__":
     # Ensure that only once instance of this script is running
     f = open(LOCK_PATH, 'w')
@@ -4775,31 +4410,31 @@ if __name__ == "__main__":
         if e.errno == errno.EAGAIN:
             sys.stderr.write('[{!s}] Script already running.\n'
                              .format(
-                                nutime.strftime(UPLDRConstants.TimeFormat)))
+                                 nutime.strftime(UPLDRConstants.TimeFormat)))
             sys.stderr.flush()
             sys.exit(-1)
         raise
 
     parser = argparse.ArgumentParser(
-                        description='Upload files to Flickr. '
-                                    'Uses uploadr.ini as config file.',
-                        epilog='by oPromessa, 2017, 2018'
-                        )
+        description='Upload files to Flickr. Uses uploadr.ini as config file.',
+        epilog='by oPromessa, 2017, 2018'
+    )
 
-    # Verbose related options
+    # Verbose related options -------------------------------------------------
     vgrpparser = parser.add_argument_group('Verbose and dry-run options')
     vgrpparser.add_argument('-v', '--verbose', action='store_true',
                             help='Provides some more verbose output. '
                                  'See also -x option. '
                                  'See also LOGGING_LEVEL value in INI file.')
     vgrpparser.add_argument('-x', '--verbose-progress', action='store_true',
-                             help='Provides progress indicator on each upload. '
-                                  'Normally used in conjunction with -v option.'
-                                  ' See also LOGGING_LEVEL value in INI file.')
+                            help='Provides progress indicator on each upload.'
+                                  ' Normally used in conjunction with '
+                                  '-v option. '
+                                  'See also LOGGING_LEVEL value in INI file.')
     vgrpparser.add_argument('-n', '--dry-run', action='store_true',
                             help='Dry run. No changes are actually performed.')
 
-    # Information related options
+    # Information related options ---------------------------------------------
     igrpparser = parser.add_argument_group('Information options')
     igrpparser.add_argument('-i', '--title', action='store',
                             help='Title for uploaded files. '
@@ -4824,7 +4459,7 @@ if __name__ == "__main__":
                                  'same title, list SetName (if different). '
                                  'Not operational at this time.')
 
-    # Processing related options
+    # Processing related options ----------------------------------------------
     pgrpparser = parser.add_argument_group('Processing related options')
     pgrpparser.add_argument('-r', '--drip-feed', action='store_true',
                             help='Wait a bit between uploading individual '
@@ -4842,26 +4477,26 @@ if __name__ == "__main__":
                                  'Uploading every SLEEP_TIME seconds. Please '
                                  'note it only performs upload/replace.')
 
+    # Bad files related options -----------------------------------------------
     # Cater for bad files. files in your Library that flickr does not recognize
-    # Options: -b, -c, -s and -g
     bgrpparser = parser.add_argument_group('Handling bad and excluded files')
     # -b add files to badfiles table
     bgrpparser.add_argument('-b', '--bad-files', action='store_true',
-                        help='Save on database bad files to prevent '
-                             'continuous uploading attempts. Bad files are '
-                             'files in your Library that flickr does not '
-                             'recognize (Error 5) or are too large (Error 8). '
-                             'Check also option -c.')
+                            help='Save on database bad files to prevent '
+                            'continuous uploading attempts. Bad files are '
+                            'files in your Library that flickr does not '
+                            'recognize (Error 5) or are too large (Error 8). '
+                            'Check also option -c.')
     # -c clears the badfiles table to allow a reset of the list
     bgrpparser.add_argument('-c', '--clean-bad-files', action='store_true',
-                        help='Resets the badfiles table/list to allow a new '
-                             'uploading attempt for bad files. Bad files are '
-                             'files in your Library that flickr does not '
-                             'recognize (Error 5) or are too large (Error 8). '
-                             'Check also option -b.')
+                            help='Resets the badfiles table/list to allow a '
+                            'new uploading attempt for bad files. Bad files '
+                            'are files in your Library that flickr does not '
+                            'recognize (Error 5) or are too large (Error 8). '
+                            'Check also option -b.')
     # -s list the badfiles table
     bgrpparser.add_argument('-s', '--list-bad-files', action='store_true',
-                        help='List the badfiles table/list.')
+                            help='List the badfiles table/list.')
     # when you change EXCLUDED_FOLDERS setting
     bgrpparser.add_argument('-g', '--remove-excluded', '--remove-ignored',
                             action='store_true',
@@ -4872,7 +4507,7 @@ if __name__ == "__main__":
                                  'in favor of --remove-excluded or -r. '
                                  'From version 2.7.0 it will be dropped.')
 
-    # Migration related options
+    # Migration related options -----------------------------------------------
     # 2.7.0 Version will add album/setName as one
     agrpparser = parser.add_argument_group('Migrate to v2.7.0')
     agrpparser.add_argument('--add-albums-migrate', action='store_true',
@@ -4889,29 +4524,36 @@ if __name__ == "__main__":
 
     # Debug to show arguments
     if LOGGING_LEVEL <= logging.INFO:
-        niceprint('Output for arguments(args):')
+        np.niceprint('Output for arguments(args):')
         pprint.pprint(args)
 
     if args.verbose:
-        niceprint('FILES_DIR: [{!s}]'.format(StrUnicodeOut(FILES_DIR)))
+        np.niceprint('FILES_DIR: [{!s}]'.format(StrUnicodeOut(FILES_DIR)))
 
     logging.warning('FILES_DIR: [{!s}]'.format(StrUnicodeOut(FILES_DIR)))
     if FILES_DIR == "":
-        niceprint('Please configure the name of the folder [FILES_DIR] '
-                  'in the INI file [normally uploadr.ini], '
-                  'with media available to sync with Flickr.')
-        sys.exit(7)
+        np.niceprint('Please configure in the INI file [normally uploadr.ini],'
+                     ' the name of the folder [FILES_DIR] '
+                     'with media available to sync with Flickr.')
+        sys.exit(8)
     else:
         if not os.path.isdir(FILES_DIR):
-            niceprint('Please configure the name of an existant folder '
-                      'in the INI file [normally uploadr.ini] '
-                      'with media available to sync with Flickr.')
-            sys.exit(8)
+            logging.critical('FILES_DIR: [{!s}] is not valid.'
+                             .format(StrUnicodeOut(FILES_DIR)))
+            np.niceprint('Please configure the name of an existant folder '
+                         'in the INI file [normally uploadr.ini] '
+                         'with media available to sync with Flickr. '
+                         'FILES_DIR: [{!s}] is not valid.'
+                         .format(StrUnicodeOut(FILES_DIR)))
+            sys.exit(9)
 
     if FLICKR["api_key"] == "" or FLICKR["secret"] == "":
-        niceprint('Please enter an API key and secret in the configuration '
-                  'script file, normaly uploadr.ini (see README).')
-        sys.exit(9)
+        logging.critical('Please enter an API key and secret in the '
+                         'configuration '
+                         'script file, normaly uploadr.ini (see README).')
+        np.niceprint('Please enter an API key and secret in the configuration '
+                     'script file, normaly uploadr.ini (see README).')
+        sys.exit(10)
 
     # Instantiate class Uploadr
     logging.debug('Instantiating the Main class flick = Uploadr()')
@@ -4929,32 +4571,33 @@ if __name__ == "__main__":
         logging.warning('Make sure you have previously authenticated!')
         flick.run()
     else:
-        niceprint('Checking if token is available... if not will authenticate')
+        np.niceprint('Checking if token is available... '
+                     'if not will authenticate')
         if (not flick.checkToken()):
             flick.authenticate()
 
         if args.add_albums_migrate:
-            niceprint('Performing preparation for migrate to 2.7.0',
-                      fname='addAlbumsMigrate')
+            np.niceprint('Performing preparation for migrate to 2.7.0',
+                         fname='addAlbumsMigrate')
 
             if flick.addAlbumsMigrate():
-                niceprint('Successfully added album tags to pics '
-                          'on upload.',
-                           fname='addAlbumsMigrate')
+                np.niceprint('Successfully added album tags to pics '
+                             'on upload.',
+                             fname='addAlbumsMigrate')
             else:
                 logging.warning('Failed adding album tags to pics '
                                 'on upload. '
                                 'Please check logs, correct, and retry.')
-                niceprint('Failed adding album tags to pics '
-                          'on upload. '
-                          'Please check logs, correct, and retry.',
-                          fname='addAlbumsMigrate')
-        elif  args.list_bad_files:
-            niceprint('Listing badfiles: Start.',
-                  fname='listBadFiles')
+                np.niceprint('Failed adding album tags to pics '
+                             'on upload. '
+                             'Please check logs, correct, and retry.',
+                             fname='addAlbumsMigrate')
+        elif args.list_bad_files:
+            np.niceprint('Listing badfiles: Start.',
+                         fname='listBadFiles')
             flick.listBadFiles()
-            niceprint('Listing badfiles: End. No more options will run.',
-                  fname='listBadFiles')
+            np.niceprint('Listing badfiles: End. No more options will run.',
+                         fname='listBadFiles')
         else:
             flick.removeUselessSetsTable()
             flick.getFlickrSets()
@@ -4971,8 +4614,8 @@ if __name__ == "__main__":
             flick.createSets()
             flick.printStat(UPLDRConstants.nuMediacount)
 
-niceprint('--------- (V{!s}) End time: {!s} ---------'
-          .format(UPLDRConstants.Version,
-                  nutime.strftime(UPLDRConstants.TimeFormat)))
+np.niceprint('--------- (V{!s}) End time: {!s} ---------'
+             .format(UPLDRConstants.Version,
+                     nutime.strftime(UPLDRConstants.TimeFormat)))
 sys.stderr.write('--------- ' + 'End: ' + ' ---------\n')
 sys.stderr.flush()

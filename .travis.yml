@@ -10,6 +10,12 @@ python:
 # nightly gets the latest nightly version of python... python 3 in the case. For now I don't want that!
 #  - "nightly"
 
+# =============================================================================
+# branches blacklist for TravisCI testing
+#branches:
+#  except:
+#  - dev-mar18
+
 before_install:
 # For use with wget into github account
   - echo -e "machine github.com\n  login $CI_USER\n  password $CI_USER_PASSWORD" >> ~/.netrc
@@ -21,7 +27,7 @@ before_install:
 # command to install dependencies
 install:
   - pip install -r requirements.txt
-# Get deletr. For future use to delete all pics frmo Flickr prior to a run
+# Get deletr to delete all pics Flickr prior to a run
   - wget https://github.com/oPromessa/flickr-deletr/archive/master.tar.gz -O flickr-deletr-master.tar.gz
   - tar zxvf flickr-deletr-master.tar.gz
 # Get papertrail.com remote_syslog2
@@ -41,6 +47,7 @@ env:
     - VerboseVar=-v
     - BadFilesVar=-b
     - ExcludedVar=--remove-excluded
+    - ListPhotosNotInSet="-l 100"
     - TAIL_LINES=200  # Tail $TAIL_LINES for output logging. Default: 20
     - WAIT_TIME=2     # Sleep time between first and second run
 # Delete !!!!!!!!!!!!!!!!!!! CAREFULL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -59,21 +66,20 @@ env:
 # addAlbumsMigrate. Option --add-albums-migrate is added on SECOND RUN
     - TestScenario=addAlbumsMigrate UploadrOptions="$VerboseVar $BadFilesVar -p 20"
 # RemoveReplace, Multiprocessing. Also test cleaning up badfiles database entries
-    - TestScenario=RemoveReplace UploadrOptions="$VerboseVar $BadFilesVar -p 10 -c"
+    - TestScenario=RemoveReplace UploadrOptions="$VerboseVar $BadFilesVar $ListPhotosNotInSet -p 10 -c"
 # ExcludedFolders+IgnoredFiles in Single Processing mode. Also test cleaning up badfiles database entries
     - TestScenario=ExcludedFolders UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -c"
 # =============================================================================
 # before_script
-# Get database token ready
-# Get uploadr.ini from tests
-# Use environment secure variable for private settings
+#    - Get database token ready
+#    - Get uploadr.ini from tests
+#    - Use environment secure variable for private settings
 before_script:
   - pwd
   - pythonVersion=`python -V 2>&1 | cut -d\  -f2`
   - echo $pythonVersion
   - echo Travis Python Version
-  - echo ${TRAVIS_PYTHON_VERSION}  
-#  - ls -laR
+  - echo ${TRAVIS_PYTHON_VERSION}
   - cp tests/uploadr.ini .
   - cp tests/uploadr.ini /home/travis/virtualenv/python$pythonVersion/bin/uploadr.ini || cp tests/uploadr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/uploadr.ini
   - grep FILES_DIR uploadr.ini
@@ -82,11 +88,21 @@ before_script:
   - sqlite3 token/oauth-tokens.sqlite 'SELECT * FROM oauth_tokens;'
   - find "./tests/Test Photo Library" -type f -exec md5sum '{}' \;
   - remote_syslog/remote_syslog -c ~/syslog2.yml
+# Prevent errors in case log and err files are not generated
+  - touch /home/travis/build/oPromessa/flickr-uploader/nohup.log
+  - touch /home/travis/build/oPromessa/flickr-uploader/nohup.err
 
 
 # =============================================================================
 # run script for tests
 script:
+# pytest --flakes (Code analysis) ---------------------------------------------
+  - pytest -v --flakes
+# pytest ----------------------------------------------------------------------
+  - pytest -v
+# pytest --doctest-modules ----------------------------------------------------
+  - pytest --doctest-modules
+  
 # DELETE RUN ------------------------------------------------------------------
 # !!!!!!!!!!!!!!!!!!!!!!!!!! CAREFULL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # COMPATIBLE WITH PYTHON 2.7 ONLY
@@ -95,7 +111,8 @@ script:
   - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then coverage run -a --concurrency multiprocessing ./flickr-deletr-master/delete.py; fi
 
 # First RUN -------------------------------------------------------------------
-  - coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log 2> /home/travis/build/oPromessa/flickr-uploader/nohup.err
+  #- coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log 2> /home/travis/build/oPromessa/flickr-uploader/nohup.err
+  - coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log 
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.err
 
@@ -131,16 +148,6 @@ script:
   - coverage report -m uploadr.py
   - sleep $WAIT_TIME
 
-# pytest --flakes (Code analysis) ---------------------------------------------
-# FOR NOW WITH PYTHON 2.* Versions only. Will edit tests for PYTHON 3.* Versions
-  - if [[ $TRAVIS_PYTHON_VERSION == 2* ]]; then pytest -v --flakes; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then pytest -v --flakes tests/test_StrUni.py::test_Unicode tests/test_StrUni.py::test_RUN tests/test_sys_argv.txt::test_sys_argv.txt; fi
-
-# FOR NOW WITH PYTHON 2.* Versions only. Will edit tests for PYTHON 3.* Versions
-#  - pytest -v # or py.test for Python versions 3.5 and below
-  - if [[ $TRAVIS_PYTHON_VERSION == 2* ]]; then pytest --doctest-modules; fi # Attempt to run test_*.txt with doctest
-#  - pytest --doctest-modules # Attempt to run test_*.txt with doctest
-
 # Deleted Pics Non existant on FLickr -----------------------------------------
 # For testing a local deleted file also not available in flickr
 # - sleep $WAIT_TIME
@@ -149,13 +156,13 @@ script:
 #  - coverage report -m uploadr.py
 #  - sqlite3 flickrdb "SELECT *, datetime( last_modified, 'unixepoch', 'localtime') FROM files;"
 
-# =============================================================================
-# after_script
+# after_failure ---------------------------------------------------------------
 # Attempt to catch "Build times out because no output was received"
 after_failure:
    - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
    - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.err
-  
+
+# after_script ----------------------------------------------------------------
 after_script:
 # MD5SUM Output for REFERENCE -------------------------------------------------
 #  - if [[ $TestScenario == RemoveReplace ]]; then find "./tests/Test Photo Library" -type f -exec md5sum '{}' \; ; fi

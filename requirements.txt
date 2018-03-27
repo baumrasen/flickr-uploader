@@ -1,11 +1,5 @@
-# scripts/flickrripper.py
-# On Python 2.7, flickrapi 2.3 may be used.
-# On Python 3, flickrapi 2.3 may be used. Recommend 2.4
-# flickrapi==2.3 ; python_version < '2.7'
 # Force six 1.11.0
 six>=1.11.0 ; python_version >= '2.7'
-# weird error... forced flickrapi 2.3
-# flickrapi==2.3 ; python_version >= '2.7'
 flickrapi ; python_version >= '2.7'
 pytest-flakes ; python_version >= '2.7'
 coverage ; python_version >= '2.7'

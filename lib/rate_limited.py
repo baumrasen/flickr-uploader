@@ -2,25 +2,32 @@
     by oPromessa, 2017
     Published on https://github.com/oPromessa/flickr-uploader/
 
-    Inspired by: https://gist.github.com/gregburek/1441055
+    rate_limited = Helper class and functions to rate limiting function calls
+                   with Python Decorators.
+                   Inspired by: https://gist.github.com/gregburek/1441055
 
-    Helper class and functions to rate limiting function calls
-    with Python Decorators.
+    retry        = Helper function to run function calls multiple times on
+                   error with Python Decorators.
 """
 
-# ----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Import section for Python 2 and 3 compatible code
-# from __future__ import absolute_import, division, print_function, unicode_literals
+# from __future__ import absolute_import, division, print_function,
+#    unicode_literals
 from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 
-# ----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Import section
 #
 import sys
 import logging
 import multiprocessing
 import time
+import random
+import sqlite3 as lite
+import flickrapi
 from functools import wraps
+from . import niceprint
 
 
 # -----------------------------------------------------------------------------
@@ -28,16 +35,17 @@ from functools import wraps
 #
 class LastTime:
     """
-        >>> import rate_limited as rt
+        >>> import lib.rate_limited as rt
         >>> a = rt.LastTime()
+        ...
         >>> a.add_cnt()
-        >>> a.get_cnt()
-        1
         >>> a.add_cnt()
         >>> a.get_cnt()
         2
     """
-
+    # -------------------------------------------------------------------------
+    # class LastTime __init__
+    #
     def __init__(self, name='LT'):
         # Init variables to None
         self.name = name
@@ -60,7 +68,6 @@ class LastTime:
 
     def set_last_time_called(self):
         self.last_time_called.value = time.time()
-        # self.debug('set_last_time_called')
 
     def get_last_time_called(self):
         return self.last_time_called.value
@@ -71,7 +78,7 @@ class LastTime:
     def get_cnt(self):
         return self.cnt.value
 
-    def debug(self, debugname='LT'):
+    def debug(self, debugname = 'LT'):
         now=time.time()
         logging.debug('___Rate name:[{!s}] '
                       'debug=[{!s}] '
@@ -103,20 +110,21 @@ def rate_limited(max_per_second):
 
     min_interval = 1.0 / max_per_second
     LT = LastTime('rate_limited')
+    np = niceprint.niceprint()
 
     def decorate(func):
         LT.acquire()
         if LT.get_last_time_called() == 0:
             LT.set_last_time_called()
-        LT.debug('DECORATE')
+        # LT.debug('DECORATE')
         LT.release()
 
         @wraps(func)
         def rate_limited_function(*args, **kwargs):
 
-            logging.warning('___Rate_limited f():[{!s}]: '
-                            'Max_per_Second:[{!s}]'
-                            .format(func.__name__, max_per_second))
+            logging.info('___Rate_limited f():[{!s}]: '
+                         'Max_per_Second:[{!s}]'
+                         .format(func.__name__, max_per_second))
 
             try:
                 LT.acquire()
@@ -153,20 +161,15 @@ def rate_limited(max_per_second):
                 LT.debug('NEXT')
 
             except Exception as ex:
-                # CODING: To be changed once reportError is on a module
-                sys.stderr.write('+++000 '
-                                 'Exception on rate_limited_function: [{!s}]\n'
-                                 .format(ex))
-                sys.stderr.flush()
-                # reportError(Caught=True,
-                #              CaughtPrefix='+++',
-                #              CaughtCode='000',
-                #              CaughtMsg='Exception on rate_limited_function',
-                #              exceptUse=True,
-                #              # exceptCode=ex.code,
-                #              exceptMsg=ex,
-                #              NicePrint=False,
-                #              exceptSysInfo=True)
+                np.reportError(Caught=True,
+                               CaughtPrefix='+++',
+                               CaughtCode='000',
+                               CaughtMsg='Exception on rate_limited_function',
+                               exceptUse=True,
+                               # exceptCode=ex.code,
+                               exceptMsg=ex,
+                               NicePrint=False,
+                               exceptSysInfo=True)
                 raise
             finally:
                 LT.release()
@@ -180,6 +183,103 @@ def rate_limited(max_per_second):
 #@rate_limited(5) # 5 calls per second
 # def print_num(num):
 #     print (num )
+
+
+# -----------------------------------------------------------------------------
+# retry
+#
+# retries execution of a function
+#
+def retry(attempts=3, waittime=5, randtime=False):
+    """
+    Catches exceptions while running a supplied function
+    Re-runs it for times while sleeping X seconds in-between
+    outputs 3 types of errors (coming from the parameters)
+
+    attempts = Max Number of Attempts
+    waittime = Wait time in between Attempts
+    randtime = Randomize the Wait time from 1 to randtime for each Attempt
+
+    >>> import lib.rate_limited as rt
+    >>> @rt.retry(attempts=3, waittime=3, randtime=True)
+    ... def f():
+    ...     print(x)
+    ...
+    >>> f()
+    Traceback (most recent call last):
+    NameError: ...
+    """
+    def wrapper_fn(f):
+        @wraps(f)
+        def new_wrapper(*args, **kwargs):
+
+            rtime = time
+            error = None
+
+            if logging.getLogger().getEffectiveLevel() <= logging.WARNING:
+                if args is not None:
+                    logging.info('___Retry f():[{!s}] '
+                                 'Max:[{!s}] Delay:[{!s}] Rnd[{!s}]'
+                                 .format(f.__name__, attempts,
+                                         waittime, randtime))
+                    for i, a in enumerate(args):
+                        logging.info('___Retry f():[{!s}] arg[{!s}]={!s}'
+                                     .format(f.__name__, i, a))
+            for i in range(attempts if attempts > 0 else 1):
+                try:
+                    logging.info('___Retry f():[{!s}]: '
+                                 'Attempt:[{!s}] of [{!s}]'
+                                 .format(f.__name__, i+1, attempts))
+                    return f(*args, **kwargs)
+                except Exception as e:
+                    logging.error('___Retry f():[{!s}]: Error code A: [{!s}]'
+                                  .format(f.__name__, e))
+                    error = e
+                except flickrapi.exceptions.FlickrError as ex:
+                    logging.error('___Retry f():[{!s}]: Error code B: [{!s}]'
+                                  .format(f.__name__, ex))
+                except lite.Error as e:
+                    logging.error('___Retry f():[{!s}]: Error code C: [{!s}]'
+                                  .format(f.__name__, e))
+                    error = e
+                    # Release the lock on error.
+                    # CODING: Check how to handle this particular scenario.
+                    # flick.useDBLock(nulockDB, False)
+                    # self.useDBLock( lock, True)
+                except:
+                    logging.error('___Retry f():[{!s}]: Error code D: Catchall'
+                                  .format(f.__name__))
+
+                logging.warning('___Function:[{!s}] Waiting:[{!s}] Rnd:[{!s}]'
+                                .format(f.__name__, waittime, randtime))
+                if randtime:
+                    rtime.sleep(random.randrange(0,
+                                                 (waittime+1)
+                                                 if waittime >= 0
+                                                 else 1))
+                else:
+                    rtime.sleep(waittime if waittime >= 0 else 0)
+            logging.error('___Retry f():[{!s}] '
+                            'Max:[{!s}] Delay:[{!s}] Rnd[{!s}]: Raising ERROR!'
+                            .format(f.__name__, attempts,
+                                    waittime, randtime))
+            raise error
+        return new_wrapper
+    return wrapper_fn
+# -----------------------------------------------------------------------------
+# Samples
+# @retry(attempts=3, waittime=2)
+# def retry_divmod(argslist):
+#     return divmod(*argslist)
+# print retry_divmod([5, 3])
+# try:
+#     print(retry_divmod([5, 'H']))
+# except:
+#     logging.error('Error Caught (Overall Catchall)...')
+# finally:
+#     logging.error('...Continuing')
+# nargslist=dict(Caught=True, CaughtPrefix='+++')
+# retry_reportError(nargslist)
 
 
 # -----------------------------------------------------------------------------
@@ -214,9 +314,8 @@ if __name__ == "__main__":
 
     print('-------------------------------------------------Multi Processing')
     def fmulti(x, prc):
-        import random
 
-        for i in range(1,x):
+        for i in range(1, x):
             r = random.randrange(6)
             print('\t\t[prc:{!s}] [{!s}]'
                   '->- WORKing {!s}s----[{!s}]'
@@ -230,8 +329,8 @@ if __name__ == "__main__":
 
     TaskPool = []
 
-    for j in range(1,4):
-        Task = multiprocessing.Process(target=fmulti, args=(5,j))
+    for j in range(1, 4):
+        Task = multiprocessing.Process(target=fmulti, args=(5, j))
         TaskPool.append(Task)
         Task.start()
 

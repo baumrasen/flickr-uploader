@@ -1,19 +1,28 @@
 >>> import sys
->>> import StrUni
->>> StrUni.isThisStringUnicode(u'Something')
+>>> import lib.niceprint as npc
+>>> StrUni = npc.niceprint()
+>>> if sys.version_info < (3, ):
+...     StrUni.isThisStringUnicode(u'Something') == True
+... else:
+...     StrUni.isThisStringUnicode(u'Something') == False
 True
->>> StrUni.isThisStringUnicode('Something')
-False
+>>> if sys.version_info < (3, ):
+...     StrUni.isThisStringUnicode('Something') == False
+... else:
+...     StrUni.isThisStringUnicode('Something') == False
+True
 >>> StrUni.isThisStringUnicode(245)
 False
->>> StrUni.StrUnicodeOut(u'some text')
-'some text'
->>> StrUni.StrUnicodeOut('some text')
-'some text'
 >>> StrUni.StrUnicodeOut(str(2)+u'some text')
 '2some text'
->>> a = unicode('hello')
->>> StrUni.isThisStringUnicode(a)
+>>> if sys.version_info < (3, ):
+...     a = unicode('hello')
+... else:
+...     a = u'hello'
+>>> if sys.version_info < (3, ):
+...     StrUni.isThisStringUnicode(a) == True
+... else:
+...     StrUni.isThisStringUnicode(a) == False
 True
 >>> b = u'Árvore'
 >>> print('a:[{!s}] b:[{!s}]'.format(StrUni.StrUnicodeOut(a), StrUni.StrUnicodeOut(b)))

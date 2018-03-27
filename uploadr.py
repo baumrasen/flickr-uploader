@@ -2076,7 +2076,8 @@ class Uploadr:
                                         np.niceprint('Tag Not removed.')
 
                     break
-                # Exceptions for flickr.upload function call...
+                # Exceptions for flickr.upload function call handled on the
+                # outer try/except.
                 except (IOError, ValueError, httplib.HTTPException):
                     reportError(Caught=True,
                                 CaughtPrefix='+++',
@@ -2147,6 +2148,28 @@ class Uploadr:
                         exceptMsg=ex,
                         NicePrint=True,
                         exceptSysInfo=True)
+            # Error: 8: Videos can't be replaced
+            if (ex.code == 1):
+                np.niceprint('Videos can\'t be replaced, delete/uploading...')
+                logging.error('Videos can\'t be replaced, delete/uploading...')
+                xrow = [ file_id, file ]
+                logging.debug('delete/uploading '
+                              'xrow[0].files_id=[{!s}]'
+                              'xrow[1].file=[{!s}]'
+                              .format(xrow[0], xrow[1]))
+                if (self.deleteFile(xrow, cur)):
+                    np.niceprint('Delete for replace succeed!')
+                    logging.warning('Delete for replace succeed!')
+                    if self.uploadFile(lock, file):
+                        np.niceprint('Upload for replace succeed!')
+                        logging.warning('Upload for replace succeed!')
+                    else:
+                        np.niceprint('Upload for replace failed!')
+                        logging.error('Upload for replace failed!')
+                else:
+                    np.niceprint('Delete for replace failed!')
+                    logging.error('Delete for replace failed!')
+                
         except lite.Error as e:
             reportError(Caught=True,
                         CaughtPrefix='+++ DB',
@@ -2170,16 +2193,19 @@ class Uploadr:
     # -------------------------------------------------------------------------
     # deletefile
     #
+    # Delete files from flickr
+    #
     # When EXCLUDED_FOLDERS defintion changes. You can run the -g
     # or --remove-ignored option in order to remove files previously loaded
-    # files from flickr
     #
     def deleteFile(self, file, cur):
         """ deleteFile
 
         delete file from flickr
-        cur represents the control dabase cursor to allow, for example,
-            deleting empty sets
+        
+        file  = row of database with (files_id, path)
+        cur   = represents the control database cursor to allow, for example,
+                deleting empty sets
         """
 
         global nuflickr

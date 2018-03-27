@@ -62,13 +62,13 @@ env:
 # Badfiles
     #- TestScenario=BadFiles UploadrOptions="$VerboseVar $BadFilesVar"
 # Multiprocessing
-    - TestScenario=MultiProcessing UploadrOptions="$VerboseVar $BadFilesVar -p 20"
+    # FOR FASTER TEST - TestScenario=MultiProcessing UploadrOptions="$VerboseVar $BadFilesVar -p 20"
 # addAlbumsMigrate. Option --add-albums-migrate is added on SECOND RUN
     - TestScenario=addAlbumsMigrate UploadrOptions="$VerboseVar $BadFilesVar -p 20"
 # RemoveReplace, Multiprocessing. Also test cleaning up badfiles database entries
     - TestScenario=RemoveReplace UploadrOptions="$VerboseVar $BadFilesVar $ListPhotosNotInSet -p 10 -c"
 # ExcludedFolders+IgnoredFiles in Single Processing mode. Also test cleaning up badfiles database entries
-    - TestScenario=ExcludedFolders UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -c"
+    # FOR FASTER TEST - TestScenario=ExcludedFolders UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -c"
 # =============================================================================
 # before_script
 #    - Get database token ready
@@ -102,7 +102,7 @@ script:
   - pytest -v
 # pytest --doctest-modules ----------------------------------------------------
   - pytest --doctest-modules
-  
+
 # DELETE RUN ------------------------------------------------------------------
 # !!!!!!!!!!!!!!!!!!!!!!!!!! CAREFULL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # COMPATIBLE WITH PYTHON 2.7 ONLY
@@ -112,7 +112,7 @@ script:
 
 # First RUN -------------------------------------------------------------------
   #- coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log 2> /home/travis/build/oPromessa/flickr-uploader/nohup.err
-  - coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log 
+  - coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.err
 

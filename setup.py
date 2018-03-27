@@ -112,7 +112,7 @@ setup(
     install_requires=REQUIRED,
     include_package_data=True,
     scripts=['uploadr.py'],
-    data_files = ('./etc', ['./uploadr.ini']),
+    data_files = [('./etc', ['./uploadr.ini'])],
     license='MIT',
     classifiers=[
         # Trove classifiers

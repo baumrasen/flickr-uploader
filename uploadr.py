@@ -1275,14 +1275,14 @@ class Uploadr:
     def updatedVideoDate(self, xfile_id, xfile, xlast_modified):
 
         # Update Date/Time on Flickr for Video files
-        # Flickr doesn't read it  from the video file itself.
+        # Flickr doesn't read it from the video file itself.
         filetype = mimetypes.guess_type(xfile)
         logging.info('filetype is:[{!s}]'.format('None'
                                                  if filetype is None
                                                  else filetype[0]))
 
         # update video date/time TAKEN.
-        # Flickr doesn't read it  from the video file itself.
+        # Flickr doesn't read it from the video file itself.
         if ((not filetype[0] is None) and ('video' in filetype[0])):
             res_set_date = None
             video_date = nutime.strftime('%Y-%m-%d %H:%M:%S',
@@ -1658,9 +1658,6 @@ class Uploadr:
                             # Successful upload. Break attempts cycle
                             break
 
-                        # Exceptions for flickr.upload function call...
-                        # No as it is caught in the outer try to consider the
-                        # Error #5 invalid videos format loading...
                         except (IOError, httplib.HTTPException):
                             reportError(Caught=True,
                                         CaughtPrefix='+++',
@@ -3510,7 +3507,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         """
 
         global nuflickr
-        
+
         @retry(attempts=3, waittime=3, randtime=False)
         def R_people_getPhotos(kwargs):
             return nuflickr.people.getPhotos(**kwargs)
@@ -3519,7 +3516,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         try:
             getPhotosResp = R_people_getPhotos(dict(user_id="me",
                                                     per_page=1))
-            
+
         except flickrapi.exceptions.FlickrError as ex:
             reportError(Caught=True,
                         CaughtPrefix='+++',

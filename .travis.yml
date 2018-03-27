@@ -12,9 +12,9 @@ python:
 
 # =============================================================================
 # branches blacklist for TravisCI testing
-branches:
-  except:
-  - dev-apr18-configfile
+#branches:
+#  except:
+#  - dev-apr18-configfile
 
 before_install:
 # For use with wget into github account
@@ -137,6 +137,7 @@ script:
   - if [[ $TestScenario == RemoveReplace ]]; then rm "./tests/Test Photo Library/photo_Excepção.jpg"; fi
   - if [[ $TestScenario == RemoveReplace ]]; then cp "./tests/Test Photo Library/ReplaceTest/file_34_Substituição.ForReplace" "./tests/Test Photo Library/Pics.Replaced/file_34_Substituição.jpg"; fi
   - if [[ $TestScenario == RemoveReplace ]]; then cp "./tests/Test Photo Library/ReplaceTest/file_35.jpg.ForReplace" "./tests/Test Photo Library/Pics.Replaced/file_35.jpg"; fi
+  - if [[ $TestScenario == RemoveReplace ]]; then cp "./tests/Test Photo Library/ReplaceTest/Video03.ToReplace.MP4.ForReplace" "./tests/Test Photo Library/Pics.Replaced/Video03.ToReplace.MP4"; fi
 
   - if [[ $TestScenario == ExcludedFolders ]]; then cp ./tests/uploadr_excluded.ini ./uploadr.ini; fi
 

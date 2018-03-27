@@ -70,7 +70,7 @@ except ImportError:
 import multiprocessing
 import flickrapi
 import xml
-# CODING: Avoids error on some systems:
+# Avoids error on some systems:
 #    AttributeError: 'module' object has no attribute 'etree'
 #    on logging.info(xml.etree.ElementTree.tostring(...
 try:
@@ -128,7 +128,8 @@ nurunning = None
 # -----------------------------------------------------------------------------
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 UPLDRConstants.nuMediacount = 0
-UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
+# UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
+UPLDRConstants.baseDir = os.getcwd()
 UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")
 # -----------------------------------------------------------------------------
 np = niceprint.niceprint()
@@ -278,7 +279,6 @@ TOKEN_PATH = eval(config.get('Config', 'TOKEN_PATH'))
 inEXCLUDED_FOLDERS = eval(config.get('Config', 'EXCLUDED_FOLDERS'))
 EXCLUDED_FOLDERS = []
 for folder in inEXCLUDED_FOLDERS:
-    # CODING: Python 2 and 3 compatibility
     EXCLUDED_FOLDERS.append(unicode(folder, 'utf-8')  # noqa
                             if sys.version_info < (3, )
                             else str(folder))
@@ -346,7 +346,6 @@ logging.basicConfig(stream=sys.stderr,
 # =============================================================================
 # Test section for logging.
 # CODING: Uncomment for testing.
-#   Only applicable if LOGGING_LEVEL is INFO or below (DEBUG, NOTSET)
 #
 # if LOGGING_LEVEL <= logging.INFO:
 #     logging.info(u'sys.getfilesystemencoding:[{!s}]'.
@@ -476,8 +475,6 @@ class Uploadr:
         """
 
         useDBLockReturn = False
-        # CODING: Not used for now:
-        # useDBLockTimeout = 0.5
 
         logging.debug('Entering useDBLock with useDBoperation:[{!s}].'
                       .format(useDBoperation))
@@ -495,16 +492,8 @@ class Uploadr:
                 # Control for when running multiprocessing set locking
                 logging.debug('===Multiprocessing=== in.lock.acquire')
                 try:
-                    # CODING: Not used for now
-                    # if lock.acquire(timeout=useDBLockTimeout):
                     if useDBthisLock.acquire():
                         useDBLockReturn = True
-                    # CONDIG: not used for now
-                    # else:
-                    #     useDBthisLock.release()
-                    #     logging.warning('===Multiprocessing=== '
-                    #                     'TIMEOUT in.lock.acquire')
-                    #     useDBLockReturn = False
                 except BaseException:
                     reportError(Caught=True,
                                 CaughtPrefix='+++ ',
@@ -1183,9 +1172,6 @@ class Uploadr:
 
             # Prevent walking thru files in the list of EXCLUDED_FOLDERS
             # Reduce time by not checking a file in an excluded folder
-
-            # CODING
-            # For Debugging: UnicodeWarning comparison
             logging.debug('Check for UnicodeWarning comparison '
                           'dirpath:[{!s}] type:[{!s}]'
                           .format(StrUnicodeOut(os.path.basename(
@@ -1606,7 +1592,7 @@ class Uploadr:
                     logging.warning('title from INI file:[{!s}]'
                                     .format(title_filename))
 
-                # CODING focus this try and not cover so much code!
+                # CODING: Focus this try/except and not cover so much code!
                 try:
                     # Perform actual upload of the file
                     search_result = None
@@ -1690,22 +1676,18 @@ class Uploadr:
 
                             # on error, check if exists a photo
                             # with file_checksum
-                            # CODING: Revise and simplify this code
-                            # CODING: Possibly use is_photo_already_uploaded
-                            # CODING: but checking without SET
                             ZisLoaded, ZisCount, Zisfile_id, zisNoSet = \
                                 self.is_photo_already_uploaded(
                                     file,
                                     file_checksum,
                                     setName)
-                            logging.debug('CODING NEW CODE: '
-                                          'is_photo_already_uploaded:[{!s}] '
+                            logging.debug('is_photo_already_uploaded:[{!s}] '
                                           'Zcount:[{!s}] Zpic:[{!s}] '
                                           'ZisNoSet:[{!s}]'
                                           .format(ZisLoaded, ZisCount,
                                                   Zisfile_id, zisNoSet))
-                            # CODING: END... to check how to replace following
-                            # lines. Check MAX_ATTEMPTS. Replace with retry?
+                            # CODING: To check how to replace following lines.
+                            # Check MAX_ATTEMPTS. Replace with @retry?
                             search_result = self.photos_search(file_checksum)
                             if not self.isGood(search_result):
                                 raise IOError(search_result)
@@ -2251,13 +2233,6 @@ class Uploadr:
                             CaughtCode='089',
                             CaughtMsg='Failed delete photo (deleteFile)',
                             NicePrint=True)
-                # CODING: Change this to deleteResp
-                # Detect error #1 via exception format(ex.code) == '1'
-                # or via analysis of XML reply? Confirmed: via except
-                # <?xml version="1.0" encoding="utf-8" ?>
-                # <rsp stat="fail">
-                #   <err code="1" msg="Photo "123" not found (invalid ID)" />
-                # </rsp>
         except flickrapi.exceptions.FlickrError as ex:
             reportError(Caught=True,
                         CaughtPrefix='+++',
@@ -2540,13 +2515,6 @@ class Uploadr:
                             CaughtCode='097',
                             CaughtMsg='Failed add photo to set (addFiletoSet)',
                             NicePrint=True)
-
-            # CODING how to handle return error code from flickr via flickrapi?
-            # via <err code> or via exception? Confirmed: via exception!
-            # <?xml version="1.0" encoding="utf-8" ?>
-            # <rsp stat="fail">
-            #   <err code="1" msg="Photoset not found" />
-            # </rsp>
         except flickrapi.exceptions.FlickrError as ex:
             reportError(Caught=True,
                         CaughtPrefix='+++',
@@ -3184,7 +3152,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
     # Checks if image is already loaded with tag:checksum
     # (calls Flickr photos.search)
     #
-    # CODING: possible outcomes
+    # Possible outcomes:
     # A) checksum,                             Count=0  THEN NOT EXISTS
     # B) checksum, title, empty setName,       Count=1  THEN EXISTS, ASSIGN SET
     #                                                   IF tag album IS FOUND
@@ -3199,7 +3167,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #         not compatible with use of the -i option
     #   Confirm if setname is the same.
     #   THEN yes found loaded.
-    # Note: There could be more entries due to errors. To be checked manually
+    # Note: There could be more entries due to errors. To be checked manually.
     #
     def is_photo_already_uploaded(self, xfile, xchecksum, xsetName):
         """ is_photo_already_uploaded
@@ -3208,7 +3176,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 title(file without extension)
                 tag:checksum
                 SetName
-                    CODING: Being implemented...
                     if setName is not defined on a pic, it attempts to
                     check tag:album
 
@@ -3232,8 +3199,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         logging.info('Is Already Uploaded:[checksum:{!s}] [album:{!s}]?'
                      .format(xchecksum, xsetName))
 
-        # CODING: Used with a big random waitime to avoid errors in
-        # multiprocessing mode.
+        # Use a big random waitime to avoid errors in multiprocessing mode.
         @retry(attempts=3, waittime=20, randtime=True)
         def R_photos_search(kwargs):
             return nuflickr.photos.search(**kwargs)
@@ -3305,8 +3271,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
             logging.info('Title:[{!s}]'.format(StrUnicodeOut(xtitle_filename)))
 
             # For each pic found on Flickr 1st check title and then Sets
-            # CODING returnList not being used
-            # returnList = []
             freturnPhotoUploaded = 0
             for pic in searchIsUploaded.find('photos').findall('photo'):
                 freturnPhotoUploaded += 1
@@ -3317,8 +3281,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                       StrUnicodeOut(pic.attrib['title']),
                                       StrUnicodeOut(pic.attrib['tags'])))
 
-                # CODING: UnicodeWarning: Unicode equal comparison failed to
-                # convert both arguments to Unicode
+                # Use StrUnicodeOut in comparison to avoid warning:
+                #   "UnicodeWarning: Unicode equal comparison failed to
+                #    convert both arguments to Unicode"
                 logging.debug('xtitle_filename/type=[{!s}]/[{!s}] '
                               'pic.attrib[title]/type=[{!s}]/[{!s}]'
                               .format(StrUnicodeOut(xtitle_filename),
@@ -3394,22 +3359,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                              .format(len(resp.findall('set'))))
 
                 # B) checksum, title, empty setName,       Count=1
-                #                                       THEN EXISTS, ASSIGN SET
-                # IF tag album IS FOUND
+                #                 THEN EXISTS, ASSIGN SET IF tag album IS FOUND
                 if (len(resp.findall('set')) == 0):
-                    # CODING returnList not being used
-                    # returnList.append({'id': pic.attrib['id'],
-                    #                    'title': pic.attrib['title'],
-                    #                    'set': '',
-                    #                    'tags': pic.attrib['tags'],
-                    #                    'result': 'empty'})
-                    # CODING: TEST
-                    # Valid for re-running interrupted runs EXCEPT when
-                    # you have two pics, with same file name and checksum on
-                    # two different sets. SAME Orphaned pic will then be
-                    # assigned to TWO DIFFERENT SETS.
-                    # Unless it has the tag album:setName defined!
-                    # Consider one additional result for PHOTO UPLOADED
+                    # CODING: Consider one additional result for PHOTO UPLOADED
                     # WITHOUT SET WITH ALBUM TAG when row exists on DB. Mark
                     # such row on the database files.set_id to null
                     # to force re-assigning to Album/Set on flickr.
@@ -3462,15 +3414,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         .format((StrUnicodeOut(xsetName) ==
                                  StrUnicodeOut(setinlist
                                                .attrib['title']))))
-
-                    # CODING returnList not being used
-                    # returnList.append({'id': pic.attrib['id'],
-                    #                    'title': pic.attrib['title'],
-                    #                    'set': setinlist.attrib['title'],
-                    #                    'tags': pic.attrib['tags'],
-                    #                    'result': 'nothing'})
-                    # logging.info('output for returnList:[{!s}]'
-                    #              .format(returnList))
 
                     # C) checksum, title, setName (1 or more), Count>=1
                     #                                               THEN EXISTS
@@ -3567,15 +3510,21 @@ set0 = sets.find('photosets').findall('photoset')[0]
         """
 
         global nuflickr
+        
+        @retry(attempts=3, waittime=3, randtime=False)
+        def R_people_getPhotos(kwargs):
+            return nuflickr.people.getPhotos(**kwargs)
 
         getPhotosResp = None
         try:
-            getPhotosResp = nuflickr.people.getPhotos(user_id="me", per_page=1)
+            getPhotosResp = R_people_getPhotos(dict(user_id="me",
+                                                    per_page=1))
+            
         except flickrapi.exceptions.FlickrError as ex:
             reportError(Caught=True,
                         CaughtPrefix='+++',
                         CaughtCode='200',
-                        CaughtMsg='Error in photos.search',
+                        CaughtMsg='Error in people.getPhotos',
                         exceptUse=True,
                         exceptCode=ex.code,
                         exceptMsg=ex,
@@ -3585,16 +3534,16 @@ set0 = sets.find('photosets').findall('photoset')[0]
             reportError(Caught=True,
                         CaughtPrefix='+++',
                         CaughtCode='201',
-                        CaughtMsg='Caught IO/HTTP Error in photos.search')
+                        CaughtMsg='Caught IO/HTTP Error in people.getPhotos')
         except BaseException:
             reportError(Caught=True,
                         CaughtPrefix='+++',
                         CaughtCode='202',
-                        CaughtMsg='Caught exception in photos.search',
+                        CaughtMsg='Caught exception in people.getPhotos',
                         exceptSysInfo=True)
         finally:
             if getPhotosResp is None or not self.isGood(getPhotosResp):
-                logging.debug('getPhotosResp:[{!s}]'
+                logging.error('getPhotosResp:[{!s}]'
                               .format('None'
                                       if getPhotosResp is None
                                       else self.isGood(getPhotosResp)))
@@ -3655,8 +3604,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         logging.info('find_tag: photo:[{!s}] intag:[{!s}]'
                      .format(photo_id, intag))
 
-        # CODING: Used with a big random waitime to avoid errors in
-        # multiprocessing mode.
+        # Use a big random waitime to avoid errors in multiprocessing mode.
         @retry(attempts=3, waittime=20, randtime=True)
         def R_tags_getListPhoto(kwargs):
             return nuflickr.tags.getListPhoto(**kwargs)
@@ -4522,7 +4470,7 @@ if __name__ == "__main__":
     # parse arguments
     args = parser.parse_args()
 
-    # Debug to show arguments
+    # Print/show arguments
     if LOGGING_LEVEL <= logging.INFO:
         np.niceprint('Output for arguments(args):')
         pprint.pprint(args)

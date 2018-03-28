@@ -2267,7 +2267,6 @@ class Uploadr:
                     nucur.execute("DELETE FROM files WHERE files_id = ?",
                                   (file[0],))
                 except lite.Error as e:
-                    DBexception = True
                     reportError(Caught=True,
                                 CaughtPrefix='+++ DB',
                                 CaughtCode='087',

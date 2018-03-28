@@ -729,7 +729,7 @@ class Uploadr:
                                         if sys.version_info < (3, )
                                         else str(row[1]))):
                     # Running in single processing mode, no need for lock
-                    self.deleteFile(row, cur, lock = None)
+                    self.deleteFile(row, cur)
 
         # Closing DB connection
         if con is not None:
@@ -782,7 +782,7 @@ class Uploadr:
                                        if isThisStringUnicode(row[1])
                                        else row[1])):
                     # Running in single processing mode, no need for lock
-                    success = self.deleteFile(row, cur, lock = None)
+                    success = self.deleteFile(row, cur)
                     logging.warning('deleteFile result: {!s}'.format(success))
                     count = count + 1
                     if (count % 3 == 0):
@@ -2234,36 +2234,38 @@ class Uploadr:
 
             lock  = for use with useDBLock to control access to DB
             file  = row of database with (files_id, path)
+            
+            Use new connection and nucur cursor to ensure commit
 
             """
             con = lite.connect(DB_PATH)
             con.text_factory = str
             with con:
                 try:
-                    cur = con.cursor()
+                    nucur = con.cursor()
                     # Acquire DBlock if in multiprocessing mode
                     self.useDBLock(lock, True)
-                    cur.execute("SELECT set_id FROM files "
-                                "WHERE files_id = ?",
-                                (file[0],))
-                    row = cur.fetchone()
+                    nucur.execute("SELECT set_id FROM files "
+                                  "WHERE files_id = ?",
+                                  (file[0],))
+                    row = nucur.fetchone()
                     if (row is not None):
-                        cur.execute("SELECT set_id FROM files "
-                                    "WHERE set_id = ?",
-                                    (row[0],))
-                        rows = cur.fetchall()
+                        nucur.execute("SELECT set_id FROM files "
+                                      "WHERE set_id = ?",
+                                      (row[0],))
+                        rows = nucur.fetchall()
                         if (len(rows) == 1):
                             np.niceprint('File is the last of the set, '
                                          'deleting the set ID: [{!s}]'
                                          .format(str(row[0])))
-                            cur.execute("DELETE FROM sets WHERE set_id = ?",
-                                        (row[0],))
+                            nucur.execute("DELETE FROM sets WHERE set_id = ?",
+                                          (row[0],))
                     # Delete file record from the local db
                     logging.debug('deleteFile.dbDeleteRecordLocalDB: '
                                   'DELETE FROM files WHERE files_id = {!s}'
                                   .format(file[0]))
-                    cur.execute("DELETE FROM files WHERE files_id = ?",
-                                (file[0],))
+                    nucur.execute("DELETE FROM files WHERE files_id = ?",
+                                  (file[0],))
                 except lite.Error as e:
                     DBexception = True
                     reportError(Caught=True,
@@ -2274,17 +2276,15 @@ class Uploadr:
                                           .format(e.args[0]),
                                 NicePrint=True,
                                 exceptSysInfo=True)
-                except BaseException as e:
+                except BaseException:
                     reportError(Caught=True,
                                 CaughtPrefix='+++',
                                 CaughtCode='088',
                                 CaughtMsg='Caught exception in '
                                           'dbDeleteRecordLocalDB',
-                                exceptUse=True,
-                                exceptCode=ex.code,
-                                exceptMsg=ex,
                                 NicePrint=True,
                                 exceptSysInfo=True)
+                    raise
                 finally:
                     con.commit()
                     logging.debug('deleteFile.dbDeleteRecordLocalDB: '
@@ -2294,9 +2294,9 @@ class Uploadr:
 
                 # CODING: START FURTHER Debug...
                 try:
-                    cur.execute("SELECT files_id, path FROM files "
-                                "WHERE files_id = ?", (file[0],))
-                    rrow = cur.fetchone()
+                    nucur.execute("SELECT files_id, path FROM files "
+                                  "WHERE files_id = ?", (file[0],))
+                    rrow = nucur.fetchone()
                     logging.debug('deleteFile.dbDeleteRecordLocalDB: '
                                   'rrow:[!{s}]'.format('None' \
                                                        if rrow is None \

@@ -46,7 +46,9 @@
 * CODING: Should extend this control to other parameters (Enhancement #7)
    * Check error:  DuplicateSectionError or DuplicateOptionError.
    * Check also: api_key. KeyError(key)
-* Use argument or current working directory for INI, token and config files
+* Align try/except handling within functions like people_get_photos or outside
+  like photos_get_not_in_set
+* Place DBlock on deleteFile function!
    
 ## Update History
 * Functions to be migrated...

@@ -728,8 +728,8 @@ class Uploadr:
                 if (self.isFileExcluded(unicode(row[1], 'utf-8')  # noqa
                                         if sys.version_info < (3, )
                                         else str(row[1]))):
-
-                    self.deleteFile(row, cur)
+                    # Running in single processing mode, no need for lock
+                    self.deleteFile(row, cur, lock = None)
 
         # Closing DB connection
         if con is not None:
@@ -781,7 +781,8 @@ class Uploadr:
                 if (not os.path.isfile(row[1].decode('utf-8')
                                        if isThisStringUnicode(row[1])
                                        else row[1])):
-                    success = self.deleteFile(row, cur)
+                    # Running in single processing mode, no need for lock
+                    success = self.deleteFile(row, cur, lock = None)
                     logging.warning('deleteFile result: {!s}'.format(success))
                     count = count + 1
                     if (count % 3 == 0):
@@ -2149,7 +2150,7 @@ class Uploadr:
                         NicePrint=True,
                         exceptSysInfo=True)
             # Error: 8: Videos can't be replaced
-            if (ex.code == 1):
+            if (ex.code == 8):
                 np.niceprint('Videos can\'t be replaced, delete/uploading...')
                 logging.error('Videos can\'t be replaced, delete/uploading...')
                 xrow = [ file_id, file ]
@@ -2157,7 +2158,7 @@ class Uploadr:
                               'xrow[0].files_id=[{!s}]'
                               'xrow[1].file=[{!s}]'
                               .format(xrow[0], xrow[1]))
-                if (self.deleteFile(xrow, cur)):
+                if (self.deleteFile(xrow, cur, lock)):
                     np.niceprint('Delete for replace succeed!')
                     logging.warning('Delete for replace succeed!')
                     if self.uploadFile(lock, file):
@@ -2198,7 +2199,7 @@ class Uploadr:
     # When EXCLUDED_FOLDERS defintion changes. You can run the -g
     # or --remove-ignored option in order to remove files previously loaded
     #
-    def deleteFile(self, file, cur):
+    def deleteFile(self, file, cur, lock = None):
         """ deleteFile
 
         delete file from flickr
@@ -2206,11 +2207,55 @@ class Uploadr:
         file  = row of database with (files_id, path)
         cur   = represents the control database cursor to allow, for example,
                 deleting empty sets
+        lock  = for use with useDBLock to control access to DB
         """
 
         global nuflickr
 
-        if args.dry_run:
+        # ---------------------------------------------------------------------
+        # dbInsertIntoFiles
+        #
+        def dbDeleteRecordLocalDB(lock, file, cur):
+            """ dbDeleteRecordLocalDB
+
+            Find out if the file is the last item in a set, if so,
+            remove the set from the local db
+            """
+
+            try:
+                # Acquire DBlock if in multiprocessing mode
+                self.useDBLock(lock, True)                
+                cur.execute("SELECT set_id FROM files WHERE files_id = ?",
+                            (file[0],))
+                row = cur.fetchone()
+                if (row is not None):
+                    cur.execute("SELECT set_id FROM files WHERE set_id = ?",
+                                (row[0],))
+                    rows = cur.fetchall()
+                    if (len(rows) == 1):
+                        np.niceprint('File is the last of the set, '
+                                     'deleting the set ID: ' + str(row[0]))
+                        cur.execute("DELETE FROM sets WHERE set_id = ?",
+                                    (row[0],))
+                # Delete file record from the local db
+                cur.execute("DELETE FROM files WHERE files_id = ?", (file[0],))
+                con.commit()              
+            except lite.Error as e:
+                DBexception = True
+                reportError(Caught=True,
+                            CaughtPrefix='+++ DB',
+                            CaughtCode='088',
+                            CaughtMsg='DB error on SELECT(or)DELETE: '
+                                      '[{!s}]'
+                                      .format(e.args[0]),
+                            NicePrint=True,
+                            exceptSysInfo=True)
+            finally:
+                # Release DBlock if in multiprocessing mode
+                self.useDBLock(lock, False)
+        # ---------------------------------------------------------------------
+            
+        if (args.dry_run is True):
             np.niceprint('Dry Run Deleting file:[{!s}]'
                          .format(StrUnicodeOut(file[1])))
             return True
@@ -2233,21 +2278,9 @@ class Uploadr:
                 encoding='utf-8',
                 method='xml'))
             if (self.isGood(deleteResp)):
-                # Find out if the file is the last item in a set, if so,
-                # remove the set from the local db
-                cur.execute("SELECT set_id FROM files WHERE files_id = ?",
-                            (file[0],))
-                row = cur.fetchone()
-                cur.execute("SELECT set_id FROM files WHERE set_id = ?",
-                            (row[0],))
-                rows = cur.fetchall()
-                if (len(rows) == 1):
-                    np.niceprint('File is the last of the set, '
-                                 'deleting the set ID: ' + str(row[0]))
-                    cur.execute("DELETE FROM sets WHERE set_id = ?", (row[0],))
 
-                # Delete file record from the local db
-                cur.execute("DELETE FROM files WHERE files_id = ?", (file[0],))
+                self.dbDeleteRecordLocalDB(lock, file, cur)               
+         
                 np.niceprint("Successful deletion.")
                 success = True
             else:
@@ -2267,21 +2300,12 @@ class Uploadr:
                         NicePrint=True)
             # Error: 1: File already removed from Flickr
             if (ex.code == 1):
-                try:
-                    cur.execute("DELETE FROM files WHERE files_id = ?",
-                                (file[0],))
-                except lite.Error as e:
-                    reportError(Caught=True,
-                                CaughtPrefix='+++ DB',
-                                CaughtCode='091',
-                                CaughtMsg='Error: DELETE FROM files:[{!s}]'
-                                          .format(e.args[0]),
-                                NicePrint=True)
+                self.dbDeleteRecordLocalDB(lock, file, cur)               
             else:
                 reportError(Caught=True,
                             CaughtPrefix='xxx',
                             CaughtCode='092',
-                            CaughtMsg='Failed delete photo (deleteFile)',
+                            CaughtMsg='Failed to delete photo (deleteFile)',
                             NicePrint=True)
         except BaseException:
             # If you get 'attempt to write a readonly database', set 'admin'

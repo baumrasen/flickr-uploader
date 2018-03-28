@@ -78,8 +78,8 @@ class LastTime:
     def get_cnt(self):
         return self.cnt.value
 
-    def debug(self, debugname = 'LT'):
-        now=time.time()
+    def debug(self, debugname='LT'):
+        now = time.time()
         logging.debug('___Rate name:[{!s}] '
                       'debug=[{!s}] '
                       '\n\t        cnt:[{!s}] '

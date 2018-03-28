@@ -2164,7 +2164,7 @@ class Uploadr:
             if (ex.code == 8):
                 np.niceprint('Videos can\'t be replaced, delete/uploading...')
                 logging.error('Videos can\'t be replaced, delete/uploading...')
-                xrow = [ file_id, file ]
+                xrow = [file_id, file]
                 logging.debug('delete/uploading '
                               'xrow[0].files_id=[{!s}]'
                               'xrow[1].file=[{!s}]'
@@ -2210,7 +2210,7 @@ class Uploadr:
     # When EXCLUDED_FOLDERS defintion changes. You can run the -g
     # or --remove-ignored option in order to remove files previously loaded
     #
-    def deleteFile(self, file, cur, lock = None):
+    def deleteFile(self, file, cur, lock=None):
         """ deleteFile
 
         delete file from flickr
@@ -2234,7 +2234,7 @@ class Uploadr:
 
             lock  = for use with useDBLock to control access to DB
             file  = row of database with (files_id, path)
-            
+
             Use new connection and nucur cursor to ensure commit
 
             """

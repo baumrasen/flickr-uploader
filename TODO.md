@@ -48,7 +48,7 @@
    * Check also: api_key. KeyError(key)
 * Align try/except handling within functions like people_get_photos or outside
   like photos_get_not_in_set
-* Place DBlock on deleteFile function!
+* Check "# CODING: replace Video" for Closing DB connection to ensure commit
    
 ## Update History
 * Functions to be migrated...

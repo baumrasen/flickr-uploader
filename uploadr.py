@@ -1018,6 +1018,10 @@ class Uploadr:
             # Show number of total files processed
             self.niceprocessedfiles(count, UPLDRConstants.nuMediacount, True)
 
+        # CODING: replace Video
+        # Closing DB connection
+        if con is not None:
+            con.close()
         np.niceprint("*****Completed uploading files*****")
 
     # -------------------------------------------------------------------------
@@ -1422,6 +1426,7 @@ class Uploadr:
                                 NicePrint=True,
                                 exceptSysInfo=True)
                 finally:
+                    con.commit()
                     # Release DBlock if in multiprocessing mode
                     self.useDBLock(lock, False)
 
@@ -1539,6 +1544,8 @@ class Uploadr:
 
                 # Update the Video Date Taken
                 self.updatedVideoDate(isfile_id, file, last_modified)
+                
+                con.commit()
 
             elif row is None:
                 if (args.verbose):
@@ -1721,6 +1728,8 @@ class Uploadr:
                                 np.niceprint('Found, '
                                              'continuing with next image.')
                                 break
+                        finally:
+                            con.commit()
 
                     # Error on upload and search for photo not performed/empty
                     if not search_result and not self.isGood(uploadResp):
@@ -1834,6 +1843,8 @@ class Uploadr:
                     self.useDBLock(lock, False)
 
                     return False
+                finally:
+                    con.commit()
 
             elif (MANAGE_CHANGES):
                 # we have a file from disk which is found on the database
@@ -2221,68 +2232,79 @@ class Uploadr:
             Find out if the file is the last item in a set, if so,
             remove the set from the local db
             """
-
-            try:
-                # Acquire DBlock if in multiprocessing mode
-                self.useDBLock(lock, True)
-                cur.execute("SELECT set_id FROM files WHERE files_id = ?",
-                            (file[0],))
-                row = cur.fetchone()
-                if (row is not None):
-                    cur.execute("SELECT set_id FROM files WHERE set_id = ?",
-                                (row[0],))
-                    rows = cur.fetchall()
-                    if (len(rows) == 1):
-                        np.niceprint('File is the last of the set, '
-                                     'deleting the set ID: ' + str(row[0]))
-                        cur.execute("DELETE FROM sets WHERE set_id = ?",
+            con = lite.connect(DB_PATH)
+            con.text_factory = str
+            with con:
+                try:
+                    # Acquire DBlock if in multiprocessing mode
+                    self.useDBLock(lock, True)
+                    cur.execute("SELECT set_id FROM files "
+                                "WHERE files_id = ?",
+                                (file[0],))
+                    row = cur.fetchone()
+                    if (row is not None):
+                        cur.execute("SELECT set_id FROM files "
+                                    "WHERE set_id = ?",
                                     (row[0],))
-                # Delete file record from the local db
-                logging.debug('deleteFile.dbDeleteRecordLocalDB'
-                              'DELETE FROM files WHERE files_id = {!s}'
-                              .format(file[0]))
-                cur.execute("DELETE FROM files WHERE files_id = ?", (file[0],))
-            except lite.Error as e:
-                DBexception = True
-                reportError(Caught=True,
-                            CaughtPrefix='+++ DB',
-                            CaughtCode='088',
-                            CaughtMsg='DB error on SELECT(or)DELETE: '
-                                      '[{!s}]'
-                                      .format(e.args[0]),
-                            NicePrint=True,
-                            exceptSysInfo=True)
-            finally:
-                con.commit()
-                logging.debug('deleteFile.dbDeleteRecordLocalDB: After COMMIT')
-                # CODING: START FURTHER Debug...
-                cur.execute("SELECT files_id, path FROM files "
-                            "WHERE files_id = ?", (file[0],))
-                rrow = cur.fetchone()
-                if (rrow is not None):
-                    logging.debug('deleteFile.dbDeleteRecordLocalDB: NOT OK '
-                                  'At least one row returned '
-                                  'rrow[0].files_id=[{!s}]'
-                                  'rrow[1].file=[{!s}]'
-                                  .format(rrow[0], rrow[1]))                    
-                else:
-                    logging.debug('deleteFile.dbDeleteRecordLocalDB: OK: '
-                                  'No row returned')
-                logging.debug('deleteFile.dbDeleteRecordLocalDB: '
-                              'Releasing Lock')
-                # CODING: END FURTHER Debug...
-
-                # Release DBlock if in multiprocessing mode
-                self.useDBLock(lock, False)
+                        rows = cur.fetchall()
+                        if (len(rows) == 1):
+                            np.niceprint('File is the last of the set, '
+                                         'deleting the set ID: [{!s}]'
+                                         .format(str(row[0])))
+                            cur.execute("DELETE FROM sets WHERE set_id = ?",
+                                        (row[0],))
+                    # Delete file record from the local db
+                    logging.debug('deleteFile.dbDeleteRecordLocalDB'
+                                  'DELETE FROM files WHERE files_id = {!s}'
+                                  .format(file[0]))
+                    cur.execute("DELETE FROM files WHERE files_id = ?",
+                                (file[0],))
+                except lite.Error as e:
+                    DBexception = True
+                    reportError(Caught=True,
+                                CaughtPrefix='+++ DB',
+                                CaughtCode='088',
+                                CaughtMsg='DB error on SELECT(or)DELETE: '
+                                          '[{!s}]'
+                                          .format(e.args[0]),
+                                NicePrint=True,
+                                exceptSysInfo=True)
+                finally:
+                    con.commit()
+                    logging.debug('deleteFile.dbDeleteRecordLocalDB: '
+                                  'After COMMIT')
+                    # CODING: START FURTHER Debug...
+                    cur.execute("SELECT files_id, path FROM files "
+                                "WHERE files_id = ?", (file[0],))
+                    rrow = cur.fetchone()
+                    logging.debug('deleteFile.dbDeleteRecordLocalDB: '
+                                  'rrow:[!{s}]'.format(rrow))
+                    if (rrow is not None):
+                        logging.debug('deleteFile.dbDeleteRecordLocalDB: '
+                                      'NOT OK '
+                                      'At least one row returned '
+                                      'rrow[0].files_id=[{!s}]'
+                                      'rrow[1].file=[{!s}]'
+                                      .format(rrow[0], rrow[1]))                    
+                    else:
+                        logging.debug('deleteFile.dbDeleteRecordLocalDB: OK: '
+                                      'No row returned')
+                    logging.debug('deleteFile.dbDeleteRecordLocalDB: '
+                                  'Releasing Lock')
+                    # CODING: END FURTHER Debug...
+    
+                    # Release DBlock if in multiprocessing mode
+                    self.useDBLock(lock, False)
+                    
+            # Closing DB connection
+            if con is not None:
+                con.close()                
         # ---------------------------------------------------------------------
 
         if (args.dry_run is True):
             np.niceprint('Dry Run Deleting file:[{!s}]'
                          .format(StrUnicodeOut(file[1])))
             return True
-
-        con = lite.connect(DB_PATH)
-        con.text_factory = str
 
         @retry(attempts=2, waittime=2, randtime=False)
         def R_photos_delete(kwargs):
@@ -2339,9 +2361,6 @@ class Uploadr:
                         CaughtCode='093',
                         CaughtMsg='Caught exception in deleteFile',
                         exceptSysInfo=True)
-        # Closing DB connection
-        if con is not None:
-            con.close()
 
         return success
 
@@ -2641,6 +2660,10 @@ class Uploadr:
                         CaughtMsg='Caught exception in addFiletoSet',
                         NicePrint=True,
                         exceptSysInfo=True)
+        # CODING: replace Video
+        # Closing DB connection
+        if con is not None:
+            con.close()
 
     # -------------------------------------------------------------------------
     # createSet
@@ -2848,6 +2871,10 @@ class Uploadr:
                 con.close()
             sys.exit(6)
         finally:
+            # CODING: replace Video
+            # Closing DB connection
+            if con is not None:
+                con.close()            
             np.niceprint('Completed database setup')
 
     # -------------------------------------------------------------------------
@@ -2907,6 +2934,11 @@ class Uploadr:
         finally:
             np.niceprint('Completed cleaning up badfiles table '
                          'from the database.')
+            
+        # CODING: replace Video
+        # Closing DB connection
+        if con is not None:
+            con.close()
 
     # -------------------------------------------------------------------------
     # md5Checksum

@@ -2294,6 +2294,7 @@ class Uploadr:
 
                 # CODING: START FURTHER Debug...
                 try:
+                    rrow = None
                     nucur.execute("SELECT files_id, path FROM files "
                                   "WHERE files_id = ?", (file[0],))
                     rrow = nucur.fetchone()
@@ -2313,15 +2314,12 @@ class Uploadr:
                                       'No row returned')
                     logging.debug('deleteFile.dbDeleteRecordLocalDB: '
                                   'Releasing Lock')
-                except BaseException as e:
+                except BaseException:
                     reportError(Caught=True,
                                 CaughtPrefix='+++',
                                 CaughtCode='ZZZ',
                                 CaughtMsg='Caught exception in '
                                           'dbDeleteRecordLocalDB',
-                                exceptUse=True,
-                                exceptCode=ex.code,
-                                exceptMsg=ex,
                                 NicePrint=True,
                                 exceptSysInfo=True)
                 # CODING: END FURTHER Debug...

@@ -7,9 +7,11 @@
 import io
 import os
 import sys
-from shutil import rmtree
+from shutil import rmtree, copy
 
 from setuptools import find_packages, setup, Command
+# To access data_files uploadr.ini from egg resource package
+from pkg_resources import Requirement, resource_filename
 
 # Package meta-data.
 NAME = 'flickr-uploader'
@@ -20,8 +22,8 @@ URL = 'https://github.com/oPromessa/flickr-uploader/',
 EMAIL = 'oPromessa@github.com'
 AUTHOR = 'oPromessa'
 REQUIRES_PYTHON = '>=2.7.*, >=3.6.*, <4'
-VERSION = None  # Load from __version__.py dictionary
-# VERSION = '2.7.0'
+LIB = 'lib'
+VERSION = None  # Load from LIB/__version__.py dictionary
 
 # What packages are required for this module to be executed?
 REQUIRED = [
@@ -43,8 +45,7 @@ with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
 # Load the package's __version__.py module as a dictionary.
 about = {}
 if not VERSION:
-    # with open(os.path.join(here, NAME, '__version__.py')) as f:
-    with open(os.path.join(here, 'lib', '__version__.py')) as f:
+    with open(os.path.join(here, LIB, '__version__.py')) as f:
         exec(f.read(), about)
 else:
     about['__version__'] = VERSION
@@ -78,12 +79,49 @@ class UploadCommand(Command):
         os.system('{0} setup.py sdist bdist_wheel --universal'
                   .format(sys.executable))
 
-        self.status('Uploading the package to PyPi via Twine…')
-        os.system('twine upload dist/*')
+        # Upload disabled for now
+        # self.status('Uploading the package to PyPi via Twine…')
+        # os.system('twine upload dist/*')
 
-        self.status('Pushing git tags…')
-        os.system('git tag v{0}'.format(about['__version__']))
-        os.system('git push --tags')
+        # upload to GitHub disbled for now
+        # self.status('Pushing git tags…')
+        # os.system('git tag v{0}'.format(about['__version__']))
+        # os.system('git push --tags')
+
+        sys.exit()
+
+
+class CustomInstallCommand(Command):
+    """Support setup.py upload."""
+
+    description = 'Custom install the packagei to include uploadr.ini'
+    user_options = []
+
+    @staticmethod
+    def status(s):
+        """Prints things in bold."""
+        print('\033[1m{0}\033[0m'.format(s))
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+
+        src = resource_filename(Requirement.parse(NAME), "uploadr.ini")
+        dst = os.path.join(sys.prefix, 'etc')
+
+        try:
+            os.makedirs(dst)
+        except OSError as exc:
+            if exc.errno == errno.EEXIST and os.path.isdir(path):
+                pass
+            else:
+                raise
+
+        copy(src, dst, follow_symlinks=True)
 
         sys.exit()
 
@@ -112,7 +150,7 @@ setup(
     install_requires=REQUIRED,
     include_package_data=True,
     scripts=['uploadr.py'],
-    data_files=[('./etc', ['./uploadr.ini'])],
+    data_files=[('', ['uploadr.ini'])],
     license='MIT',
     classifiers=[
         # Trove classifiers
@@ -135,5 +173,6 @@ setup(
     # $ setup.py publish support.
     cmdclass={
         'upload': UploadCommand,
+        'custominstall': CustomInstallCommand,
     },
 )

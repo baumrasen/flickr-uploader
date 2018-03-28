@@ -2226,16 +2226,21 @@ class Uploadr:
         # ---------------------------------------------------------------------
         # dbDeleteRecordLocalDB
         #
-        def dbDeleteRecordLocalDB(lock, file, cur):
+        def dbDeleteRecordLocalDB(lock, file):
             """ dbDeleteRecordLocalDB
 
             Find out if the file is the last item in a set, if so,
             remove the set from the local db
+
+            lock  = for use with useDBLock to control access to DB
+            file  = row of database with (files_id, path)
+
             """
             con = lite.connect(DB_PATH)
             con.text_factory = str
             with con:
                 try:
+                    cur = con.cursor()
                     # Acquire DBlock if in multiprocessing mode
                     self.useDBLock(lock, True)
                     cur.execute("SELECT set_id FROM files "
@@ -2269,11 +2274,26 @@ class Uploadr:
                                           .format(e.args[0]),
                                 NicePrint=True,
                                 exceptSysInfo=True)
+                except BaseException as e:
+                    reportError(Caught=True,
+                                CaughtPrefix='+++',
+                                CaughtCode='088',
+                                CaughtMsg='Caught exception in '
+                                          'dbDeleteRecordLocalDB',
+                                exceptUse=True,
+                                exceptCode=ex.code,
+                                exceptMsg=ex,
+                                NicePrint=True,
+                                exceptSysInfo=True)
                 finally:
                     con.commit()
                     logging.debug('deleteFile.dbDeleteRecordLocalDB: '
                                   'After COMMIT')
-                    # CODING: START FURTHER Debug...
+                    # Release DBlock if in multiprocessing mode
+                    self.useDBLock(lock, False)
+
+                # CODING: START FURTHER Debug...
+                try:
                     cur.execute("SELECT files_id, path FROM files "
                                 "WHERE files_id = ?", (file[0],))
                     rrow = cur.fetchone()
@@ -2293,10 +2313,18 @@ class Uploadr:
                                       'No row returned')
                     logging.debug('deleteFile.dbDeleteRecordLocalDB: '
                                   'Releasing Lock')
-                    # CODING: END FURTHER Debug...
-
-                    # Release DBlock if in multiprocessing mode
-                    self.useDBLock(lock, False)
+                except BaseException as e:
+                    reportError(Caught=True,
+                                CaughtPrefix='+++',
+                                CaughtCode='ZZZ',
+                                CaughtMsg='Caught exception in '
+                                          'dbDeleteRecordLocalDB',
+                                exceptUse=True,
+                                exceptCode=ex.code,
+                                exceptMsg=ex,
+                                NicePrint=True,
+                                exceptSysInfo=True)
+                # CODING: END FURTHER Debug...
 
             # Closing DB connection
             if con is not None:
@@ -2327,7 +2355,7 @@ class Uploadr:
                 method='xml'))
             if (self.isGood(deleteResp)):
 
-                dbDeleteRecordLocalDB(lock, file, cur)
+                dbDeleteRecordLocalDB(lock, file)
 
                 np.niceprint("Successful deletion.")
                 success = True
@@ -2348,7 +2376,7 @@ class Uploadr:
                         NicePrint=True)
             # Error: 1: File already removed from Flickr
             if (ex.code == 1):
-                dbDeleteRecordLocalDB(lock, file, cur)
+                dbDeleteRecordLocalDB(lock, file)
             else:
                 reportError(Caught=True,
                             CaughtPrefix='xxx',
@@ -3555,10 +3583,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
 # <?xml version="1.0" encoding="utf-8" ?>
 # <rsp stat="ok">
 #   <photos page="1" pages="1" perpage="100" total="2">
-#     <photo id="37564183184" owner="146995488@N03" secret="5390570f1c"
+#     <photo id="37564183184" owner="XXXX" secret="XXX"
 # server="4540" farm="5" title="DSC01397" ispublic="0" isfriend="0"
 # isfamily="0" tags="autoupload checksum1133825cea9d605f332d04b40a44a6d6" />
-#     <photo id="38210659646" owner="146995488@N03" secret="2786b173f4"
+#     <photo id="38210659646" owner="XXXX" secret="XXX"
 # server="4536" farm="5" title="DSC01397" ispublic="0" isfriend="0"
 # isfamily="0" tags="autoupload checksum1133825cea9d605f332d04b40a44a6d6" />
 #   </photos>
@@ -3568,7 +3596,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
 # <?xml version="1.0" encoding="utf-8" ?>
 # <rsp stat="ok">
 #   <photos page="1" pages="1" perpage="100" total="2">
-#     <photo id="26486922439" owner="146995488@N03" secret="7657801015"
+#     <photo id="26486922439" owner="XXXX" secret="XXX"
 # server="4532" farm="5" title="017_17a-5" ispublic="0" isfriend="0"
 # isfamily="0" tags="autoupload checksum0449d770558cfac7a6786e468f917b9c" />
 #   </photos>
@@ -3581,11 +3609,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #
     # Sample response:
     # <photos page="2" pages="89" perpage="10" total="881">
-    #     <photo id="2636" owner="47058503995@N01"
-    #             secret="a123456" server="2" title="test_04"
+    #     <photo id="2636" owner="XXXX"
+    #             secret="XXX" server="2" title="test_04"
     #             ispublic="1" isfriend="0" isfamily="0" />
-    #     <photo id="2635" owner="47058503995@N01"
-    #         secret="b123456" server="2" title="test_03"
+    #     <photo id="2635" owner="XXXX"
+    #         secret="XXX" server="2" title="test_03"
     #         ispublic="0" isfriend="1" isfamily="1" />
     # </photos>
     def photos_search(self, checksum):

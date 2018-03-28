@@ -1,5 +1,5 @@
 # flickr-uploader: TO DO 
-* by oPromessa, 2017, V2.7.1
+* by oPromessa, 2017, V2.7.3
 * Published on https://github.com/oPromessa/flickr-uploader/
 
 ## Pending improvements/Known issues
@@ -48,7 +48,6 @@
    * Check also: api_key. KeyError(key)
 * Align try/except handling within functions like people_get_photos or outside
   like photos_get_not_in_set
-* Check "# CODING: replace Video" for Closing DB connection to ensure commit
    
 ## Update History
 * Functions to be migrated...

@@ -46,6 +46,7 @@ class LastTime:
     # -------------------------------------------------------------------------
     # class LastTime __init__
     #
+
     def __init__(self, name='LT'):
         # Init variables to None
         self.name = name
@@ -89,17 +90,17 @@ class LastTime:
                               debugname,
                               self.cnt.value,
                               time.strftime(
-                                '%T.{}'
-                                .format(str(self.last_time_called.value -
-                                            int(self.last_time_called.value))
-                                            .split('.')[1][:3]),
-                                time.localtime(self.last_time_called.value)),
+                                  '%T.{}'
+                                  .format(str(self.last_time_called.value -
+                                              int(self.last_time_called.value))
+                                          .split('.')[1][:3]),
+                                  time.localtime(self.last_time_called.value)),
                               time.strftime(
-                                '%T.{}'
-                                .format(str(now -
-                                            int(now))
-                                            .split('.')[1][:3]),
-                                time.localtime(now))))
+                                  '%T.{}'
+                                  .format(str(now -
+                                              int(now))
+                                          .split('.')[1][:3]),
+                                  time.localtime(now))))
 
 
 # -----------------------------------------------------------------------------
@@ -143,9 +144,9 @@ def rate_limited(max_per_second):
                               .format(func.__name__,
                                       LT.get_cnt(),
                                       time.strftime(
-                                            '%T',
-                                            time.localtime(
-                                                LT.get_last_time_called())),
+                                          '%T',
+                                          time.localtime(
+                                              LT.get_last_time_called())),
                                       time.strftime('%T',
                                                     time.localtime(xfrom)),
                                       elapsed,
@@ -229,7 +230,7 @@ def retry(attempts=3, waittime=5, randtime=False):
                 try:
                     logging.info('___Retry f():[{!s}]: '
                                  'Attempt:[{!s}] of [{!s}]'
-                                 .format(f.__name__, i+1, attempts))
+                                 .format(f.__name__, i + 1, attempts))
                     return f(*args, **kwargs)
                 except Exception as e:
                     logging.error('___Retry f():[{!s}]: Error code A: [{!s}]'
@@ -246,7 +247,7 @@ def retry(attempts=3, waittime=5, randtime=False):
                     # CODING: Check how to handle this particular scenario.
                     # flick.useDBLock(nulockDB, False)
                     # self.useDBLock( lock, True)
-                except:
+                except BaseException:
                     logging.error('___Retry f():[{!s}]: Error code D: Catchall'
                                   .format(f.__name__))
 
@@ -254,15 +255,15 @@ def retry(attempts=3, waittime=5, randtime=False):
                                 .format(f.__name__, waittime, randtime))
                 if randtime:
                     rtime.sleep(random.randrange(0,
-                                                 (waittime+1)
+                                                 (waittime + 1)
                                                  if waittime >= 0
                                                  else 1))
                 else:
                     rtime.sleep(waittime if waittime >= 0 else 0)
             logging.error('___Retry f():[{!s}] '
-                            'Max:[{!s}] Delay:[{!s}] Rnd[{!s}]: Raising ERROR!'
-                            .format(f.__name__, attempts,
-                                    waittime, randtime))
+                          'Max:[{!s}] Delay:[{!s}] Rnd[{!s}]: Raising ERROR!'
+                          .format(f.__name__, attempts,
+                                  waittime, randtime))
             raise error
         return new_wrapper
     return wrapper_fn
@@ -313,6 +314,7 @@ if __name__ == "__main__":
             print_num(process, j)
 
     print('-------------------------------------------------Multi Processing')
+
     def fmulti(x, prc):
 
         for i in range(1, x):

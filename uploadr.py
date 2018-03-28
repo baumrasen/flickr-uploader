@@ -2270,7 +2270,7 @@ class Uploadr:
                     DBexception = True
                     reportError(Caught=True,
                                 CaughtPrefix='+++ DB',
-                                CaughtCode='088',
+                                CaughtCode='087',
                                 CaughtMsg='DB error on SELECT(or)DELETE: '
                                           '[{!s}]'
                                           .format(e.args[0]),
@@ -2292,37 +2292,37 @@ class Uploadr:
                     # Release DBlock if in multiprocessing mode
                     self.useDBLock(lock, False)
 
-                # CODING: START FURTHER Debug...
-                try:
-                    rrow = None
-                    nucur.execute("SELECT files_id, path FROM files "
-                                  "WHERE files_id = ?", (file[0],))
-                    rrow = nucur.fetchone()
-                    logging.debug('deleteFile.dbDeleteRecordLocalDB: '
-                                  'rrow:[!{s}]'.format('None' \
-                                                       if rrow is None \
-                                                       else rrow))
-                    if (rrow is not None):
-                        logging.debug('deleteFile.dbDeleteRecordLocalDB: '
-                                      'NOT OK '
-                                      'At least one row returned '
-                                      'rrow[0].files_id=[{!s}]'
-                                      'rrow[1].file=[{!s}]'
-                                      .format(rrow[0], rrow[1]))
-                    else:
-                        logging.debug('deleteFile.dbDeleteRecordLocalDB: OK: '
-                                      'No row returned')
-                    logging.debug('deleteFile.dbDeleteRecordLocalDB: '
-                                  'Releasing Lock')
-                except BaseException:
-                    reportError(Caught=True,
-                                CaughtPrefix='+++',
-                                CaughtCode='ZZZ',
-                                CaughtMsg='Caught exception in '
-                                          'dbDeleteRecordLocalDB',
-                                NicePrint=True,
-                                exceptSysInfo=True)
-                # CODING: END FURTHER Debug...
+                # CODING: START FURTHER Debug... ------------------------------
+                # try:
+                #     rrow = None
+                #     nucur.execute("SELECT files_id, path FROM files "
+                #                   "WHERE files_id = ?", (file[0],))
+                #     rrow = nucur.fetchone()
+                #     logging.debug('deleteFile.dbDeleteRecordLocalDB: '
+                #                   'rrow:[!{s}]'.format('None' \
+                #                                        if rrow is None \
+                #                                        else rrow))
+                #     if (rrow is not None):
+                #         logging.debug('deleteFile.dbDeleteRecordLocalDB: '
+                #                       'NOT OK '
+                #                       'At least one row returned '
+                #                       'rrow[0].files_id=[{!s}]'
+                #                       'rrow[1].file=[{!s}]'
+                #                       .format(rrow[0], rrow[1]))
+                #     else:
+                #         logging.debug('deleteFile.dbDeleteRecordLocalDB: OK:'
+                #                       ' No row returned')
+                #     logging.debug('deleteFile.dbDeleteRecordLocalDB: '
+                #                   'Releasing Lock')
+                # except BaseException:
+                #     reportError(Caught=True,
+                #                 CaughtPrefix='+++',
+                #                 CaughtCode='ZZZ',
+                #                 CaughtMsg='Caught exception in '
+                #                           'dbDeleteRecordLocalDB',
+                #                 NicePrint=True,
+                #                 exceptSysInfo=True)
+                # CODING: END FURTHER Debug... --------------------------------
 
             # Closing DB connection
             if con is not None:

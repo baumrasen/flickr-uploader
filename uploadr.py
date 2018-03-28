@@ -2170,7 +2170,7 @@ class Uploadr:
                 else:
                     np.niceprint('Delete for replace failed!')
                     logging.error('Delete for replace failed!')
-                
+
         except lite.Error as e:
             reportError(Caught=True,
                         CaughtPrefix='+++ DB',
@@ -2203,7 +2203,7 @@ class Uploadr:
         """ deleteFile
 
         delete file from flickr
-        
+
         file  = row of database with (files_id, path)
         cur   = represents the control database cursor to allow, for example,
                 deleting empty sets
@@ -2224,7 +2224,7 @@ class Uploadr:
 
             try:
                 # Acquire DBlock if in multiprocessing mode
-                self.useDBLock(lock, True)                
+                self.useDBLock(lock, True)
                 cur.execute("SELECT set_id FROM files WHERE files_id = ?",
                             (file[0],))
                 row = cur.fetchone()
@@ -2239,7 +2239,7 @@ class Uploadr:
                                     (row[0],))
                 # Delete file record from the local db
                 cur.execute("DELETE FROM files WHERE files_id = ?", (file[0],))
-                con.commit()              
+                con.commit()
             except lite.Error as e:
                 DBexception = True
                 reportError(Caught=True,
@@ -2254,11 +2254,14 @@ class Uploadr:
                 # Release DBlock if in multiprocessing mode
                 self.useDBLock(lock, False)
         # ---------------------------------------------------------------------
-            
+
         if (args.dry_run is True):
             np.niceprint('Dry Run Deleting file:[{!s}]'
                          .format(StrUnicodeOut(file[1])))
             return True
+
+        con = lite.connect(DB_PATH)
+        con.text_factory = str
 
         @retry(attempts=2, waittime=2, randtime=False)
         def R_photos_delete(kwargs):
@@ -2279,8 +2282,8 @@ class Uploadr:
                 method='xml'))
             if (self.isGood(deleteResp)):
 
-                self.dbDeleteRecordLocalDB(lock, file, cur)               
-         
+                dbDeleteRecordLocalDB(lock, file, cur)
+
                 np.niceprint("Successful deletion.")
                 success = True
             else:
@@ -2300,7 +2303,7 @@ class Uploadr:
                         NicePrint=True)
             # Error: 1: File already removed from Flickr
             if (ex.code == 1):
-                self.dbDeleteRecordLocalDB(lock, file, cur)               
+                dbDeleteRecordLocalDB(lock, file, cur)
             else:
                 reportError(Caught=True,
                             CaughtPrefix='xxx',
@@ -2315,6 +2318,9 @@ class Uploadr:
                         CaughtCode='093',
                         CaughtMsg='Caught exception in deleteFile',
                         exceptSysInfo=True)
+        # Closing DB connection
+        if con is not None:
+            con.close()
 
         return success
 

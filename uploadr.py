@@ -1439,7 +1439,7 @@ class Uploadr:
                         reportError(Caught=True,
                                     CaughtPrefix='+++ DB',
                                     CaughtCode='032',
-                                    CaughtMsg='Succeeded at retry SQL...'
+                                    CaughtMsg='Succeed at retry SQL...'
                                     '[{!s}/{!s} attempts]'
                                     .format(x, MAX_SQL_ATTEMPTS),
                                     NicePrint=True)
@@ -2213,7 +2213,7 @@ class Uploadr:
         global nuflickr
 
         # ---------------------------------------------------------------------
-        # dbInsertIntoFiles
+        # dbDeleteRecordLocalDB
         #
         def dbDeleteRecordLocalDB(lock, file, cur):
             """ dbDeleteRecordLocalDB
@@ -2238,8 +2238,10 @@ class Uploadr:
                         cur.execute("DELETE FROM sets WHERE set_id = ?",
                                     (row[0],))
                 # Delete file record from the local db
+                logging.debug('deleteFile.dbDeleteRecordLocalDB'
+                              'DELETE FROM files WHERE files_id = {!s}'
+                              .format(file[0]))
                 cur.execute("DELETE FROM files WHERE files_id = ?", (file[0],))
-                con.commit()
             except lite.Error as e:
                 DBexception = True
                 reportError(Caught=True,
@@ -2251,6 +2253,25 @@ class Uploadr:
                             NicePrint=True,
                             exceptSysInfo=True)
             finally:
+                con.commit()
+                logging.debug('deleteFile.dbDeleteRecordLocalDB: After COMMIT')
+                # CODING: START FURTHER Debug...
+                cur.execute("SELECT files_id, path FROM files "
+                            "WHERE files_id = ?", (file[0],))
+                rrow = cur.fetchone()
+                if (rrow is not None):
+                    logging.debug('deleteFile.dbDeleteRecordLocalDB: NOT OK '
+                                  'At least one row returned '
+                                  'rrow[0].files_id=[{!s}]'
+                                  'rrow[1].file=[{!s}]'
+                                  .format(rrow[0], rrow[1]))                    
+                else:
+                    logging.debug('deleteFile.dbDeleteRecordLocalDB: OK: '
+                                  'No row returned')
+                logging.debug('deleteFile.dbDeleteRecordLocalDB: '
+                              'Releasing Lock')
+                # CODING: END FURTHER Debug...
+
                 # Release DBlock if in multiprocessing mode
                 self.useDBLock(lock, False)
         # ---------------------------------------------------------------------

@@ -1544,7 +1544,7 @@ class Uploadr:
 
                 # Update the Video Date Taken
                 self.updatedVideoDate(isfile_id, file, last_modified)
-                
+
                 con.commit()
 
             elif row is None:
@@ -2254,7 +2254,7 @@ class Uploadr:
                             cur.execute("DELETE FROM sets WHERE set_id = ?",
                                         (row[0],))
                     # Delete file record from the local db
-                    logging.debug('deleteFile.dbDeleteRecordLocalDB'
+                    logging.debug('deleteFile.dbDeleteRecordLocalDB: '
                                   'DELETE FROM files WHERE files_id = {!s}'
                                   .format(file[0]))
                     cur.execute("DELETE FROM files WHERE files_id = ?",
@@ -2278,27 +2278,29 @@ class Uploadr:
                                 "WHERE files_id = ?", (file[0],))
                     rrow = cur.fetchone()
                     logging.debug('deleteFile.dbDeleteRecordLocalDB: '
-                                  'rrow:[!{s}]'.format(rrow))
+                                  'rrow:[!{s}]'.format('None' \
+                                                       if rrow is None \
+                                                       else rrow))
                     if (rrow is not None):
                         logging.debug('deleteFile.dbDeleteRecordLocalDB: '
                                       'NOT OK '
                                       'At least one row returned '
                                       'rrow[0].files_id=[{!s}]'
                                       'rrow[1].file=[{!s}]'
-                                      .format(rrow[0], rrow[1]))                    
+                                      .format(rrow[0], rrow[1]))
                     else:
                         logging.debug('deleteFile.dbDeleteRecordLocalDB: OK: '
                                       'No row returned')
                     logging.debug('deleteFile.dbDeleteRecordLocalDB: '
                                   'Releasing Lock')
                     # CODING: END FURTHER Debug...
-    
+
                     # Release DBlock if in multiprocessing mode
                     self.useDBLock(lock, False)
-                    
+
             # Closing DB connection
             if con is not None:
-                con.close()                
+                con.close()
         # ---------------------------------------------------------------------
 
         if (args.dry_run is True):
@@ -2874,7 +2876,7 @@ class Uploadr:
             # CODING: replace Video
             # Closing DB connection
             if con is not None:
-                con.close()            
+                con.close()
             np.niceprint('Completed database setup')
 
     # -------------------------------------------------------------------------
@@ -2934,7 +2936,7 @@ class Uploadr:
         finally:
             np.niceprint('Completed cleaning up badfiles table '
                          'from the database.')
-            
+
         # CODING: replace Video
         # Closing DB connection
         if con is not None:

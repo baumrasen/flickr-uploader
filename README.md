@@ -1,6 +1,6 @@
 # flickr-uploader
 ----------------
-by oPromessa, 2017, V2.7.2 [![Master Build Status](https://travis-ci.org/oPromessa/flickr-uploader.svg?branch=master)](https://travis-ci.org/oPromessa/flickr-uploader)
+by oPromessa, 2017, V2.7.3 [![Master Build Status](https://travis-ci.org/oPromessa/flickr-uploader.svg?branch=master)](https://travis-ci.org/oPromessa/flickr-uploader)
 
 ## Description
 --------------

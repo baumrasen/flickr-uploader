@@ -7,6 +7,7 @@
 import io
 import os
 import sys
+import errno
 from shutil import rmtree, copy
 
 from setuptools import find_packages, setup, Command
@@ -116,7 +117,7 @@ class CustomInstallCommand(Command):
         try:
             os.makedirs(dst)
         except OSError as exc:
-            if exc.errno == errno.EEXIST and os.path.isdir(path):
+            if exc.errno == errno.EEXIST and os.path.isdir(dst):
                 pass
             else:
                 raise

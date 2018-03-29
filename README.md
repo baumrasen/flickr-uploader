@@ -1,6 +1,8 @@
 # flickr-uploader
-----------------
+-----------------
 by oPromessa, 2017, V2.7.3 [![Master Build Status](https://travis-ci.org/oPromessa/flickr-uploader.svg?branch=master)](https://travis-ci.org/oPromessa/flickr-uploader)
+Published on [https://github.com/oPromessa/flickr-uploader/](https://github.com/oPromessa/flickr-uploader/)
+
 
 ## Description
 --------------
@@ -22,7 +24,7 @@ local storage.
   yourself. Check uploadr.ini config file.
 * Allows specific files to be ignored (via regular expressions)
 * Skips files that are over a configurable size (max flickr size is about 900MB)
-* Reuploads modified images
+* Reuploads modified images as well as Videos (via delete/upload).
 * Automatically removes images from Flickr when they are removed from your
   local hard drive
 * Convert RAW files (with an external tool). Check Known issues section.
@@ -31,7 +33,8 @@ THIS SCRIPT IS PROVIDED WITH NO WARRANTY WHATSOEVER.
 PLEASE REVIEW THE SOURCE CODE TO MAKE SURE IT WILL WORK FOR YOUR NEEDS.
 IF YOU FIND A BUG, PLEASE REPORT IT.
 
-### Sample file structure
+### How it works! An example...
+#### Sample file structure
 Consider this example to explain how files are uploaded into Sets/Albums on Flickr.
 
 If you have the following folders and pics  (the name of the flickr Sets/Albums depends on the uploadr.ini file setting FULL_SET_NAME, but I normally use it as False):
@@ -46,12 +49,12 @@ If you have the following folders and pics  (the name of the flickr Sets/Albums 
 /home/user/media/folderAlbum5/pic01.jpg
 /home/user/media/folderAlbum5/Sub/pic051.jpg
 ```
-
+#### Settin your source folder with  FILES_DIR
 And you setup FILES_DIR
 ```
 FILES_DIR=/home/user/media
 ```
-You should get the following:
+You should get the following depending on how the setting FULL_SET_NAME is set:
 
 | FilePathName | Set/Album Name (FULL_SET_NAME=False) | Set/Album Name (FULL_SET_NAME=True) | Pic | Remarks |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
@@ -76,29 +79,44 @@ You should get the following:
 ## Setup on Synology
 --------------------
 Might work on other platforms like Windows also.
-*Side note:* don't be overwhelmed with this setup. They are quite
-straitghtforward.
+*Side note:* don't be overwhelmed with this setup. They are quite straitghtforward.
+Summary steps:
 
+1. Enable SSH access to Synology DSM Server
+2. Prepare a local folder location for Python modules install
+3. Download and install pip
+4. Download and install flickrapi
+5. Download and install flickr-uploader
+
+### 1.Enable SSH access to Synology DSM Server
 Enable and access your Synology DSM via SSH with an admin user.
-Avoid the use of root for security reasons
+Avoid the use of root for security reasons.
 
-To create a local install define and export PYTHONPATH variable:
+### 2. Prepare a local folder location for Python modules install.
+**This avoids messing up with the system files.**
+To create a local install destination directory/folder define and export PYTHONPATH variable:
 ```bash
 $ cd
 $ mkdir apps
 $ mkdir apps/Python
 $ export PYTHONPATH=~/apps/Python/lib/python2.7/site-packages
 ```
-Download get-pip.py and install
+Create also a 'dev' directory/folder. Download here the files/packages prior to intstallation:
 ```bash
 $ cd
 $ mkdir dev
-$ cd dev
+dev$ cd dev
 ```
-Download get-pip.py and extract to ~/dev to run setup
+### 3. Download and install pip
+**Download** get-pip.py
+**Extract to** ~/dev
+And then **install** by running `python get-pip.py --prefix=~/apps/Python`
+Follow [these guidelines for PIP installation](https://pip.pypa.io/en/latest/installing/).
 *Make sure to use the --prefix parameter*
 ```bash
-$ python get-pip.py --prefix=~/apps/Python
+$ cd
+$ cd dev
+dev$ python get-pip.py --prefix=~/apps/Python
 Collecting pip
     Downloading pip-9.0.1-py2.py3-none-any.whl (1.3MB)
         100%  1.3MB 495kB/s
@@ -111,7 +129,9 @@ Collecting wheel
 Installing collected packages: pip, setuptools, wheel
     Successfully installed pip setuptools wheel
 ```
-Download flickrapi-2.3.tar.gz and extract to ~/dev to run setup
+### 4. Download and install flickrapi (2.4.0 or 2.3.1)
+**Download** flickrapi-2.3.tar.gz from [PyPi.Python.Org](https://pypi.python.org/pypi/flickrapi)
+**Extract to** ~/dev and run *python setup.py install --prefix=~/apps/Python*
 *Make sure to use the --prefix parameter*
 ```bash
 $ python setup.py install --prefix=~/apps/Python
@@ -130,6 +150,19 @@ Installing chardetect script to /xxx/xxx/xxx/apps/Python/bin
 Installed /xxx/xxx/xxx/apps/Python/lib/python2.7/site-packages/chardet-3.0.4-py2.7.egg
 Finished processing dependencies for flickrapi==2.3
 ```
+
+###  5. Download and install flickr-uploader
+Soon to be available on Pypi.
+For now you can download it from GitHub [flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest).
+You can find under **Assets**:
+* the source code packages;
+* a distribution package Published on [https://github.com/oPromessa/flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest)
+   * **[NOT FULLY TESTED YET]** You can try and run `python3 setup.py install --prefix=~/apps/Python` Let me know if it works!
+
+Extract the contents of the elected tar file.
+* You can then run it from the current folder.
+* Edit the uploadr.ini as appropriate (check Configuration section)
+
 ## Configuration
 ----------------
 Go to http://www.flickr.com/services/apps/create/apply and apply for an API
@@ -180,77 +213,76 @@ $ ./uploadr.py --dry-run
 ```
 Run ./uploadrd.py --help for up to the minute information or arguments:
 ```bash
-$ ./uploadr.py --help
-
 usage: uploadr.py [-h] [-v] [-x] [-n] [-i TITLE] [-e DESCRIPTION] [-t TAGS]
-                 [-l N] [-z] [-r] [-p P] [-u] [-d] [-b] [-c] [-g]
-                 [--add-albums-migrate]
+                  [-l N] [-z] [-r] [-p P] [-u] [-d] [-b] [-c] [-s] [-g]
+                  [--add-albums-migrate]
 
 Upload files to Flickr. Uses uploadr.ini as config file.
 
 optional arguments:
- -h, --help            show this help message and exit
+  -h, --help            show this help message and exit
 
 Verbose and dry-run options:
- -v, --verbose         Provides some more verbose output. See also -x option.
-                       See also LOGGING_LEVEL value in INI file.
- -x, --verbose-progress
-                       Provides progress indicator on each upload. Normally
-                       used in conjunction with -v option. See also
-                       LOGGING_LEVEL value in INI file.
- -n, --dry-run         Dry run. No changes are actually performed.
+  -v, --verbose         Provides some more verbose output. See also -x option.
+                        See also LOGGING_LEVEL value in INI file.
+  -x, --verbose-progress
+                        Provides progress indicator on each upload. Normally
+                        used in conjunction with -v option. See also
+                        LOGGING_LEVEL value in INI file.
+  -n, --dry-run         Dry run. No changes are actually performed.
 
 Information options:
- -i TITLE, --title TITLE
-                       Title for uploaded files. Overwrites title set in INI
-                       config file. If not specified and not set in INI file,
-                       it uses filename as title (*Recommended).
- -e DESCRIPTION, --description DESCRIPTION
-                       Description for uploaded filesOverwrites description
-                       set in INI file.
- -t TAGS, --tags TAGS  Space-separated tags for uploaded files. It appends to
-                       the tags defined in INI file.
- -l N, --list-photos-not-in-set N
-                       List as many as N photos not in set. Maximum listed
-                       photos is 500.
- -z, --search-for-duplicates
-                       Lists duplicated files: same checksum, same title,
-                       list SetName (if different). Not operational at this
-                       time.
+  -i TITLE, --title TITLE
+                        Title for uploaded files. Overwrites title set in INI
+                        config file. If not specified and not set in INI file,
+                        it uses filename as title (*Recommended).
+  -e DESCRIPTION, --description DESCRIPTION
+                        Description for uploaded filesOverwrites description
+                        set in INI file.
+  -t TAGS, --tags TAGS  Space-separated tags for uploaded files. It appends to
+                        the tags defined in INI file.
+  -l N, --list-photos-not-in-set N
+                        List as many as N photos not in set. Maximum listed
+                        photos is 500.
+  -z, --search-for-duplicates
+                        Lists duplicated files: same checksum, same title,
+                        list SetName (if different). Not operational at this
+                        time.
 
 Processing related options:
- -r, --drip-feed       Wait a bit between uploading individual files.
- -p P, --processes P   Number of photos to upload simultaneously.
- -u, --not-is-already-uploaded
-                       Do not check if file is already uploaded and exists on
-                       flickr prior to uploading.
- -d, --daemon          Run forever as a daemon.Uploading every SLEEP_TIME
-                       seconds. Please note it only performs upload/replace.
+  -r, --drip-feed       Wait a bit between uploading individual files.
+  -p P, --processes P   Number of photos to upload simultaneously.
+  -u, --not-is-already-uploaded
+                        Do not check if file is already uploaded and exists on
+                        flickr prior to uploading.
+  -d, --daemon          Run forever as a daemon.Uploading every SLEEP_TIME
+                        seconds. Please note it only performs upload/replace.
 
 Handling bad and excluded files:
- -b, --bad-files       Save on database bad files to prevent continuous
-                       uploading attempts. Bad files are files in your
-                       Library that flickr does not recognize (Error 5) or
-                       are too large (Error 8). Check also option -c.
- -c, --clean-bad-files
-                       Resets the badfiles table/list to allow a new
-                       uploading attempt for bad files. Bad files are files
-                       in your Library that flickr does not recognize (Error
-                       5) or are too large (Error 8). Check also option -b.
- -g, --remove-excluded, --remove-ignored
-                       Remove previously uploaded files, that are now being
-                       excluded due to change of the INI file configuration
-                       EXCLUDED_FOLDERS.NOTE: Please drop use of --remove-
-                       ignored in favor of --remove-excluded or -r. From
-                       version 2.7.0 it will be dropped.
+  -b, --bad-files       Save on database bad files to prevent continuous
+                        uploading attempts. Bad files are files in your
+                        Library that flickr does not recognize (Error 5) or
+                        are too large (Error 8). Check also option -c.
+  -c, --clean-bad-files
+                        Resets the badfiles table/list to allow a new
+                        uploading attempt for bad files. Bad files are files
+                        in your Library that flickr does not recognize (Error
+                        5) or are too large (Error 8). Check also option -b.
+  -s, --list-bad-files  List the badfiles table/list.
+  -g, --remove-excluded, --remove-ignored
+                        Remove previously uploaded files, that are now being
+                        excluded due to change of the INI file configuration
+                        EXCLUDED_FOLDERS.NOTE: Please drop use of --remove-
+                        ignored in favor of --remove-excluded or -r. From
+                        version 2.7.0 it will be dropped.
 
 Migrate to v2.7.0:
- --add-albums-migrate  From v2.7.0 onwards, uploadr adds to Flickr an album
-                       tag to each pic. This option adds such tag to
-                       previously loaded pics. uploadr v2.7.0 will perform
-                       automatically such migration upon first run This
-                       option is *only* available to re-run it, should it be
-                       necessary.
+  --add-albums-migrate  From v2.7.0 onwards, uploadr adds to Flickr an album
+                        tag to each pic. This option adds such tag to
+                        previously loaded pics. uploadr v2.7.0 will perform
+                        automatically such migration upon first run This
+                        option is *only* available to re-run it, should it be
+                        necessary.
 
 by oPromessa, 2017, 2018
 ```
@@ -270,7 +302,7 @@ by oPromessa, 2017, 2018
 
 ### On Linux/Unix/Mac based systems, run via crontab
 - Use  upload.cron added to the distribution and adapt to your needs.
-- Use wither "crontab -e" or vi /etc/crontab according to your system.
+- Use either "crontab -e" or vi /etc/crontab according to your system.
 ```bash
 # cron entry (runs at the top of every hour)
 0  *  *  *  * /full/path/to/uploadr.cron > /dev/null 2>&1

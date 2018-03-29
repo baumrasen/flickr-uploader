@@ -128,8 +128,10 @@ nurunning = None
 # -----------------------------------------------------------------------------
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 UPLDRConstants.nuMediacount = 0
-# UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
-UPLDRConstants.baseDir = os.getcwd()
+UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
+# CODING: To be used in lieu of previous line once uploadr.py is installed
+# on /bin folder with setup.py install
+# UPLDRConstants.baseDir = os.getcwd()
 UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")
 # -----------------------------------------------------------------------------
 np = niceprint.niceprint()

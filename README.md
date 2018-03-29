@@ -51,7 +51,7 @@ If you have the following folders and pics  (the name of the flickr Sets/Albums 
 ```
 #### Settin your source folder with  FILES_DIR
 And you setup FILES_DIR
-```
+```bash
 FILES_DIR=/home/user/media
 ```
 You should get the following depending on how the setting FULL_SET_NAME is set:
@@ -159,7 +159,6 @@ For now you can download it from GitHub [flickr-uploader/releases/latest](https:
 You can find under **Assets**:
 * the source code packages;
 * a distribution package Published on [https://github.com/oPromessa/flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest)
-   * **[NOT FULLY TESTED YET]** You can try and run `python3 setup.py install --prefix=~/apps/Python` Let me know if it works!
 
 Extract the contents of the elected tar file.
 * You can then run it from the current folder.

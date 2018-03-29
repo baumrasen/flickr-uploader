@@ -48,7 +48,11 @@
    * Check also: api_key. KeyError(key)
 * Align try/except handling within functions like people_get_photos or outside
   like photos_get_not_in_set
-   
+* **[NOT FULLY TESTED YET]** You can try and run
+  `python3 setup.py install --prefix=~/apps/Python` Let me know if it works!
+  Need to algin this change with 1) uploadr.ini change from dirname to getcwd
+  and 2) uploadr.py use baseDir as a getcwd()
+  
 ## Update History
 * Functions to be migrated...
    * convertRawFiles

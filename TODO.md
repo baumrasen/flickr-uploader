@@ -1,5 +1,5 @@
 # flickr-uploader: TO DO 
-* by oPromessa, 2017, V2.7.1
+* by oPromessa, 2017, V2.7.3
 * Published on https://github.com/oPromessa/flickr-uploader/
 
 ## Pending improvements/Known issues
@@ -46,8 +46,13 @@
 * CODING: Should extend this control to other parameters (Enhancement #7)
    * Check error:  DuplicateSectionError or DuplicateOptionError.
    * Check also: api_key. KeyError(key)
-* Use argument or current working directory for INI, token and config files
-   
+* Align try/except handling within functions like people_get_photos or outside
+  like photos_get_not_in_set
+* **[NOT FULLY TESTED YET]** You can try and run
+  `python3 setup.py install --prefix=~/apps/Python` Let me know if it works!
+  Need to algin this change with 1) uploadr.ini change from dirname to getcwd
+  and 2) uploadr.py use baseDir as a getcwd()
+  
 ## Update History
 * Functions to be migrated...
    * convertRawFiles

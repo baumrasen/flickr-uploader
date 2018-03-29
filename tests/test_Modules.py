@@ -52,10 +52,10 @@ class TestMethods(unittest.TestCase):
 
     def test_RUN(self):
         print(eval(time.strftime('int("%j")+int("%H")*100+int("%M")')))
-        self.assertTrue(1 <=
-                       eval(time.strftime('int("%j")+int("%H")*100+int("%M")'))
-                       <= 2725)
-        for j in range(1, 366+1):
+        self.assertTrue(
+            1 <= eval(
+                time.strftime('int("%j")+int("%H")*100+int("%M")')) <= 2725)
+        for j in range(1, 366 + 1):
             for h in range(24):
                 for m in range(60):
                     self.assertTrue(1 <= eval(time.strftime(

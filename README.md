@@ -130,9 +130,11 @@ Installing collected packages: pip, setuptools, wheel
     Successfully installed pip setuptools wheel
 ```
 ### 4. Download and install flickrapi (2.4.0 or 2.3.1)
-**Download** flickrapi-2.3.tar.gz from [PyPi.Python.Org](https://pypi.python.org/pypi/flickrapi)
-**Extract to** ~/dev and run *python setup.py install --prefix=~/apps/Python*
-*Make sure to use the --prefix parameter*
+**Download** flickrapi-2.3.tar.gz from [PyPi.Python.Org](https://pypi.python.org/pypi/flickrapi).
+
+**Extract to** ~/dev and run `python setup.py install --prefix=~/apps/Python`
+
+**Make sure to use the --prefix parameter**
 ```bash
 $ python setup.py install --prefix=~/apps/Python
 python setup.py install --prefix=~/apps/Python

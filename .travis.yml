@@ -35,6 +35,12 @@ install:
   - tar zxvf remote_syslog_linux_i386.tar.gz
   #- ls -la remote_syslog
   #- ls -la
+  # run python setup.py install
+  - python setup.py install
+  # run python setup.py installcfg
+  - pythonVersion=`python -V 2>&1 | cut -d\  -f2`
+  - python setup.py installcfg
+  - python setup.py installcfg --folder /home/travis/virtualenv/python$pythonVersion/etc
 
 # =============================================================================
 # env

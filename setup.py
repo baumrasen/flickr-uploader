@@ -59,9 +59,14 @@ class UploadCommand(Command):
     user_options = []
 
     @staticmethod
-    def status(s):
+    def bstatus(s):
         """Prints things in bold."""
         print('\033[1m{0}\033[0m'.format(s))
+
+    @staticmethod
+    def status(s):
+        """Prints things."""
+        print('{0}'.format(s))
 
     def initialize_options(self):
         pass
@@ -71,60 +76,66 @@ class UploadCommand(Command):
 
     def run(self):
         try:
-            self.status('Removing previous builds…')
+            self.bstatus('Removing previous builds…')
             rmtree(os.path.join(here, 'dist'))
         except OSError:
             pass
 
-        self.status('Building Source and Wheel (universal) distribution…')
+        self.bstatus('Building Source and Wheel (universal) distribution…')
         os.system('{0} setup.py sdist bdist_wheel --universal'
                   .format(sys.executable))
 
         # Upload disabled for now
-        # self.status('Uploading the package to PyPi via Twine…')
+        # self.bstatus('Uploading the package to PyPi via Twine...')
         # os.system('twine upload dist/*')
 
         # upload to GitHub disbled for now
-        # self.status('Pushing git tags…')
+        # self.bstatus('Pushing git tags...')
         # os.system('git tag v{0}'.format(about['__version__']))
         # os.system('git push --tags')
 
         sys.exit()
 
 
-class CustomInstallCommand(Command):
-    """Support setup.py upload."""
+class InstallCfg(Command):
+    """
+    Support setup.py install flickr-uploader configuration files:
 
-    description = 'Custom install the package to include uploadr.ini'
+    uploadr.ini  = configuration options files
+    uploadr.cron = used for CRON
+    """
+
+    description = 'Custom install flickr-uploader configuration files'
     user_options = [
-           ('custominstall=', None, 'Custom install to include uploadr.ini'),
+           ('folder=',
+               None,
+               'Folder location for uploadr.ini and uploadr.cron'),
     ]
 
     @staticmethod
-    def status(s):
+    def bstatus(s):
         """Prints things in bold."""
         print('\033[1m{0}\033[0m'.format(s))
 
+    @staticmethod
+    def status(s):
+        """Prints things."""
+        print('{0}'.format(s))
+
     def initialize_options(self):
-        self.dest_folder = ''
+        self.folder = os.path.join(sys.prefix, 'etc')
 
     def finalize_options(self):
         pass
 
     def run(self):
 
-        sys.stderr.write('dest_folder: [' + self.dest_folder + ']\n')
-        sys.exit()
-        
-        # Does it work with setuptools
-        # self.announce(
-        #     'Running command: %s' % str(command),
-        #     level=distutils.log.INFO)        
+        self.bstatus('Installing config files into folder [%s]'
+                     % str(self.folder))
 
-        if self.dest_folder:
-            dst = self.dest_folder 
-            # dst = os.path.join(sys.prefix, 'etc')
-    
+        if self.folder:
+            dst = self.folder
+
             try:
                 os.makedirs(dst)
             except OSError as exc:
@@ -132,11 +143,26 @@ class CustomInstallCommand(Command):
                     pass
                 else:
                     raise
-            src = resource_filename(Requirement.parse(NAME), "uploadr.ini")
-            copy(src, dst, follow_symlinks=True)
-    
-            # src = resource_filename(Requirement.parse(NAME), "uploadr.cron")
-            # copy(src, dst, follow_symlinks=True)
+            src = []
+            src.append(resource_filename(Requirement.parse(NAME),
+                       "uploadr.ini"))
+            src.append(resource_filename(Requirement.parse(NAME),
+                       "uploadr.cron"))
+            for f in src:
+                self.status("Copying [%s] into folder [%s]"
+                            % (str(f), str(dst)))
+                copy(f, dst, follow_symlinks=True)
+
+        if self.folder:
+            assert os.path.exists(self.folder), (
+                'flickr-uploadr config folder %s does not exist.'
+                .format(str(self.folder)))
+            for f in src:
+                assert os.path.exists(f), (
+                    'flickr-uploadr config file %s does not exist.'
+                    .format(str(f)))
+            self.bstatus('Installed config files into folder [%s]'
+                         % str(self.folder))
 
         sys.exit()
 
@@ -188,6 +214,6 @@ setup(
     # $ setup.py publish support.
     cmdclass={
         'upload': UploadCommand,
-        'custominstall': CustomInstallCommand,
+        'installcfg': InstallCfg,
     },
 )

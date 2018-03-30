@@ -134,6 +134,7 @@ UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
 # UPLDRConstants.baseDir = os.getcwd()
 UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")
 sys.stderr.write('[DEBUG] baseDir: [' + UPLDRConstants.baseDir + ']\n')
+sys.stderr.write('[DEBUG]     cwd: [' + os.getcwd() + ']\n')
 sys.stderr.write('[DEBUG] INIfile: [' + UPLDRConstants.INIfile + ']\n')
 sys.stderr.flush()
 # -----------------------------------------------------------------------------

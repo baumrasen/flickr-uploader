@@ -151,7 +151,8 @@ class InstallCfg(Command):
             for f in src:
                 self.status("Copying [%s] into folder [%s]"
                             % (str(f), str(dst)))
-                copy(f, dst, follow_symlinks=True)
+                copy(f, dst) if sys.version_info < (3, ) \
+                             else copy(f, dst, follow_symlinks=True)
 
         if self.folder:
             assert os.path.exists(self.folder), (

@@ -95,8 +95,10 @@ class UploadCommand(Command):
 class CustomInstallCommand(Command):
     """Support setup.py upload."""
 
-    description = 'Custom install the packagei to include uploadr.ini'
-    user_options = []
+    description = 'Custom install the package to include uploadr.ini'
+    user_options = [
+           ('custominstall=', None, 'Custom install to include uploadr.ini'),
+    ]
 
     @staticmethod
     def status(s):
@@ -111,7 +113,6 @@ class CustomInstallCommand(Command):
 
     def run(self):
 
-        src = resource_filename(Requirement.parse(NAME), "uploadr.ini")
         dst = os.path.join(sys.prefix, 'etc')
 
         try:
@@ -121,8 +122,11 @@ class CustomInstallCommand(Command):
                 pass
             else:
                 raise
-
+        src = resource_filename(Requirement.parse(NAME), "uploadr.ini")
         copy(src, dst, follow_symlinks=True)
+
+        # src = resource_filename(Requirement.parse(NAME), "uploadr.cron")
+        # copy(src, dst, follow_symlinks=True)
 
         sys.exit()
 

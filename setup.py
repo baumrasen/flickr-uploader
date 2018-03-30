@@ -106,27 +106,37 @@ class CustomInstallCommand(Command):
         print('\033[1m{0}\033[0m'.format(s))
 
     def initialize_options(self):
-        pass
+        self.dest_folder = ''
 
     def finalize_options(self):
         pass
 
     def run(self):
 
-        dst = os.path.join(sys.prefix, 'etc')
+        sys.stderr.write('dest_folder: [' + self.dest_folder + ']\n')
+        sys.exit()
+        
+        # Does it work with setuptools
+        # self.announce(
+        #     'Running command: %s' % str(command),
+        #     level=distutils.log.INFO)        
 
-        try:
-            os.makedirs(dst)
-        except OSError as exc:
-            if exc.errno == errno.EEXIST and os.path.isdir(dst):
-                pass
-            else:
-                raise
-        src = resource_filename(Requirement.parse(NAME), "uploadr.ini")
-        copy(src, dst, follow_symlinks=True)
-
-        # src = resource_filename(Requirement.parse(NAME), "uploadr.cron")
-        # copy(src, dst, follow_symlinks=True)
+        if self.dest_folder:
+            dst = self.dest_folder 
+            # dst = os.path.join(sys.prefix, 'etc')
+    
+            try:
+                os.makedirs(dst)
+            except OSError as exc:
+                if exc.errno == errno.EEXIST and os.path.isdir(dst):
+                    pass
+                else:
+                    raise
+            src = resource_filename(Requirement.parse(NAME), "uploadr.ini")
+            copy(src, dst, follow_symlinks=True)
+    
+            # src = resource_filename(Requirement.parse(NAME), "uploadr.cron")
+            # copy(src, dst, follow_symlinks=True)
 
         sys.exit()
 

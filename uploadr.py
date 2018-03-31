@@ -821,6 +821,7 @@ class Uploadr:
 
         np.niceprint("*****Uploading files*****")
 
+        con = None
         allMedia = self.grabNewFiles()
         # If managing changes, consider all files
         if MANAGE_CHANGES:
@@ -1193,13 +1194,13 @@ class Uploadr:
                     in EXCLUDED_FOLDERS:
                 dirnames[:] = []
                 filenames[:] = []
-                logging.warning('Folder [{!s}] on path [{!s}] excluded.'
-                                .format(
+                logging.info('Folder [{!s}] on path [{!s}] excluded.'
+                             .format(
                                     StrUnicodeOut(os.path.basename(
                                         os.path.normpath(dirpath))
                                     ),
                                     StrUnicodeOut(os.path.normpath(dirpath)))
-                                )
+                            )
 
             for f in filenames:
                 filePath = os.path.join(dirpath, f)
@@ -4521,7 +4522,10 @@ if __name__ == "__main__":
     pgrpparser.add_argument('-u', '--not-is-already-uploaded',
                             action='store_true',
                             help='Do not check if file is already uploaded '
-                                 'and exists on flickr prior to uploading.')
+                                 'and exists on flickr prior to uploading. '
+                                 'Use this option for faster INITIAL upload. '
+                                 'Do not use it in subsequent uploads to '
+                                 'prevent/recover orphan pics without a set.')
     # run in daemon mode uploading every X seconds
     pgrpparser.add_argument('-d', '--daemon', action='store_true',
                             help='Run forever as a daemon.'

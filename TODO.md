@@ -2,8 +2,41 @@
 * by oPromessa, 2017, V2.7.3
 * Published on https://github.com/oPromessa/flickr-uploader/
 
-## Pending improvements/Known issues
-------------------------------------
+## Pending improvements
+-----------------------
+* converRawFiles is not tested. Also requires an exif tool to be installed
+  and configured as RAW_TOOL_PATH in INI file. Make sure to leave
+  CONVERT_RAW_FILES = False in INI file or use at your own risk.
+* Consider using python module exiftool?
+* Would be nice to update ALL tags on replacePhoto and not only the
+  mandatory checksum tag as FLICKR maintains the tags from the first load.
+* Regular Output needs to be aligned/simplified to include:
+   * successful uploads
+   * successful update of date/time in videos
+   * successful replacement of photos
+* Change code to insert on database prior to upload and then update result.
+* Test if it Re-upload or not pictures removed from flickr Web interface.
+* Enhancement #7: Extend INI File settings control for appropriate values
+  to all parameters 
+   * Check error:  DuplicateSectionError or DuplicateOptionError.
+   * Check also: api_key. KeyError(key)
+* Align try/except handling within functions like people_get_photos or outside
+  like photos_get_not_in_set
+* **[NOT FULLY TESTED YET]** You can try and run (Let me know if it works!)
+   * `python3 setup.py install --prefix=~/apps/Python`
+   * `python3 setup.py installcfg --folder=~/apps/Python` to install confifg
+  Need to align this change with 1) uploadr.ini change from dirname to getcwd
+  and 2) uploadr.py use baseDir as a getcwd()
+* Error 040 on upload (issue #28) try/exception flickrapi is not triggered
+  within the inner scope and it does not reupload. Only IOError. HTTPException.
+  Move also upload to @retry control! This may be the cause to some files not
+  being added to their sets. Although subsequent runs should find and deal
+  with this pending assignment to set.
+* Apply multiprocessing to Add pics to sets. For 50K pics takes a long time
+  (enhancemente #11)
+  
+## Known issues
+---------------
 * AVOID using uploadr when performing massive delete operations on flicr.
   While deleting many files on flickr some of the function calls return
   values like the title of a Set as empty(None). This prompts printing
@@ -12,18 +45,9 @@
   setName if setName is not None else 'None'
   BUT worst than that is that one will be saving on the local database
   sets with name (title) empty which will cause other functions to fail.
-* converRawFiles is not tested. Also requires an exif tool to be installed
-  and configured as RAW_TOOL_PATH in INI file. Make sure to leave
-  CONVERT_RAW_FILES = False in INI file or use at your own risk.
-* Consider using python module exiftool?
-* Would be nice to update ALL tags on replacePhoto and not only the
-  mandatory checksum tag as FLICKR maintains the tags from the first load.
-* If local flickrdb is deleted it will re-upload entire local Library.
-  It would be interesting to attempt to rebuild local database. With the
-  exception of tags (would require use of exiftool) almost all other
-  information could be obtained. On V2.6.8, the function
-  is_photo_already_uploaded would already search pics with checksum+Set
-  and, if it finds it it will update the local DB.
+* If local flickrdb is deleted it will run is_photo_already_uploaded to
+  search for already loaded pics with checksum+Set and re-build the
+  local database.
 * In multiprocessing mode, when uploading additional files to your library
   the work is divided into sorted chunks by each process and it may occur
   that some processes have more work than others defeating the purpose
@@ -37,22 +61,8 @@
   (which match such regular expression) are not removed.
 * Arguments not fully tested:
    * -z (not yet fully developed)
-* Regular Output needs to be aligned/simplified to include:
-   * successful uploads
-   * successful update of date/time in videos
-   * successful replacement of photos
-* Change code to insert on database prior to upload and then update result.
-* Test if it Re-upload or not pictures removed from flickr Web interface.
-* CODING: Should extend this control to other parameters (Enhancement #7)
-   * Check error:  DuplicateSectionError or DuplicateOptionError.
-   * Check also: api_key. KeyError(key)
-* Align try/except handling within functions like people_get_photos or outside
-  like photos_get_not_in_set
-* **[NOT FULLY TESTED YET]** You can try and run
-  `python3 setup.py install --prefix=~/apps/Python` Let me know if it works!
-  Need to algin this change with 1) uploadr.ini change from dirname to getcwd
-  and 2) uploadr.py use baseDir as a getcwd()
+* Functions not migrated...
+   * convertRawFiles   
   
 ## Update History
-* Functions to be migrated...
-   * convertRawFiles
+* Check releases at [https://github.com/oPromessa/flickr-uploader/](https://github.com/oPromessa/flickr-uploader/)

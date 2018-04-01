@@ -54,8 +54,8 @@ env:
     - BadFilesVar=-b
     - ExcludedVar=--remove-excluded
     - ListPhotosNotInSet="-l 100"
-    - TAIL_LINES=200  # Tail $TAIL_LINES for output logging. Default: 20
-    - WAIT_TIME=2     # Sleep time between first and second run
+    - TAIL_LINES=2000  # Tail $TAIL_LINES for output logging. Default: 20
+    - WAIT_TIME=2      # Sleep time between first and second run
 # Delete !!!!!!!!!!!!!!!!!!! CAREFULL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # To ensure an empty Flickr database. Set DeleteAllFromFlickr=1. 0 otherwise.
     - DeleteAllFromFlickr=0
@@ -119,8 +119,10 @@ script:
   - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then coverage run -a --concurrency multiprocessing ./flickr-deletr-master/delete.py; fi
 
 # First RUN -------------------------------------------------------------------
-  #- coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log 2> /home/travis/build/oPromessa/flickr-uploader/nohup.err
-  - coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log
+  # stdout to file, stderr to file
+  - coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log 2> /home/travis/build/oPromessa/flickr-uploader/nohup.err
+  # stdout to file, stderr to console
+  #- coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.err
 

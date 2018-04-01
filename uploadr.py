@@ -1199,8 +1199,7 @@ class Uploadr:
                                     StrUnicodeOut(os.path.basename(
                                         os.path.normpath(dirpath))
                                     ),
-                                    StrUnicodeOut(os.path.normpath(dirpath)))
-                            )
+                                    StrUnicodeOut(os.path.normpath(dirpath))))
 
             for f in filenames:
                 filePath = os.path.join(dirpath, f)

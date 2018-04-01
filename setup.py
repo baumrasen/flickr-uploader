@@ -108,8 +108,8 @@ class InstallCfg(Command):
     description = 'Custom install flickr-uploader configuration files'
     user_options = [
            ('folder=',
-               None,
-               'Folder location for uploadr.ini and uploadr.cron'),
+            None,
+            'Folder location for uploadr.ini and uploadr.cron'),
     ]
 
     @staticmethod
@@ -145,14 +145,14 @@ class InstallCfg(Command):
                     raise
             src = []
             src.append(resource_filename(Requirement.parse(NAME),
-                       "uploadr.ini"))
+                                         "uploadr.ini"))
             src.append(resource_filename(Requirement.parse(NAME),
-                       "uploadr.cron"))
+                                         "uploadr.cron"))
             for f in src:
                 self.status("Copying [%s] into folder [%s]"
                             % (str(f), str(dst)))
                 copy(f, dst) if sys.version_info < (3, ) \
-                             else copy(f, dst, follow_symlinks=True)
+                    else copy(f, dst, follow_symlinks=True)
 
         if self.folder:
             assert os.path.exists(self.folder), (

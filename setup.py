@@ -30,6 +30,8 @@ VERSION = None  # Load from LIB/__version__.py dictionary
 REQUIRED = [
     'flickrapi',
 ]
+# What data_files are required for this applicaiton to be configured?
+DATA_FILES=[('', ['uploadr.ini', 'uploadr.cron'])]
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
@@ -101,15 +103,31 @@ class InstallCfg(Command):
     """
     Support setup.py install flickr-uploader configuration files:
 
-    uploadr.ini  = configuration options files
-    uploadr.cron = used for CRON
+    DATA_FILES   = list of configuration options files (.ini, .cron, etc)
     """
+
+
+    # Show files to be coopied =under 'python setup.py installcfg --help'
+    str_user_options = ''
+    dcnt = 0
+    for tuple in DATA_FILES:
+        dcnt += 1
+        if dcnt > 1:
+            str_user_options = str_user_options + ', '
+        cfgdir = tuple[0]
+        cnt = 0
+        for cfgfile in tuple[1]:
+            cnt += 1
+            if cnt > 1:
+                str_user_options = str_user_options + ', '
+            str_user_options = str_user_options + \
+                               '"' + os.path.join(cfgdir, cfgfile) + '"'
 
     description = 'Custom install flickr-uploader configuration files'
     user_options = [
            ('folder=',
             None,
-            'Folder location for uploadr.ini and uploadr.cron'),
+            'Folder location for ' + str_user_options + ' files.'),
     ]
 
     @staticmethod
@@ -143,11 +161,20 @@ class InstallCfg(Command):
                     pass
                 else:
                     raise
+
+            # src = []
+            # src.append(resource_filename(Requirement.parse(NAME),
+            #                              "uploadr.ini"))
+            # src.append(resource_filename(Requirement.parse(NAME),
+            #                              "uploadr.cron"))
+            # Save files under self.src list to be copied within the run method.
+            # Note: Does not account for files wihtin folders of the package!
             src = []
-            src.append(resource_filename(Requirement.parse(NAME),
-                                         "uploadr.ini"))
-            src.append(resource_filename(Requirement.parse(NAME),
-                                         "uploadr.cron"))
+            for tuple in DATA_FILES:
+                cfgdir = tuple[0]
+                for cfgfile in tuple[1]:
+                    src.append(resource_filename(Requirement.parse(NAME),
+                                                 cfgfile))
             for f in src:
                 self.status("Copying [%s] into folder [%s]"
                             % (str(f), str(dst)))
@@ -192,7 +219,7 @@ setup(
     install_requires=REQUIRED,
     include_package_data=True,
     scripts=['uploadr.py'],
-    data_files=[('', ['uploadr.ini', 'uploadr.cron'])],
+    data_files=DATA_FILES,
     license='MIT',
     classifiers=[
         # Trove classifiers

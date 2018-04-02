@@ -31,7 +31,7 @@ REQUIRED = [
     'flickrapi',
 ]
 # What data_files are required for this applicaiton to be configured?
-DATA_FILES=[('', ['uploadr.ini', 'uploadr.cron'])]
+DATA_FILES = [('', ['uploadr.ini', 'uploadr.cron'])]
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
@@ -106,7 +106,6 @@ class InstallCfg(Command):
     DATA_FILES   = list of configuration options files (.ini, .cron, etc)
     """
 
-
     # Show files to be coopied =under 'python setup.py installcfg --help'
     str_user_options = ''
     dcnt = 0
@@ -121,11 +120,11 @@ class InstallCfg(Command):
             if cnt > 1:
                 str_user_options = str_user_options + ', '
             str_user_options = str_user_options + \
-                               '"' + os.path.join(cfgdir, cfgfile) + '"'
+                '"' + os.path.join(cfgdir, cfgfile) + '"'
 
     description = 'Custom install flickr-uploader configuration files'
     user_options = [
-           ('folder=',
+        ('folder=',
             None,
             'Folder location for ' + str_user_options + ' files.'),
     ]
@@ -162,16 +161,10 @@ class InstallCfg(Command):
                 else:
                     raise
 
-            # src = []
-            # src.append(resource_filename(Requirement.parse(NAME),
-            #                              "uploadr.ini"))
-            # src.append(resource_filename(Requirement.parse(NAME),
-            #                              "uploadr.cron"))
-            # Save files under self.src list to be copied within the run method.
+            # Save file list to be copied within the run method.
             # Note: Does not account for files wihtin folders of the package!
             src = []
             for tuple in DATA_FILES:
-                cfgdir = tuple[0]
                 for cfgfile in tuple[1]:
                     src.append(resource_filename(Requirement.parse(NAME),
                                                  cfgfile))

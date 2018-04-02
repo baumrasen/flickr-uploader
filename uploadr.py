@@ -132,6 +132,7 @@ UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
 # CODING: To be used in lieu of previous line once uploadr.py is installed
 # on /bin folder with setup.py install
 # UPLDRConstants.baseDir = os.getcwd()
+# UPLDRConstants.baseDir = os.path.join(sys.prefix, 'etc')
 UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")
 sys.stderr.write('[DEBUG] baseDir: [' + UPLDRConstants.baseDir + ']\n')
 sys.stderr.write('[DEBUG]     cwd: [' + os.getcwd() + ']\n')
@@ -4453,7 +4454,7 @@ np.niceprint('--------- (V{!s}) Start time: {!s} ---------'
              .format(UPLDRConstants.Version,
                      nutime.strftime(UPLDRConstants.TimeFormat)))
 if __name__ == "__main__":
-    # Ensure that only once instance of this script is running
+    # Ensure that only one instance of this script is running
     f = open(LOCK_PATH, 'w')
     try:
         fcntl.lockf(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -4470,6 +4471,17 @@ if __name__ == "__main__":
         description='Upload files to Flickr. Uses uploadr.ini as config file.',
         epilog='by oPromessa, 2017, 2018'
     )
+
+    # Configuration related options -------------------------------------------
+    cgrpparser = parser.add_argument_group('Configuration related options')
+    cgrpparser.add_argument('-C', '--config-file', action='store',
+                            # dest='xINIfile',
+                            metavar='filename.ini',
+                            type=argparse.FileType('r'),
+                            default=UPLDRConstants.INIfile,
+                            help='Optional configuration file.'
+                                 'default is [{!s}]'
+                                 .format(UPLDRConstants.INIfile))
 
     # Verbose related options -------------------------------------------------
     vgrpparser = parser.add_argument_group('Verbose and dry-run options')

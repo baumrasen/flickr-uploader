@@ -925,10 +925,9 @@ class Uploadr:
                 filenames[:] = []
                 logging.info('Folder [{!s}] on path [{!s}] excluded.'
                              .format(
-                                    StrUnicodeOut(os.path.basename(
-                                        os.path.normpath(dirpath))
-                                    ),
-                                    StrUnicodeOut(os.path.normpath(dirpath))))
+                                 StrUnicodeOut(os.path.basename(
+                                     os.path.normpath(dirpath))),
+                                 StrUnicodeOut(os.path.normpath(dirpath))))
 
             for f in filenames:
                 filePath = os.path.join(dirpath, f)
@@ -4174,6 +4173,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
             np.niceprint('*****Completed Listing Photos not in a set '
                          'in Flickr******')
 
+
 # -----------------------------------------------------------------------------
 # run_uploadr
 #
@@ -4441,7 +4441,7 @@ UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")
 sys.stderr.write('[DEBUG] baseDir: [' + UPLDRConstants.baseDir + ']\n')
 sys.stderr.write('[DEBUG]     cwd: [' + os.getcwd() + ']\n')
 sys.stderr.write('[DEBUG]  prefix: [' + os.path.join(sys.prefix, 'etc') + \
-    ']\n')
+                 ']\n')
 sys.stderr.write('[DEBUG] INIfile: [' + UPLDRConstants.INIfile + ']\n')
 sys.stderr.flush()
 # -----------------------------------------------------------------------------

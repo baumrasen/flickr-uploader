@@ -4175,16 +4175,16 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
 
 # -----------------------------------------------------------------------------
-# run_uploadr
+# parse_arguments
 #
 # This is the main method
 #
-def run_uploadr():
-    """ run_uploadr
-    """
-    # -------------------------------------------------------------------------
+def parse_arguments():
+    """ parse_arguments
 
-    global FLICK
+        Parse arguments and save results into global ARGS
+    """
+
     global ARGS
 
     # Parse args --------------------------------------------------------------
@@ -4309,6 +4309,19 @@ def run_uploadr():
     ARGS = parser.parse_args()
     # Parse args --------------------------------------------------------------
 
+# -----------------------------------------------------------------------------
+# run_uploadr
+#
+# This is the main method
+#
+def run_uploadr():
+    """ run_uploadr
+    """
+    # -------------------------------------------------------------------------
+
+    global FLICK
+    global ARGS
+
     # Print/show arguments
     if LOGGING_LEVEL <= logging.INFO:
         np.niceprint('Output for arguments(ARGS):')
@@ -4428,7 +4441,8 @@ retry = rate_limited.retry
 # Class UPLDRConstants
 #
 #   nuMediacount = Counter of total files to initially upload
-#   baseDir      = Base configuration directory for files
+#   baseDir      = Base configuration directory location
+#   INIfile      = Configuration file
 # -----------------------------------------------------------------------------
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 UPLDRConstants.nuMediacount = 0
@@ -4440,7 +4454,7 @@ UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
 UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")
 sys.stderr.write('[DEBUG] baseDir: [' + UPLDRConstants.baseDir + ']\n')
 sys.stderr.write('[DEBUG]     cwd: [' + os.getcwd() + ']\n')
-sys.stderr.write('[DEBUG]  prefix: [' + os.path.join(sys.prefix, 'etc') + \
+sys.stderr.write('[DEBUG]  prefix: [' + os.path.join(sys.prefix, 'etc') +
                  ']\n')
 sys.stderr.write('[DEBUG] INIfile: [' + UPLDRConstants.INIfile + ']\n')
 sys.stderr.flush()
@@ -4673,6 +4687,12 @@ logging.basicConfig(stream=sys.stderr,
 #                                     'WARNING UNDER min WARNING LEVEL'))
 #         logging.info('Message with {!s}'.format(
 #                                     'INFO UNDER min WARNING LEVEL'))
+# CODING: Change logging level on the fly...
+#    logging.getLogger().setLevel(logging.WARNING)
+#    logging.debug('Debug messge not shown!')
+#    logging.getLogger().setLevel(logging.DEBUG)
+#    logging.debug('Debug messge shown!')
+#
 if LOGGING_LEVEL <= logging.INFO:
     np.niceprint('Output for FLICKR Configuration:')
     pprint.pprint(FLICKR)
@@ -4694,6 +4714,7 @@ if __name__ == "__main__":
             sys.exit(-1)
         raise
     finally:
+        parse_arguments()
         run_uploadr()
 
 np.niceprint('--------- (V{!s}) End time: {!s} ---------'

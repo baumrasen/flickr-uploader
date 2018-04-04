@@ -1,4 +1,4 @@
-# flickr-uploader: TO DO 
+# flickr-uploader: TO DO
 * by oPromessa, 2017, V2.7.3
 * Published on https://github.com/oPromessa/flickr-uploader/
 
@@ -17,7 +17,7 @@
 * Change code to insert on database prior to upload and then update result.
 * Test if it Re-upload or not pictures removed from flickr Web interface.
 * Enhancement #7: Extend INI File settings control for appropriate values
-  to all parameters 
+  to all parameters
    * Check error:  DuplicateSectionError or DuplicateOptionError.
    * Check also: api_key. KeyError(key)
 * Align try/except handling within functions like people_get_photos or outside
@@ -34,7 +34,11 @@
   with this pending assignment to set.
 * Apply multiprocessing to Add pics to sets. For 50K pics takes a long time
   (enhancemente #11)
-  
+* updatedVideoDate fails on three attempts (is it 'cause Flickr is processing
+  the video? and raises error caught on #210! Next run does not update video
+  date.
+
+
 ## Known issues
 ---------------
 * AVOID using uploadr when performing massive delete operations on flicr.
@@ -62,7 +66,9 @@
 * Arguments not fully tested:
    * -z (not yet fully developed)
 * Functions not migrated...
-   * convertRawFiles   
-  
+   * convertRawFiles
+* Arguments are parsed with get/set (Python 2.7 and 3.6 compatible) and not
+  dictionary like accesse (Python 3.6 compatible only)
+
 ## Update History
 * Check releases at [https://github.com/oPromessa/flickr-uploader/](https://github.com/oPromessa/flickr-uploader/)

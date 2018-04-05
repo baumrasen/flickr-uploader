@@ -173,9 +173,9 @@ script:
 # Attempt to catch "Build times out because no output was received"
 after_failure:
 # Upload LOG/ERR files to dropbox
-  - python drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER
-  - python drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER
-  - python drop.py --token $DROPBOX_TOKEN nohup.err $TRAVIS_BUILD_NUMBER
+  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.err $TRAVIS_BUILD_NUMBER
   
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.err
@@ -193,9 +193,9 @@ after_script:
   - sqlite3 flickrdb 'SELECT sets.set_id, sets.name, files_id, path FROM sets, files WHERE sets.set_id = files.set_id ORDER BY sets.name, path;'
 
 # Upload LOG/ERR files to Dropbox
-  - python drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER
-  - python drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER
-  - python drop.py --token $DROPBOX_TOKEN nohup.err $TRAVIS_BUILD_NUMBER
+  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.err $TRAVIS_BUILD_NUMBER
   
 # Deploy to Heroku ------------------------------------------------------------
 deploy:

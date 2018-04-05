@@ -20,7 +20,7 @@ before_install:
 # For use with wget into github account
   - echo -e "machine github.com\n  login $CI_USER\n  password $CI_USER_PASSWORD" >> ~/.netrc
 
-  - echo -e "files:\n  - /home/travis/build/oPromessa/flickr-uploader/nohup.err\n  - /home/travis/build/oPromessa/flickr-uploader/nohup.log\ndestination:\n  $PT_HOSTNAME\n  $PT_PORT\n  $PT_PROTOCOL\n" > ~/syslog2.yml
+  - echo -e "files:\n  - /home/travis/build/oPromessa/flickr-uploader/nohup.lst\n  - /home/travis/build/oPromessa/flickr-uploader/nohup.log\ndestination:\n  $PT_HOSTNAME\n  $PT_PORT\n  $PT_PROTOCOL\n" > ~/syslog2.yml
   - cat ~/syslog2.yml
 
 # =============================================================================
@@ -94,12 +94,10 @@ before_script:
   - sqlite3 token/oauth-tokens.sqlite 'SELECT * FROM oauth_tokens;'
   - find "./tests/Test Photo Library" -type f -exec md5sum '{}' \;
 #  - remote_syslog/remote_syslog -c ~/syslog2.yml
-# Save build related data
-  - echo -e "TRAVIS_PYTHON_VERSION|TRAVIS_TEST_RESULT|TRAVIS_EVENT_TYPE|TRAVIS_COMMIT|TRAVIS_COMMIT_MESSAGE|TRAVIS_BUILD_DIR|TRAVIS_BUILD_ID|TRAVIS_BUILD_NUMBER" > build.txt
-  - echo -e "$TRAVIS_PYTHON_VERSION|$TRAVIS_TEST_RESULT|$TRAVIS_EVENT_TYPE|$TRAVIS_COMMIT|$TRAVIS_COMMIT_MESSAGE|$TRAVIS_BUILD_DIR|$TRAVIS_BUILD_ID|$TRAVIS_BUILD_NUMBER" >> build.txt
 # Prevent errors in case log and err files are not generated
+  - touch build.txt
   - touch /home/travis/build/oPromessa/flickr-uploader/nohup.log
-  - touch /home/travis/build/oPromessa/flickr-uploader/nohup.err
+  - touch /home/travis/build/oPromessa/flickr-uploader/nohup.lst
 
 # =============================================================================
 # run script for tests
@@ -122,11 +120,11 @@ script:
 
 # First RUN -------------------------------------------------------------------
   # stdout to file, stderr to file
-  - coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log 2> /home/travis/build/oPromessa/flickr-uploader/nohup.err
+  - coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log 2> /home/travis/build/oPromessa/flickr-uploader/nohup.lst
   # stdout to file, stderr to console
   #- coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
-  - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.err
+  - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst
 
   - coverage combine
   - coverage report -m uploadr.py
@@ -153,9 +151,9 @@ script:
 
   - if [[ $TestScenario == ExcludedFolders ]]; then cp ./tests/uploadr_excluded.ini ./uploadr.ini; fi
 
-  - travis_wait coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.err
+  - travis_wait coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
-  - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.err
+  - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst
 
   - coverage combine
   - coverage report -m uploadr.py
@@ -172,13 +170,16 @@ script:
 # after_failure ---------------------------------------------------------------
 # Attempt to catch "Build times out because no output was received"
 after_failure:
+# Save build related data
+  - echo -e "TRAVIS_PYTHON_VERSION|TRAVIS_TEST_RESULT|TRAVIS_EVENT_TYPE|TRAVIS_COMMIT|TRAVIS_COMMIT_MESSAGE|TRAVIS_BUILD_DIR|TRAVIS_BUILD_ID|TRAVIS_BUILD_NUMBER|TRAVIS_JOB_NUMBER" > build.txt
+  - echo -e "$TRAVIS_PYTHON_VERSION|$TRAVIS_TEST_RESULT|$TRAVIS_EVENT_TYPE|$TRAVIS_COMMIT|$TRAVIS_COMMIT_MESSAGE|$TRAVIS_BUILD_DIR|$TRAVIS_BUILD_ID|$TRAVIS_BUILD_NUMBER|$TRAVIS_JOB_NUMBER" >> build.txt
 # Upload LOG/ERR files to dropbox
-  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.err $TRAVIS_BUILD_NUMBER
+  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_JOB_NUMBER
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_JOB_NUMBER
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_JOB_NUMBER
   
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
-  - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.err
+  - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst
 
 # after_script ----------------------------------------------------------------
 after_script:
@@ -192,10 +193,14 @@ after_script:
   - sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;'
   - sqlite3 flickrdb 'SELECT sets.set_id, sets.name, files_id, path FROM sets, files WHERE sets.set_id = files.set_id ORDER BY sets.name, path;'
 
+# Save build related data
+  - echo -e "TRAVIS_PYTHON_VERSION|TRAVIS_TEST_RESULT|TRAVIS_EVENT_TYPE|TRAVIS_COMMIT|TRAVIS_COMMIT_MESSAGE|TRAVIS_BUILD_DIR|TRAVIS_BUILD_ID|TRAVIS_BUILD_NUMBER|TRAVIS_JOB_NUMBER" > build.txt
+  - echo -e "$TRAVIS_PYTHON_VERSION|$TRAVIS_TEST_RESULT|$TRAVIS_EVENT_TYPE|$TRAVIS_COMMIT|$TRAVIS_COMMIT_MESSAGE|$TRAVIS_BUILD_DIR|$TRAVIS_BUILD_ID|$TRAVIS_BUILD_NUMBER|$TRAVIS_JOB_NUMBER" >> build.txt
+
 # Upload LOG/ERR files to Dropbox
-  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.err $TRAVIS_BUILD_NUMBER
+  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_JOB_NUMBER
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_JOB_NUMBER
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_JOB_NUMBER
   
 # Deploy to Heroku ------------------------------------------------------------
 deploy:

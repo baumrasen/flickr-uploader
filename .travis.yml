@@ -193,11 +193,10 @@ after_script:
   - sqlite3 flickrdb 'SELECT sets.set_id, sets.name, files_id, path FROM sets, files WHERE sets.set_id = files.set_id ORDER BY sets.name, path;'
 
 # Upload LOG/ERR files to Dropbox
-  - echo -e "TRAVIS_PYTHON_VERSION|TRAVIS_TEST_RESULT|TRAVIS_EVENT_TYPE|TRAVIS_COMMIT|TRAVIS_COMMIT_MESSAGE|TRAVIS_BUILD_DIR|TRAVIS_BUILD_ID|TRAVIS_BUILD_NUMBER" > build.txt
-  - echo -e "$TRAVIS_PYTHON_VERSION|$TRAVIS_TEST_RESULT|$TRAVIS_EVENT_TYPE|$TRAVIS_COMMIT|$TRAVIS_COMMIT_MESSAGE|$TRAVIS_BUILD_DIR|$TRAVIS_BUILD_ID|$TRAVIS_BUILD_NUMBER" >> build.txt
-  - python nohup.log --token $DROPBOX_TOKEN $TRAVIS_BUILD_NUMBER/nohup.log
-  - python nohup.err --token $DROPBOX_TOKEN $TRAVIS_BUILD_NUMBER/nohup.err
-
+  - python drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER
+  - python drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER
+  - python drop.py --token $DROPBOX_TOKEN nohup.err $TRAVIS_BUILD_NUMBER
+  
 # Deploy to Heroku ------------------------------------------------------------
 deploy:
   provider: heroku

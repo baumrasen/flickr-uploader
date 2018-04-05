@@ -97,6 +97,9 @@ before_script:
 # Prevent errors in case log and err files are not generated
   - touch /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - touch /home/travis/build/oPromessa/flickr-uploader/nohup.err
+# Upload file to dropbox test
+  - cd tests
+  - python drop.py --token $DROPBOX_TOKEN test_sys_argv.txt
 
 
 # =============================================================================

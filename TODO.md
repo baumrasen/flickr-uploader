@@ -37,6 +37,8 @@
 * updatedVideoDate fails on three attempts (is it 'cause Flickr is processing
   the video? and raises error caught on #210! Next run does not update video
   date.
+* @rate_limited wihtin class Uploadr instantiates logging. have to do it
+  earlier wihtin the main code.
 
 
 ## Known issues

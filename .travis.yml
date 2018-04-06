@@ -174,9 +174,9 @@ after_failure:
   - echo -e "TRAVIS_PYTHON_VERSION|TRAVIS_TEST_RESULT|TRAVIS_EVENT_TYPE|TRAVIS_COMMIT|TRAVIS_COMMIT_MESSAGE|TRAVIS_BUILD_DIR|TRAVIS_BUILD_ID|TRAVIS_BUILD_NUMBER|TRAVIS_JOB_NUMBER" > build.txt
   - echo -e "$TRAVIS_PYTHON_VERSION|$TRAVIS_TEST_RESULT|$TRAVIS_EVENT_TYPE|$TRAVIS_COMMIT|$TRAVIS_COMMIT_MESSAGE|$TRAVIS_BUILD_DIR|$TRAVIS_BUILD_ID|$TRAVIS_BUILD_NUMBER|$TRAVIS_JOB_NUMBER" >> build.txt
 # Upload LOG/ERR files to dropbox
-  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_JOB_NUMBER
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_JOB_NUMBER
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_JOB_NUMBER
+  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER/$TRAVIS_JOB_NUMBER
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER/$TRAVIS_JOB_NUMBER
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_BUILD_NUMBER/$TRAVIS_JOB_NUMBER
   
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst
@@ -198,9 +198,9 @@ after_script:
   - echo -e "$TRAVIS_PYTHON_VERSION|$TRAVIS_TEST_RESULT|$TRAVIS_EVENT_TYPE|$TRAVIS_COMMIT|$TRAVIS_COMMIT_MESSAGE|$TRAVIS_BUILD_DIR|$TRAVIS_BUILD_ID|$TRAVIS_BUILD_NUMBER|$TRAVIS_JOB_NUMBER" >> build.txt
 
 # Upload LOG/ERR files to Dropbox
-  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_JOB_NUMBER
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_JOB_NUMBER
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_JOB_NUMBER
+  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER/$TRAVIS_JOB_NUMBER
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER/$TRAVIS_JOB_NUMBER
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_BUILD_NUMBER/$TRAVIS_JOB_NUMBER
   
 # Deploy to Heroku ------------------------------------------------------------
 deploy:

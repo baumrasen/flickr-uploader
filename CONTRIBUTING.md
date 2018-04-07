@@ -11,10 +11,38 @@
 * Temporary coding remarks within code marked with `CODING` keyword comment
 * If using isThisStringUnicode for (something) if test else (other) make
   sure to break lines with \ correctly. Be careful.
-* Use niceprint function to output messages to stdout.
-* Use logging. for CRITICAL, ERROR, WARNING, INFO, DEBUG messages to stderr
 * Some ocasional critical messages are generated with `sys.stderr.write()`
-* Specific CODING related comments are marked with `CODING` keyword
+* Use niceprint function to output messages to stdout.
+* Use logging. for CRITICAL, ERROR, WARNING, INFO, DEBUG messages to stderr.
+  Three uses and one remark:
+   * Simply log message at approriate level
+   ```python
+   logging.warning('Status: {!s}'.format('Setup Complete'))
+   ```
+   * Control additional specific output to stderr depending on level
+   ```python
+   if LOGGING_LEVEL <= logging.INFO:
+       logging.info('Output for {!s}:'.format('uploadResp'))
+       logging.info(xml.etree.ElementTree.tostring(addPhotoResp,
+                                                  encoding='utf-8',
+                                                  method='xml'))
+       # <generate any further output>
+   ```
+   * Control additional specific output to stdout depending on level
+   ```python
+   if LOGGING_LEVEL <= logging.INFO:
+       niceprint ('Output for {!s}:'.format('uploadResp'))
+       xml.etree.ElementTree.dump(uploadResp)
+       # <generate any further output>
+   ```
+   * Change logging level on the fly...
+   ```python
+   logging.getLogger().setLevel(logging.WARNING)
+   logging.debug('Debug messge not shown!')
+   logging.getLogger().setLevel(logging.DEBUG)
+   logging.debug('Debug messge shown!')
+   ```
+* Specific CODING related comments are marked with `CODING keyword
 * Prefix coding for some output messages:
    * `*****`   Section informative
    * `===`     Multiprocessing related
@@ -31,7 +59,7 @@
    * logging.warning: relevant conclusions/situations
    * logging.info: relevant output of variables
    * logging.debug: entering and exiting functions
-   * Note: Consider using assertions: check niceassert function.   
+   * Note: Consider using assertions: check niceassert function.
 * Protect all DB access (single processing or multiprocessing) with:
     ```python
     try:
@@ -49,7 +77,7 @@
     finally:
         # Release DB lock if running in multiprocessing mode
         self.useDBLock( lock, False)
-    ```   
+    ```
 * As far as my testing goes :) the following errors are handled:
    * Flickr reports file not loaded due to error: `5 [flickr:Error:
    5: Filetype was not recognised]`

@@ -103,6 +103,39 @@ import lib.niceprint as niceprint
 import lib.rate_limited as rate_limited
 
 
+# =============================================================================
+# Logging init code
+#
+# Getting definitions from UPLDRConstants
+UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
+# Define LOGGING_LEVEL to allow logging even if everything else is wrong!
+LOGGING_LEVEL = logging.WARNING
+logging.basicConfig(stream=sys.stderr,
+                    level=int(LOGGING_LEVEL),
+                    datefmt=UPLDRConstants.TimeFormat,
+                    format=UPLDRConstants.P + '[' +
+                    str(UPLDRConstants.Run) + ']' +
+                    '[%(asctime)s]:[%(processName)-11s]' +
+                    UPLDRConstants.W +
+                    '[%(levelname)-8s]:[%(name)s] %(message)s')
+# CODING: Uncomment for logging related testing.
+#
+# if LOGGING_LEVEL <= logging.INFO:
+#     logging.info(u'sys.getfilesystemencoding:[{!s}]'.
+#                     format(sys.getfilesystemencoding()))
+#     logging.info('LOGGING_LEVEL Value: {!s}'.format(LOGGING_LEVEL))
+#     if LOGGING_LEVEL <= logging.WARNING:
+#         logging.critical('Message with {!s}'.format(
+#                                     'CRITICAL UNDER min WARNING LEVEL'))
+#         logging.error('Message with {!s}'.format(
+#                                     'ERROR UNDER min WARNING LEVEL'))
+#         logging.warning('Message with {!s}'.format(
+#                                     'WARNING UNDER min WARNING LEVEL'))
+#         logging.info('Message with {!s}'.format(
+#                                     'INFO UNDER min WARNING LEVEL'))
+# -----------------------------------------------------------------------------
+
+
 # -----------------------------------------------------------------------------
 # FileWithCallback class
 #
@@ -4445,7 +4478,7 @@ retry = rate_limited.retry
 #   baseDir      = Base configuration directory location
 #   INIfile      = Configuration file
 # -----------------------------------------------------------------------------
-UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
+# UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 UPLDRConstants.nuMediacount = 0
 UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
 # CODING: To be used in lieu of previous line once uploadr.py is installed
@@ -4460,12 +4493,21 @@ sys.stderr.write('[DEBUG]  prefix: [' + os.path.join(sys.prefix, 'etc') +
 sys.stderr.write('[DEBUG] INIfile: [' + UPLDRConstants.INIfile + ']\n')
 sys.stderr.flush()
 # -----------------------------------------------------------------------------
+
+# =============================================================================
+# Functions aliases
+#
+#   StrUnicodeOut       = from niceprint module
+#   isThisStringUnicode = from niceprint module
+#   niceassert          = from niceprint module
+#   reportError         = from niceprint module
+# -----------------------------------------------------------------------------
 np = niceprint.niceprint()
 StrUnicodeOut = np.StrUnicodeOut
 isThisStringUnicode = np.isThisStringUnicode
 niceassert = np.niceassert
 reportError = np.reportError
-
+# -----------------------------------------------------------------------------
 
 # =============================================================================
 # Init code
@@ -4480,14 +4522,17 @@ if sys.version_info < (2, 7):
     sys.stderr.flush()
     sys.exit(1)
 else:
-    # Define LOGGING_LEVEL to allow logging even if everything else is wrong!
-    LOGGING_LEVEL = logging.WARNING
     sys.stderr.write('--------- (V' + UPLDRConstants.Version +
                      ') Init: ' + ' ---------\n')
     sys.stderr.write('Python version on this system: ' + sys.version + '\n')
     sys.stderr.flush()
 
 # -----------------------------------------------------------------------------
+
+
+# =============================================================================
+# Look for Config file uploadr.ini
+#
 try:
     if not (
         (UPLDRConstants.baseDir == '' or os.path.isdir(
@@ -4506,10 +4551,6 @@ except Exception as err:
     sys.stderr.flush()
     sys.exit(2)
 
-
-# =============================================================================
-# Look for Config file uploadr.ini
-#
 config = ConfigParser.ConfigParser()
 try:
     INIFiles = None
@@ -4642,58 +4683,9 @@ FULL_SET_NAME = eval(config.get('Config', 'FULL_SET_NAME'))
 MAX_SQL_ATTEMPTS = eval(config.get('Config', 'MAX_SQL_ATTEMPTS'))
 MAX_UPLOAD_ATTEMPTS = eval(config.get('Config', 'MAX_UPLOAD_ATTEMPTS'))
 
+# Update logging level as per LOGGING_LEVEL from INI file
+logging.getLogger().setLevel(LOGGING_LEVEL)
 
-# =============================================================================
-# Logging
-#
-# Two uses:
-#   Simply log message at approriate level
-#       logging.warning('Status: {!s}'.format('Setup Complete'))
-#   Control additional specific output to stderr depending on level
-#       if LOGGING_LEVEL <= logging.INFO:
-#            logging.info('Output for {!s}:'.format('uploadResp'))
-#            logging.info(xml.etree.ElementTree.tostring(
-#                                                    addPhotoResp,
-#                                                    encoding='utf-8',
-#                                                    method='xml'))
-#            <generate any further output>
-#   Control additional specific output to stdout depending on level
-#       if LOGGING_LEVEL <= logging.INFO:
-#            niceprint ('Output for {!s}:'.format('uploadResp'))
-#            xml.etree.ElementTree.dump(uploadResp)
-#            <generate any further output>
-#
-logging.basicConfig(stream=sys.stderr,
-                    level=int(LOGGING_LEVEL),
-                    datefmt=UPLDRConstants.TimeFormat,
-                    format=UPLDRConstants.P + '[' +
-                    str(UPLDRConstants.Run) + ']' +
-                    '[%(asctime)s]:[%(processName)-11s]' +
-                    UPLDRConstants.W +
-                    '[%(levelname)-8s]:[%(name)s] %(message)s')
-# =============================================================================
-# Test section for logging.
-# CODING: Uncomment for testing.
-#
-# if LOGGING_LEVEL <= logging.INFO:
-#     logging.info(u'sys.getfilesystemencoding:[{!s}]'.
-#                     format(sys.getfilesystemencoding()))
-#     logging.info('LOGGING_LEVEL Value: {!s}'.format(LOGGING_LEVEL))
-#     if LOGGING_LEVEL <= logging.WARNING:
-#         logging.critical('Message with {!s}'.format(
-#                                     'CRITICAL UNDER min WARNING LEVEL'))
-#         logging.error('Message with {!s}'.format(
-#                                     'ERROR UNDER min WARNING LEVEL'))
-#         logging.warning('Message with {!s}'.format(
-#                                     'WARNING UNDER min WARNING LEVEL'))
-#         logging.info('Message with {!s}'.format(
-#                                     'INFO UNDER min WARNING LEVEL'))
-# CODING: Change logging level on the fly...
-#    logging.getLogger().setLevel(logging.WARNING)
-#    logging.debug('Debug messge not shown!')
-#    logging.getLogger().setLevel(logging.DEBUG)
-#    logging.debug('Debug messge shown!')
-#
 if LOGGING_LEVEL <= logging.INFO:
     np.niceprint('Output for FLICKR Configuration:')
     pprint.pprint(FLICKR)

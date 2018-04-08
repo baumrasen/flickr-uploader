@@ -4663,22 +4663,21 @@ class MyConfiguration(object):
         for item in self.__dict__:
             logging.debug('Eval for : [{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                           .format(item,
-                                  StrUnicodeOut(self.__dict__[item]),
-                                  type(self.__dict__[item])))
+                                  type(self.__dict__[item]),
+                                  StrUnicodeOut(self.__dict__[item])))
             self.__dict__[item] = eval(self.__dict__[item])
             logging.debug('Eval done: [{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
-
                           .format(item,
-                                  self.__dict__[item],
-                                  type(self.__dict__[item])))
+                                  type(self.__dict__[item]),
+                                  StrUnicodeOut(self.__dict__[item])))
 
         if LOGGING_LEVEL <= logging.INFO:
             logging.info('Active INI key/values pairs...')
             for item in self.__dict__:
                 logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                              .format(item,
-                                     StrUnicodeOut(self.__dict__[item]),
-                                     type(self.__dict__[item])))
+                                     type(self.__dict__[item]),
+                                     StrUnicodeOut(self.__dict__[item])))
 
         self.__dict__['FILES_DIR'] = unicode(  # noqa
                                          self.__dict__['FILES_DIR'],
@@ -4691,9 +4690,8 @@ class MyConfiguration(object):
             for item in self.__dict__:
                 logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                              .format(item,
-                                     StrUnicodeOut(self.__dict__[item]),
-                                     type(self.__dict__[item])))
-
+                                     type(self.__dict__[item]),
+                                     StrUnicodeOut(self.__dict__[item])))
 
 def parseconfig(Config):
     """ readconfig

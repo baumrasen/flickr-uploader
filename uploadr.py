@@ -4630,10 +4630,10 @@ class MyConfiguration(object):
         if LOGGING_LEVEL <= logging.DEBUG:
             logging.debug('Default INI key/values pairs...')
             for item in self.__dict__:
-                logging.debug('[{!s:20s}] = [{!s:10s}] / type:[{!s}]'
+                logging.debug('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                               .format(item,
-                                      StrUnicodeOut(self.__dict__[item]),
-                                      type(self.__dict__[item])))
+                                      type(self.__dict__[item]),
+                                      StrUnicodeOut(self.__dict__[item])))                
 
         # Look for Configuration INI file -------------------------------------
         config = ConfigParser.ConfigParser()

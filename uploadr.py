@@ -109,7 +109,8 @@ import lib.rate_limited as rate_limited
 # Getting definitions from UPLDRConstants
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 # Define LOGGING_LEVEL to allow logging even if everything else is wrong!
-LOGGING_LEVEL = logging.WARNING
+#EXTREME CODING
+LOGGING_LEVEL = logging.DEBUG
 logging.basicConfig(stream=sys.stderr,
                     level=int(LOGGING_LEVEL),
                     datefmt=UPLDRConstants.TimeFormat,
@@ -118,21 +119,6 @@ logging.basicConfig(stream=sys.stderr,
                     '[%(asctime)s]:[%(processName)-11s]' +
                     UPLDRConstants.W +
                     '[%(levelname)-8s]:[%(name)s] %(message)s')
-# CODING: Uncomment for logging related testing.
-#
-# if LOGGING_LEVEL <= logging.INFO:
-#     logging.info(u'sys.getfilesystemencoding:[{!s}]'.
-#                     format(sys.getfilesystemencoding()))
-#     logging.info('LOGGING_LEVEL Value: {!s}'.format(LOGGING_LEVEL))
-#     if LOGGING_LEVEL <= logging.WARNING:
-#         logging.critical('Message with {!s}'.format(
-#                                     'CRITICAL UNDER min WARNING LEVEL'))
-#         logging.error('Message with {!s}'.format(
-#                                     'ERROR UNDER min WARNING LEVEL'))
-#         logging.warning('Message with {!s}'.format(
-#                                     'WARNING UNDER min WARNING LEVEL'))
-#         logging.info('Message with {!s}'.format(
-#                                     'INFO UNDER min WARNING LEVEL'))
 # -----------------------------------------------------------------------------
 
 
@@ -1326,9 +1312,9 @@ class Uploadr:
                     file_checksum = self.md5Checksum(file)
 
                 # Title Handling
-                if ARGS.title:  # Replace
+                if ARGS.title:
                     FLICKR["title"] = ARGS.title
-                if ARGS.description:  # Replace
+                if ARGS.description:
                     FLICKR["description"] = ARGS.description
                 if ARGS.tags:  # Append a space to later add -t TAGS
                     FLICKR["tags"] += " "
@@ -4231,11 +4217,19 @@ def parse_arguments():
     cgrpparser.add_argument('-C', '--config-file', action='store',
                             # dest='xINIfile',
                             metavar='filename.ini',
-                            type=argparse.FileType('r'),
+                            type=str,
                             default=UPLDRConstants.INIfile,
                             help='Optional configuration file.'
                                  'default is [{!s}]'
                                  .format(UPLDRConstants.INIfile))
+    # cgrpparser.add_argument('-C', '--config-file', action='store',
+    #                         # dest='xINIfile',
+    #                         metavar='filename.ini',
+    #                         type=argparse.FileType('r'),
+    #                         default=UPLDRConstants.INIfile,
+    #                         help='Optional configuration file.'
+    #                              'default is [{!s}]'
+    #                              .format(UPLDRConstants.INIfile))
 
     # Verbose related options -------------------------------------------------
     vgrpparser = parser.add_argument_group('Verbose and dry-run options')
@@ -4362,10 +4356,12 @@ def run_uploadr():
         pprint.pprint(ARGS)
 
     if ARGS.verbose:
-        np.niceprint('FILES_DIR: [{!s}]'.format(StrUnicodeOut(FILES_DIR)))
+        np.niceprint('FILES_DIR: [{!s}]'.format(StrUnicodeOut(xCfg.FILES_DIR)))
 
-    logging.warning('FILES_DIR: [{!s}]'.format(StrUnicodeOut(FILES_DIR)))
-    if FILES_DIR == "":
+    logging.warning('FILES_DIR: [{!s}]'.format(StrUnicodeOut(xCfg.FILES_DIR)))
+    # EXTREME CODING
+    sys.exit()
+    if xCfg.FILES_DIR == "":
         np.niceprint('Please configure in the INI file [normally uploadr.ini],'
                      ' the name of the folder [FILES_DIR] '
                      'with media available to sync with Flickr.')
@@ -4447,11 +4443,9 @@ def run_uploadr():
 
             FLICK.createSets()
             FLICK.printStat(UPLDRConstants.nuMediacount)
+    # Run Uploadr -------------------------------------------------------------
 
 
-# =============================================================================
-# Main code
-#
 # =============================================================================
 # Global Variables
 #
@@ -4470,6 +4464,7 @@ nulockDB = None
 numutex = None
 nurunning = None
 retry = rate_limited.retry
+# -----------------------------------------------------------------------------
 
 # =============================================================================
 # Class UPLDRConstants
@@ -4486,11 +4481,11 @@ UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
 # UPLDRConstants.baseDir = os.getcwd()
 # UPLDRConstants.baseDir = os.path.join(sys.prefix, 'etc')
 UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")
-sys.stderr.write('[DEBUG] baseDir: [' + UPLDRConstants.baseDir + ']\n')
-sys.stderr.write('[DEBUG]     cwd: [' + os.getcwd() + ']\n')
-sys.stderr.write('[DEBUG]  prefix: [' + os.path.join(sys.prefix, 'etc') +
+sys.stderr.write('[CODING]     baseDir: [' + UPLDRConstants.baseDir + ']\n')
+sys.stderr.write('[CODING]         cwd: [' + os.getcwd() + ']\n')
+sys.stderr.write('[CODING]  prefix/etc: [' + os.path.join(sys.prefix, 'etc') +
                  ']\n')
-sys.stderr.write('[DEBUG] INIfile: [' + UPLDRConstants.INIfile + ']\n')
+sys.stderr.write('[CODING]     INIfile: [' + UPLDRConstants.INIfile + ']\n')
 sys.stderr.flush()
 # -----------------------------------------------------------------------------
 
@@ -4533,169 +4528,367 @@ else:
 # =============================================================================
 # Look for Config file uploadr.ini
 #
-try:
-    if not (
-        (UPLDRConstants.baseDir == '' or os.path.isdir(
-            UPLDRConstants.baseDir)) and os.path.isfile(
-            UPLDRConstants.INIfile)):
-        raise OSError('[Errno 2] No such file or directory')
-except Exception as err:
-    sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] config folder [{!s}] '
-                     'and/or INI file: [{!s}] '
-                     'not found or incorrect format: [{!s}]! Exiting...\n'
-                     .format(nutime.strftime(UPLDRConstants.TimeFormat),
-                             os.getpid(),
-                             UPLDRConstants.baseDir,
-                             UPLDRConstants.INIfile,
-                             str(err)))
-    sys.stderr.flush()
-    sys.exit(2)
+class MyConfiguration(object):
+    """ MyConfiguration
 
-config = ConfigParser.ConfigParser()
-try:
-    INIFiles = None
-    INIFiles = config.read(UPLDRConstants.INIfile)
-except Exception as err:
-    sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] INI file: [{!s}] '
-                     'not found or incorrect format: [{!s}]!\n'
-                     .format(nutime.strftime(UPLDRConstants.TimeFormat),
-                             os.getpid(),
-                             UPLDRConstants.INIfile,
-                             str(err)))
-    sys.stderr.flush()
-if not INIFiles:
-    sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] INI file: [{!s}] '
-                     'not found or incorrect format! Exiting...\n'
-                     .format(nutime.strftime(UPLDRConstants.TimeFormat),
-                             os.getpid(),
-                             UPLDRConstants.INIfile))
-    sys.stderr.flush()
-    sys.exit(2)
-# -----------------------------------------------------------------------------
-# Look for [Config] section file uploadr.ini file
-if not config.has_section('Config'):
-    sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] INI file: [{!s}] '
-                     'has no [Config] section! Exiting...\n'
-                     .format(nutime.strftime(UPLDRConstants.TimeFormat),
-                             os.getpid(),
-                             UPLDRConstants.INIfile))
-    sys.stderr.flush()
-    sys.exit(2)
-# -----------------------------------------------------------------------------
-# Obtain configuration from uploadr.ini
-# Refer to contents of uploadr.ini for explanation on configuration parameters
-# Obtain configuration LOGGING_LEVEL from Configuration file.
-# If not available or not valid assume WARNING level and notify of that fact.
-# Force conversion of LOGGING_LEVEL into int() for later use in conditionals
-LOGGING_LEVEL = (config.get('Config', 'LOGGING_LEVEL')
-                 if config.has_option('Config', 'LOGGING_LEVEL')
-                 else logging.WARNING)
-if (int(str(LOGGING_LEVEL)) if str.isdigit(str(LOGGING_LEVEL)) else 99) not in\
-    [logging.NOTSET,
-     logging.DEBUG,
-     logging.INFO,
-     logging.WARNING,
-     logging.ERROR,
-     logging.CRITICAL]:
-    LOGGING_LEVEL = logging.WARNING
-    sys.stderr.write('[{!s}]:[WARNING ]:[uploadr] LOGGING_LEVEL '
-                     'not defined or incorrect on INI file: [{!s}]. '
-                     'Assuming WARNING level.\n'.format(
-                         nutime.strftime(UPLDRConstants.TimeFormat),
-                         UPLDRConstants.INIfile))
-    sys.stderr.flush()
-LOGGING_LEVEL = int(str(LOGGING_LEVEL))
-if config.has_option('Config', 'FILES_DIR'):
+        Loads default configuration files. Overwrites with any specific values
+        found on INI config file.
+    """
+    # Config section ----------------------------------------------------------
+    INISections = [ 'Config' ]
+    # Default configuration keys/values pairs ---------------------------------
+    INIkeys = [
+                'FILES_DIR',
+                'FLICKR',
+                'SLEEP_TIME',
+                'DRIP_TIME',
+                'DB_PATH',
+                'LOCK_PATH',
+                'TOKEN_CACHE',
+                'TOKEN_PATH',
+                'EXCLUDED_FOLDERS',
+                'IGNORED_REGEX',
+                'ALLOWED_EXT',
+                'CONVERT_RAW_FILES',
+                'RAW_EXT',
+                'RAW_TOOL_PATH',
+                'FILE_MAX_SIZE',
+                'MANAGE_CHANGES',
+                'FULL_SET_NAME',
+                'MAX_SQL_ATTEMPTS',
+                'MAX_UPLOAD_ATTEMPTS',
+                'LOGGING_LEVEL'
+              ]
+    # Default configuration keys/values pairs ---------------------------------
+    INIvalues = [
+                  # FILES_DIR
+                  "'photos'",
+                  # FLICKR
+                  "{ 'title'       : '',\
+                     'description' : '',\
+                     'tags'        : 'auto-upload',\
+                     'is_public'   : '0',\
+                     'is_friend'   : '0',\
+                     'is_family'   : '0',\
+                     'api_key'     : 'api_key_not_defined',\
+                     'secret'      : 'secret_not_defined'\
+                  }",
+                 # SLEEP_TIME
+                 "1 * 60",
+                 # DRIP_TIME
+                 "1 * 60",
+                 #  DB_PATH
+                 "os.path.join(os.path.dirname(sys.argv[0]), 'flickrdb')",
+                 # LOCK_PATH
+                 "os.path.join(os.path.dirname(sys.argv[0]), '.flickrlock')",
+                 # TOKEN_CACHE
+                 "os.path.join(os.path.dirname(sys.argv[0]), 'token')",
+                 # TOKEN_PATH
+                 "os.path.join(os.path.dirname(sys.argv[0]), '.flickrToken')",
+                 # EXCLUDED_FOLDERS (need to process for unicode support)
+                 "['@eaDir','#recycle','.picasaoriginals','_ExcludeSync',\
+                   'Corel Auto-Preserve','Originals',\
+                   'Automatisch beibehalten von Corel']",
+                 # IGNORED_REGEX
+                 "[ ]",
+                 # "['IMG_[0-8]', '.+Ignore.+']",
+                 # ALLOWED_EXT
+                 "['jpg','png','avi','mov','mpg','mp4','3gp']",
+                 # CONVERT_RAW_FILES
+                 "False",
+                 # RAW_EXT
+                 "['3fr', 'ari', 'arw', 'bay', 'crw', 'cr2', 'cap', 'dcs',\
+                   'dcr', 'dng', 'drf', 'eip', 'erf', 'fff', 'iiq', 'k25',\
+                   'kdc', 'mdc', 'mef', 'mos', 'mrw', 'nef', 'nrw', 'obm',\
+                   'orf', 'pef', 'ptx', 'pxn', 'r3d', 'raf', 'raw', 'rwl',\
+                   'rw2', 'rwz', 'sr2', 'srf', 'srw', 'x3f' ]",
+                 # RAW_TOOL_PATH
+                 "'/volume1/photo/Image-ExifTool-9.69'",
+                 # FILE_MAX_SIZE
+                 "50000000",
+                 # MANAGE_CHANGES
+                 "True",
+                 # FULL_SET_NAME
+                 "False",
+                 #  MAX_SQL_ATTEMPTS
+                 "3",
+                 # MAX_UPLOAD_ATTEMPTS
+                 "10",
+                 # LOGGING_LEVEL
+                 "40"
+                ]
+
+    # -------------------------------------------------------------------------
+    # MyConfiguration.__init__
+    #
+    def __init__(self, cfg_filename, cfg_Sections = INISections):
+        """__init__
+        """
+
+        # Assume default values into class dictionary of values ---------------
+        self.__dict__ = dict(zip(self.INIkeys, self.INIvalues))
+        if LOGGING_LEVEL <= logging.DEBUG:
+            logging.debug('Default INI key/values pairs...')
+            for item in self.__dict__:
+                logging.debug('[{!s:20s}] = [{!s:10s}] / type:[{!s}]'
+                              .format(item,
+                                      StrUnicodeOut(self.__dict__[item]),
+                                      type(self.__dict__[item])))
+
+        # Look for Configuration INI file -------------------------------------
+        config = ConfigParser.ConfigParser()
+        config.optionxform = str  # make option names case sensitive
+        try:
+            INIFile = None
+            INIFile = config.read(cfg_filename)
+        except Exception as err:
+            logging.critical('INI file: [{!s}] not found or '
+                             'incorrect format: [{!s}]!\n'
+                             .format(cfg_filename, str(err)))
+        finally:
+            if not INIFile:
+                raise ValueError('No config file found!')
+
+        # Parse Configuration file and overwrite any values -------------------
+        for name in cfg_Sections:
+            self.__dict__.update(config.items(name))
+
+    # -------------------------------------------------------------------------
+    # MyConfiguration.process
+    #
+    def process(self):
+        """ process
+        """
+        # Evaluate values
+        for item in self.__dict__:
+            logging.debug('Eval for : [{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
+                          .format(item,
+                                  StrUnicodeOut(self.__dict__[item]),
+                                  type(self.__dict__[item])))
+            self.__dict__[item] = eval(self.__dict__[item])
+            logging.debug('Eval done: [{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
+
+                          .format(item,
+                                  self.__dict__[item],
+                                  type(self.__dict__[item])))
+
+        if LOGGING_LEVEL <= logging.INFO:
+            logging.info('Active INI key/values pairs...')
+            for item in self.__dict__:
+                logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
+                              .format(item,
+                                      StrUnicodeOut(self.__dict__[item]),
+                                      type(self.__dict__[item])))
+
+        self.__dict__['FILES_DIR'] = unicode(  # noqa
+                                         self.__dict__['FILES_DIR'],
+                                         'utf-8') \
+                                     if sys.version_info < (3, ) \
+                                     else str(self.__dict__['FILES_DIR'])
+
+
+        if LOGGING_LEVEL <= logging.INFO:
+            logging.info('Processed INI key/values pairs...')
+            for item in self.__dict__:
+                logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
+                              .format(item,
+                                      StrUnicodeOut(self.__dict__[item]),
+                                      type(self.__dict__[item])))
+
+
+def parseconfig(Config):
+    """ readconfig
+    """
+
     try:
-        FILES_DIR = unicode(  # noqa
-                            eval(config.get('Config', 'FILES_DIR')), 'utf-8') \
-                    if sys.version_info < (3, ) \
-                    else str(eval(config.get('Config', 'FILES_DIR')))
+        if not (
+            (UPLDRConstants.baseDir == '' or os.path.isdir(
+                UPLDRConstants.baseDir)) and os.path.isfile(
+                UPLDRConstants.INIfile)):
+            raise OSError('[Errno 2] No such file or directory')
     except Exception as err:
-        sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] FILES_DIR: '
-                         'not defined or incorrect on INI file: [{!s}]\n'
+        sys.stderr.write(
+            '[{!s}]:[{!s}][ERROR   ]:[uploadr] config folder [{!s}] '
+            'and/or INI file: [{!s}] not found or '
+            'incorrect format: [{!s}]! Exiting...\n'
+            .format(nutime.strftime(UPLDRConstants.TimeFormat),
+                    os.getpid(),
+                    UPLDRConstants.baseDir,
+                    UPLDRConstants.INIfile,
+                    str(err)))
+        sys.stderr.flush()
+        sys.exit(2)
+
+    config = ConfigParser.ConfigParser()
+    try:
+        INIFiles = None
+        INIFiles = config.read(UPLDRConstants.INIfile)
+    except Exception as err:
+        sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] INI file: [{!s}] '
+                         'not found or incorrect format: [{!s}]!\n'
                          .format(nutime.strftime(UPLDRConstants.TimeFormat),
                                  os.getpid(),
+                                 UPLDRConstants.INIfile,
                                  str(err)))
         sys.stderr.flush()
-        sys.exit(3)
-else:
-    # Undefined FILES_DIR. Will be reported as an error later on Main code.
-    FILES_DIR = unicode(  # noqa
-                        '', 'utf-8') if sys.version_info < (3, ) else str('')
-FLICKR = eval(config.get('Config', 'FLICKR'))
-SLEEP_TIME = eval(config.get('Config', 'SLEEP_TIME'))
-DRIP_TIME = eval(config.get('Config', 'DRIP_TIME'))
-DB_PATH = eval(config.get('Config', 'DB_PATH'))
-try:
-    TOKEN_CACHE = eval(config.get('Config', 'TOKEN_CACHE'))
-# CODING: Should extend this control to other parameters (Enhancement #7)
-except (ConfigParser.NoOptionError, ConfigParser.NoOptionError) as err:
-    sys.stderr.write('[{!s}]:[{!s}][WARNING ]:[uploadr] ({!s}) TOKEN_CACHE '
-                     'not defined or incorrect on INI file: [{!s}]. '
-                     'Assuming default value [{!s}].\n'
-                     .format(nutime.strftime(UPLDRConstants.TimeFormat),
-                             os.getpid(),
-                             str(err),
-                             UPLDRConstants.INIfile,
-                             os.path.join(UPLDRConstants.baseDir,
-                                          "token")))
-    sys.stderr.flush()
-    TOKEN_CACHE = os.path.join(UPLDRConstants.baseDir, "token")
-LOCK_PATH = eval(config.get('Config', 'LOCK_PATH'))
-TOKEN_PATH = eval(config.get('Config', 'TOKEN_PATH'))
-# Read EXCLUDED_FOLDERS and convert them into Unicode folders
-inEXCLUDED_FOLDERS = eval(config.get('Config', 'EXCLUDED_FOLDERS'))
-EXCLUDED_FOLDERS = []
-for folder in inEXCLUDED_FOLDERS:
-    EXCLUDED_FOLDERS.append(unicode(folder, 'utf-8')  # noqa
-                            if sys.version_info < (3, )
-                            else str(folder))
-    if LOGGING_LEVEL <= logging.INFO:
-        sys.stderr.write('[{!s}]:[{!s}][INFO    ]:[uploadr] '
-                         'folder from EXCLUDED_FOLDERS:[{!s}] '
-                         'type:[{!s}]\n'
+    if not INIFiles:
+        sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] INI file: [{!s}] '
+                         'not found or incorrect format! Exiting...\n'
                          .format(nutime.strftime(UPLDRConstants.TimeFormat),
+                                 os.getpid(),
+                                 UPLDRConstants.INIfile))
+        sys.stderr.flush()
+        sys.exit(2)
+    # -------------------------------------------------------------------------
+    # Look for [Config] section file uploadr.ini file
+    if not config.has_section('Config'):
+        sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] INI file: [{!s}] '
+                         'has no [Config] section! Exiting...\n'
+                         .format(nutime.strftime(UPLDRConstants.TimeFormat),
+                                 os.getpid(),
+                                 UPLDRConstants.INIfile))
+        sys.stderr.flush()
+        sys.exit(2)
+    # -------------------------------------------------------------------------
+    # Obtain configuration from uploadr.ini
+    # Refer to contents of uploadr.ini for explanation on configuration
+    # parameters.
+    # Obtain configuration LOGGING_LEVEL from Configuration file.
+    # If not available or not valid assume WARNING level and notify.
+    # Convert LOGGING_LEVEL into int() for later use in conditionals
+    LOGGING_LEVEL = (config.get('Config', 'LOGGING_LEVEL')
+                     if config.has_option('Config', 'LOGGING_LEVEL')
+                     else logging.WARNING)
+    if (int(str(LOGGING_LEVEL)) if str.isdigit(str(LOGGING_LEVEL)) else 99) \
+        not in\
+            [logging.NOTSET,
+             logging.DEBUG,
+             logging.INFO,
+             logging.WARNING,
+             logging.ERROR,
+             logging.CRITICAL]:
+        LOGGING_LEVEL = logging.WARNING
+        sys.stderr.write('[{!s}]:[WARNING ]:[uploadr] LOGGING_LEVEL '
+                         'not defined or incorrect on INI file: [{!s}]. '
+                         'Assuming WARNING level.\n'.format(
+                             nutime.strftime(UPLDRConstants.TimeFormat),
+                             UPLDRConstants.INIfile))
+        sys.stderr.flush()
+    LOGGING_LEVEL = int(str(LOGGING_LEVEL))
+    if config.has_option('Config', 'FILES_DIR'):
+        try:
+            FILES_DIR = unicode(  # noqa
+                                eval(config.get('Config', 'FILES_DIR')),
+                                'utf-8') \
+                        if sys.version_info < (3, ) \
+                        else str(eval(config.get('Config', 'FILES_DIR')))
+        except Exception as err:
+            sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] FILES_DIR: '
+                             'not defined or incorrect on INI file: [{!s}]\n'
+                             .format(
+                                 nutime.strftime(UPLDRConstants.TimeFormat),
+                                 os.getpid(),
+                                 str(err)))
+            sys.stderr.flush()
+            sys.exit(3)
+    else:
+        # Undefined FILES_DIR. Will be reported as an error later on Main code.
+        FILES_DIR = unicode(  # noqa
+                            '', 'utf-8') \
+                            if sys.version_info < (3, ) else str('')
+    FLICKR = eval(config.get('Config', 'FLICKR'))
+    SLEEP_TIME = eval(config.get('Config', 'SLEEP_TIME'))
+    DRIP_TIME = eval(config.get('Config', 'DRIP_TIME'))
+    DB_PATH = eval(config.get('Config', 'DB_PATH'))
+    try:
+        TOKEN_CACHE = eval(config.get('Config', 'TOKEN_CACHE'))
+    # CODING: Should extend this control to other parameters (Enhancement #7)
+    except (ConfigParser.NoOptionError, ConfigParser.NoOptionError) as err:
+        sys.stderr.write('[{!s}]:[{!s}][WARNING ]:[uploadr] ({!s}) TOKEN_CACHE'
+                         ' not defined or incorrect on INI file: [{!s}]. '
+                         'Assuming default value [{!s}].\n'
+                         .format(nutime.strftime(UPLDRConstants.TimeFormat),
+                                 os.getpid(),
+                                 str(err),
+                                 UPLDRConstants.INIfile,
+                                 os.path.join(UPLDRConstants.baseDir,
+                                              "token")))
+        sys.stderr.flush()
+        TOKEN_CACHE = os.path.join(UPLDRConstants.baseDir, "token")
+    LOCK_PATH = eval(config.get('Config', 'LOCK_PATH'))
+    TOKEN_PATH = eval(config.get('Config', 'TOKEN_PATH'))
+    # Read EXCLUDED_FOLDERS and convert them into Unicode folders
+    inEXCLUDED_FOLDERS = eval(config.get('Config', 'EXCLUDED_FOLDERS'))
+    EXCLUDED_FOLDERS = []
+    for folder in inEXCLUDED_FOLDERS:
+        EXCLUDED_FOLDERS.append(unicode(folder, 'utf-8')  # noqa
+                                if sys.version_info < (3, )
+                                else str(folder))
+        if LOGGING_LEVEL <= logging.INFO:
+            sys.stderr.write('[{!s}]:[{!s}][INFO    ]:[uploadr] '
+                             'folder from EXCLUDED_FOLDERS:[{!s}] '
+                             'type:[{!s}]\n'
+                             .format(
+                                 nutime.strftime(UPLDRConstants.TimeFormat),
                                  os.getpid(),
                                  StrUnicodeOut(EXCLUDED_FOLDERS[
                                      len(EXCLUDED_FOLDERS) - 1]),
                                  type(EXCLUDED_FOLDERS[
-                                     len(EXCLUDED_FOLDERS) - 1])))
+                                     len(EXCLUDED_FOLDERS) - 1]))
+                            )
+            sys.stderr.flush()
+    del inEXCLUDED_FOLDERS
+    # Consider Unicode Regular expressions
+    IGNORED_REGEX = [re.compile(regex, re.UNICODE) for regex in
+                     eval(config.get('Config', 'IGNORED_REGEX'))]
+    if LOGGING_LEVEL <= logging.INFO:
+        sys.stderr.write('[{!s}]:[{!s}][INFO    ]:[uploadr] '
+                         'Number of IGNORED_REGEX entries:[{!s}]\n'
+                         .format(nutime.strftime(UPLDRConstants.TimeFormat),
+                                 os.getpid(),
+                                 len(IGNORED_REGEX)))
         sys.stderr.flush()
-del inEXCLUDED_FOLDERS
-# Consider Unicode Regular expressions
-IGNORED_REGEX = [re.compile(regex, re.UNICODE) for regex in
-                 eval(config.get('Config', 'IGNORED_REGEX'))]
-if LOGGING_LEVEL <= logging.INFO:
-    sys.stderr.write('[{!s}]:[{!s}][INFO    ]:[uploadr] '
-                     'Number of IGNORED_REGEX entries:[{!s}]\n'
-                     .format(nutime.strftime(UPLDRConstants.TimeFormat),
-                             os.getpid(),
-                             len(IGNORED_REGEX)))
-    sys.stderr.flush()
-ALLOWED_EXT = eval(config.get('Config', 'ALLOWED_EXT'))
-RAW_EXT = eval(config.get('Config', 'RAW_EXT'))
-FILE_MAX_SIZE = eval(config.get('Config', 'FILE_MAX_SIZE'))
-MANAGE_CHANGES = eval(config.get('Config', 'MANAGE_CHANGES'))
-RAW_TOOL_PATH = eval(config.get('Config', 'RAW_TOOL_PATH'))
-CONVERT_RAW_FILES = eval(config.get('Config', 'CONVERT_RAW_FILES'))
-FULL_SET_NAME = eval(config.get('Config', 'FULL_SET_NAME'))
-MAX_SQL_ATTEMPTS = eval(config.get('Config', 'MAX_SQL_ATTEMPTS'))
-MAX_UPLOAD_ATTEMPTS = eval(config.get('Config', 'MAX_UPLOAD_ATTEMPTS'))
+    ALLOWED_EXT = eval(config.get('Config', 'ALLOWED_EXT'))
+    RAW_EXT = eval(config.get('Config', 'RAW_EXT'))
+    FILE_MAX_SIZE = eval(config.get('Config', 'FILE_MAX_SIZE'))
+    MANAGE_CHANGES = eval(config.get('Config', 'MANAGE_CHANGES'))
+    RAW_TOOL_PATH = eval(config.get('Config', 'RAW_TOOL_PATH'))
+    CONVERT_RAW_FILES = eval(config.get('Config', 'CONVERT_RAW_FILES'))
+    FULL_SET_NAME = eval(config.get('Config', 'FULL_SET_NAME'))
+    MAX_SQL_ATTEMPTS = eval(config.get('Config', 'MAX_SQL_ATTEMPTS'))
+    MAX_UPLOAD_ATTEMPTS = eval(config.get('Config', 'MAX_UPLOAD_ATTEMPTS'))
+    # -------------------------------------------------------------------------
 
+
+# =============================================================================
+# Main code
+#
 # Update logging level as per LOGGING_LEVEL from INI file
+#
 logging.getLogger().setLevel(LOGGING_LEVEL)
 
-if LOGGING_LEVEL <= logging.INFO:
-    np.niceprint('Output for FLICKR Configuration:')
-    pprint.pprint(FLICKR)
-
-np.niceprint('--------- (V{!s}) Start time: {!s} ---------'
+np.niceprint('--------- (V{!s}) Start time: {!s} ---------(Log:{!s})'
              .format(UPLDRConstants.Version,
-                     nutime.strftime(UPLDRConstants.TimeFormat)))
+                     nutime.strftime(UPLDRConstants.TimeFormat),
+                     LOGGING_LEVEL))
 if __name__ == "__main__":
+    # Parse the argumens options
+    parse_arguments()
+
+    # Arguments override configuration filename
+    if ARGS.config_file:
+        UPLDRConstants.INIfile = ARGS.config_file
+
+    # Source configuration
+    xCfg = MyConfiguration(UPLDRConstants.INIfile, ['Config'])
+    xCfg.process()
+    # CODING: Remove
+    if LOGGING_LEVEL <= logging.INFO:
+        np.niceprint('Output for FLICKR Configuration:')
+        pprint.pprint(xCfg.FLICKR)
+
     # Ensure that only one instance of this script is running
-    f = open(LOCK_PATH, 'w')
+    f = open(xCfg.LOCK_PATH, 'w')
     try:
         fcntl.lockf(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except IOError as e:
@@ -4707,11 +4900,11 @@ if __name__ == "__main__":
             sys.exit(-1)
         raise
     finally:
-        parse_arguments()
         run_uploadr()
 
-np.niceprint('--------- (V{!s}) End time: {!s} ---------'
+np.niceprint('--------- (V{!s}) End time: {!s} ---------(Log:{!s})'
              .format(UPLDRConstants.Version,
-                     nutime.strftime(UPLDRConstants.TimeFormat)))
+                     nutime.strftime(UPLDRConstants.TimeFormat),
+                     LOGGING_LEVEL))
 sys.stderr.write('--------- ' + 'End: ' + ' ---------\n')
 sys.stderr.flush()

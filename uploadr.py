@@ -109,7 +109,7 @@ import lib.rate_limited as rate_limited
 # Getting definitions from UPLDRConstants
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 # Define LOGGING_LEVEL to allow logging even if everything else is wrong!
-#EXTREME CODING
+# EXTREME CODING
 LOGGING_LEVEL = logging.DEBUG
 logging.basicConfig(stream=sys.stderr,
                     level=int(LOGGING_LEVEL),
@@ -4535,93 +4535,93 @@ class MyConfiguration(object):
         found on INI config file.
     """
     # Config section ----------------------------------------------------------
-    INISections = [ 'Config' ]
+    INISections = ['Config']
     # Default configuration keys/values pairs ---------------------------------
     INIkeys = [
-                'FILES_DIR',
-                'FLICKR',
-                'SLEEP_TIME',
-                'DRIP_TIME',
-                'DB_PATH',
-                'LOCK_PATH',
-                'TOKEN_CACHE',
-                'TOKEN_PATH',
-                'EXCLUDED_FOLDERS',
-                'IGNORED_REGEX',
-                'ALLOWED_EXT',
-                'CONVERT_RAW_FILES',
-                'RAW_EXT',
-                'RAW_TOOL_PATH',
-                'FILE_MAX_SIZE',
-                'MANAGE_CHANGES',
-                'FULL_SET_NAME',
-                'MAX_SQL_ATTEMPTS',
-                'MAX_UPLOAD_ATTEMPTS',
-                'LOGGING_LEVEL'
-              ]
+        'FILES_DIR',
+        'FLICKR',
+        'SLEEP_TIME',
+        'DRIP_TIME',
+        'DB_PATH',
+        'LOCK_PATH',
+        'TOKEN_CACHE',
+        'TOKEN_PATH',
+        'EXCLUDED_FOLDERS',
+        'IGNORED_REGEX',
+        'ALLOWED_EXT',
+        'CONVERT_RAW_FILES',
+        'RAW_EXT',
+        'RAW_TOOL_PATH',
+        'FILE_MAX_SIZE',
+        'MANAGE_CHANGES',
+        'FULL_SET_NAME',
+        'MAX_SQL_ATTEMPTS',
+        'MAX_UPLOAD_ATTEMPTS',
+        'LOGGING_LEVEL'
+    ]
     # Default configuration keys/values pairs ---------------------------------
     INIvalues = [
-                  # FILES_DIR
-                  "'photos'",
-                  # FLICKR
-                  "{ 'title'       : '',\
-                     'description' : '',\
-                     'tags'        : 'auto-upload',\
-                     'is_public'   : '0',\
-                     'is_friend'   : '0',\
-                     'is_family'   : '0',\
-                     'api_key'     : 'api_key_not_defined',\
-                     'secret'      : 'secret_not_defined'\
-                  }",
-                 # SLEEP_TIME
-                 "1 * 60",
-                 # DRIP_TIME
-                 "1 * 60",
-                 #  DB_PATH
-                 "os.path.join(os.path.dirname(sys.argv[0]), 'flickrdb')",
-                 # LOCK_PATH
-                 "os.path.join(os.path.dirname(sys.argv[0]), '.flickrlock')",
-                 # TOKEN_CACHE
-                 "os.path.join(os.path.dirname(sys.argv[0]), 'token')",
-                 # TOKEN_PATH
-                 "os.path.join(os.path.dirname(sys.argv[0]), '.flickrToken')",
-                 # EXCLUDED_FOLDERS (need to process for unicode support)
-                 "['@eaDir','#recycle','.picasaoriginals','_ExcludeSync',\
-                   'Corel Auto-Preserve','Originals',\
-                   'Automatisch beibehalten von Corel']",
-                 # IGNORED_REGEX
-                 "[ ]",
-                 # "['IMG_[0-8]', '.+Ignore.+']",
-                 # ALLOWED_EXT
-                 "['jpg','png','avi','mov','mpg','mp4','3gp']",
-                 # CONVERT_RAW_FILES
-                 "False",
-                 # RAW_EXT
-                 "['3fr', 'ari', 'arw', 'bay', 'crw', 'cr2', 'cap', 'dcs',\
-                   'dcr', 'dng', 'drf', 'eip', 'erf', 'fff', 'iiq', 'k25',\
-                   'kdc', 'mdc', 'mef', 'mos', 'mrw', 'nef', 'nrw', 'obm',\
-                   'orf', 'pef', 'ptx', 'pxn', 'r3d', 'raf', 'raw', 'rwl',\
-                   'rw2', 'rwz', 'sr2', 'srf', 'srw', 'x3f' ]",
-                 # RAW_TOOL_PATH
-                 "'/volume1/photo/Image-ExifTool-9.69'",
-                 # FILE_MAX_SIZE
-                 "50000000",
-                 # MANAGE_CHANGES
-                 "True",
-                 # FULL_SET_NAME
-                 "False",
-                 #  MAX_SQL_ATTEMPTS
-                 "3",
-                 # MAX_UPLOAD_ATTEMPTS
-                 "10",
-                 # LOGGING_LEVEL
-                 "40"
-                ]
+        # FILES_DIR
+        "'photos'",
+        # FLICKR
+        "{ 'title'       : '',\
+           'description' : '',\
+           'tags'        : 'auto-upload',\
+           'is_public'   : '0',\
+           'is_friend'   : '0',\
+           'is_family'   : '0',\
+           'api_key'     : 'api_key_not_defined',\
+           'secret'      : 'secret_not_defined'\
+        }",
+        # SLEEP_TIME
+        "1 * 60",
+        # DRIP_TIME
+        "1 * 60",
+        #  DB_PATH
+        "os.path.join(os.path.dirname(sys.argv[0]), 'flickrdb')",
+        # LOCK_PATH
+        "os.path.join(os.path.dirname(sys.argv[0]), '.flickrlock')",
+        # TOKEN_CACHE
+        "os.path.join(os.path.dirname(sys.argv[0]), 'token')",
+        # TOKEN_PATH
+        "os.path.join(os.path.dirname(sys.argv[0]), '.flickrToken')",
+        # EXCLUDED_FOLDERS (need to process for unicode support)
+        "['@eaDir','#recycle','.picasaoriginals','_ExcludeSync',\
+          'Corel Auto-Preserve','Originals',\
+          'Automatisch beibehalten von Corel']",
+        # IGNORED_REGEX
+        "[ ]",
+        # "['IMG_[0-8]', '.+Ignore.+']",
+        # ALLOWED_EXT
+        "['jpg','png','avi','mov','mpg','mp4','3gp']",
+        # CONVERT_RAW_FILES
+        "False",
+        # RAW_EXT
+        "['3fr', 'ari', 'arw', 'bay', 'crw', 'cr2', 'cap', 'dcs',\
+          'dcr', 'dng', 'drf', 'eip', 'erf', 'fff', 'iiq', 'k25',\
+          'kdc', 'mdc', 'mef', 'mos', 'mrw', 'nef', 'nrw', 'obm',\
+          'orf', 'pef', 'ptx', 'pxn', 'r3d', 'raf', 'raw', 'rwl',\
+          'rw2', 'rwz', 'sr2', 'srf', 'srw', 'x3f' ]",
+        # RAW_TOOL_PATH
+        "'/volume1/photo/Image-ExifTool-9.69'",
+        # FILE_MAX_SIZE
+        "50000000",
+        # MANAGE_CHANGES
+        "True",
+        # FULL_SET_NAME
+        "False",
+        #  MAX_SQL_ATTEMPTS
+        "3",
+        # MAX_UPLOAD_ATTEMPTS
+        "10",
+        # LOGGING_LEVEL
+        "40"
+    ]
 
     # -------------------------------------------------------------------------
     # MyConfiguration.__init__
     #
-    def __init__(self, cfg_filename, cfg_Sections = INISections):
+    def __init__(self, cfg_filename, cfg_Sections=INISections):
         """__init__
         """
 
@@ -4676,9 +4676,9 @@ class MyConfiguration(object):
             logging.info('Active INI key/values pairs...')
             for item in self.__dict__:
                 logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
-                              .format(item,
-                                      StrUnicodeOut(self.__dict__[item]),
-                                      type(self.__dict__[item])))
+                             .format(item,
+                                     StrUnicodeOut(self.__dict__[item]),
+                                     type(self.__dict__[item])))
 
         self.__dict__['FILES_DIR'] = unicode(  # noqa
                                          self.__dict__['FILES_DIR'],
@@ -4686,14 +4686,13 @@ class MyConfiguration(object):
                                      if sys.version_info < (3, ) \
                                      else str(self.__dict__['FILES_DIR'])
 
-
         if LOGGING_LEVEL <= logging.INFO:
             logging.info('Processed INI key/values pairs...')
             for item in self.__dict__:
                 logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
-                              .format(item,
-                                      StrUnicodeOut(self.__dict__[item]),
-                                      type(self.__dict__[item])))
+                             .format(item,
+                                     StrUnicodeOut(self.__dict__[item]),
+                                     type(self.__dict__[item])))
 
 
 def parseconfig(Config):

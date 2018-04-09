@@ -4380,7 +4380,7 @@ def run_uploadr():
 
     # EXTREME CODING
     sys.exit()
-    
+
     if FLICKR["api_key"] == "" or FLICKR["secret"] == "":
         logging.critical('Please enter an API key and secret in the '
                          'configuration '
@@ -4652,13 +4652,14 @@ class MyConfiguration(object):
             INIFile = None
             INIFile = config.read(cfg_filename)
             for name in cfg_Sections:
-                self.__dict__.update(config.items(name))            
+                self.__dict__.update(config.items(name))
         except Exception as err:
             logging.critical('INI file: [{!s}] not found or '
                              'incorrect format: [{!s}]! Will attempt to use '
-                             'defait INI values.'
+                             'default INI values.'
                              .format(cfg_filename, str(err)))
         finally:
+            # Allow to continue with default values...
             if not INIFile:
                 raise ValueError('No config file found!')
 
@@ -4723,9 +4724,9 @@ class MyConfiguration(object):
             try:
                 if INIcheck[item] in ('list', 'int', 'bool', 'str', 'dict'):
                     logging.debug('isinstance={!s}'
-                        .format(
-                            isinstance(eval(self.__dict__[item]),
-                                       eval(INIcheck[item]))))
+                                  .format(
+                                      isinstance(eval(self.__dict__[item]),
+                                                 eval(INIcheck[item]))))
                     if not(isinstance(eval(self.__dict__[item]),
                                       eval(INIcheck[item]))):
                         raise
@@ -4739,7 +4740,7 @@ class MyConfiguration(object):
                 #     logging.debug('    isfile={!s}'
                 #         .format(
                 #             os.path.isfile((eval(self.__dict__[item])))))
-            except:
+            except BaseException:
                 logging.critical('Invalid INI value for:[{!s}] '
                                  'Using default value:[{!s}]'
                                  .format(item,
@@ -4747,8 +4748,8 @@ class MyConfiguration(object):
                                             self.INIkeys.index(str(item))]))
                 # Use default value or exit...
                 self.__dict__.update(dict(zip(
-                    [ item ],
-                    [ self.INIvalues[self.INIkeys.index(str(item))] ])))
+                    [item],
+                    [self.INIvalues[self.INIkeys.index(str(item))]])))
             finally:
                 self.__dict__[item] = eval(self.__dict__[item])
                 logging.debug('Eval done: [{!s:20s}]/type:[{!s:13s}] '
@@ -4756,7 +4757,7 @@ class MyConfiguration(object):
                               .format(item,
                                       type(self.__dict__[item]),
                                       StrUnicodeOut(self.__dict__[item])))
-            
+
         if LOGGING_LEVEL <= logging.INFO:
             logging.info('\t\t\t\tProcessed INI key/values pairs...')
             for item in sorted(self.__dict__):
@@ -4764,7 +4765,7 @@ class MyConfiguration(object):
                              .format(item,
                                      type(self.__dict__[item]),
                                      StrUnicodeOut(self.__dict__[item])))
-        
+
         return True
 
     # -------------------------------------------------------------------------
@@ -4773,7 +4774,7 @@ class MyConfiguration(object):
     def verifyconfig(self):
         """ readconfig
         """
-    
+
         # Further specific processing... FILES_DIR
         self.__dict__['FILES_DIR'] = unicode(  # noqa
                                          self.__dict__['FILES_DIR'],
@@ -4815,8 +4816,8 @@ class MyConfiguration(object):
                                  len(outEXCLUDED_FOLDERS) - 1]))
                         )
         self.__dict__.update(dict(zip(
-                    [ 'EXCLUDED_FOLDERS' ],
-                    [ outEXCLUDED_FOLDERS ] )))
+                    ['EXCLUDED_FOLDERS'],
+                    [outEXCLUDED_FOLDERS])))
         # CODING assing outEXCLUDED_FOLDERS to self.__dict with update...
         # Further specific processing... IGNORED_REGEX
         # Consider Unicode Regular expressions
@@ -4826,7 +4827,7 @@ class MyConfiguration(object):
         #     logging.INFO('Number of IGNORED_REGEX entries:[{!s}]\n'
         #                  .format(len(IGNORED_REGEX)))
         # ---------------------------------------------------------------------
-        
+
         if LOGGING_LEVEL <= logging.INFO:
             logging.info('\t\t\t\tVerified INI key/values pairs...')
             for item in sorted(self.__dict__):

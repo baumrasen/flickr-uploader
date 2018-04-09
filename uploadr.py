@@ -4781,7 +4781,7 @@ class MyConfiguration(object):
                                          'utf-8') \
                                      if sys.version_info < (3, ) \
                                      else str(self.__dict__['FILES_DIR'])
-    
+
         # Further specific processing... LOGGING_LEVEL
         if self.__dict__['LOGGING_LEVEL'] not in\
                 [logging.NOTSET,

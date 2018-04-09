@@ -4745,7 +4745,7 @@ class MyConfiguration(object):
                                  'Using default value:[{!s}]'
                                  .format(item,
                                          self.INIvalues[
-                                            self.INIkeys.index(str(item))]))
+                                             self.INIkeys.index(str(item))]))
                 # Use default value or exit...
                 self.__dict__.update(dict(zip(
                     [item],
@@ -4815,8 +4815,8 @@ class MyConfiguration(object):
                              type(outEXCLUDED_FOLDERS[
                                  len(outEXCLUDED_FOLDERS) - 1])))
         self.__dict__.update(dict(zip(
-                    ['EXCLUDED_FOLDERS'],
-                    [outEXCLUDED_FOLDERS])))
+            ['EXCLUDED_FOLDERS'],
+            [outEXCLUDED_FOLDERS])))
         # CODING assing outEXCLUDED_FOLDERS to self.__dict with update...
         # Further specific processing... IGNORED_REGEX
         # Consider Unicode Regular expressions

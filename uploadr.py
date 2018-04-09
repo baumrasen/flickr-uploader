@@ -4636,6 +4636,8 @@ class MyConfiguration(object):
         """__init__
         """
 
+        logging.debug('\t__init__: name=[{!s}]'.format(self.name))
+
         # Assume default values into class dictionary of values ---------------
         self.__dict__ = dict(zip(self.INIkeys, self.INIvalues))
         if LOGGING_LEVEL <= logging.DEBUG:
@@ -4814,8 +4816,10 @@ class MyConfiguration(object):
                              type(outEXCLUDED_FOLDERS[
                                  len(outEXCLUDED_FOLDERS) - 1]))
                         )
+        self.__dict__.update(dict(zip(
+                    [ 'EXCLUDED_FOLDERS' ],
+                    [ outEXCLUDED_FOLDERS ] )))
         # CODING assing outEXCLUDED_FOLDERS to self.__dict with update...
-        del inEXCLUDED_FOLDERS        
         # Further specific processing... IGNORED_REGEX
         # Consider Unicode Regular expressions
         # IGNORED_REGEX = [re.compile(regex, re.UNICODE) for regex in
@@ -4824,6 +4828,15 @@ class MyConfiguration(object):
         #     logging.INFO('Number of IGNORED_REGEX entries:[{!s}]\n'
         #                  .format(len(IGNORED_REGEX)))
         # ---------------------------------------------------------------------
+        
+        if LOGGING_LEVEL <= logging.INFO:
+            logging.info('\t\t\t\tVerified INI key/values pairs...')
+            for item in sorted(self.__dict__):
+                logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
+                             .format(item,
+                                     type(self.__dict__[item]),
+                                     StrUnicodeOut(self.__dict__[item])))
+
         return True
 
 

@@ -4636,8 +4636,6 @@ class MyConfiguration(object):
         """__init__
         """
 
-        logging.debug('\t__init__: name=[{!s}]'.format(self.name))
-
         # Assume default values into class dictionary of values ---------------
         self.__dict__ = dict(zip(self.INIkeys, self.INIvalues))
         if LOGGING_LEVEL <= logging.DEBUG:
@@ -4758,7 +4756,6 @@ class MyConfiguration(object):
                               .format(item,
                                       type(self.__dict__[item]),
                                       StrUnicodeOut(self.__dict__[item])))
-
             
         if LOGGING_LEVEL <= logging.INFO:
             logging.info('\t\t\t\tProcessed INI key/values pairs...')
@@ -4792,9 +4789,10 @@ class MyConfiguration(object):
                  logging.WARNING,
                  logging.ERROR,
                  logging.CRITICAL]:
-            LOGGING_LEVEL = logging.WARNING
+            self.__dict__['LOGGING_LEVEL'] = logging.WARNING
         # Convert LOGGING_LEVEL into int() for later use in conditionals
-        self.LOGGING_LEVEL = int(str(self.LOGGING_LEVEL))
+        self.__dict__['LOGGING_LEVEL'] = int(str(
+            self.__dict__['LOGGING_LEVEL']))
         # Further specific processing... TOKEN_CACHE
         # Further specific processing... DB_PATH
         # Further specific processing... LOCK_PATH
@@ -4881,10 +4879,10 @@ if __name__ == "__main__":
         raise ValueError('No config file found or incorrect config!')
 
     # Update logging level as per LOGGING_LEVEL from INI file
-    logging.getLogger().setLevel(LOGGING_LEVEL)
+    logging.getLogger().setLevel(xCfg.LOGGING_LEVEL)
 
     # CODING: Remove
-    if LOGGING_LEVEL <= logging.INFO:
+    if xCfg.LOGGING_LEVEL <= logging.INFO:
         np.niceprint('Output for FLICKR Configuration:')
         pprint.pprint(xCfg.FLICKR)
 
@@ -4906,6 +4904,6 @@ if __name__ == "__main__":
 np.niceprint('--------- (V{!s}) End time: {!s} ---------(Log:{!s})'
              .format(UPLDRConstants.Version,
                      nutime.strftime(UPLDRConstants.TimeFormat),
-                     LOGGING_LEVEL))
+                     xCfg.LOGGING_LEVEL))
 sys.stderr.write('--------- ' + 'End: ' + ' ---------\n')
 sys.stderr.flush()

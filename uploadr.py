@@ -20,7 +20,7 @@
     Inspired by:
     * https://github.com/sybrenstuvel/flickrapi
     * http://micampe.it/things/flickruploadr
-    * https://github.com/joelmx/flickrUploadr/blob/master/python3/uploadr.py
+    * https://github.com/joelmx/flickrUploadr/
 
     ## README.md
     ------------

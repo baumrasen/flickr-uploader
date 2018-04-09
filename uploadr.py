@@ -4813,8 +4813,7 @@ class MyConfiguration(object):
                              StrUnicodeOut(outEXCLUDED_FOLDERS[
                                  len(outEXCLUDED_FOLDERS) - 1]),
                              type(outEXCLUDED_FOLDERS[
-                                 len(outEXCLUDED_FOLDERS) - 1]))
-                        )
+                                 len(outEXCLUDED_FOLDERS) - 1])))
         self.__dict__.update(dict(zip(
                     ['EXCLUDED_FOLDERS'],
                     [outEXCLUDED_FOLDERS])))

@@ -4378,10 +4378,7 @@ def run_uploadr():
                          .format(StrUnicodeOut(xCfg.FILES_DIR)))
             sys.exit(9)
 
-    # EXTREME CODING
-    sys.exit()
-
-    if FLICKR["api_key"] == "" or FLICKR["secret"] == "":
+    if xCfg.FLICKR["api_key"] == "" or xCfg.FLICKR["secret"] == "":
         logging.critical('Please enter an API key and secret in the '
                          'configuration '
                          'script file, normaly uploadr.ini (see README).')
@@ -4661,7 +4658,7 @@ class MyConfiguration(object):
         finally:
             # Allow to continue with default values...
             if not INIFile:
-                raise ValueError('No config file found!')
+                raise ValueError('No config file or unrecoverable error!')
 
         # Parse Configuration file and overwrite any values -------------------
         # pprint.pprint(config.items(cfg_Sections[0]))
@@ -4799,7 +4796,7 @@ class MyConfiguration(object):
         # Further specific processing... TOKEN_PATH
         # Further specific processing... RAW_TOOL_PATH # Not used for now!
         for item in ['DB_PATH',  # Check if basedir exists. Unicode Support
-                     'LOCKPATH',
+                     'LOCK_PATH',
                      'TOKEN_CACHE',
                      'TOKEN_PATH']:
             logging.debug('verifyconfig for [{!s}]'.format(item))

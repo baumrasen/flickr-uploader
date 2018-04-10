@@ -30,12 +30,14 @@ try:
 except ImportError:
     import configparser as ConfigParser  # Python 3
 from . import niceprint
+
+# =============================================================================
+# Functions aliases
+#
+#   StrUnicodeOut       = from niceprint module
+# -----------------------------------------------------------------------------
 np = niceprint.niceprint()
 StrUnicodeOut = np.StrUnicodeOut
-
-from . import UPLDRConstants as UPLDRConstantsClass
-UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
-
 
 # -----------------------------------------------------------------------------
 # class MyConfiguration to hangle Config file uploadr.ini for flickr-uploadr.

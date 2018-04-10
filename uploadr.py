@@ -106,9 +106,8 @@ import lib.myconfig as myconfig
 # Getting definitions from UPLDRConstants
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 # Define LOGGING_LEVEL to allow logging even if everything else is wrong!
-# LOGGING_LEVEL = logging.WARNING
-# CODING
-LOGGING_LEVEL = logging.DEBUG
+LOGGING_LEVEL = logging.WARNING
+# LOGGING_LEVEL = logging.DEBUG  # CODING
 logging.basicConfig(stream=sys.stderr,
                     level=int(str(LOGGING_LEVEL)),
                     datefmt=UPLDRConstants.TimeFormat,

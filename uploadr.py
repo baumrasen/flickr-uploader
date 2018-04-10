@@ -120,7 +120,6 @@ logging.basicConfig(stream=sys.stderr,
                     '[%(asctime)s]:[%(processName)-11s]' +
                     UPLDRConstants.W +
                     '[%(levelname)-8s]:[%(name)s] %(message)s')
-logging.info('test')
 # -----------------------------------------------------------------------------
 
 
@@ -4812,6 +4811,7 @@ class MyConfiguration(object):
 
         # Further specific processing... EXCLUDED_FOLDERS
         #     Read EXCLUDED_FOLDERS and convert them into Unicode folders
+        logging.debug('verifyconfig for [{!s}]'.format('EXCLUDED_FOLDERS'))
         inEXCLUDED_FOLDERS = self.__dict__['EXCLUDED_FOLDERS']
         logging.debug('inEXCLUDED_FOLDERS=[{!s}]'
                       .format(inEXCLUDED_FOLDERS))
@@ -4836,6 +4836,7 @@ class MyConfiguration(object):
         # Further specific processing... IGNORED_REGEX
         # Consider Unicode Regular expressions
         for item in ['IGNORED_REGEX']:
+            logging.debug('verifyconfig for [{!s}]'.format(item))
             self.__dict__[item] = [re.compile(regex, re.UNICODE)
                 for regex in self.__dict__[item]]
             logging.info('Number of IGNORED_REGEX entries:[{!s}]\n'

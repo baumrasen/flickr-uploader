@@ -37,6 +37,7 @@
 * updatedVideoDate fails on three attempts (is it 'cause Flickr is processing
   the video? and raises error caught on #210! Next run does not update video
   date.
+* review LOGGING_LEVEL definition vs MyConfiguration class
 
 ## Known issues
 ---------------

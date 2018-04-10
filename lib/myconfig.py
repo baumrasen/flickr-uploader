@@ -164,6 +164,13 @@ class MyConfig(object):
             INIFile = config.read(cfg_filename)
             for name in cfg_Sections:
                 self.__dict__.update(config.items(name))
+            # Find incorrect config keys on INI File and delete them
+            dropkeys = [ config.__dict__[key] for key
+                        in config.__dict__.keys() if key not in INIkeys]
+            logging.debug('dropkeys:[{!s}]'.format(dropkeys))
+            for key in dropkeys:
+                logging.debug('del key:[{!s}]'.format(key))
+                del self.__dict__[key]
         except Exception as err:
             logging.critical('INI file: [{!s}] not found or '
                              'incorrect format: [{!s}]! Will attempt to use '

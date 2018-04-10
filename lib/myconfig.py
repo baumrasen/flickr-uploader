@@ -25,6 +25,14 @@ import sys
 import os
 import logging
 import re
+try:
+    import ConfigParser as ConfigParser  # Python 2
+except ImportError:
+    import configparser as ConfigParser  # Python 3
+from . import niceprint
+np = niceprint.niceprint()
+StrUnicodeOut = np.StrUnicodeOut
+
 from . import UPLDRConstants as UPLDRConstantsClass
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 

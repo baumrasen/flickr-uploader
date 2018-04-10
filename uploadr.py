@@ -63,10 +63,6 @@ import fcntl
 import errno
 import subprocess
 import re
-try:
-    import ConfigParser as ConfigParser  # Python 2
-except ImportError:
-    import configparser as ConfigParser  # Python 3
 import multiprocessing
 import flickrapi
 import xml

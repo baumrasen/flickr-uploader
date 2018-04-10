@@ -3289,10 +3289,12 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         # D) checksum, title, other setName,       Count>=1
                         #                                       THEN NOT EXISTS
                         if ARGS.verbose_progress:
-                            np.niceprint('...: IS PHOTO UPLOADED=FALSE OTHER SET, '
+                            np.niceprint('...: '
+                                         'IS PHOTO UPLOADED=FALSE OTHER SET, '
                                          'CONTINUING SEARCH IN SETS',
                                          fname='is_already_uploaded')
-                        logging.warning('...: IS PHOTO UPLOADED=FALSE OTHER SET, '
+                        logging.warning('...: '
+                                        'IS PHOTO UPLOADED=FALSE OTHER SET, '
                                         'CONTINUING SEARCH IN SETS')
                         continue
 

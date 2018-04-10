@@ -4241,9 +4241,9 @@ def parse_arguments():
                                  'See also LOGGING_LEVEL value in INI file.')
     vgrpparser.add_argument('-x', '--verbose-progress', action='store_true',
                             help='Provides progress indicator on each upload.'
-                                  ' Normally used in conjunction with '
-                                  '-v option. '
-                                  'See also LOGGING_LEVEL value in INI file.')
+                                 ' Normally used in conjunction with '
+                                 '-v option. '
+                                 'See also LOGGING_LEVEL value in INI file.')
     vgrpparser.add_argument('-n', '--dry-run', action='store_true',
                             help='Dry run. No changes are actually performed.')
 
@@ -4732,14 +4732,6 @@ class MyConfiguration(object):
                         raise
                 else:
                     raise
-                # elif INIcheck[item] in ('path'):
-                #     logging.debug('    ispath={!s}'
-                #         .format(
-                #             os.path.isdir((eval(self.__dict__[item])))))
-                # elif INIcheck[item] in ('file'):
-                #     logging.debug('    isfile={!s}'
-                #         .format(
-                #             os.path.isfile((eval(self.__dict__[item])))))
             except BaseException:
                 logging.critical('Invalid INI value for:[{!s}] '
                                  'Using default value:[{!s}]'
@@ -4775,13 +4767,6 @@ class MyConfiguration(object):
         """ readconfig
         """
 
-        # Further specific processing... FILES_DIR
-        self.__dict__['FILES_DIR'] = unicode(  # noqa
-                                         self.__dict__['FILES_DIR'],
-                                         'utf-8') \
-                                     if sys.version_info < (3, ) \
-                                     else str(self.__dict__['FILES_DIR'])
-
         # Further specific processing... LOGGING_LEVEL
         if self.__dict__['LOGGING_LEVEL'] not in\
                 [logging.NOTSET,
@@ -4794,39 +4779,72 @@ class MyConfiguration(object):
         # Convert LOGGING_LEVEL into int() for later use in conditionals
         self.__dict__['LOGGING_LEVEL'] = int(str(
             self.__dict__['LOGGING_LEVEL']))
-        # Further specific processing... TOKEN_CACHE
+
+        # Further specific processing... FILES_DIR
+        for item in ('FILES_DIR'):  # Check if dir exists. Unicode Support
+            logging.debug('verifyconfig for [{!s}]'.format(item))
+            self.__dict__[item] = unicode(  # noqa
+                                      self.__dict__[item],
+                                      'utf-8') \
+                                  if sys.version_info < (3, ) \
+                                  else str(self.__dict__[item])
+            if not os.path.isdir(self.__dict__[item]):
+                logging.critical('{!s}: [{!s}] is not a valid folder.'
+                                 .format(item,
+                                         StrUnicodeOut(self.__dict__[item])))
+
         # Further specific processing... DB_PATH
         # Further specific processing... LOCK_PATH
+        # Further specific processing... TOKEN_CACHE
         # Further specific processing... TOKEN_PATH
+        # Further specific processing... RAW_TOOL_PATH # Not used for now!
+        for item in ('DB_PATH',  # Check if basedir exists. Unicode Support
+                     'LOCKPATH',
+                     'TOKEN_CACHE',
+                     'TOKEN_PATH'):
+            logging.debug('verifyconfig for [{!s}]'.format(item))
+            self.__dict__[item] = unicode(  # noqa
+                                      self.__dict__[item],
+                                      'utf-8') \
+                                  if sys.version_info < (3, ) \
+                                  else str(self.__dict__[item])
+            if not os.path.isdir(os.path.dirname(self.__dict__[item])):
+                logging.critical('{!s}: [{!s}] is not in a valid folder.'
+                                 .format(item,
+                                         StrUnicodeOut(self.__dict__[item])))
+
         # Further specific processing... EXCLUDED_FOLDERS
-        # Read EXCLUDED_FOLDERS and convert them into Unicode folders
+        #     Read EXCLUDED_FOLDERS and convert them into Unicode folders
         inEXCLUDED_FOLDERS = self.__dict__['EXCLUDED_FOLDERS']
-        logging.info(inEXCLUDED_FOLDERS)
+        logging.debug('inEXCLUDED_FOLDERS=[{!s}]'
+                      .format(inEXCLUDED_FOLDERS))
         outEXCLUDED_FOLDERS = []
         for folder in inEXCLUDED_FOLDERS:
             outEXCLUDED_FOLDERS.append(unicode(folder, 'utf-8')  # noqa
                                        if sys.version_info < (3, )
                                        else str(folder))
-            logging.info('folder from EXCLUDED_FOLDERS:[{!s}] '
-                         'type:[{!s}]\n'
-                         .format(
-                             StrUnicodeOut(outEXCLUDED_FOLDERS[
-                                 len(outEXCLUDED_FOLDERS) - 1]),
-                             type(outEXCLUDED_FOLDERS[
-                                 len(outEXCLUDED_FOLDERS) - 1])))
+            logging.debug('folder from EXCLUDED_FOLDERS:[{!s}] '
+                          'type:[{!s}]\n'
+                          .format(
+                              StrUnicodeOut(outEXCLUDED_FOLDERS[
+                                  len(outEXCLUDED_FOLDERS) - 1]),
+                              type(outEXCLUDED_FOLDERS[
+                                  len(outEXCLUDED_FOLDERS) - 1])))
+        logging.info('outEXCLUDED_FOLDERS=[{!s}]'
+                     .format(outEXCLUDED_FOLDERS))
         self.__dict__.update(dict(zip(
             ['EXCLUDED_FOLDERS'],
             [outEXCLUDED_FOLDERS])))
-        # CODING assing outEXCLUDED_FOLDERS to self.__dict with update...
+
         # Further specific processing... IGNORED_REGEX
         # Consider Unicode Regular expressions
-        # IGNORED_REGEX = [re.compile(regex, re.UNICODE) for regex in
-        #                  eval(config.get('Config', 'IGNORED_REGEX'))]
-        # if LOGGING_LEVEL <= logging.INFO:
-        #     logging.INFO('Number of IGNORED_REGEX entries:[{!s}]\n'
-        #                  .format(len(IGNORED_REGEX)))
-        # ---------------------------------------------------------------------
+        for item in ('IGNORED_REGEX'):
+            self.__dict__[item] = [re.compile(regex, re.UNICODE)
+                for regex in self.__dict__[item]]
+            logging.info('Number of IGNORED_REGEX entries:[{!s}]\n'
+                         .format(len(self.__dict__[item])))
 
+        # ---------------------------------------------------------------------
         if LOGGING_LEVEL <= logging.INFO:
             logging.info('\t\t\t\tVerified INI key/values pairs...')
             for item in sorted(self.__dict__):
@@ -4852,6 +4870,8 @@ if __name__ == "__main__":
     # Arguments override configuration filename
     if ARGS.config_file:
         UPLDRConstants.INIfile = ARGS.config_file
+        logging.info('UPLDRConstants.INIfile:[{!s}]'
+                     .format(StrUnicodeOut(UPLDRConstants.INIfile)))
 
     try:
         if not (

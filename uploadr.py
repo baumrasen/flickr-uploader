@@ -4838,7 +4838,7 @@ class MyConfiguration(object):
         for item in ['IGNORED_REGEX']:
             logging.debug('verifyconfig for [{!s}]'.format(item))
             self.__dict__[item] = [re.compile(regex, re.UNICODE)
-                for regex in self.__dict__[item]]
+                                   for regex in self.__dict__[item]]
             logging.info('Number of IGNORED_REGEX entries:[{!s}]\n'
                          .format(len(self.__dict__[item])))
 

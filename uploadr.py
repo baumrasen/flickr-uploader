@@ -1213,7 +1213,7 @@ class Uploadr:
             return True
 
         if (ARGS.verbose):
-            np.niceprint('Checking file:[{!s}]...'
+            np.niceprint('  Checking file:[{!s}]...'
                          .format(StrUnicodeOut(file)))
 
         setName = self.getSetNameFromFile(file,
@@ -1301,12 +1301,12 @@ class Uploadr:
 
             elif row is None:
                 if (ARGS.verbose):
-                    np.niceprint('Uploading file:[{!s}]...'
+                    np.niceprint(' Uploading file:[{!s}]...'
                                  'On Album:[{!s}]...'
                                  .format(StrUnicodeOut(file),
                                          StrUnicodeOut(setName)))
 
-                logging.warning('Uploading file:[{!s}]... '
+                logging.warning(' Uploading file:[{!s}]... '
                                 'On Album:[{!s}]...'
                                 .format(StrUnicodeOut(file),
                                         StrUnicodeOut(setName)))
@@ -1403,15 +1403,15 @@ class Uploadr:
 
                             # Save photo_id returned from Flickr upload
                             photo_id = uploadResp.findall('photoid')[0].text
-                            logging.warning('Uploaded [{!s}] photo_id=[{!s}] '
-                                            'Ok. Will check for issues ('
-                                            'duplicates or wrong checksum)'
+                            logging.warning('  Uploaded file:[{!s}] '
+                                            'Id=[{!s}]. Check for '
+                                            'duplicates/wrong checksum...'
                                             .format(StrUnicodeOut(file),
                                                     photo_id))
                             if (ARGS.verbose):
-                                np.niceprint('Uploaded [{!s}] photo_id=[{!s}] '
-                                             'Ok. Will check for issues ('
-                                             'duplicates or wrong checksum)'
+                                np.niceprint('  Uploaded file:[{!s}] '
+                                             'ID=[{!s}]. Check for '
+                                             'duplicates/wrong checksum...'
                                              .format(StrUnicodeOut(file),
                                                      photo_id))
 
@@ -1492,7 +1492,7 @@ class Uploadr:
                         raise IOError(uploadResp)
 
                     # Successful update
-                    np.niceprint('Successfully uploaded the file:[{!s}].'
+                    np.niceprint('Successful file:[{!s}].'
                                  .format(StrUnicodeOut(file)))
 
                     # Save file_id... from uploadResp or search_result

@@ -4571,6 +4571,7 @@ if __name__ == "__main__":
 
     # Update logging level as per LOGGING_LEVEL from INI file
     logging.getLogger().setLevel(xCfg.LOGGING_LEVEL)
+    LOGGING_LEVEL = xCfg.LOGGING_LEVEL
 
     # CODING: Remove
     if xCfg.LOGGING_LEVEL <= logging.INFO:
@@ -4591,10 +4592,9 @@ if __name__ == "__main__":
         raise
     finally:
         run_uploadr()
-
-np.niceprint('--------- (V{!s}) End time: {!s} ---------(Log:{!s})'
+np.niceprint('--------- (V{!s}) End time: {!s} -----------(Log:{!s})'
              .format(UPLDRConstants.Version,
                      nutime.strftime(UPLDRConstants.TimeFormat),
-                     xCfg.LOGGING_LEVEL))
+                     LOGGING_LEVEL))
 sys.stderr.write('--------- ' + 'End: ' + ' ---------\n')
 sys.stderr.flush()

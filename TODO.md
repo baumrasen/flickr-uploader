@@ -38,6 +38,9 @@
   the video? and raises error caught on #210! Next run does not update video
   date.
 * review LOGGING_LEVEL definition vs MyConfiguration class
+* Test:
+  if ARGS.title:
+      xCfg.FLICKR["title"] = ARGS.title
 
 ## Known issues
 ---------------

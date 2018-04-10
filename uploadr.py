@@ -324,9 +324,9 @@ class Uploadr:
         global nuflickr
 
         # Instantiate nuflickr for connection to flickr via flickrapi
-        nuflickr = flickrapi.FlickrAPI(FLICKR["api_key"],
-                                       FLICKR["secret"],
-                                       token_cache_location=TOKEN_CACHE)
+        nuflickr = flickrapi.FlickrAPI(xCfg.FLICKR["api_key"],
+                                       xCfg.FLICKR["secret"],
+                                       token_cache_location=xCfg.TOKEN_CACHE)
         # Get request token
         np.niceprint('Getting new token.')
         try:
@@ -392,10 +392,10 @@ class Uploadr:
         global nuflickr
 
         logging.info('Obtaining Cached token')
-        logging.debug('TOKEN_CACHE:[{!s}]'.format(TOKEN_CACHE))
-        nuflickr = flickrapi.FlickrAPI(FLICKR["api_key"],
-                                       FLICKR["secret"],
-                                       token_cache_location=TOKEN_CACHE)
+        logging.debug('TOKEN_CACHE:[{!s}]'.format(xCfg.TOKEN_CACHE))
+        nuflickr = flickrapi.FlickrAPI(xCfg.FLICKR["api_key"],
+                                       xCfg.FLICKR["secret"],
+                                       token_cache_location=xCfg.TOKEN_CACHE)
 
         try:
             # Check if token permissions are correct.
@@ -1311,14 +1311,14 @@ class Uploadr:
 
                 # Title Handling
                 if ARGS.title:
-                    FLICKR["title"] = ARGS.title
+                    xCfg.FLICKR["title"] = ARGS.title
                 if ARGS.description:
-                    FLICKR["description"] = ARGS.description
+                    xCfg.FLICKR["description"] = ARGS.description
                 if ARGS.tags:  # Append a space to later add -t TAGS
-                    FLICKR["tags"] += " "
+                    xCfg.FLICKR["tags"] += " "
                     if ARGS.verbose:
                         np.niceprint('TAGS:[{} {}]'
-                                     .format(FLICKR["tags"],
+                                     .format(xCfg.FLICKR["tags"],
                                              ARGS.tags).replace(',', ''))
 
                 # if FLICKR["title"] is empty...
@@ -1332,7 +1332,7 @@ class Uploadr:
                 # UnicodeDecodeError: 'ascii' codec can't decode byte 0xc3
                 # in position 11: ordinal not in range(128)
                 # Worked around it by forcing the title to filename
-                if FLICKR["title"] == "":
+                if xCfg.FLICKR["title"] == "":
                     path_filename, title_filename = os.path.split(file)
                     logging.info('path:[{!s}] '
                                  'filename:[{!s}] '
@@ -1343,7 +1343,7 @@ class Uploadr:
                     title_filename = os.path.splitext(title_filename)[0]
                     logging.warning('title_name:[{!s}]'.format(title_filename))
                 else:
-                    title_filename = FLICKR["title"]
+                    title_filename = xCfg.FLICKR["title"]
                     logging.warning('title from INI file:[{!s}]'
                                     .format(title_filename))
 
@@ -1373,19 +1373,19 @@ class Uploadr:
                                 fileobj=FileWithCallback(file,
                                                          callback),
                                 title=title_filename
-                                if FLICKR["title"] == ""
-                                else str(FLICKR["title"]),
-                                description=str(FLICKR["description"]),
+                                if xCfg.FLICKR["title"] == ""
+                                else str(xCfg.FLICKR["title"]),
+                                description=str(xCfg.FLICKR["description"]),
                                 tags='{} checksum:{} album:"{}" {}'
                                 .format(
-                                    FLICKR["tags"],
+                                    xCfg.FLICKR["tags"],
                                     file_checksum,
                                     StrUnicodeOut(setName),
                                     ARGS.tags if ARGS.tags else '')
                                 .replace(',', ''),
-                                is_public=str(FLICKR["is_public"]),
-                                is_family=str(FLICKR["is_family"]),
-                                is_friend=str(FLICKR["is_friend"])
+                                is_public=str(xCfg.FLICKR["is_public"]),
+                                is_family=str(xCfg.FLICKR["is_family"]),
+                                is_friend=str(xCfg.FLICKR["is_friend"])
                             )
 
                             logging.debug('uploadResp: ')

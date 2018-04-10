@@ -4781,7 +4781,7 @@ class MyConfiguration(object):
             self.__dict__['LOGGING_LEVEL']))
 
         # Further specific processing... FILES_DIR
-        for item in ('FILES_DIR'):  # Check if dir exists. Unicode Support
+        for item in ['FILES_DIR']:  # Check if dir exists. Unicode Support
             logging.debug('verifyconfig for [{!s}]'.format(item))
             self.__dict__[item] = unicode(  # noqa
                                       self.__dict__[item],
@@ -4798,10 +4798,10 @@ class MyConfiguration(object):
         # Further specific processing... TOKEN_CACHE
         # Further specific processing... TOKEN_PATH
         # Further specific processing... RAW_TOOL_PATH # Not used for now!
-        for item in ('DB_PATH',  # Check if basedir exists. Unicode Support
+        for item in ['DB_PATH',  # Check if basedir exists. Unicode Support
                      'LOCKPATH',
                      'TOKEN_CACHE',
-                     'TOKEN_PATH'):
+                     'TOKEN_PATH']:
             logging.debug('verifyconfig for [{!s}]'.format(item))
             self.__dict__[item] = unicode(  # noqa
                                       self.__dict__[item],
@@ -4838,7 +4838,7 @@ class MyConfiguration(object):
 
         # Further specific processing... IGNORED_REGEX
         # Consider Unicode Regular expressions
-        for item in ('IGNORED_REGEX'):
+        for item in ['IGNORED_REGEX']:
             self.__dict__[item] = [re.compile(regex, re.UNICODE)
                 for regex in self.__dict__[item]]
             logging.info('Number of IGNORED_REGEX entries:[{!s}]\n'

@@ -461,7 +461,7 @@ class Uploadr:
 
         if (not FLICK.checkToken()):
             FLICK.authenticate()
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
 
         with con:
@@ -507,7 +507,7 @@ class Uploadr:
 
         if (not FLICK.checkToken()):
             FLICK.authenticate()
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
 
         with con:
@@ -570,7 +570,7 @@ class Uploadr:
         con = None
         allMedia = self.grabNewFiles()
         # If managing changes, consider all files
-        if MANAGE_CHANGES:
+        if xCfg.MANAGE_CHANGES:
             logging.warning('MANAGED_CHANGES is True. Reviewing allMedia.')
             changedMedia = allMedia
 
@@ -578,7 +578,7 @@ class Uploadr:
         else:
             logging.warning('MANAGED_CHANGES is False. Reviewing only '
                             'changedMedia.')
-            con = lite.connect(DB_PATH)
+            con = lite.connect(xCfg.DB_PATH)
             con.text_factory = str
             with con:
                 cur = con.cursor()
@@ -593,7 +593,7 @@ class Uploadr:
 
         if (ARGS.bad_files):
             # Cater for bad files
-            con = lite.connect(DB_PATH)
+            con = lite.connect(xCfg.DB_PATH)
             con.text_factory = str
             with con:
                 cur = con.cursor()
@@ -761,8 +761,8 @@ class Uploadr:
                 success = self.uploadFile(lock=None, file=file)
                 if ARGS.drip_feed and success and i != changedMedia_count - 1:
                     np.niceprint('Waiting [{!s}] seconds before next upload'
-                                 .format(str(DRIP_TIME)))
-                    nutime.sleep(DRIP_TIME)
+                                 .format(str(xCfg.DRIP_TIME)))
+                    nutime.sleep(xCfg.DRIP_TIME)
                 count = count + 1
                 self.niceprocessedfiles(count,
                                         UPLDRConstants.nuMediacount,
@@ -794,16 +794,16 @@ class Uploadr:
 
         """ convertRawFiles
         """
-        if (not CONVERT_RAW_FILES):
+        if (not xCfg.CONVERT_RAW_FILES):
             return
 
         np.niceprint('*****Converting files*****')
-        for ext in RAW_EXT:
+        for ext in xCfg.RAW_EXT:
             np.niceprint('About to convert files with extension: [{!s}]'
                          .format(StrUnicodeOut(ext)))
 
             for dirpath, dirnames, filenames in os.walk(
-                    FILES_DIR,
+                    xCfg.FILES_DIR,
                     followlinks=True):
                 if '.picasaoriginals' in dirnames:
                     dirnames.remove('.picasaoriginals')
@@ -848,7 +848,8 @@ class Uploadr:
                             else:
                                 flag = "JpgFromRaw"
 
-                            command = RAW_TOOL_PATH + "exiftool -b -" + flag +\
+                            command = xCfg.RAW_TOOL_PATH +\
+                                "exiftool -b -" + flag +\
                                 " -w .JPG -ext " + ext + " -r '" +\
                                 dirpath + "/" +\
                                 filename + "." + fileExt + "'"
@@ -894,7 +895,7 @@ class Uploadr:
                             #           f +
                             #           " to JPG.")
 
-                            command = RAW_TOOL_PATH +\
+                            command = xCfg.RAW_TOOL_PATH +\
                                 "exiftool -tagsfromfile '" +\
                                 dirpath + "/" + f +\
                                 "' -r -all:all -ext JPG '" +\
@@ -926,7 +927,7 @@ class Uploadr:
 
         files = []
         for dirpath, dirnames, filenames in\
-                os.walk(FILES_DIR, followlinks=True):
+                os.walk(xCfg.FILES_DIR, followlinks=True):
 
             # Prevent walking thru files in the list of EXCLUDED_FOLDERS
             # Reduce time by not checking a file in an excluded folder
@@ -937,7 +938,7 @@ class Uploadr:
                               type(os.path.basename(
                                   os.path.normpath(dirpath)))))
             if os.path.basename(os.path.normpath(dirpath)) \
-                    in EXCLUDED_FOLDERS:
+                    in xCfg.EXCLUDED_FOLDERS:
                 dirnames[:] = []
                 filenames[:] = []
                 logging.info('Folder [{!s}] on path [{!s}] excluded.'
@@ -954,14 +955,14 @@ class Uploadr:
                 #     logging.debug('File {!s} in EXCLUDED_FOLDERS:'
                 #                   .format(filePath.encode('utf-8')))
                 #     continue
-                if any(ignored.search(f) for ignored in IGNORED_REGEX):
+                if any(ignored.search(f) for ignored in xCfg.IGNORED_REGEX):
                     logging.debug('File {!s} in IGNORED_REGEX:'
                                   .format(filePath.encode('utf-8')))
                     continue
                 ext = os.path.splitext(os.path.basename(f))[1][1:].lower()
-                if ext in ALLOWED_EXT:
+                if ext in xCfg.ALLOWED_EXT:
                     fileSize = os.path.getsize(dirpath + "/" + f)
-                    if (fileSize < FILE_MAX_SIZE):
+                    if (fileSize < xCfg.FILE_MAX_SIZE):
                         files.append(
                             os.path.normpath(
                                 StrUnicodeOut(dirpath) +
@@ -993,7 +994,7 @@ class Uploadr:
 
         Returns True if a file is within an EXCLUDED_FOLDERS directory/folder
         """
-        for excluded_dir in EXCLUDED_FOLDERS:
+        for excluded_dir in xCfg.EXCLUDED_FOLDERS:
             logging.debug('type(excluded_dir):[{!s}]'
                           .format(type(excluded_dir)))
             logging.debug('is excluded_dir unicode?[{!s}]'
@@ -1148,9 +1149,11 @@ class Uploadr:
 
             # Database Locked is returned often on this INSERT
             # Will try MAX_SQL_ATTEMPTS...
-            for x in range(0, MAX_SQL_ATTEMPTS):
+            for x in range(0, xCfg.MAX_SQL_ATTEMPTS):
                 logging.info('BEGIN SQL:[{!s}]...[{!s}/{!s} attempts].'
-                             .format('INSERT INTO files', x, MAX_SQL_ATTEMPTS))
+                             .format('INSERT INTO files',
+                                     x,
+                                     xCfg.MAX_SQL_ATTEMPTS))
                 DBexception = False
                 try:
                     # Acquire DBlock if in multiprocessing mode
@@ -1183,7 +1186,7 @@ class Uploadr:
                                 CaughtCode='031',
                                 CaughtMsg='Sleep 2 and retry SQL...'
                                           '[{!s}/{!s} attempts]'
-                                          .format(x, MAX_SQL_ATTEMPTS),
+                                          .format(x, xCfg.MAX_SQL_ATTEMPTS),
                                 NicePrint=True)
                     nutime.sleep(2)
                 else:
@@ -1193,13 +1196,13 @@ class Uploadr:
                                     CaughtCode='032',
                                     CaughtMsg='Succeed at retry SQL...'
                                     '[{!s}/{!s} attempts]'
-                                    .format(x, MAX_SQL_ATTEMPTS),
+                                    .format(x, xCfg.MAX_SQL_ATTEMPTS),
                                     NicePrint=True)
                     logging.info(
                         'END SQL:[{!s}]...[{!s}/{!s} attempts].'
                         .format('INSERT INTO files',
                                 x,
-                                MAX_SQL_ATTEMPTS))
+                                xCfg.MAX_SQL_ATTEMPTS))
                     # Break the cycle of SQL_ATTEMPTS and continue
                     break
         # ---------------------------------------------------------------------
@@ -1213,12 +1216,14 @@ class Uploadr:
             np.niceprint('Checking file:[{!s}]...'
                          .format(StrUnicodeOut(file)))
 
-        setName = self.getSetNameFromFile(file, FILES_DIR, FULL_SET_NAME)
+        setName = self.getSetNameFromFile(file,
+                                          xCfg.FILES_DIR,
+                                          xCfg.FULL_SET_NAME)
 
         success = False
         # For tracking bad response from search_photos
         TraceBackIndexError = False
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
         with con:
             cur = con.cursor()
@@ -1351,19 +1356,19 @@ class Uploadr:
                 try:
                     # Perform actual upload of the file
                     search_result = None
-                    for x in range(0, MAX_UPLOAD_ATTEMPTS):
+                    for x in range(0, xCfg.MAX_UPLOAD_ATTEMPTS):
                         # Reset variables on each iteration
                         search_result = None
                         uploadResp = None
                         logging.warning('Uploading/Reuploading '
                                         '[{!s}/{!s} attempts].'
-                                        .format(x, MAX_UPLOAD_ATTEMPTS))
+                                        .format(x, xCfg.MAX_UPLOAD_ATTEMPTS))
                         if (x > 0):
                             np.niceprint('Reuploading:[{!s}]...'
                                          '[{!s}/{!s} attempts].'
                                          .format(StrUnicodeOut(file),
                                                  x,
-                                                 MAX_UPLOAD_ATTEMPTS))
+                                                 xCfg.MAX_UPLOAD_ATTEMPTS))
                         # Upload file to Flickr
                         # replace commas from tags and checksum tags
                         # to avoid tags conflicts
@@ -1452,7 +1457,7 @@ class Uploadr:
 
                             if int(search_result.find('photos')
                                    .attrib['total']) == 0:
-                                if x == MAX_UPLOAD_ATTEMPTS - 1:
+                                if x == xCfg.MAX_UPLOAD_ATTEMPTS - 1:
                                     np.niceprint('Reached maximum number '
                                                  'of attempts to upload, '
                                                  'file: [{!s}]'.format(file))
@@ -1461,7 +1466,8 @@ class Uploadr:
                                                      'skipping')
                                 np.niceprint('Not found, reuploading '
                                              '[{!s}/{!s} attempts].'
-                                             .format(x, MAX_UPLOAD_ATTEMPTS))
+                                             .format(x,
+                                                     xCfg.MAX_UPLOAD_ATTEMPTS))
                                 continue
 
                             if int(search_result.find('photos')
@@ -1593,7 +1599,7 @@ class Uploadr:
                 finally:
                     con.commit()
 
-            elif (MANAGE_CHANGES):
+            elif (xCfg.MANAGE_CHANGES):
                 # we have a file from disk which is found on the database
                 # and is also on flickr but is set on flickr is not defined.
                 # So we need to reset the local datbase set_id so that it will
@@ -1748,7 +1754,7 @@ class Uploadr:
             logging.debug('photo:[{!s}] type(photo):[{!s}]'
                           .format(photo, type(photo)))
 
-            for x in range(0, MAX_UPLOAD_ATTEMPTS):
+            for x in range(0, xCfg.MAX_UPLOAD_ATTEMPTS):
                 res_add_tag = None
                 res_get_info = None
                 replaceResp = None
@@ -1759,7 +1765,7 @@ class Uploadr:
                                      '[{!s}]...[{!s}/{!s} attempts].'
                                      .format(StrUnicodeOut(file),
                                              x,
-                                             MAX_UPLOAD_ATTEMPTS))
+                                             xCfg.MAX_UPLOAD_ATTEMPTS))
 
                     # Use fileobj with filename='dummy'to accept unicode file.
                     replaceResp = nuflickr.replace(
@@ -1849,7 +1855,7 @@ class Uploadr:
                     np.niceprint('Sleep 10 and try to replace again.')
                     nutime.sleep(10)
 
-                    if x == MAX_UPLOAD_ATTEMPTS - 1:
+                    if x == xCfg.MAX_UPLOAD_ATTEMPTS - 1:
                         raise ValueError('Reached maximum number of attempts '
                                          'to replace, skipping')
                     continue
@@ -1985,7 +1991,7 @@ class Uploadr:
             Use new connection and nucur cursor to ensure commit
 
             """
-            con = lite.connect(DB_PATH)
+            con = lite.connect(xCfg.DB_PATH)
             con.text_factory = str
             with con:
                 try:
@@ -2190,8 +2196,8 @@ class Uploadr:
             np.niceprint('Last check: [{!s}]'
                          .format(str(nutime.asctime(time.localtime()))))
             logging.warning('Running in Daemon mode. Sleep [{!s}] seconds.'
-                            .format(SLEEP_TIME))
-            nutime.sleep(SLEEP_TIME)
+                            .format(xCfg.SLEEP_TIME))
+            nutime.sleep(xCfg.SLEEP_TIME)
 
     # -------------------------------------------------------------------------
     # getSetNameFromFile
@@ -2243,7 +2249,7 @@ class Uploadr:
         if ARGS.dry_run:
             return True
 
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
         with con:
             cur = con.cursor()
@@ -2254,8 +2260,8 @@ class Uploadr:
             for row in files:
                 # row[1] = path for the file from table files
                 setName = self.getSetNameFromFile(row[1],
-                                                  FILES_DIR,
-                                                  FULL_SET_NAME)
+                                                  xCfg.FILES_DIR,
+                                                  xCfg.FULL_SET_NAME)
                 newSetCreated = False
 
                 # Search local DB for set_id by setName(folder name )
@@ -2311,7 +2317,7 @@ class Uploadr:
             return nuflickr.photosets.addPhoto(**kwargs)
 
         try:
-            con = lite.connect(DB_PATH)
+            con = lite.connect(xCfg.DB_PATH)
             con.text_factory = str
 
             logging.info('Calling nuflickr.photosets.addPhoto'
@@ -2363,8 +2369,8 @@ class Uploadr:
             if (ex.code == 1):
                 np.niceprint('Photoset not found, creating new set...')
                 setName = self.getSetNameFromFile(file[1],
-                                                  FILES_DIR,
-                                                  FULL_SET_NAME)
+                                                  xCfg.FILES_DIR,
+                                                  xCfg.FULL_SET_NAME)
                 self.createSet(setName, file[0], cur, con)
             # Error: 3: Photo Already in set
             elif (ex.code == 3):
@@ -2520,10 +2526,10 @@ class Uploadr:
             Creates the control database
         """
 
-        np.niceprint('Setting up database:[{!s}]'.format(DB_PATH))
+        np.niceprint('Setting up database:[{!s}]'.format(xCfg.DB_PATH))
         con = None
         try:
-            con = lite.connect(DB_PATH)
+            con = lite.connect(xCfg.DB_PATH)
             con.text_factory = str
             cur = con.cursor()
             cur.execute('CREATE TABLE IF NOT EXISTS files '
@@ -2631,10 +2637,10 @@ class Uploadr:
             Cleans up (deletes) contents from DB badfiles table
         """
         np.niceprint('Cleaning up badfiles table from the database: [{!s}]'
-                     .format(DB_PATH))
+                     .format(xCfg.DB_PATH))
         con = None
         try:
-            con = lite.connect(DB_PATH)
+            con = lite.connect(xCfg.DB_PATH)
             con.text_factory = str
             cur = con.cursor()
             cur.execute('PRAGMA user_version')
@@ -2713,7 +2719,7 @@ class Uploadr:
         if ARGS.dry_run:
             return True
 
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
         with con:
             cur = con.cursor()
@@ -2775,7 +2781,7 @@ class Uploadr:
 
         Prints the list of sets/albums recorded on the local database
         """
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
         with con:
             try:
@@ -2818,7 +2824,7 @@ class Uploadr:
         if ARGS.dry_run:
             return True
 
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
         try:
             sets = nuflickr.photosets_getList()
@@ -3672,8 +3678,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
             # row[1] = path for the file from table files
             setName = self.getSetNameFromFile(f[1],
-                                              FILES_DIR,
-                                              FULL_SET_NAME)
+                                              xCfg.FILES_DIR,
+                                              xCfg.FULL_SET_NAME)
             try:
                 terr = False
                 tfind, tid = self.photos_find_tag(
@@ -3745,7 +3751,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         mmutex = None
         mrunning = None
 
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
         with con:
             try:
@@ -3929,8 +3935,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
                     # row[1] = path for the file from table files
                     setName = self.getSetNameFromFile(row[1],
-                                                      FILES_DIR,
-                                                      FULL_SET_NAME)
+                                                      xCfg.FILES_DIR,
+                                                      xCfg.FULL_SET_NAME)
                     try:
                         tfind, tid = self.photos_find_tag(
                             photo_id=row[0],
@@ -3987,7 +3993,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #
     def listBadFiles(self):
 
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
         with con:
             try:
@@ -4044,7 +4050,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         InitialFoundFiles = shows the Found files prior to processing
         """
         # Total Local photos count --------------------------------------------
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
         countlocal = 0
         with con:
@@ -4394,7 +4400,7 @@ def run_uploadr():
     if ARGS.daemon:
         # Will run in daemon mode every SLEEP_TIME seconds
         logging.warning('Will run in daemon mode every {!s} seconds'
-                        .format(SLEEP_TIME))
+                        .format(xCfg.SLEEP_TIME))
         logging.warning('Make sure you have previously authenticated!')
         FLICK.run()
     else:

@@ -16,10 +16,6 @@
    * successful replacement of photos
 * Change code to insert on database prior to upload and then update result.
 * Test if it Re-upload or not pictures removed from flickr Web interface.
-* Enhancement #7: Extend INI File settings control for appropriate values
-  to all parameters
-   * Check error:  DuplicateSectionError or DuplicateOptionError.
-   * Check also: api_key. KeyError(key)
 * Align try/except handling within functions like people_get_photos or outside
   like photos_get_not_in_set
 * **[NOT FULLY TESTED YET]** You can try and run (Let me know if it works!)

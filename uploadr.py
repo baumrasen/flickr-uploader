@@ -2128,10 +2128,10 @@ class Uploadr:
         Also updates photo DB entry with its set_id
         """
 
-        logging.warning('Adding set: [{!s}] to database log.'
+        logging.warning('  Add set to DB:[{!s}]'
                         .format(StrUnicodeOut(setName)))
         if (ARGS.verbose):
-            np.niceprint('Adding set: [{!s}] to database log.'
+            np.niceprint('  Add set to DB:[{!s}]'
                          .format(StrUnicodeOut(setName)))
 
         try:
@@ -2272,7 +2272,7 @@ class Uploadr:
                 if set is None:
                     # row[0] = files_id from files table
                     setId = self.createSet(setName, row[0], cur, con)
-                    np.niceprint('Created the set: [{!s}]'.
+                    np.niceprint('Created the set:[{!s}]'.
                                  format(StrUnicodeOut(setName)))
                     newSetCreated = True
                 else:
@@ -2285,7 +2285,7 @@ class Uploadr:
                 # row[1] = path for the file from table files
                 # row[2] = set_id from files table
                 if row[2] is None and newSetCreated is False:
-                    np.niceprint('adding file to set [{!s}]...'
+                    np.niceprint('Adding file to set:[{!s}]...'
                                  .format(StrUnicodeOut(row[1])))
 
                     self.addFileToSet(setId, row, cur)
@@ -2336,7 +2336,7 @@ class Uploadr:
                 method='xml'))
 
             if (self.isGood(addPhotoResp)):
-                np.niceprint('Successfully added file:[{!s}] to its set.'
+                np.niceprint('Added file/set:[{!s}] to its set.'
                              .format(StrUnicodeOut(file[1])))
                 try:
                     cur.execute("UPDATE files SET set_id = ? "
@@ -2425,9 +2425,9 @@ class Uploadr:
 
         global nuflickr
 
-        logging.info('Creating new set:[{!s}]'
+        logging.info('  Creating set:[{!s}]'
                      .format(StrUnicodeOut(setName)))
-        np.niceprint('Creating new set:[{!s}]'
+        np.niceprint('  Creating set:[{!s}]'
                      .format(StrUnicodeOut(setName)))
 
         if ARGS.dry_run:

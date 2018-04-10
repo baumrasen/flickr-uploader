@@ -62,7 +62,6 @@ import hashlib
 import fcntl
 import errno
 import subprocess
-import re
 import multiprocessing
 import flickrapi
 import xml

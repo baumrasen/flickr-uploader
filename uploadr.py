@@ -621,7 +621,7 @@ class Uploadr:
                 logging.debug('===Multiprocessing=== Setting up logger!')
                 multiprocessing.log_to_stderr()
                 logger = multiprocessing.get_logger()
-                logger.setLevel(LOGGING_LEVEL)
+                logger.setLevel(xCfg.LOGGING_LEVEL)
 
                 logging.debug('===Multiprocessing=== Lock defined!')
 
@@ -684,7 +684,7 @@ class Uploadr:
                                              uploadTask.pid))
 
                 # Check status of jobs/tasks in the Process Pool
-                if LOGGING_LEVEL <= logging.DEBUG:
+                if xCfg.LOGGING_LEVEL <= logging.DEBUG:
                     logging.debug('===Checking Processes launched/status:')
                     for j in uploadPool:
                         np.niceprint('{!s}.is_alive = {!s}'
@@ -976,7 +976,7 @@ class Uploadr:
                                              StrUnicodeOut('/') +
                                              StrUnicodeOut(f))))
         files.sort()
-        if LOGGING_LEVEL <= logging.DEBUG:
+        if xCfg.LOGGING_LEVEL <= logging.DEBUG:
             np.niceprint('Pretty Print Output for {!s}:'.format('files'))
             pprint.pprint(files)
 
@@ -3785,7 +3785,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     logging.debug('===Multiprocessing=== Setting up logger!')
                     multiprocessing.log_to_stderr()
                     logger = multiprocessing.get_logger()
-                    logger.setLevel(LOGGING_LEVEL)
+                    logger.setLevel(xCfg.LOGGING_LEVEL)
 
                     logging.debug('===Multiprocessing=== Lock defined!')
 
@@ -3849,7 +3849,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                                  migrateTask.pid))
 
                     # Check status of jobs/tasks in the Process Pool
-                    if LOGGING_LEVEL <= logging.DEBUG:
+                    if xCfg.LOGGING_LEVEL <= logging.DEBUG:
                         logging.debug('===Checking Processes launched/status:')
                         for j in migratePool:
                             np.niceprint('{!s}.is_alive = {!s}'
@@ -4355,7 +4355,7 @@ def run_uploadr():
     global ARGS
 
     # Print/show arguments
-    if LOGGING_LEVEL <= logging.INFO:
+    if xCfg.LOGGING_LEVEL <= logging.INFO:
         np.niceprint('Output for arguments(ARGS):')
         pprint.pprint(ARGS)
 

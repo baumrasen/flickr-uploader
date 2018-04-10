@@ -2,11 +2,11 @@
     by oPromessa, 2017
     Published on https://github.com/oPromessa/flickr-uploader/
 
-    Helper class and functions to manage INI configuration.
+    Helper class and functions to load, process and verify INI configuration.
 
 
-    MyConfiguration = Helper class and functions to rate limiting function calls
-                      with Python Decorators.
+    MyConfiguration = Helper class and functions to load, process and
+                      verify INI configuration.
 
     processconfig   = Helper function ...
     verifyconfig    = Helper function ...
@@ -24,7 +24,7 @@ from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 import sys
 import os
 import logging
-from . import niceprint
+import re
 from . import UPLDRConstants as UPLDRConstantsClass
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 
@@ -138,7 +138,7 @@ class MyConfig(object):
 
         # Assume default values into class dictionary of values ---------------
         self.__dict__ = dict(zip(self.INIkeys, self.INIvalues))
-        if LOGGING_LEVEL <= logging.DEBUG:
+        if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
             logging.debug('\t\t\t\tDefault INI key/values pairs...')
             for item in sorted(self.__dict__):
                 logging.debug('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
@@ -166,7 +166,7 @@ class MyConfig(object):
         # Parse Configuration file and overwrite any values -------------------
         # pprint.pprint(config.items(cfg_Sections[0]))
 
-        if LOGGING_LEVEL <= logging.INFO:
+        if logging.getLogger().getEffectiveLevel() <= logging.INFO:
             logging.info('\t\t\t\tActive INI key/values pairs...')
             for item in sorted(self.__dict__):
                 logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
@@ -204,7 +204,7 @@ class MyConfig(object):
             'int'    # 'LOGGING_LEVEL'
         ]
         INIcheck = dict(zip(self.INIkeys, INItypes))
-        if LOGGING_LEVEL <= logging.DEBUG:
+        if logging.getLogger().getEffectiveLevel() <= logging.INFO:
             logging.debug('\t\t\t\tDefault INI key/type pairs...')
             for item in sorted(INIcheck):
                 logging.debug('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
@@ -250,7 +250,7 @@ class MyConfig(object):
                                       type(self.__dict__[item]),
                                       StrUnicodeOut(self.__dict__[item])))
 
-        if LOGGING_LEVEL <= logging.INFO:
+        if logging.getLogger().getEffectiveLevel() <= logging.INFO:
             logging.info('\t\t\t\tProcessed INI key/values pairs...')
             for item in sorted(self.__dict__):
                 logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
@@ -347,7 +347,7 @@ class MyConfig(object):
                          .format(len(self.__dict__[item])))
 
         # ---------------------------------------------------------------------
-        if LOGGING_LEVEL <= logging.INFO:
+        if logging.getLogger().getEffectiveLevel() <= logging.INFO:
             logging.info('\t\t\t\tVerified INI key/values pairs...')
             for item in sorted(self.__dict__):
                 logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'

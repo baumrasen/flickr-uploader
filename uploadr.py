@@ -1263,15 +1263,15 @@ class Uploadr:
                 isLoaded = False
                 isfile_id = None
                 isNoSet = None
-                logging.warning('not_is_photo_already_uploaded:[{!s}] '
+                logging.warning('not_is_already_uploaded:[{!s}] '
                                 .format(isLoaded))
             else:
                 file_checksum = self.md5Checksum(file)
                 isLoaded, isCount, isfile_id, isNoSet = \
-                    self.is_photo_already_uploaded(file,
-                                                   file_checksum,
-                                                   setName)
-                logging.info('is_photo_already_uploaded:[{!s}] '
+                    self.is_already_uploaded(file,
+                                             file_checksum,
+                                             setName)
+                logging.info('is_already_uploaded:[{!s}] '
                              'count:[{!s}] pic:[{!s}] '
                              'row is None == [{!s}] '
                              'isNoSet:[{!s}]'
@@ -1434,11 +1434,11 @@ class Uploadr:
                             # on error, check if exists a photo
                             # with file_checksum
                             ZisLoaded, ZisCount, Zisfile_id, zisNoSet = \
-                                self.is_photo_already_uploaded(
+                                self.is_already_uploaded(
                                     file,
                                     file_checksum,
                                     setName)
-                            logging.debug('is_photo_already_uploaded:[{!s}] '
+                            logging.debug('is_already_uploaded:[{!s}] '
                                           'Zcount:[{!s}] Zpic:[{!s}] '
                                           'ZisNoSet:[{!s}]'
                                           .format(ZisLoaded, ZisCount,
@@ -3001,7 +3001,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         np.niceprint('*****Completed adding Flickr Sets to DB*****')
 
     # -------------------------------------------------------------------------
-    # is_photo_already_uploaded
+    # is_already_uploaded
     #
     # Checks if image is already loaded with tag:checksum
     # (calls Flickr photos.search)
@@ -3023,8 +3023,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #   THEN yes found loaded.
     # Note: There could be more entries due to errors. To be checked manually.
     #
-    def is_photo_already_uploaded(self, xfile, xchecksum, xsetName):
-        """ is_photo_already_uploaded
+    def is_already_uploaded(self, xfile, xchecksum, xsetName):
+        """ is_already_uploaded
 
             Searchs for image with same:
                 title(file without extension)
@@ -3094,9 +3094,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 # CODING: how to indicate an error... different from False?
                 # Possibly raising an exception?
                 # raise Exception('photos_search: Max attempts exhausted.')
-                np.niceprint('return: IS_PHOTO_UPLOADED: ERROR#1',
-                             fname='is_photo_already_uploaded')
-                logging.warning('return: IS_PHOTO_UPLOADED: ERROR#1')
+                np.niceprint('out: IS_PHOTO_UPLOADED: ERROR#1',
+                             fname='is_already_uploaded')
+                logging.warning('out: IS_PHOTO_UPLOADED: ERROR#1')
                 return returnIsPhotoUploaded, \
                     returnPhotoUploaded, \
                     returnPhotoID, \
@@ -3196,9 +3196,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         # Possibly raising an exception?
                         # raise Exception('photos_getAllContexts: '
                         #                 'Max attempts exhausted.')
-                        np.niceprint('return: IS_PHOTO_UPLOADED: ERROR#2',
-                                     fname='is_photo_already_uploaded')
-                        logging.warning('return: IS_PHOTO_UPLOADED: ERROR#2')
+                        np.niceprint('out: IS_PHOTO_UPLOADED: ERROR#2',
+                                     fname='is_already_uploaded')
+                        logging.warning('out: IS_PHOTO_UPLOADED: ERROR#2')
                         return returnIsPhotoUploaded, \
                             returnPhotoUploaded, \
                             returnPhotoID, \
@@ -3224,10 +3224,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         intag='album:{}'
                         .format(xsetName))
                     if tfind:
-                        np.niceprint('return: PHOTO UPLOADED WITHOUT SET '
+                        np.niceprint('out: PHOTO UPLOADED WITHOUT SET '
                                      'WITH ALBUM TAG',
-                                     fname='is_photo_already_uploaded')
-                        logging.warning('return: PHOTO UPLOADED WITHOUT SET '
+                                     fname='is_already_uploaded')
+                        logging.warning('out: PHOTO UPLOADED WITHOUT SET '
                                         'WITH ALBUM TAG')
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
@@ -3238,10 +3238,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             returnUploadedNoSet
                     else:
                         if ARGS.verbose_progress:
-                            np.niceprint('PHOTO UPLOADED WITHOUT SET '
+                            np.niceprint('out: PHOTO UPLOADED WITHOUT SET '
                                          'WITHOUT ALBUM TAG',
-                                         fname='is_photo_already_uploaded')
-                        logging.warning('PHOTO UPLOADED WITHOUT SET '
+                                         fname='is_already_uploaded')
+                        logging.warning('out: PHOTO UPLOADED WITHOUT SET '
                                         'WITHOUT ALBUM TAG')
 
                 for setinlist in resp.findall('set'):
@@ -3273,11 +3273,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     #                                               THEN EXISTS
                     if (StrUnicodeOut(xsetName) ==
                             StrUnicodeOut(setinlist.attrib['title'])):
-                        np.niceprint('return: IS PHOTO UPLOADED='
+                        np.niceprint('out: IS PHOTO UPLOADED='
                                      'TRUE WITH SET',
-                                     fname='is_photo_already_uploaded')
+                                     fname='is_already_uploaded')
                         logging.warning(
-                            'return: IS PHOTO UPLOADED=TRUE WITH SET')
+                            'out: IS PHOTO UPLOADED=TRUE WITH SET')
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
                         returnUploadedNoSet = False
@@ -3289,10 +3289,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         # D) checksum, title, other setName,       Count>=1
                         #                                       THEN NOT EXISTS
                         if ARGS.verbose_progress:
-                            np.niceprint('IS PHOTO UPLOADED=FALSE OTHER SET, '
+                            np.niceprint('...: IS PHOTO UPLOADED=FALSE OTHER SET, '
                                          'CONTINUING SEARCH IN SETS',
-                                         fname='is_photo_already_uploaded')
-                        logging.warning('IS PHOTO UPLOADED=FALSE OTHER SET, '
+                                         fname='is_already_uploaded')
+                        logging.warning('...: IS PHOTO UPLOADED=FALSE OTHER SET, '
                                         'CONTINUING SEARCH IN SETS')
                         continue
 

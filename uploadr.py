@@ -97,7 +97,9 @@ import lib.niceprint as niceprint
 # Helper class and functions to rate/pace limiting function calls and run a
 # function multiple attempts/times on error
 import lib.rate_limited as rate_limited
-
+# -----------------------------------------------------------------------------
+# Helper class and functions to load, process and verify INI configuration.
+import lib.myconfig as myconfig
 
 # =============================================================================
 # Logging init code
@@ -4553,7 +4555,7 @@ if __name__ == "__main__":
         sys.exit(2)
 
     # Source configuration
-    xCfg = MyConfig(UPLDRConstants.INIfile, ['Config'])
+    xCfg = myconfig.MyConfig(UPLDRConstants.INIfile, ['Config'])
     if xCfg.processconfig():
         if xCfg.verifyconfig():
             pass

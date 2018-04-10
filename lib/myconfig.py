@@ -39,6 +39,7 @@ from . import niceprint
 np = niceprint.niceprint()
 StrUnicodeOut = np.StrUnicodeOut
 
+
 # -----------------------------------------------------------------------------
 # class MyConfiguration to hangle Config file uploadr.ini for flickr-uploadr.
 #
@@ -228,9 +229,6 @@ class MyConfig(object):
                                   type(self.__dict__[item]),
                                   StrUnicodeOut(self.__dict__[item])))
 
-            # logging.debug('item:{!s}'.format(item))
-            # logging.debug('__dict__.item:{!s}'.format(self.__dict__[item]))
-            # logging.debug('INIcheck.item:{!s}'.format(INIcheck[item]))
             try:
                 if INIcheck[item] in ('list', 'int', 'bool', 'str', 'dict'):
                     logging.debug('isinstance={!s}'
@@ -303,11 +301,12 @@ class MyConfig(object):
                                  .format(item,
                                          StrUnicodeOut(self.__dict__[item])))
 
-        # Further specific processing... DB_PATH
-        # Further specific processing... LOCK_PATH
-        # Further specific processing... TOKEN_CACHE
-        # Further specific processing... TOKEN_PATH
-        # Further specific processing... RAW_TOOL_PATH # Not used for now!
+        # Further specific processing...
+        #       DB_PATH
+        #       LOCK_PATH
+        #       TOKEN_CACHE
+        #       TOKEN_PATH
+        #       RAW_TOOL_PATH  # Not used for now!
         for item in ['DB_PATH',  # Check if basedir exists. Unicode Support
                      'LOCK_PATH',
                      'TOKEN_CACHE',
@@ -366,3 +365,19 @@ class MyConfig(object):
                                      StrUnicodeOut(self.__dict__[item])))
 
         return True
+
+
+# -----------------------------------------------------------------------------
+# If called directly run doctests
+#
+if __name__ == "__main__":
+
+    logging.basicConfig(level=logging.DEBUG,
+                        format='[%(asctime)s]:[%(processName)-11s]' +
+                               '[%(levelname)-8s]:[%(name)s] %(message)s')
+
+    import doctest
+    doctest.testmod()
+
+    # Comment following line to allow further debugging/testing
+    sys.exit(0)

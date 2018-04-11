@@ -1050,8 +1050,8 @@ class Uploadr:
                     encoding='utf-8',
                     method='xml'))
                 if self.isGood(res_set_date):
-                    np.niceprint('Successfully set date [{!s}] '
-                                 'for file:[{!s}].'
+                    np.niceprint('Successful date:[{!s}] '
+                                 'for file:[{!s}]'
                                  .format(StrUnicodeOut(video_date),
                                          StrUnicodeOut(xfile)))
             except (IOError, ValueError, httplib.HTTPException):
@@ -1068,7 +1068,7 @@ class Uploadr:
                 if not self.isGood(res_set_date):
                     raise IOError(res_set_date)
 
-            np.niceprint('Successfully set date [{!s}] for pic [{!s}]'
+            np.niceprint('Successful date:[{!s}] for file:[{!s}]'
                          .format(StrUnicodeOut(video_date),
                                  StrUnicodeOut(xfile)))
             return True
@@ -3569,9 +3569,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
         global nuflickr
 
         if (ARGS.verbose):
-            np.niceprint('Setting Date photo_id=[{!s}] date_taken=[{!s}]'
+            np.niceprint('   Setting Date:photo_id=[{!s}] date_taken=[{!s}]'
                          .format(photo_id, datetxt))
-        logging.warning('Setting Date photo_id=[{!s}] date_taken=[{!s}]'
+        logging.warning('   Setting Date:photo_id=[{!s}] date_taken=[{!s}]'
                         .format(photo_id, datetxt))
 
         @retry(attempts=3, waittime=10, randtime=True)
@@ -3592,7 +3592,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 method='xml'))
 
             if (ARGS.verbose):
-                np.niceprint('Set Date Response:[{!s}]'
+                np.niceprint(' Set Date Reply:[{!s}]'
                              .format(self.isGood(respDate)))
 
         except flickrapi.exceptions.FlickrError as ex:

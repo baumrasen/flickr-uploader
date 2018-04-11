@@ -1286,7 +1286,7 @@ class Uploadr:
                 logging.warning('ALREADY LOADED. '
                                 'DO NOT PERFORM ANYTHING ELSE. '
                                 'ROW IS NONE... UPDATING LOCAL DATABASE.')
-                np.niceprint('Already loaded file:[{!s}]...'
+                np.niceprint(' Already loaded:[{!s}]...'
                              'On Album:[{!s}]... UPDATING LOCAL DATABASE.'
                              .format(StrUnicodeOut(file),
                                      StrUnicodeOut(setName)))

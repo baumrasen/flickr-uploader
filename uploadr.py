@@ -3092,8 +3092,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 # CODING: how to indicate an error... different from False?
                 # Possibly raising an exception?
                 # raise Exception('photos_search: Max attempts exhausted.')
-                np.niceprint(' IS_UPLOADED:[ERROR#1]',
-                             fname='isuploaded')
+                if (ARGS.verbose):
+                    np.niceprint(' IS_UPLOADED:[ERROR#1]',
+                                 fname='isuploaded')
                 logging.warning(' IS_UPLOADED:[ERROR#1]')
                 return returnIsPhotoUploaded, \
                     returnPhotoUploaded, \
@@ -3194,8 +3195,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         # Possibly raising an exception?
                         # raise Exception('photos_getAllContexts: '
                         #                 'Max attempts exhausted.')
-                        np.niceprint(' IS_UPLOADED:[ERROR#2]',
-                                     fname='isuploaded')
+                        if (ARGS.verbose):
+                            np.niceprint(' IS_UPLOADED:[ERROR#2]',
+                                         fname='isuploaded')
                         logging.warning(' IS_UPLOADED:[ERROR#2]')
                         return returnIsPhotoUploaded, \
                             returnPhotoUploaded, \
@@ -3222,11 +3224,12 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         intag='album:{}'
                         .format(xsetName))
                     if tfind:
-                        np.niceprint(' IS_UPLOADED:[PHOTO UPLOADED WITHOUT '
-                                     'SET WITH ALBUM TAG]',
-                                     fname='isuploaded')
-                        logging.warning(' IS_UPLOADED:[PHOTO UPLOADED WITHOUT '
-                                        'SET WITH ALBUM TAG]')
+                        if (ARGS.verbose):
+                            np.niceprint(' IS_UPLOADED:[PHOTO UPLOADED WITHOUT'
+                                         ' SET WITH ALBUM TAG]',
+                                         fname='isuploaded')
+                        logging.warning(' IS_UPLOADED:[PHOTO UPLOADED WITHOUT'
+                                        ' SET WITH ALBUM TAG]')
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
                         returnUploadedNoSet = True
@@ -3271,9 +3274,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     #                                               THEN EXISTS
                     if (StrUnicodeOut(xsetName) ==
                             StrUnicodeOut(setinlist.attrib['title'])):
-                        np.niceprint(' IS_UPLOADED:[IS PHOTO UPLOADED='
-                                     'TRUE WITH SET]',
-                                     fname='isuploaded')
+                        if (ARGS.verbose):
+                            np.niceprint(' IS_UPLOADED:[IS PHOTO UPLOADED='
+                                         'TRUE WITH SET]',
+                                         fname='isuploaded')
                         logging.warning(
                             ' IS_UPLOADED:[IS PHOTO UPLOADED=TRUE WITH SET]')
                         returnIsPhotoUploaded = True

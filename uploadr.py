@@ -299,13 +299,11 @@ class Uploadr:
 
         if not total:
             if (int(count) % 100 == 0):
-                np.niceprint('\t{!s} of \t{!s} files processed (uploaded, '
-                             'md5ed or timestamp checked).'
+                np.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
                              .format(count, cTotal))
         else:
             if (int(count) % 100 > 0):
-                np.niceprint('\t{!s} of \t{!s} files processed (uploaded, '
-                             'md5ed or timestamp checked).'
+                np.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
                              .format(count, cTotal))
 
         sys.stdout.flush()
@@ -514,7 +512,7 @@ class Uploadr:
                 cur = con.cursor()
                 cur.execute("SELECT files_id, path FROM files")
                 rows = cur.fetchall()
-                np.niceprint('[{!s}] will be checked for Removal...'
+                np.niceprint('[{!s>6s}] will be checked for Removal...'
                              .format(str(len(rows))))
             except lite.Error as e:
                 reportError(Caught=True,
@@ -537,10 +535,10 @@ class Uploadr:
                     logging.warning('deleteFile result: {!s}'.format(success))
                     count = count + 1
                     if (count % 3 == 0):
-                        np.niceprint('\t[{!s}] files removed...'
+                        np.niceprint('[{!s:>6s}] files removed...'
                                      .format(str(count)))
             if (count % 100 > 0):
-                np.niceprint('\t[{!s}] files removed...'
+                np.niceprint('[{!s:>6s}] files removed...'
                              .format(str(count)))
 
         # Closing DB connection
@@ -587,7 +585,7 @@ class Uploadr:
 
         changedMedia_count = len(changedMedia)
         UPLDRConstants.nuMediacount = changedMedia_count
-        np.niceprint('Found [{!s}] files to upload.'
+        np.niceprint('Found [{!s:>6s}] files to upload.'
                      .format(str(changedMedia_count)))
 
         if (ARGS.bad_files):
@@ -1207,7 +1205,7 @@ class Uploadr:
         # ---------------------------------------------------------------------
 
         if (ARGS.dry_run is True):
-            np.niceprint('Dry Run Uploading file:[{!s}]...'
+            np.niceprint('   Dry Run file:[{!s}]...'
                          .format(StrUnicodeOut(file)))
             return True
 
@@ -1567,8 +1565,7 @@ class Uploadr:
                             format(ex.code) == '8')) and (ARGS.bad_files)):
                         # Add to db the file NOT uploaded
                         # Control for when running multiprocessing set locking
-                        np.niceprint('Adding to Bad files table:[{!s}] '
-                                     'due to [{!s}]'
+                        np.niceprint('   Log Bad file:[{!s}] due to [{!s}]'
                                      .format(file,
                                              'Filetype was not recognised'
                                              if (format(ex.code) == '5')
@@ -1733,12 +1730,12 @@ class Uploadr:
         global nuflickr
 
         if (ARGS.dry_run is True):
-            np.niceprint('Dry Run Replacing file:[{!s}]...'
+            np.niceprint('Dry Run Replace:[{!s}]...'
                          .format(StrUnicodeOut(file)))
             return True
 
         if (ARGS.verbose):
-            np.niceprint('Replacing file:[{!s}]...'
+            np.niceprint(' Replacing file:[{!s}]...'
                          .format(StrUnicodeOut(file)))
 
         success = False
@@ -1760,7 +1757,7 @@ class Uploadr:
 
                 try:
                     if (x > 0):
-                        np.niceprint('Re-Replacing:'
+                        np.niceprint('   Re-Replacing:'
                                      '[{!s}]...[{!s}/{!s} attempts].'
                                      .format(StrUnicodeOut(file),
                                              x,
@@ -1875,7 +1872,7 @@ class Uploadr:
             if (not self.isGood(res_get_info)):
                 raise IOError(res_get_info)
 
-            np.niceprint('Successfully replaced the file:[{!s}].'
+            np.niceprint('  Replaced file:[{!s}].'
                          .format(StrUnicodeOut(file)))
 
             # Update the db the file uploaded
@@ -2284,7 +2281,7 @@ class Uploadr:
                 # row[1] = path for the file from table files
                 # row[2] = set_id from files table
                 if row[2] is None and newSetCreated is False:
-                    np.niceprint('Adding file to set:[{!s}]...'
+                    np.niceprint('Add file to set:[{!s}]...'
                                  .format(StrUnicodeOut(row[1])))
 
                     self.addFileToSet(setId, row, cur)
@@ -2335,7 +2332,7 @@ class Uploadr:
                 method='xml'))
 
             if (self.isGood(addPhotoResp)):
-                np.niceprint('Added file/set:[{!s}] to its set.'
+                np.niceprint(' Added file/set:[{!s}] to its set.'
                              .format(StrUnicodeOut(file[1])))
                 try:
                     cur.execute("UPDATE files SET set_id = ? "
@@ -2424,9 +2421,9 @@ class Uploadr:
 
         global nuflickr
 
-        logging.info('  Creating set:[{!s}]'
+        logging.info('   Creating set:[{!s}]'
                      .format(StrUnicodeOut(setName)))
-        np.niceprint('  Creating set:[{!s}]'
+        np.niceprint('   Creating set:[{!s}]'
                      .format(StrUnicodeOut(setName)))
 
         if ARGS.dry_run:
@@ -2886,9 +2883,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                           isThisStringUnicode(primaryPhotoId)))
 
                     if (ARGS.verbose):
-                        np.niceprint('setName=[{!s}] '
+                        np.niceprint('  Add Set to DB:[{!s}] '
                                      'setId=[{!s}] '
-                                     'primaryPhotoId=[{!s}]'
+                                     'primaryId=[{!s}]'
                                      .format('None'
                                              if setName is None
                                              else StrUnicodeOut(setName),
@@ -3093,9 +3090,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 # CODING: how to indicate an error... different from False?
                 # Possibly raising an exception?
                 # raise Exception('photos_search: Max attempts exhausted.')
-                np.niceprint('out: IS_PHOTO_UPLOADED: ERROR#1',
-                             fname='is_already_uploaded')
-                logging.warning('out: IS_PHOTO_UPLOADED: ERROR#1')
+                np.niceprint(' IS_UPLOADED:[ERROR#1]',
+                             fname='isuploaded')
+                logging.warning(' IS_UPLOADED:[ERROR#1]')
                 return returnIsPhotoUploaded, \
                     returnPhotoUploaded, \
                     returnPhotoID, \
@@ -3195,9 +3192,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         # Possibly raising an exception?
                         # raise Exception('photos_getAllContexts: '
                         #                 'Max attempts exhausted.')
-                        np.niceprint('out: IS_PHOTO_UPLOADED: ERROR#2',
-                                     fname='is_already_uploaded')
-                        logging.warning('out: IS_PHOTO_UPLOADED: ERROR#2')
+                        np.niceprint(' IS_UPLOADED:[ERROR#2]',
+                                     fname='isuploaded')
+                        logging.warning(' IS_UPLOADED:[ERROR#2]')
                         return returnIsPhotoUploaded, \
                             returnPhotoUploaded, \
                             returnPhotoID, \
@@ -3223,11 +3220,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         intag='album:{}'
                         .format(xsetName))
                     if tfind:
-                        np.niceprint('out: PHOTO UPLOADED WITHOUT SET '
-                                     'WITH ALBUM TAG',
-                                     fname='is_already_uploaded')
-                        logging.warning('out: PHOTO UPLOADED WITHOUT SET '
-                                        'WITH ALBUM TAG')
+                        np.niceprint(' IS_UPLOADED:[PHOTO UPLOADED WITHOUT SET '
+                                     'WITH ALBUM TAG]',
+                                     fname='isuploaded')
+                        logging.warning(' IS_UPLOADED:[PHOTO UPLOADED WITHOUT SET '
+                                        'WITH ALBUM TAG]')
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
                         returnUploadedNoSet = True
@@ -3237,11 +3234,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             returnUploadedNoSet
                     else:
                         if ARGS.verbose_progress:
-                            np.niceprint('out: PHOTO UPLOADED WITHOUT SET '
-                                         'WITHOUT ALBUM TAG',
-                                         fname='is_already_uploaded')
-                        logging.warning('out: PHOTO UPLOADED WITHOUT SET '
-                                        'WITHOUT ALBUM TAG')
+                            np.niceprint(' IS_UPLOADED:[PHOTO UPLOADED WITHOUT SET '
+                                         'WITHOUT ALBUM TAG]',
+                                         fname='isuploaded')
+                        logging.warning(' IS_UPLOADED:[PHOTO UPLOADED WITHOUT SET '
+                                        'WITHOUT ALBUM TAG]')
 
                 for setinlist in resp.findall('set'):
                     logging.warning('setinlist:')
@@ -3272,11 +3269,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     #                                               THEN EXISTS
                     if (StrUnicodeOut(xsetName) ==
                             StrUnicodeOut(setinlist.attrib['title'])):
-                        np.niceprint('out: IS PHOTO UPLOADED='
-                                     'TRUE WITH SET',
-                                     fname='is_already_uploaded')
+                        np.niceprint(' IS_UPLOADED:[IS PHOTO UPLOADED='
+                                     'TRUE WITH SET]',
+                                     fname='isuploaded')
                         logging.warning(
-                            'out: IS PHOTO UPLOADED=TRUE WITH SET')
+                            ' IS_UPLOADED:[IS PHOTO UPLOADED=TRUE WITH SET]')
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
                         returnUploadedNoSet = False
@@ -3288,13 +3285,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         # D) checksum, title, other setName,       Count>=1
                         #                                       THEN NOT EXISTS
                         if ARGS.verbose_progress:
-                            np.niceprint('...: '
-                                         'IS PHOTO UPLOADED=FALSE OTHER SET, '
-                                         'CONTINUING SEARCH IN SETS',
-                                         fname='is_already_uploaded')
-                        logging.warning('...: '
-                                        'IS PHOTO UPLOADED=FALSE OTHER SET, '
-                                        'CONTINUING SEARCH IN SETS')
+                            np.niceprint(' IS_UPLOADED:[FALSE OTHER SET, '
+                                         'CONTINUING SEARCH IN SETS]',
+                                         fname='isuploaded')
+                        logging.warning(' IS_UPLOADED:[FALSE OTHER SET, '
+                                        'CONTINUING SEARCH IN SETS]')
                         continue
 
         return returnIsPhotoUploaded, returnPhotoUploaded, \
@@ -3569,10 +3564,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
         global nuflickr
 
         if (ARGS.verbose):
-            np.niceprint('   Setting Date:photo_id=[{!s}] date_taken=[{!s}]'
-                         .format(photo_id, datetxt))
-        logging.warning('   Setting Date:photo_id=[{!s}] date_taken=[{!s}]'
-                        .format(photo_id, datetxt))
+            np.niceprint('   Setting Date:[{!s}] Id=[{!s}]'
+                         .format(datetxt, photo_id))
+        logging.warning('   Setting Date:[{!s}] Id=[{!s}]'
+                        .format(datetxt, photo_id))
 
         @retry(attempts=3, waittime=10, randtime=True)
         def R_photos_setdates(kwargs):

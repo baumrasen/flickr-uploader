@@ -2281,8 +2281,9 @@ class Uploadr:
                 # row[1] = path for the file from table files
                 # row[2] = set_id from files table
                 if row[2] is None and newSetCreated is False:
-                    np.niceprint('Add file to set:[{!s}]...'
-                                 .format(StrUnicodeOut(row[1])))
+                    np.niceprint('Add file to set:[{!s}] set:[{!s}]'
+                                 .format(StrUnicodeOut(row[1]),
+                                         StrUnicodeOut(setName)))
 
                     self.addFileToSet(setId, row, cur)
 
@@ -2332,8 +2333,9 @@ class Uploadr:
                 method='xml'))
 
             if (self.isGood(addPhotoResp)):
-                np.niceprint(' Added file/set:[{!s}] to its set.'
-                             .format(StrUnicodeOut(file[1])))
+                np.niceprint(' Added file/set:[{!s}] setId:[{!s}]'
+                             .format(StrUnicodeOut(file[1]),
+                                     StrUnicodeOut(setId)))
                 try:
                     cur.execute("UPDATE files SET set_id = ? "
                                 "WHERE files_id = ?",
@@ -2956,11 +2958,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                                   .format(e.args[0]),
                                         NicePrint=True)
                     else:
-                        logging.info('Flickr Set/Album already on '
-                                     'local database.')
+                        logging.info('Set exists on DB:[{!s}]'
+                                     .format(StrUnicodeOut(setName)))
                         if (ARGS.verbose):
-                            np.niceprint('Flickr Set/Album already on '
-                                         'local database.')
+                            np.niceprint('Set exists on DB:[{!s}]'
+                                         .format(StrUnicodeOut(setName)))
 
                 con.commit()
 
@@ -3220,11 +3222,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         intag='album:{}'
                         .format(xsetName))
                     if tfind:
-                        np.niceprint(' IS_UPLOADED:[PHOTO UPLOADED WITHOUT SET '
-                                     'WITH ALBUM TAG]',
+                        np.niceprint(' IS_UPLOADED:[PHOTO UPLOADED WITHOUT '
+                                     'SET WITH ALBUM TAG]',
                                      fname='isuploaded')
-                        logging.warning(' IS_UPLOADED:[PHOTO UPLOADED WITHOUT SET '
-                                        'WITH ALBUM TAG]')
+                        logging.warning(' IS_UPLOADED:[PHOTO UPLOADED WITHOUT '
+                                        'SET WITH ALBUM TAG]')
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
                         returnUploadedNoSet = True
@@ -3234,11 +3236,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             returnUploadedNoSet
                     else:
                         if ARGS.verbose_progress:
-                            np.niceprint(' IS_UPLOADED:[PHOTO UPLOADED WITHOUT SET '
-                                         'WITHOUT ALBUM TAG]',
+                            np.niceprint('IS_UPLOADED:[PHOTO UPLOADED WITHOUT'
+                                         ' SET WITHOUT ALBUM TAG]',
                                          fname='isuploaded')
-                        logging.warning(' IS_UPLOADED:[PHOTO UPLOADED WITHOUT SET '
-                                        'WITHOUT ALBUM TAG]')
+                        logging.warning('IS_UPLOADED:[PHOTO UPLOADED WITHOUT'
+                                        ' SET WITHOUT ALBUM TAG]')
 
                 for setinlist in resp.findall('set'):
                     logging.warning('setinlist:')

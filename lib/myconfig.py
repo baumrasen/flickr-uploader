@@ -43,6 +43,18 @@ StrUnicodeOut = np.StrUnicodeOut
 # -----------------------------------------------------------------------------
 # class MyConfiguration to hangle Config file uploadr.ini for flickr-uploadr.
 #
+# Inits with default configuration values.
+# Refer to contents of uploadr.ini for explanation on configuration
+# parameters.
+# Set default LOGGING_LEVEL value on INIValues based on:
+#     Level     Numeric value
+#     CRITICAL  50
+#     ERROR     40
+#     WARNING   30
+#     INFO      20
+#     DEBUG     10
+#     NOTSET    0
+#
 class MyConfig(object):
     """ MyConfig
 
@@ -136,19 +148,15 @@ class MyConfig(object):
     # -------------------------------------------------------------------------
     # MyConfig.__init__
     #
-    # Obtain configuration from uploadr.ini
-    # Refer to contents of uploadr.ini for explanation on configuration
-    # parameters.
-    # Obtain configuration LOGGING_LEVEL from Configuration file.
-    # If not available or not valid assume WARNING level and notify.
-    # Look for [Config] section file uploadr.ini file
+    # Inits with default configuration values.    
     #
-    def __init__(self, cfg_filename, cfg_Sections=INISections):
+    def __init__(self):
         """__init__
         """
 
         # Assume default values into class dictionary of values ---------------
         self.__dict__ = dict(zip(self.INIkeys, self.INIvalues))
+
         if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
             logging.debug('\t\t\t\tDefault INI key/values pairs...')
             for item in sorted(self.__dict__):
@@ -156,6 +164,16 @@ class MyConfig(object):
                               .format(item,
                                       type(self.__dict__[item]),
                                       StrUnicodeOut(self.__dict__[item])))
+
+    # -------------------------------------------------------------------------
+    # MyConfig.readconfig
+    #
+    # Use readconfig to obtain configuration from uploadr.ini
+    # Look for [Config] section file uploadr.ini file
+    def readconfig(self, cfg_filename, cfg_Sections=INISections):
+        """ readconfig
+        """
+
         # Look for Configuration INI file -------------------------------------
         config = ConfigParser.ConfigParser()
         config.optionxform = str  # make option names case sensitive
@@ -164,6 +182,7 @@ class MyConfig(object):
             INIFile = config.read(cfg_filename)
             for name in cfg_Sections:
                 self.__dict__.update(config.items(name))
+
             # Find incorrect config keys on INI File and delete them
             dropkeys = [key for key in self.__dict__.keys()
                         if key not in self.INIkeys]

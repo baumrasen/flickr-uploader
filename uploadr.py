@@ -105,11 +105,11 @@ import lib.myconfig as myconfig
 #
 # Getting definitions from UPLDRConstants
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
-# Define LOGGING_LEVEL to allow logging even if everything else is wrong!
-LOGGING_LEVEL = logging.WARNING
-# LOGGING_LEVEL = logging.DEBUG  # CODING
+# Inits with default configuration values.
+xCfg = myconfig.MyConfig()
+# Get LOGGING_LEVEL to allow logging even if everything else is wrong!
 logging.basicConfig(stream=sys.stderr,
-                    level=int(str(LOGGING_LEVEL)),
+                    level=int(str(xCfg.LOGGING_LEVEL)),
                     datefmt=UPLDRConstants.TimeFormat,
                     format=UPLDRConstants.P + '[' +
                     str(UPLDRConstants.Run) + ']' +
@@ -4531,7 +4531,7 @@ else:
 np.niceprint('--------- (V{!s}) Start time: {!s} ---------(Log:{!s})'
              .format(UPLDRConstants.Version,
                      nutime.strftime(UPLDRConstants.TimeFormat),
-                     LOGGING_LEVEL))
+                     xCfg.LOGGING_LEVEL))
 if __name__ == "__main__":
     # Parse the argumens options
     parse_arguments()
@@ -4557,8 +4557,8 @@ if __name__ == "__main__":
                     str(err)))
         sys.exit(2)
 
-    # Source configuration
-    xCfg = myconfig.MyConfig(UPLDRConstants.INIfile, ['Config'])
+    # Source configuration from INIfile
+    xCfg.readconfig(UPLDRConstants.INIfile, ['Config'])
     if xCfg.processconfig():
         if xCfg.verifyconfig():
             pass
@@ -4569,7 +4569,6 @@ if __name__ == "__main__":
 
     # Update logging level as per LOGGING_LEVEL from INI file
     logging.getLogger().setLevel(xCfg.LOGGING_LEVEL)
-    LOGGING_LEVEL = xCfg.LOGGING_LEVEL
 
     # CODING: Remove
     if xCfg.LOGGING_LEVEL <= logging.INFO:
@@ -4593,6 +4592,6 @@ if __name__ == "__main__":
 np.niceprint('--------- (V{!s}) End time: {!s} -----------(Log:{!s})'
              .format(UPLDRConstants.Version,
                      nutime.strftime(UPLDRConstants.TimeFormat),
-                     LOGGING_LEVEL))
+                     xCfg.LOGGING_LEVEL))
 sys.stderr.write('--------- ' + 'End: ' + ' ---------\n')
 sys.stderr.flush()

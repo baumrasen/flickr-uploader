@@ -512,7 +512,7 @@ class Uploadr:
                 cur = con.cursor()
                 cur.execute("SELECT files_id, path FROM files")
                 rows = cur.fetchall()
-                np.niceprint('[{!s>6s}] will be checked for Removal...'
+                np.niceprint('[{!s:>6s}] will be checked for Removal...'
                              .format(str(len(rows))))
             except lite.Error as e:
                 reportError(Caught=True,

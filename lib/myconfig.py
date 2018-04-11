@@ -148,7 +148,7 @@ class MyConfig(object):
     # -------------------------------------------------------------------------
     # MyConfig.__init__
     #
-    # Inits with default configuration values.    
+    # Inits with default configuration values.
     #
     def __init__(self):
         """__init__

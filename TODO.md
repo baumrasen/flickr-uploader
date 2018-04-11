@@ -10,10 +10,6 @@
 * Consider using python module exiftool?
 * Would be nice to update ALL tags on replacePhoto and not only the
   mandatory checksum tag as FLICKR maintains the tags from the first load.
-* Regular Output needs to be aligned/simplified to include:
-   * successful uploads
-   * successful update of date/time in videos
-   * successful replacement of photos
 * Change code to insert on database prior to upload and then update result.
 * Test if it Re-upload or not pictures removed from flickr Web interface.
 * Align try/except handling within functions like people_get_photos or outside
@@ -33,10 +29,6 @@
 * updatedVideoDate fails on three attempts (is it 'cause Flickr is processing
   the video? and raises error caught on #210! Next run does not update video
   date.
-* review LOGGING_LEVEL definition vs MyConfiguration class
-* Test:
-  if ARGS.title:
-      xCfg.FLICKR["title"] = ARGS.title
 
 ## Known issues
 ---------------

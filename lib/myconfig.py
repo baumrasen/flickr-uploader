@@ -165,7 +165,7 @@ class MyConfig(object):
             for name in cfg_Sections:
                 self.__dict__.update(config.items(name))
             # Find incorrect config keys on INI File and delete them
-            dropkeys = [key for key in self.__dict__.keys() 
+            dropkeys = [key for key in self.__dict__.keys()
                         if key not in self.INIkeys]
             logging.debug('dropkeys:[{!s}]'.format(dropkeys))
             for key in dropkeys:

@@ -10,21 +10,13 @@
 * Consider using python module exiftool?
 * Would be nice to update ALL tags on replacePhoto and not only the
   mandatory checksum tag as FLICKR maintains the tags from the first load.
-* Regular Output needs to be aligned/simplified to include:
-   * successful uploads
-   * successful update of date/time in videos
-   * successful replacement of photos
 * Change code to insert on database prior to upload and then update result.
 * Test if it Re-upload or not pictures removed from flickr Web interface.
-* Enhancement #7: Extend INI File settings control for appropriate values
-  to all parameters
-   * Check error:  DuplicateSectionError or DuplicateOptionError.
-   * Check also: api_key. KeyError(key)
 * Align try/except handling within functions like people_get_photos or outside
   like photos_get_not_in_set
 * **[NOT FULLY TESTED YET]** You can try and run (Let me know if it works!)
    * `python3 setup.py install --prefix=~/apps/Python`
-   * `python3 setup.py installcfg --folder=~/apps/Python` to install confifg
+   * `python3 setup.py installcfg --folder=~/apps/Python` to install config
   Need to align this change with 1) uploadr.ini change from dirname to getcwd
   and 2) uploadr.py use baseDir as a getcwd()
 * Error 040 on upload (issue #28) try/exception flickrapi is not triggered
@@ -37,9 +29,6 @@
 * updatedVideoDate fails on three attempts (is it 'cause Flickr is processing
   the video? and raises error caught on #210! Next run does not update video
   date.
-* @rate_limited within class Uploadr instantiates logging. have to do it
-  earlier within the main code. on-going-fix...
-
 
 ## Known issues
 ---------------
@@ -73,4 +62,5 @@
   dictionary like accesse (Python 3.6 compatible only)
 
 ## Update History
+-----------------
 * Check releases at [https://github.com/oPromessa/flickr-uploader/](https://github.com/oPromessa/flickr-uploader/)

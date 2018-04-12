@@ -20,7 +20,7 @@
     Inspired by:
     * https://github.com/sybrenstuvel/flickrapi
     * http://micampe.it/things/flickruploadr
-    * https://github.com/joelmx/flickrUploadr/blob/master/python3/uploadr.py
+    * https://github.com/joelmx/flickrUploadr/
 
     ## README.md
     ------------
@@ -62,11 +62,6 @@ import hashlib
 import fcntl
 import errno
 import subprocess
-import re
-try:
-    import ConfigParser as ConfigParser  # Python 2
-except ImportError:
-    import configparser as ConfigParser  # Python 3
 import multiprocessing
 import flickrapi
 import xml
@@ -101,38 +96,27 @@ import lib.niceprint as niceprint
 # Helper class and functions to rate/pace limiting function calls and run a
 # function multiple attempts/times on error
 import lib.rate_limited as rate_limited
-
+# -----------------------------------------------------------------------------
+# Helper class and functions to load, process and verify INI configuration.
+import lib.myconfig as myconfig
 
 # =============================================================================
 # Logging init code
 #
 # Getting definitions from UPLDRConstants
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
-# Define LOGGING_LEVEL to allow logging even if everything else is wrong!
-LOGGING_LEVEL = logging.WARNING
+# Inits with default configuration values.
+xCfg = myconfig.MyConfig()
+# Get LOGGING_LEVEL to allow logging even if everything else is wrong!
+xCfg.LOGGING_LEVEL = int(str(xCfg.LOGGING_LEVEL))
 logging.basicConfig(stream=sys.stderr,
-                    level=int(LOGGING_LEVEL),
+                    level=int(str(xCfg.LOGGING_LEVEL)),
                     datefmt=UPLDRConstants.TimeFormat,
                     format=UPLDRConstants.P + '[' +
                     str(UPLDRConstants.Run) + ']' +
                     '[%(asctime)s]:[%(processName)-11s]' +
                     UPLDRConstants.W +
                     '[%(levelname)-8s]:[%(name)s] %(message)s')
-# CODING: Uncomment for logging related testing.
-#
-# if LOGGING_LEVEL <= logging.INFO:
-#     logging.info(u'sys.getfilesystemencoding:[{!s}]'.
-#                     format(sys.getfilesystemencoding()))
-#     logging.info('LOGGING_LEVEL Value: {!s}'.format(LOGGING_LEVEL))
-#     if LOGGING_LEVEL <= logging.WARNING:
-#         logging.critical('Message with {!s}'.format(
-#                                     'CRITICAL UNDER min WARNING LEVEL'))
-#         logging.error('Message with {!s}'.format(
-#                                     'ERROR UNDER min WARNING LEVEL'))
-#         logging.warning('Message with {!s}'.format(
-#                                     'WARNING UNDER min WARNING LEVEL'))
-#         logging.info('Message with {!s}'.format(
-#                                     'INFO UNDER min WARNING LEVEL'))
 # -----------------------------------------------------------------------------
 
 
@@ -316,13 +300,11 @@ class Uploadr:
 
         if not total:
             if (int(count) % 100 == 0):
-                np.niceprint('\t{!s} of \t{!s} files processed (uploaded, '
-                             'md5ed or timestamp checked).'
+                np.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
                              .format(count, cTotal))
         else:
             if (int(count) % 100 > 0):
-                np.niceprint('\t{!s} of \t{!s} files processed (uploaded, '
-                             'md5ed or timestamp checked).'
+                np.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
                              .format(count, cTotal))
 
         sys.stdout.flush()
@@ -340,9 +322,9 @@ class Uploadr:
         global nuflickr
 
         # Instantiate nuflickr for connection to flickr via flickrapi
-        nuflickr = flickrapi.FlickrAPI(FLICKR["api_key"],
-                                       FLICKR["secret"],
-                                       token_cache_location=TOKEN_CACHE)
+        nuflickr = flickrapi.FlickrAPI(xCfg.FLICKR["api_key"],
+                                       xCfg.FLICKR["secret"],
+                                       token_cache_location=xCfg.TOKEN_CACHE)
         # Get request token
         np.niceprint('Getting new token.')
         try:
@@ -408,10 +390,10 @@ class Uploadr:
         global nuflickr
 
         logging.info('Obtaining Cached token')
-        logging.debug('TOKEN_CACHE:[{!s}]'.format(TOKEN_CACHE))
-        nuflickr = flickrapi.FlickrAPI(FLICKR["api_key"],
-                                       FLICKR["secret"],
-                                       token_cache_location=TOKEN_CACHE)
+        logging.debug('TOKEN_CACHE:[{!s}]'.format(xCfg.TOKEN_CACHE))
+        nuflickr = flickrapi.FlickrAPI(xCfg.FLICKR["api_key"],
+                                       xCfg.FLICKR["secret"],
+                                       token_cache_location=xCfg.TOKEN_CACHE)
 
         try:
             # Check if token permissions are correct.
@@ -477,7 +459,7 @@ class Uploadr:
 
         if (not FLICK.checkToken()):
             FLICK.authenticate()
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
 
         with con:
@@ -523,7 +505,7 @@ class Uploadr:
 
         if (not FLICK.checkToken()):
             FLICK.authenticate()
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
 
         with con:
@@ -531,7 +513,7 @@ class Uploadr:
                 cur = con.cursor()
                 cur.execute("SELECT files_id, path FROM files")
                 rows = cur.fetchall()
-                np.niceprint('[{!s}] will be checked for Removal...'
+                np.niceprint('[{!s:>6s}] will be checked for Removal...'
                              .format(str(len(rows))))
             except lite.Error as e:
                 reportError(Caught=True,
@@ -554,10 +536,10 @@ class Uploadr:
                     logging.warning('deleteFile result: {!s}'.format(success))
                     count = count + 1
                     if (count % 3 == 0):
-                        np.niceprint('\t[{!s}] files removed...'
+                        np.niceprint('[{!s:>6s}] files removed...'
                                      .format(str(count)))
             if (count % 100 > 0):
-                np.niceprint('\t[{!s}] files removed...'
+                np.niceprint('[{!s:>6s}] files removed...'
                              .format(str(count)))
 
         # Closing DB connection
@@ -586,7 +568,7 @@ class Uploadr:
         con = None
         allMedia = self.grabNewFiles()
         # If managing changes, consider all files
-        if MANAGE_CHANGES:
+        if xCfg.MANAGE_CHANGES:
             logging.warning('MANAGED_CHANGES is True. Reviewing allMedia.')
             changedMedia = allMedia
 
@@ -594,7 +576,7 @@ class Uploadr:
         else:
             logging.warning('MANAGED_CHANGES is False. Reviewing only '
                             'changedMedia.')
-            con = lite.connect(DB_PATH)
+            con = lite.connect(xCfg.DB_PATH)
             con.text_factory = str
             with con:
                 cur = con.cursor()
@@ -604,12 +586,12 @@ class Uploadr:
 
         changedMedia_count = len(changedMedia)
         UPLDRConstants.nuMediacount = changedMedia_count
-        np.niceprint('Found [{!s}] files to upload.'
+        np.niceprint('Found [{!s:>6s}] files to upload.'
                      .format(str(changedMedia_count)))
 
         if (ARGS.bad_files):
             # Cater for bad files
-            con = lite.connect(DB_PATH)
+            con = lite.connect(xCfg.DB_PATH)
             con.text_factory = str
             with con:
                 cur = con.cursor()
@@ -637,7 +619,7 @@ class Uploadr:
                 logging.debug('===Multiprocessing=== Setting up logger!')
                 multiprocessing.log_to_stderr()
                 logger = multiprocessing.get_logger()
-                logger.setLevel(LOGGING_LEVEL)
+                logger.setLevel(xCfg.LOGGING_LEVEL)
 
                 logging.debug('===Multiprocessing=== Lock defined!')
 
@@ -700,7 +682,7 @@ class Uploadr:
                                              uploadTask.pid))
 
                 # Check status of jobs/tasks in the Process Pool
-                if LOGGING_LEVEL <= logging.DEBUG:
+                if xCfg.LOGGING_LEVEL <= logging.DEBUG:
                     logging.debug('===Checking Processes launched/status:')
                     for j in uploadPool:
                         np.niceprint('{!s}.is_alive = {!s}'
@@ -777,8 +759,8 @@ class Uploadr:
                 success = self.uploadFile(lock=None, file=file)
                 if ARGS.drip_feed and success and i != changedMedia_count - 1:
                     np.niceprint('Waiting [{!s}] seconds before next upload'
-                                 .format(str(DRIP_TIME)))
-                    nutime.sleep(DRIP_TIME)
+                                 .format(str(xCfg.DRIP_TIME)))
+                    nutime.sleep(xCfg.DRIP_TIME)
                 count = count + 1
                 self.niceprocessedfiles(count,
                                         UPLDRConstants.nuMediacount,
@@ -810,16 +792,16 @@ class Uploadr:
 
         """ convertRawFiles
         """
-        if (not CONVERT_RAW_FILES):
+        if (not xCfg.CONVERT_RAW_FILES):
             return
 
         np.niceprint('*****Converting files*****')
-        for ext in RAW_EXT:
+        for ext in xCfg.RAW_EXT:
             np.niceprint('About to convert files with extension: [{!s}]'
                          .format(StrUnicodeOut(ext)))
 
             for dirpath, dirnames, filenames in os.walk(
-                    FILES_DIR,
+                    xCfg.FILES_DIR,
                     followlinks=True):
                 if '.picasaoriginals' in dirnames:
                     dirnames.remove('.picasaoriginals')
@@ -864,7 +846,8 @@ class Uploadr:
                             else:
                                 flag = "JpgFromRaw"
 
-                            command = RAW_TOOL_PATH + "exiftool -b -" + flag +\
+                            command = xCfg.RAW_TOOL_PATH +\
+                                "exiftool -b -" + flag +\
                                 " -w .JPG -ext " + ext + " -r '" +\
                                 dirpath + "/" +\
                                 filename + "." + fileExt + "'"
@@ -910,7 +893,7 @@ class Uploadr:
                             #           f +
                             #           " to JPG.")
 
-                            command = RAW_TOOL_PATH +\
+                            command = xCfg.RAW_TOOL_PATH +\
                                 "exiftool -tagsfromfile '" +\
                                 dirpath + "/" + f +\
                                 "' -r -all:all -ext JPG '" +\
@@ -942,7 +925,7 @@ class Uploadr:
 
         files = []
         for dirpath, dirnames, filenames in\
-                os.walk(FILES_DIR, followlinks=True):
+                os.walk(xCfg.FILES_DIR, followlinks=True):
 
             # Prevent walking thru files in the list of EXCLUDED_FOLDERS
             # Reduce time by not checking a file in an excluded folder
@@ -953,7 +936,7 @@ class Uploadr:
                               type(os.path.basename(
                                   os.path.normpath(dirpath)))))
             if os.path.basename(os.path.normpath(dirpath)) \
-                    in EXCLUDED_FOLDERS:
+                    in xCfg.EXCLUDED_FOLDERS:
                 dirnames[:] = []
                 filenames[:] = []
                 logging.info('Folder [{!s}] on path [{!s}] excluded.'
@@ -970,14 +953,14 @@ class Uploadr:
                 #     logging.debug('File {!s} in EXCLUDED_FOLDERS:'
                 #                   .format(filePath.encode('utf-8')))
                 #     continue
-                if any(ignored.search(f) for ignored in IGNORED_REGEX):
+                if any(ignored.search(f) for ignored in xCfg.IGNORED_REGEX):
                     logging.debug('File {!s} in IGNORED_REGEX:'
                                   .format(filePath.encode('utf-8')))
                     continue
                 ext = os.path.splitext(os.path.basename(f))[1][1:].lower()
-                if ext in ALLOWED_EXT:
+                if ext in xCfg.ALLOWED_EXT:
                     fileSize = os.path.getsize(dirpath + "/" + f)
-                    if (fileSize < FILE_MAX_SIZE):
+                    if (fileSize < xCfg.FILE_MAX_SIZE):
                         files.append(
                             os.path.normpath(
                                 StrUnicodeOut(dirpath) +
@@ -991,7 +974,7 @@ class Uploadr:
                                              StrUnicodeOut('/') +
                                              StrUnicodeOut(f))))
         files.sort()
-        if LOGGING_LEVEL <= logging.DEBUG:
+        if xCfg.LOGGING_LEVEL <= logging.DEBUG:
             np.niceprint('Pretty Print Output for {!s}:'.format('files'))
             pprint.pprint(files)
 
@@ -1009,7 +992,7 @@ class Uploadr:
 
         Returns True if a file is within an EXCLUDED_FOLDERS directory/folder
         """
-        for excluded_dir in EXCLUDED_FOLDERS:
+        for excluded_dir in xCfg.EXCLUDED_FOLDERS:
             logging.debug('type(excluded_dir):[{!s}]'
                           .format(type(excluded_dir)))
             logging.debug('is excluded_dir unicode?[{!s}]'
@@ -1066,8 +1049,8 @@ class Uploadr:
                     encoding='utf-8',
                     method='xml'))
                 if self.isGood(res_set_date):
-                    np.niceprint('Successfully set date [{!s}] '
-                                 'for file:[{!s}].'
+                    np.niceprint('Successful date:[{!s}] '
+                                 'for file:[{!s}]'
                                  .format(StrUnicodeOut(video_date),
                                          StrUnicodeOut(xfile)))
             except (IOError, ValueError, httplib.HTTPException):
@@ -1084,7 +1067,7 @@ class Uploadr:
                 if not self.isGood(res_set_date):
                     raise IOError(res_set_date)
 
-            np.niceprint('Successfully set date [{!s}] for pic [{!s}]'
+            np.niceprint('Successful date:[{!s}] for file:[{!s}]'
                          .format(StrUnicodeOut(video_date),
                                  StrUnicodeOut(xfile)))
             return True
@@ -1164,9 +1147,11 @@ class Uploadr:
 
             # Database Locked is returned often on this INSERT
             # Will try MAX_SQL_ATTEMPTS...
-            for x in range(0, MAX_SQL_ATTEMPTS):
+            for x in range(0, xCfg.MAX_SQL_ATTEMPTS):
                 logging.info('BEGIN SQL:[{!s}]...[{!s}/{!s} attempts].'
-                             .format('INSERT INTO files', x, MAX_SQL_ATTEMPTS))
+                             .format('INSERT INTO files',
+                                     x,
+                                     xCfg.MAX_SQL_ATTEMPTS))
                 DBexception = False
                 try:
                     # Acquire DBlock if in multiprocessing mode
@@ -1199,7 +1184,7 @@ class Uploadr:
                                 CaughtCode='031',
                                 CaughtMsg='Sleep 2 and retry SQL...'
                                           '[{!s}/{!s} attempts]'
-                                          .format(x, MAX_SQL_ATTEMPTS),
+                                          .format(x, xCfg.MAX_SQL_ATTEMPTS),
                                 NicePrint=True)
                     nutime.sleep(2)
                 else:
@@ -1209,32 +1194,34 @@ class Uploadr:
                                     CaughtCode='032',
                                     CaughtMsg='Succeed at retry SQL...'
                                     '[{!s}/{!s} attempts]'
-                                    .format(x, MAX_SQL_ATTEMPTS),
+                                    .format(x, xCfg.MAX_SQL_ATTEMPTS),
                                     NicePrint=True)
                     logging.info(
                         'END SQL:[{!s}]...[{!s}/{!s} attempts].'
                         .format('INSERT INTO files',
                                 x,
-                                MAX_SQL_ATTEMPTS))
+                                xCfg.MAX_SQL_ATTEMPTS))
                     # Break the cycle of SQL_ATTEMPTS and continue
                     break
         # ---------------------------------------------------------------------
 
         if (ARGS.dry_run is True):
-            np.niceprint('Dry Run Uploading file:[{!s}]...'
+            np.niceprint('   Dry Run file:[{!s}]...'
                          .format(StrUnicodeOut(file)))
             return True
 
         if (ARGS.verbose):
-            np.niceprint('Checking file:[{!s}]...'
+            np.niceprint('  Checking file:[{!s}]...'
                          .format(StrUnicodeOut(file)))
 
-        setName = self.getSetNameFromFile(file, FILES_DIR, FULL_SET_NAME)
+        setName = self.getSetNameFromFile(file,
+                                          xCfg.FILES_DIR,
+                                          xCfg.FULL_SET_NAME)
 
         success = False
         # For tracking bad response from search_photos
         TraceBackIndexError = False
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
         with con:
             cur = con.cursor()
@@ -1274,15 +1261,15 @@ class Uploadr:
                 isLoaded = False
                 isfile_id = None
                 isNoSet = None
-                logging.warning('not_is_photo_already_uploaded:[{!s}] '
+                logging.warning('not_is_already_uploaded:[{!s}] '
                                 .format(isLoaded))
             else:
                 file_checksum = self.md5Checksum(file)
                 isLoaded, isCount, isfile_id, isNoSet = \
-                    self.is_photo_already_uploaded(file,
-                                                   file_checksum,
-                                                   setName)
-                logging.info('is_photo_already_uploaded:[{!s}] '
+                    self.is_already_uploaded(file,
+                                             file_checksum,
+                                             setName)
+                logging.info('is_already_uploaded:[{!s}] '
                              'count:[{!s}] pic:[{!s}] '
                              'row is None == [{!s}] '
                              'isNoSet:[{!s}]'
@@ -1298,7 +1285,7 @@ class Uploadr:
                 logging.warning('ALREADY LOADED. '
                                 'DO NOT PERFORM ANYTHING ELSE. '
                                 'ROW IS NONE... UPDATING LOCAL DATABASE.')
-                np.niceprint('Already loaded file:[{!s}]...'
+                np.niceprint(' Already loaded:[{!s}]...'
                              'On Album:[{!s}]... UPDATING LOCAL DATABASE.'
                              .format(StrUnicodeOut(file),
                                      StrUnicodeOut(setName)))
@@ -1312,12 +1299,12 @@ class Uploadr:
 
             elif row is None:
                 if (ARGS.verbose):
-                    np.niceprint('Uploading file:[{!s}]...'
+                    np.niceprint(' Uploading file:[{!s}]...'
                                  'On Album:[{!s}]...'
                                  .format(StrUnicodeOut(file),
                                          StrUnicodeOut(setName)))
 
-                logging.warning('Uploading file:[{!s}]... '
+                logging.warning(' Uploading file:[{!s}]... '
                                 'On Album:[{!s}]...'
                                 .format(StrUnicodeOut(file),
                                         StrUnicodeOut(setName)))
@@ -1326,15 +1313,15 @@ class Uploadr:
                     file_checksum = self.md5Checksum(file)
 
                 # Title Handling
-                if ARGS.title:  # Replace
-                    FLICKR["title"] = ARGS.title
-                if ARGS.description:  # Replace
-                    FLICKR["description"] = ARGS.description
+                if ARGS.title:
+                    xCfg.FLICKR["title"] = ARGS.title
+                if ARGS.description:
+                    xCfg.FLICKR["description"] = ARGS.description
                 if ARGS.tags:  # Append a space to later add -t TAGS
-                    FLICKR["tags"] += " "
+                    xCfg.FLICKR["tags"] += " "
                     if ARGS.verbose:
                         np.niceprint('TAGS:[{} {}]'
-                                     .format(FLICKR["tags"],
+                                     .format(xCfg.FLICKR["tags"],
                                              ARGS.tags).replace(',', ''))
 
                 # if FLICKR["title"] is empty...
@@ -1348,7 +1335,7 @@ class Uploadr:
                 # UnicodeDecodeError: 'ascii' codec can't decode byte 0xc3
                 # in position 11: ordinal not in range(128)
                 # Worked around it by forcing the title to filename
-                if FLICKR["title"] == "":
+                if xCfg.FLICKR["title"] == "":
                     path_filename, title_filename = os.path.split(file)
                     logging.info('path:[{!s}] '
                                  'filename:[{!s}] '
@@ -1359,7 +1346,7 @@ class Uploadr:
                     title_filename = os.path.splitext(title_filename)[0]
                     logging.warning('title_name:[{!s}]'.format(title_filename))
                 else:
-                    title_filename = FLICKR["title"]
+                    title_filename = xCfg.FLICKR["title"]
                     logging.warning('title from INI file:[{!s}]'
                                     .format(title_filename))
 
@@ -1367,19 +1354,19 @@ class Uploadr:
                 try:
                     # Perform actual upload of the file
                     search_result = None
-                    for x in range(0, MAX_UPLOAD_ATTEMPTS):
+                    for x in range(0, xCfg.MAX_UPLOAD_ATTEMPTS):
                         # Reset variables on each iteration
                         search_result = None
                         uploadResp = None
                         logging.warning('Uploading/Reuploading '
                                         '[{!s}/{!s} attempts].'
-                                        .format(x, MAX_UPLOAD_ATTEMPTS))
+                                        .format(x, xCfg.MAX_UPLOAD_ATTEMPTS))
                         if (x > 0):
                             np.niceprint('Reuploading:[{!s}]...'
                                          '[{!s}/{!s} attempts].'
                                          .format(StrUnicodeOut(file),
                                                  x,
-                                                 MAX_UPLOAD_ATTEMPTS))
+                                                 xCfg.MAX_UPLOAD_ATTEMPTS))
                         # Upload file to Flickr
                         # replace commas from tags and checksum tags
                         # to avoid tags conflicts
@@ -1389,19 +1376,19 @@ class Uploadr:
                                 fileobj=FileWithCallback(file,
                                                          callback),
                                 title=title_filename
-                                if FLICKR["title"] == ""
-                                else str(FLICKR["title"]),
-                                description=str(FLICKR["description"]),
+                                if xCfg.FLICKR["title"] == ""
+                                else str(xCfg.FLICKR["title"]),
+                                description=str(xCfg.FLICKR["description"]),
                                 tags='{} checksum:{} album:"{}" {}'
                                 .format(
-                                    FLICKR["tags"],
+                                    xCfg.FLICKR["tags"],
                                     file_checksum,
                                     StrUnicodeOut(setName),
                                     ARGS.tags if ARGS.tags else '')
                                 .replace(',', ''),
-                                is_public=str(FLICKR["is_public"]),
-                                is_family=str(FLICKR["is_family"]),
-                                is_friend=str(FLICKR["is_friend"])
+                                is_public=str(xCfg.FLICKR["is_public"]),
+                                is_family=str(xCfg.FLICKR["is_family"]),
+                                is_friend=str(xCfg.FLICKR["is_friend"])
                             )
 
                             logging.debug('uploadResp: ')
@@ -1414,15 +1401,15 @@ class Uploadr:
 
                             # Save photo_id returned from Flickr upload
                             photo_id = uploadResp.findall('photoid')[0].text
-                            logging.warning('Uploaded [{!s}] photo_id=[{!s}] '
-                                            'Ok. Will check for issues ('
-                                            'duplicates or wrong checksum)'
+                            logging.warning('  Uploaded file:[{!s}] '
+                                            'Id=[{!s}]. Check for '
+                                            'duplicates/wrong checksum...'
                                             .format(StrUnicodeOut(file),
                                                     photo_id))
                             if (ARGS.verbose):
-                                np.niceprint('Uploaded [{!s}] photo_id=[{!s}] '
-                                             'Ok. Will check for issues ('
-                                             'duplicates or wrong checksum)'
+                                np.niceprint('  Uploaded file:[{!s}] '
+                                             'ID=[{!s}]. Check for '
+                                             'duplicates/wrong checksum...'
                                              .format(StrUnicodeOut(file),
                                                      photo_id))
 
@@ -1445,11 +1432,11 @@ class Uploadr:
                             # on error, check if exists a photo
                             # with file_checksum
                             ZisLoaded, ZisCount, Zisfile_id, zisNoSet = \
-                                self.is_photo_already_uploaded(
+                                self.is_already_uploaded(
                                     file,
                                     file_checksum,
                                     setName)
-                            logging.debug('is_photo_already_uploaded:[{!s}] '
+                            logging.debug('is_already_uploaded:[{!s}] '
                                           'Zcount:[{!s}] Zpic:[{!s}] '
                                           'ZisNoSet:[{!s}]'
                                           .format(ZisLoaded, ZisCount,
@@ -1468,7 +1455,7 @@ class Uploadr:
 
                             if int(search_result.find('photos')
                                    .attrib['total']) == 0:
-                                if x == MAX_UPLOAD_ATTEMPTS - 1:
+                                if x == xCfg.MAX_UPLOAD_ATTEMPTS - 1:
                                     np.niceprint('Reached maximum number '
                                                  'of attempts to upload, '
                                                  'file: [{!s}]'.format(file))
@@ -1477,7 +1464,8 @@ class Uploadr:
                                                      'skipping')
                                 np.niceprint('Not found, reuploading '
                                              '[{!s}/{!s} attempts].'
-                                             .format(x, MAX_UPLOAD_ATTEMPTS))
+                                             .format(x,
+                                                     xCfg.MAX_UPLOAD_ATTEMPTS))
                                 continue
 
                             if int(search_result.find('photos')
@@ -1502,7 +1490,7 @@ class Uploadr:
                         raise IOError(uploadResp)
 
                     # Successful update
-                    np.niceprint('Successfully uploaded the file:[{!s}].'
+                    np.niceprint('Successful file:[{!s}].'
                                  .format(StrUnicodeOut(file)))
 
                     # Save file_id... from uploadResp or search_result
@@ -1578,8 +1566,7 @@ class Uploadr:
                             format(ex.code) == '8')) and (ARGS.bad_files)):
                         # Add to db the file NOT uploaded
                         # Control for when running multiprocessing set locking
-                        np.niceprint('Adding to Bad files table:[{!s}] '
-                                     'due to [{!s}]'
+                        np.niceprint('   Log Bad file:[{!s}] due to [{!s}]'
                                      .format(file,
                                              'Filetype was not recognised'
                                              if (format(ex.code) == '5')
@@ -1609,7 +1596,7 @@ class Uploadr:
                 finally:
                     con.commit()
 
-            elif (MANAGE_CHANGES):
+            elif (xCfg.MANAGE_CHANGES):
                 # we have a file from disk which is found on the database
                 # and is also on flickr but is set on flickr is not defined.
                 # So we need to reset the local datbase set_id so that it will
@@ -1744,12 +1731,12 @@ class Uploadr:
         global nuflickr
 
         if (ARGS.dry_run is True):
-            np.niceprint('Dry Run Replacing file:[{!s}]...'
+            np.niceprint('Dry Run Replace:[{!s}]...'
                          .format(StrUnicodeOut(file)))
             return True
 
         if (ARGS.verbose):
-            np.niceprint('Replacing file:[{!s}]...'
+            np.niceprint(' Replacing file:[{!s}]...'
                          .format(StrUnicodeOut(file)))
 
         success = False
@@ -1764,18 +1751,18 @@ class Uploadr:
             logging.debug('photo:[{!s}] type(photo):[{!s}]'
                           .format(photo, type(photo)))
 
-            for x in range(0, MAX_UPLOAD_ATTEMPTS):
+            for x in range(0, xCfg.MAX_UPLOAD_ATTEMPTS):
                 res_add_tag = None
                 res_get_info = None
                 replaceResp = None
 
                 try:
                     if (x > 0):
-                        np.niceprint('Re-Replacing:'
+                        np.niceprint('   Re-Replacing:'
                                      '[{!s}]...[{!s}/{!s} attempts].'
                                      .format(StrUnicodeOut(file),
                                              x,
-                                             MAX_UPLOAD_ATTEMPTS))
+                                             xCfg.MAX_UPLOAD_ATTEMPTS))
 
                     # Use fileobj with filename='dummy'to accept unicode file.
                     replaceResp = nuflickr.replace(
@@ -1865,7 +1852,7 @@ class Uploadr:
                     np.niceprint('Sleep 10 and try to replace again.')
                     nutime.sleep(10)
 
-                    if x == MAX_UPLOAD_ATTEMPTS - 1:
+                    if x == xCfg.MAX_UPLOAD_ATTEMPTS - 1:
                         raise ValueError('Reached maximum number of attempts '
                                          'to replace, skipping')
                     continue
@@ -1886,7 +1873,7 @@ class Uploadr:
             if (not self.isGood(res_get_info)):
                 raise IOError(res_get_info)
 
-            np.niceprint('Successfully replaced the file:[{!s}].'
+            np.niceprint('  Replaced file:[{!s}].'
                          .format(StrUnicodeOut(file)))
 
             # Update the db the file uploaded
@@ -2001,7 +1988,7 @@ class Uploadr:
             Use new connection and nucur cursor to ensure commit
 
             """
-            con = lite.connect(DB_PATH)
+            con = lite.connect(xCfg.DB_PATH)
             con.text_factory = str
             with con:
                 try:
@@ -2138,10 +2125,10 @@ class Uploadr:
         Also updates photo DB entry with its set_id
         """
 
-        logging.warning('Adding set: [{!s}] to database log.'
+        logging.warning('  Add set to DB:[{!s}]'
                         .format(StrUnicodeOut(setName)))
         if (ARGS.verbose):
-            np.niceprint('Adding set: [{!s}] to database log.'
+            np.niceprint('  Add set to DB:[{!s}]'
                          .format(StrUnicodeOut(setName)))
 
         try:
@@ -2206,8 +2193,8 @@ class Uploadr:
             np.niceprint('Last check: [{!s}]'
                          .format(str(nutime.asctime(time.localtime()))))
             logging.warning('Running in Daemon mode. Sleep [{!s}] seconds.'
-                            .format(SLEEP_TIME))
-            nutime.sleep(SLEEP_TIME)
+                            .format(xCfg.SLEEP_TIME))
+            nutime.sleep(xCfg.SLEEP_TIME)
 
     # -------------------------------------------------------------------------
     # getSetNameFromFile
@@ -2259,7 +2246,7 @@ class Uploadr:
         if ARGS.dry_run:
             return True
 
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
         with con:
             cur = con.cursor()
@@ -2270,8 +2257,8 @@ class Uploadr:
             for row in files:
                 # row[1] = path for the file from table files
                 setName = self.getSetNameFromFile(row[1],
-                                                  FILES_DIR,
-                                                  FULL_SET_NAME)
+                                                  xCfg.FILES_DIR,
+                                                  xCfg.FULL_SET_NAME)
                 newSetCreated = False
 
                 # Search local DB for set_id by setName(folder name )
@@ -2282,7 +2269,7 @@ class Uploadr:
                 if set is None:
                     # row[0] = files_id from files table
                     setId = self.createSet(setName, row[0], cur, con)
-                    np.niceprint('Created the set: [{!s}]'.
+                    np.niceprint('Created the set:[{!s}]'.
                                  format(StrUnicodeOut(setName)))
                     newSetCreated = True
                 else:
@@ -2295,8 +2282,9 @@ class Uploadr:
                 # row[1] = path for the file from table files
                 # row[2] = set_id from files table
                 if row[2] is None and newSetCreated is False:
-                    np.niceprint('adding file to set [{!s}]...'
-                                 .format(StrUnicodeOut(row[1])))
+                    np.niceprint('Add file to set:[{!s}] set:[{!s}]'
+                                 .format(StrUnicodeOut(row[1]),
+                                         StrUnicodeOut(setName)))
 
                     self.addFileToSet(setId, row, cur)
 
@@ -2327,7 +2315,7 @@ class Uploadr:
             return nuflickr.photosets.addPhoto(**kwargs)
 
         try:
-            con = lite.connect(DB_PATH)
+            con = lite.connect(xCfg.DB_PATH)
             con.text_factory = str
 
             logging.info('Calling nuflickr.photosets.addPhoto'
@@ -2346,8 +2334,9 @@ class Uploadr:
                 method='xml'))
 
             if (self.isGood(addPhotoResp)):
-                np.niceprint('Successfully added file:[{!s}] to its set.'
-                             .format(StrUnicodeOut(file[1])))
+                np.niceprint(' Added file/set:[{!s}] setId:[{!s}]'
+                             .format(StrUnicodeOut(file[1]),
+                                     StrUnicodeOut(setId)))
                 try:
                     cur.execute("UPDATE files SET set_id = ? "
                                 "WHERE files_id = ?",
@@ -2379,8 +2368,8 @@ class Uploadr:
             if (ex.code == 1):
                 np.niceprint('Photoset not found, creating new set...')
                 setName = self.getSetNameFromFile(file[1],
-                                                  FILES_DIR,
-                                                  FULL_SET_NAME)
+                                                  xCfg.FILES_DIR,
+                                                  xCfg.FULL_SET_NAME)
                 self.createSet(setName, file[0], cur, con)
             # Error: 3: Photo Already in set
             elif (ex.code == 3):
@@ -2435,9 +2424,9 @@ class Uploadr:
 
         global nuflickr
 
-        logging.info('Creating new set:[{!s}]'
+        logging.info('   Creating set:[{!s}]'
                      .format(StrUnicodeOut(setName)))
-        np.niceprint('Creating new set:[{!s}]'
+        np.niceprint('   Creating set:[{!s}]'
                      .format(StrUnicodeOut(setName)))
 
         if ARGS.dry_run:
@@ -2536,10 +2525,10 @@ class Uploadr:
             Creates the control database
         """
 
-        np.niceprint('Setting up database:[{!s}]'.format(DB_PATH))
+        np.niceprint('Setting up database:[{!s}]'.format(xCfg.DB_PATH))
         con = None
         try:
-            con = lite.connect(DB_PATH)
+            con = lite.connect(xCfg.DB_PATH)
             con.text_factory = str
             cur = con.cursor()
             cur.execute('CREATE TABLE IF NOT EXISTS files '
@@ -2647,10 +2636,10 @@ class Uploadr:
             Cleans up (deletes) contents from DB badfiles table
         """
         np.niceprint('Cleaning up badfiles table from the database: [{!s}]'
-                     .format(DB_PATH))
+                     .format(xCfg.DB_PATH))
         con = None
         try:
-            con = lite.connect(DB_PATH)
+            con = lite.connect(xCfg.DB_PATH)
             con.text_factory = str
             cur = con.cursor()
             cur.execute('PRAGMA user_version')
@@ -2729,7 +2718,7 @@ class Uploadr:
         if ARGS.dry_run:
             return True
 
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
         with con:
             cur = con.cursor()
@@ -2791,7 +2780,7 @@ class Uploadr:
 
         Prints the list of sets/albums recorded on the local database
         """
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
         with con:
             try:
@@ -2834,7 +2823,7 @@ class Uploadr:
         if ARGS.dry_run:
             return True
 
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
         try:
             sets = nuflickr.photosets_getList()
@@ -2897,9 +2886,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                           isThisStringUnicode(primaryPhotoId)))
 
                     if (ARGS.verbose):
-                        np.niceprint('setName=[{!s}] '
+                        np.niceprint('  Add Set to DB:[{!s}] '
                                      'setId=[{!s}] '
-                                     'primaryPhotoId=[{!s}]'
+                                     'primaryId=[{!s}]'
                                      .format('None'
                                              if setName is None
                                              else StrUnicodeOut(setName),
@@ -2970,11 +2959,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                                   .format(e.args[0]),
                                         NicePrint=True)
                     else:
-                        logging.info('Flickr Set/Album already on '
-                                     'local database.')
+                        logging.info('Set exists on DB:[{!s}]'
+                                     .format(StrUnicodeOut(setName)))
                         if (ARGS.verbose):
-                            np.niceprint('Flickr Set/Album already on '
-                                         'local database.')
+                            np.niceprint('Set exists on DB:[{!s}]'
+                                         .format(StrUnicodeOut(setName)))
 
                 con.commit()
 
@@ -3011,7 +3000,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         np.niceprint('*****Completed adding Flickr Sets to DB*****')
 
     # -------------------------------------------------------------------------
-    # is_photo_already_uploaded
+    # is_already_uploaded
     #
     # Checks if image is already loaded with tag:checksum
     # (calls Flickr photos.search)
@@ -3033,8 +3022,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #   THEN yes found loaded.
     # Note: There could be more entries due to errors. To be checked manually.
     #
-    def is_photo_already_uploaded(self, xfile, xchecksum, xsetName):
-        """ is_photo_already_uploaded
+    def is_already_uploaded(self, xfile, xchecksum, xsetName):
+        """ is_already_uploaded
 
             Searchs for image with same:
                 title(file without extension)
@@ -3104,9 +3093,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 # CODING: how to indicate an error... different from False?
                 # Possibly raising an exception?
                 # raise Exception('photos_search: Max attempts exhausted.')
-                np.niceprint('return: IS_PHOTO_UPLOADED: ERROR#1',
-                             fname='is_photo_already_uploaded')
-                logging.warning('return: IS_PHOTO_UPLOADED: ERROR#1')
+                if (ARGS.verbose):
+                    np.niceprint(' IS_UPLOADED:[ERROR#1]',
+                                 fname='isuploaded')
+                logging.warning(' IS_UPLOADED:[ERROR#1]')
                 return returnIsPhotoUploaded, \
                     returnPhotoUploaded, \
                     returnPhotoID, \
@@ -3206,9 +3196,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         # Possibly raising an exception?
                         # raise Exception('photos_getAllContexts: '
                         #                 'Max attempts exhausted.')
-                        np.niceprint('return: IS_PHOTO_UPLOADED: ERROR#2',
-                                     fname='is_photo_already_uploaded')
-                        logging.warning('return: IS_PHOTO_UPLOADED: ERROR#2')
+                        if (ARGS.verbose):
+                            np.niceprint(' IS_UPLOADED:[ERROR#2]',
+                                         fname='isuploaded')
+                        logging.warning(' IS_UPLOADED:[ERROR#2]')
                         return returnIsPhotoUploaded, \
                             returnPhotoUploaded, \
                             returnPhotoID, \
@@ -3234,11 +3225,12 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         intag='album:{}'
                         .format(xsetName))
                     if tfind:
-                        np.niceprint('return: PHOTO UPLOADED WITHOUT SET '
-                                     'WITH ALBUM TAG',
-                                     fname='is_photo_already_uploaded')
-                        logging.warning('return: PHOTO UPLOADED WITHOUT SET '
-                                        'WITH ALBUM TAG')
+                        if (ARGS.verbose):
+                            np.niceprint(' IS_UPLOADED:[PHOTO UPLOADED WITHOUT'
+                                         ' SET WITH ALBUM TAG]',
+                                         fname='isuploaded')
+                        logging.warning(' IS_UPLOADED:[PHOTO UPLOADED WITHOUT'
+                                        ' SET WITH ALBUM TAG]')
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
                         returnUploadedNoSet = True
@@ -3248,11 +3240,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             returnUploadedNoSet
                     else:
                         if ARGS.verbose_progress:
-                            np.niceprint('PHOTO UPLOADED WITHOUT SET '
-                                         'WITHOUT ALBUM TAG',
-                                         fname='is_photo_already_uploaded')
-                        logging.warning('PHOTO UPLOADED WITHOUT SET '
-                                        'WITHOUT ALBUM TAG')
+                            np.niceprint('IS_UPLOADED:[PHOTO UPLOADED WITHOUT'
+                                         ' SET WITHOUT ALBUM TAG]',
+                                         fname='isuploaded')
+                        logging.warning('IS_UPLOADED:[PHOTO UPLOADED WITHOUT'
+                                        ' SET WITHOUT ALBUM TAG]')
 
                 for setinlist in resp.findall('set'):
                     logging.warning('setinlist:')
@@ -3283,11 +3275,12 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     #                                               THEN EXISTS
                     if (StrUnicodeOut(xsetName) ==
                             StrUnicodeOut(setinlist.attrib['title'])):
-                        np.niceprint('return: IS PHOTO UPLOADED='
-                                     'TRUE WITH SET',
-                                     fname='is_photo_already_uploaded')
+                        if (ARGS.verbose):
+                            np.niceprint(' IS_UPLOADED:[IS PHOTO UPLOADED='
+                                         'TRUE WITH SET]',
+                                         fname='isuploaded')
                         logging.warning(
-                            'return: IS PHOTO UPLOADED=TRUE WITH SET')
+                            ' IS_UPLOADED:[IS PHOTO UPLOADED=TRUE WITH SET]')
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
                         returnUploadedNoSet = False
@@ -3299,11 +3292,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         # D) checksum, title, other setName,       Count>=1
                         #                                       THEN NOT EXISTS
                         if ARGS.verbose_progress:
-                            np.niceprint('IS PHOTO UPLOADED=FALSE OTHER SET, '
-                                         'CONTINUING SEARCH IN SETS',
-                                         fname='is_photo_already_uploaded')
-                        logging.warning('IS PHOTO UPLOADED=FALSE OTHER SET, '
-                                        'CONTINUING SEARCH IN SETS')
+                            np.niceprint(' IS_UPLOADED:[FALSE OTHER SET, '
+                                         'CONTINUING SEARCH IN SETS]',
+                                         fname='isuploaded')
+                        logging.warning(' IS_UPLOADED:[FALSE OTHER SET, '
+                                        'CONTINUING SEARCH IN SETS]')
                         continue
 
         return returnIsPhotoUploaded, returnPhotoUploaded, \
@@ -3578,10 +3571,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
         global nuflickr
 
         if (ARGS.verbose):
-            np.niceprint('Setting Date photo_id=[{!s}] date_taken=[{!s}]'
-                         .format(photo_id, datetxt))
-        logging.warning('Setting Date photo_id=[{!s}] date_taken=[{!s}]'
-                        .format(photo_id, datetxt))
+            np.niceprint('   Setting Date:[{!s}] Id=[{!s}]'
+                         .format(datetxt, photo_id))
+        logging.warning('   Setting Date:[{!s}] Id=[{!s}]'
+                        .format(datetxt, photo_id))
 
         @retry(attempts=3, waittime=10, randtime=True)
         def R_photos_setdates(kwargs):
@@ -3601,7 +3594,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 method='xml'))
 
             if (ARGS.verbose):
-                np.niceprint('Set Date Response:[{!s}]'
+                np.niceprint(' Set Date Reply:[{!s}]'
                              .format(self.isGood(respDate)))
 
         except flickrapi.exceptions.FlickrError as ex:
@@ -3688,8 +3681,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
             # row[1] = path for the file from table files
             setName = self.getSetNameFromFile(f[1],
-                                              FILES_DIR,
-                                              FULL_SET_NAME)
+                                              xCfg.FILES_DIR,
+                                              xCfg.FULL_SET_NAME)
             try:
                 terr = False
                 tfind, tid = self.photos_find_tag(
@@ -3761,7 +3754,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         mmutex = None
         mrunning = None
 
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
         with con:
             try:
@@ -3795,7 +3788,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     logging.debug('===Multiprocessing=== Setting up logger!')
                     multiprocessing.log_to_stderr()
                     logger = multiprocessing.get_logger()
-                    logger.setLevel(LOGGING_LEVEL)
+                    logger.setLevel(xCfg.LOGGING_LEVEL)
 
                     logging.debug('===Multiprocessing=== Lock defined!')
 
@@ -3859,7 +3852,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                                  migrateTask.pid))
 
                     # Check status of jobs/tasks in the Process Pool
-                    if LOGGING_LEVEL <= logging.DEBUG:
+                    if xCfg.LOGGING_LEVEL <= logging.DEBUG:
                         logging.debug('===Checking Processes launched/status:')
                         for j in migratePool:
                             np.niceprint('{!s}.is_alive = {!s}'
@@ -3945,8 +3938,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
                     # row[1] = path for the file from table files
                     setName = self.getSetNameFromFile(row[1],
-                                                      FILES_DIR,
-                                                      FULL_SET_NAME)
+                                                      xCfg.FILES_DIR,
+                                                      xCfg.FULL_SET_NAME)
                     try:
                         tfind, tid = self.photos_find_tag(
                             photo_id=row[0],
@@ -4003,7 +3996,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #
     def listBadFiles(self):
 
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
         with con:
             try:
@@ -4060,7 +4053,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         InitialFoundFiles = shows the Found files prior to processing
         """
         # Total Local photos count --------------------------------------------
-        con = lite.connect(DB_PATH)
+        con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
         countlocal = 0
         with con:
@@ -4231,11 +4224,19 @@ def parse_arguments():
     cgrpparser.add_argument('-C', '--config-file', action='store',
                             # dest='xINIfile',
                             metavar='filename.ini',
-                            type=argparse.FileType('r'),
+                            type=str,
                             default=UPLDRConstants.INIfile,
                             help='Optional configuration file.'
                                  'default is [{!s}]'
                                  .format(UPLDRConstants.INIfile))
+    # cgrpparser.add_argument('-C', '--config-file', action='store',
+    #                         # dest='xINIfile',
+    #                         metavar='filename.ini',
+    #                         type=argparse.FileType('r'),
+    #                         default=UPLDRConstants.INIfile,
+    #                         help='Optional configuration file.'
+    #                              'default is [{!s}]'
+    #                              .format(UPLDRConstants.INIfile))
 
     # Verbose related options -------------------------------------------------
     vgrpparser = parser.add_argument_group('Verbose and dry-run options')
@@ -4245,9 +4246,9 @@ def parse_arguments():
                                  'See also LOGGING_LEVEL value in INI file.')
     vgrpparser.add_argument('-x', '--verbose-progress', action='store_true',
                             help='Provides progress indicator on each upload.'
-                                  ' Normally used in conjunction with '
-                                  '-v option. '
-                                  'See also LOGGING_LEVEL value in INI file.')
+                                 ' Normally used in conjunction with '
+                                 '-v option. '
+                                 'See also LOGGING_LEVEL value in INI file.')
     vgrpparser.add_argument('-n', '--dry-run', action='store_true',
                             help='Dry run. No changes are actually performed.')
 
@@ -4357,31 +4358,32 @@ def run_uploadr():
     global ARGS
 
     # Print/show arguments
-    if LOGGING_LEVEL <= logging.INFO:
+    if xCfg.LOGGING_LEVEL <= logging.INFO:
         np.niceprint('Output for arguments(ARGS):')
         pprint.pprint(ARGS)
 
     if ARGS.verbose:
-        np.niceprint('FILES_DIR: [{!s}]'.format(StrUnicodeOut(FILES_DIR)))
+        np.niceprint('FILES_DIR: [{!s}]'.format(StrUnicodeOut(xCfg.FILES_DIR)))
 
-    logging.warning('FILES_DIR: [{!s}]'.format(StrUnicodeOut(FILES_DIR)))
-    if FILES_DIR == "":
+    logging.warning('FILES_DIR: [{!s}]'.format(StrUnicodeOut(xCfg.FILES_DIR)))
+
+    if xCfg.FILES_DIR == "":
         np.niceprint('Please configure in the INI file [normally uploadr.ini],'
                      ' the name of the folder [FILES_DIR] '
                      'with media available to sync with Flickr.')
         sys.exit(8)
     else:
-        if not os.path.isdir(FILES_DIR):
+        if not os.path.isdir(xCfg.FILES_DIR):
             logging.critical('FILES_DIR: [{!s}] is not valid.'
-                             .format(StrUnicodeOut(FILES_DIR)))
+                             .format(StrUnicodeOut(xCfg.FILES_DIR)))
             np.niceprint('Please configure the name of an existant folder '
                          'in the INI file [normally uploadr.ini] '
                          'with media available to sync with Flickr. '
                          'FILES_DIR: [{!s}] is not valid.'
-                         .format(StrUnicodeOut(FILES_DIR)))
+                         .format(StrUnicodeOut(xCfg.FILES_DIR)))
             sys.exit(9)
 
-    if FLICKR["api_key"] == "" or FLICKR["secret"] == "":
+    if xCfg.FLICKR["api_key"] == "" or xCfg.FLICKR["secret"] == "":
         logging.critical('Please enter an API key and secret in the '
                          'configuration '
                          'script file, normaly uploadr.ini (see README).')
@@ -4401,7 +4403,7 @@ def run_uploadr():
     if ARGS.daemon:
         # Will run in daemon mode every SLEEP_TIME seconds
         logging.warning('Will run in daemon mode every {!s} seconds'
-                        .format(SLEEP_TIME))
+                        .format(xCfg.SLEEP_TIME))
         logging.warning('Make sure you have previously authenticated!')
         FLICK.run()
     else:
@@ -4447,11 +4449,9 @@ def run_uploadr():
 
             FLICK.createSets()
             FLICK.printStat(UPLDRConstants.nuMediacount)
+    # Run Uploadr -------------------------------------------------------------
 
 
-# =============================================================================
-# Main code
-#
 # =============================================================================
 # Global Variables
 #
@@ -4470,6 +4470,7 @@ nulockDB = None
 numutex = None
 nurunning = None
 retry = rate_limited.retry
+# -----------------------------------------------------------------------------
 
 # =============================================================================
 # Class UPLDRConstants
@@ -4486,12 +4487,12 @@ UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
 # UPLDRConstants.baseDir = os.getcwd()
 # UPLDRConstants.baseDir = os.path.join(sys.prefix, 'etc')
 UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")
-sys.stderr.write('[DEBUG] baseDir: [' + UPLDRConstants.baseDir + ']\n')
-sys.stderr.write('[DEBUG]     cwd: [' + os.getcwd() + ']\n')
-sys.stderr.write('[DEBUG]  prefix: [' + os.path.join(sys.prefix, 'etc') +
-                 ']\n')
-sys.stderr.write('[DEBUG] INIfile: [' + UPLDRConstants.INIfile + ']\n')
-sys.stderr.flush()
+if xCfg.LOGGING_LEVEL <= logging.DEBUG:
+    logging.debug('       baseDir:[{!s}]'.format(UPLDRConstants.baseDir))
+    logging.debug('           cwd:[{!s}]'.format(os.getcwd()))
+    logging.debug('    prefix/etc:[{!s}]'.format(os.path.join(sys.prefix,
+                                                              'etc')))
+    logging.debug('       INIfile:[{!s}]'.format(UPLDRConstants.INIfile))
 # -----------------------------------------------------------------------------
 
 # =============================================================================
@@ -4526,176 +4527,61 @@ else:
                      ') Init: ' + ' ---------\n')
     sys.stderr.write('Python version on this system: ' + sys.version + '\n')
     sys.stderr.flush()
-
 # -----------------------------------------------------------------------------
 
 
 # =============================================================================
-# Look for Config file uploadr.ini
+# Main code
 #
-try:
-    if not (
-        (UPLDRConstants.baseDir == '' or os.path.isdir(
-            UPLDRConstants.baseDir)) and os.path.isfile(
-            UPLDRConstants.INIfile)):
-        raise OSError('[Errno 2] No such file or directory')
-except Exception as err:
-    sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] config folder [{!s}] '
-                     'and/or INI file: [{!s}] '
-                     'not found or incorrect format: [{!s}]! Exiting...\n'
-                     .format(nutime.strftime(UPLDRConstants.TimeFormat),
-                             os.getpid(),
-                             UPLDRConstants.baseDir,
-                             UPLDRConstants.INIfile,
-                             str(err)))
-    sys.stderr.flush()
-    sys.exit(2)
-
-config = ConfigParser.ConfigParser()
-try:
-    INIFiles = None
-    INIFiles = config.read(UPLDRConstants.INIfile)
-except Exception as err:
-    sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] INI file: [{!s}] '
-                     'not found or incorrect format: [{!s}]!\n'
-                     .format(nutime.strftime(UPLDRConstants.TimeFormat),
-                             os.getpid(),
-                             UPLDRConstants.INIfile,
-                             str(err)))
-    sys.stderr.flush()
-if not INIFiles:
-    sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] INI file: [{!s}] '
-                     'not found or incorrect format! Exiting...\n'
-                     .format(nutime.strftime(UPLDRConstants.TimeFormat),
-                             os.getpid(),
-                             UPLDRConstants.INIfile))
-    sys.stderr.flush()
-    sys.exit(2)
-# -----------------------------------------------------------------------------
-# Look for [Config] section file uploadr.ini file
-if not config.has_section('Config'):
-    sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] INI file: [{!s}] '
-                     'has no [Config] section! Exiting...\n'
-                     .format(nutime.strftime(UPLDRConstants.TimeFormat),
-                             os.getpid(),
-                             UPLDRConstants.INIfile))
-    sys.stderr.flush()
-    sys.exit(2)
-# -----------------------------------------------------------------------------
-# Obtain configuration from uploadr.ini
-# Refer to contents of uploadr.ini for explanation on configuration parameters
-# Obtain configuration LOGGING_LEVEL from Configuration file.
-# If not available or not valid assume WARNING level and notify of that fact.
-# Force conversion of LOGGING_LEVEL into int() for later use in conditionals
-LOGGING_LEVEL = (config.get('Config', 'LOGGING_LEVEL')
-                 if config.has_option('Config', 'LOGGING_LEVEL')
-                 else logging.WARNING)
-if (int(str(LOGGING_LEVEL)) if str.isdigit(str(LOGGING_LEVEL)) else 99) not in\
-    [logging.NOTSET,
-     logging.DEBUG,
-     logging.INFO,
-     logging.WARNING,
-     logging.ERROR,
-     logging.CRITICAL]:
-    LOGGING_LEVEL = logging.WARNING
-    sys.stderr.write('[{!s}]:[WARNING ]:[uploadr] LOGGING_LEVEL '
-                     'not defined or incorrect on INI file: [{!s}]. '
-                     'Assuming WARNING level.\n'.format(
-                         nutime.strftime(UPLDRConstants.TimeFormat),
-                         UPLDRConstants.INIfile))
-    sys.stderr.flush()
-LOGGING_LEVEL = int(str(LOGGING_LEVEL))
-if config.has_option('Config', 'FILES_DIR'):
-    try:
-        FILES_DIR = unicode(  # noqa
-                            eval(config.get('Config', 'FILES_DIR')), 'utf-8') \
-                    if sys.version_info < (3, ) \
-                    else str(eval(config.get('Config', 'FILES_DIR')))
-    except Exception as err:
-        sys.stderr.write('[{!s}]:[{!s}][ERROR   ]:[uploadr] FILES_DIR: '
-                         'not defined or incorrect on INI file: [{!s}]\n'
-                         .format(nutime.strftime(UPLDRConstants.TimeFormat),
-                                 os.getpid(),
-                                 str(err)))
-        sys.stderr.flush()
-        sys.exit(3)
-else:
-    # Undefined FILES_DIR. Will be reported as an error later on Main code.
-    FILES_DIR = unicode(  # noqa
-                        '', 'utf-8') if sys.version_info < (3, ) else str('')
-FLICKR = eval(config.get('Config', 'FLICKR'))
-SLEEP_TIME = eval(config.get('Config', 'SLEEP_TIME'))
-DRIP_TIME = eval(config.get('Config', 'DRIP_TIME'))
-DB_PATH = eval(config.get('Config', 'DB_PATH'))
-try:
-    TOKEN_CACHE = eval(config.get('Config', 'TOKEN_CACHE'))
-# CODING: Should extend this control to other parameters (Enhancement #7)
-except (ConfigParser.NoOptionError, ConfigParser.NoOptionError) as err:
-    sys.stderr.write('[{!s}]:[{!s}][WARNING ]:[uploadr] ({!s}) TOKEN_CACHE '
-                     'not defined or incorrect on INI file: [{!s}]. '
-                     'Assuming default value [{!s}].\n'
-                     .format(nutime.strftime(UPLDRConstants.TimeFormat),
-                             os.getpid(),
-                             str(err),
-                             UPLDRConstants.INIfile,
-                             os.path.join(UPLDRConstants.baseDir,
-                                          "token")))
-    sys.stderr.flush()
-    TOKEN_CACHE = os.path.join(UPLDRConstants.baseDir, "token")
-LOCK_PATH = eval(config.get('Config', 'LOCK_PATH'))
-TOKEN_PATH = eval(config.get('Config', 'TOKEN_PATH'))
-# Read EXCLUDED_FOLDERS and convert them into Unicode folders
-inEXCLUDED_FOLDERS = eval(config.get('Config', 'EXCLUDED_FOLDERS'))
-EXCLUDED_FOLDERS = []
-for folder in inEXCLUDED_FOLDERS:
-    EXCLUDED_FOLDERS.append(unicode(folder, 'utf-8')  # noqa
-                            if sys.version_info < (3, )
-                            else str(folder))
-    if LOGGING_LEVEL <= logging.INFO:
-        sys.stderr.write('[{!s}]:[{!s}][INFO    ]:[uploadr] '
-                         'folder from EXCLUDED_FOLDERS:[{!s}] '
-                         'type:[{!s}]\n'
-                         .format(nutime.strftime(UPLDRConstants.TimeFormat),
-                                 os.getpid(),
-                                 StrUnicodeOut(EXCLUDED_FOLDERS[
-                                     len(EXCLUDED_FOLDERS) - 1]),
-                                 type(EXCLUDED_FOLDERS[
-                                     len(EXCLUDED_FOLDERS) - 1])))
-        sys.stderr.flush()
-del inEXCLUDED_FOLDERS
-# Consider Unicode Regular expressions
-IGNORED_REGEX = [re.compile(regex, re.UNICODE) for regex in
-                 eval(config.get('Config', 'IGNORED_REGEX'))]
-if LOGGING_LEVEL <= logging.INFO:
-    sys.stderr.write('[{!s}]:[{!s}][INFO    ]:[uploadr] '
-                     'Number of IGNORED_REGEX entries:[{!s}]\n'
-                     .format(nutime.strftime(UPLDRConstants.TimeFormat),
-                             os.getpid(),
-                             len(IGNORED_REGEX)))
-    sys.stderr.flush()
-ALLOWED_EXT = eval(config.get('Config', 'ALLOWED_EXT'))
-RAW_EXT = eval(config.get('Config', 'RAW_EXT'))
-FILE_MAX_SIZE = eval(config.get('Config', 'FILE_MAX_SIZE'))
-MANAGE_CHANGES = eval(config.get('Config', 'MANAGE_CHANGES'))
-RAW_TOOL_PATH = eval(config.get('Config', 'RAW_TOOL_PATH'))
-CONVERT_RAW_FILES = eval(config.get('Config', 'CONVERT_RAW_FILES'))
-FULL_SET_NAME = eval(config.get('Config', 'FULL_SET_NAME'))
-MAX_SQL_ATTEMPTS = eval(config.get('Config', 'MAX_SQL_ATTEMPTS'))
-MAX_UPLOAD_ATTEMPTS = eval(config.get('Config', 'MAX_UPLOAD_ATTEMPTS'))
-
-# Update logging level as per LOGGING_LEVEL from INI file
-logging.getLogger().setLevel(LOGGING_LEVEL)
-
-if LOGGING_LEVEL <= logging.INFO:
-    np.niceprint('Output for FLICKR Configuration:')
-    pprint.pprint(FLICKR)
-
-np.niceprint('--------- (V{!s}) Start time: {!s} ---------'
+np.niceprint('--------- (V{!s}) Start time: {!s} ---------(Log:{!s})'
              .format(UPLDRConstants.Version,
-                     nutime.strftime(UPLDRConstants.TimeFormat)))
+                     nutime.strftime(UPLDRConstants.TimeFormat),
+                     xCfg.LOGGING_LEVEL))
 if __name__ == "__main__":
+    # Parse the argumens options
+    parse_arguments()
+
+    # Arguments override configuration filename
+    if ARGS.config_file:
+        UPLDRConstants.INIfile = ARGS.config_file
+        logging.info('UPLDRConstants.INIfile:[{!s}]'
+                     .format(StrUnicodeOut(UPLDRConstants.INIfile)))
+
+    try:
+        if not (
+            (UPLDRConstants.baseDir == '' or os.path.isdir(
+                UPLDRConstants.baseDir)) and os.path.isfile(
+                UPLDRConstants.INIfile)):
+            raise OSError('[Errno 2] No such file or directory')
+    except Exception as err:
+        logging.critical(
+            'Config folder [{!s}] and/or INI file: [{!s}] not found or '
+            'incorrect format: [{!s}]! Exiting...\n'
+            .format(UPLDRConstants.baseDir,
+                    UPLDRConstants.INIfile,
+                    str(err)))
+        sys.exit(2)
+
+    # Source configuration from INIfile
+    xCfg.readconfig(UPLDRConstants.INIfile, ['Config'])
+    if xCfg.processconfig():
+        if xCfg.verifyconfig():
+            pass
+        else:
+            raise ValueError('No config file found or incorrect config!')
+    else:
+        raise ValueError('No config file found or incorrect config!')
+
+    # Update logging level as per LOGGING_LEVEL from INI file
+    logging.getLogger().setLevel(xCfg.LOGGING_LEVEL)
+
+    # CODING: Remove
+    if xCfg.LOGGING_LEVEL <= logging.INFO:
+        np.niceprint('Output for FLICKR Configuration:')
+        pprint.pprint(xCfg.FLICKR)
+
     # Ensure that only one instance of this script is running
-    f = open(LOCK_PATH, 'w')
+    f = open(xCfg.LOCK_PATH, 'w')
     try:
         fcntl.lockf(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except IOError as e:
@@ -4707,11 +4593,10 @@ if __name__ == "__main__":
             sys.exit(-1)
         raise
     finally:
-        parse_arguments()
         run_uploadr()
-
-np.niceprint('--------- (V{!s}) End time: {!s} ---------'
+np.niceprint('--------- (V{!s}) End time: {!s} -----------(Log:{!s})'
              .format(UPLDRConstants.Version,
-                     nutime.strftime(UPLDRConstants.TimeFormat)))
+                     nutime.strftime(UPLDRConstants.TimeFormat),
+                     xCfg.LOGGING_LEVEL))
 sys.stderr.write('--------- ' + 'End: ' + ' ---------\n')
 sys.stderr.flush()

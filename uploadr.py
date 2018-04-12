@@ -4486,12 +4486,12 @@ UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
 # UPLDRConstants.baseDir = os.getcwd()
 # UPLDRConstants.baseDir = os.path.join(sys.prefix, 'etc')
 UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")
-sys.stderr.write('[CODING]     baseDir: [' + UPLDRConstants.baseDir + ']\n')
-sys.stderr.write('[CODING]         cwd: [' + os.getcwd() + ']\n')
-sys.stderr.write('[CODING]  prefix/etc: [' + os.path.join(sys.prefix, 'etc') +
-                 ']\n')
-sys.stderr.write('[CODING]     INIfile: [' + UPLDRConstants.INIfile + ']\n')
-sys.stderr.flush()
+if xCfg.LOGGING_LEVEL <= logging.DEBUG:
+    logging.debug('       baseDir:[{!s}]'.format(UPLDRConstants.baseDir))
+    logging.debug('           cwd:[{!s}]'.format(os.getcwd()))
+    logging.debug('    prefix/etc:[{!s}]'.format(os.path.join(sys.prefix,
+                                                              'etc')))
+    logging.debug('       INIfile:[{!s}]'.format(UPLDRConstants.INIfile))
 # -----------------------------------------------------------------------------
 
 # =============================================================================

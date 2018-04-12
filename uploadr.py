@@ -4481,11 +4481,9 @@ retry = rate_limited.retry
 # -----------------------------------------------------------------------------
 # UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 UPLDRConstants.nuMediacount = 0
-UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
-# CODING: To be used in lieu of previous line once uploadr.py is installed
-# on /bin folder with setup.py install
-# UPLDRConstants.baseDir = os.getcwd()
-# UPLDRConstants.baseDir = os.path.join(sys.prefix, 'etc')
+# Base dir for config and support files. Current Working Directory.
+# See also option --config-file argument option
+UPLDRConstants.baseDir = os.getcwd()
 UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")
 if xCfg.LOGGING_LEVEL <= logging.DEBUG:
     logging.debug('       baseDir:[{!s}]'.format(UPLDRConstants.baseDir))
@@ -4541,7 +4539,7 @@ if __name__ == "__main__":
     # Parse the argumens options
     parse_arguments()
 
-    # Arguments override configuration filename
+    # Argument --config-file overrides configuration filename.
     if ARGS.config_file:
         UPLDRConstants.INIfile = ARGS.config_file
         logging.info('UPLDRConstants.INIfile:[{!s}]'

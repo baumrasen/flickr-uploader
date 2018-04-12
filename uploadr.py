@@ -108,7 +108,7 @@ UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 # Inits with default configuration values.
 xCfg = myconfig.MyConfig()
 # Get LOGGING_LEVEL to allow logging even if everything else is wrong!
-xCfg.LOGGING_LEVEL = int(str(xCfg.LOGGING_LEVEL ))
+xCfg.LOGGING_LEVEL = int(str(xCfg.LOGGING_LEVEL))
 logging.debug('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
               .format('LOGGING_LEVEL',
                       type(xCfg.LOGGING_LEVEL),

@@ -3226,10 +3226,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         .format(xsetName))
                     if tfind:
                         if (ARGS.verbose):
-                            np.niceprint(' IS_UPLOADED:[PHOTO UPLOADED WITHOUT'
+                            np.niceprint(' IS_UPLOADED:[UPLOADED WITHOUT'
                                          ' SET WITH ALBUM TAG]',
                                          fname='isuploaded')
-                        logging.warning(' IS_UPLOADED:[PHOTO UPLOADED WITHOUT'
+                        logging.warning(' IS_UPLOADED:[UPLOADED WITHOUT'
                                         ' SET WITH ALBUM TAG]')
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
@@ -3240,10 +3240,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             returnUploadedNoSet
                     else:
                         if ARGS.verbose_progress:
-                            np.niceprint('IS_UPLOADED:[PHOTO UPLOADED WITHOUT'
+                            np.niceprint('IS_UPLOADED:[UPLOADED WITHOUT'
                                          ' SET WITHOUT ALBUM TAG]',
                                          fname='isuploaded')
-                        logging.warning('IS_UPLOADED:[PHOTO UPLOADED WITHOUT'
+                        logging.warning('IS_UPLOADED:[UPLOADED WITHOUT'
                                         ' SET WITHOUT ALBUM TAG]')
 
                 for setinlist in resp.findall('set'):
@@ -3276,11 +3276,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     if (StrUnicodeOut(xsetName) ==
                             StrUnicodeOut(setinlist.attrib['title'])):
                         if (ARGS.verbose):
-                            np.niceprint(' IS_UPLOADED:[IS PHOTO UPLOADED='
-                                         'TRUE WITH SET]',
+                            np.niceprint(' IS_UPLOADED:[TRUE WITH SET]',
                                          fname='isuploaded')
                         logging.warning(
-                            ' IS_UPLOADED:[IS PHOTO UPLOADED=TRUE WITH SET]')
+                            ' IS_UPLOADED:[TRUE WITH SET]')
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
                         returnUploadedNoSet = False

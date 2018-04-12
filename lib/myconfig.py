@@ -344,9 +344,12 @@ class MyConfig(object):
                                   if sys.version_info < (3, ) \
                                   else str(self.__dict__[item])
             if not os.path.isdir(os.path.dirname(self.__dict__[item])):
-                logging.critical('{!s}: [{!s}] is not in a valid folder.'
+                logging.critical('{!s}:[{!s}] is not in a valid folder:[{!s}].'
                                  .format(item,
-                                         StrUnicodeOut(self.__dict__[item])))
+                                         StrUnicodeOut(self.__dict__[item])),
+                                         StrUnicodeOut(os.path.dirname(
+                                             self.__dict__[item]))
+                                )
 
         # Further specific processing... EXCLUDED_FOLDERS
         #     Read EXCLUDED_FOLDERS and convert them into Unicode folders

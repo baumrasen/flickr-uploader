@@ -109,16 +109,6 @@ UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 xCfg = myconfig.MyConfig()
 # Get LOGGING_LEVEL to allow logging even if everything else is wrong!
 xCfg.LOGGING_LEVEL = int(str(xCfg.LOGGING_LEVEL))
-# CODING
-sys.stderr.write('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]\n'
-                 .format('LOGGING_LEVEL',
-                         type(xCfg.LOGGING_LEVEL),
-                         xCfg.LOGGING_LEVEL))
-sys.stderr.flush()
-logging.debug('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
-              .format('LOGGING_LEVEL',
-                      type(xCfg.LOGGING_LEVEL),
-                      xCfg.LOGGING_LEVEL))
 logging.basicConfig(stream=sys.stderr,
                     level=int(str(xCfg.LOGGING_LEVEL)),
                     datefmt=UPLDRConstants.TimeFormat,

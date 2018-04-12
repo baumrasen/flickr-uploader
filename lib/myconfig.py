@@ -349,7 +349,7 @@ class MyConfig(object):
                                          StrUnicodeOut(self.__dict__[item]),
                                          StrUnicodeOut(os.path.dirname(
                                              self.__dict__[item]))
-                                ))
+                                         ))
 
         # Further specific processing... EXCLUDED_FOLDERS
         #     Read EXCLUDED_FOLDERS and convert them into Unicode folders

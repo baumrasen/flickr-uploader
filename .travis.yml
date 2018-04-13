@@ -67,7 +67,8 @@ env:
   #   addAlbumsMigrate
   #   RemoveReplace, Multiprocessing
   #   ExcludedFolders+IgnoredFiles in Single Processing mode. Also test cleaning up badfiles database entries and listing files not in set
-  #   Old273INI 
+  #   Old273INI
+  #   NoVerbose
 
   matrix:
 # TestScenario: Help, Delete DryRun, BadFiles, MultiProcessing, Remove, Replace, RemoveReplace, Old273INI
@@ -87,6 +88,8 @@ env:
     - TestScenario=ExcludedFolders UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -c -l 50"
 # Old273INI to test previous INI config file format using os.path.dirname(sys.argv[0]) vs os.getcwd()
     - TestScenario=Old273INI UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -p 10"
+#   NoVerbose
+    - TestScenario=NoVerbose UploadrOptions="-p 25"
     
 # =============================================================================
 # before_script

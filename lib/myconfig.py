@@ -61,7 +61,7 @@ class MyConfig(object):
 
         Loads default configuration files. Overwrites with any specific values
         found on INI config file.
-        
+
         >>> import lib.myconfig as myconfig
         >>> Cfg = myconfig.MyConfig()
         >>> Cfg.processconfig()
@@ -446,4 +446,3 @@ if __name__ == "__main__":
             print('Test Myconfig: Ok')
         else:
             print('Test Myconfig: Not Ok')
-    

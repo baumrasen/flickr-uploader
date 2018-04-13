@@ -4489,6 +4489,7 @@ if xCfg.LOGGING_LEVEL <= logging.DEBUG:
     logging.debug('           cwd:[{!s}]'.format(os.getcwd()))
     logging.debug('    prefix/etc:[{!s}]'.format(os.path.join(sys.prefix,
                                                               'etc')))
+    logging.debug('   sys.argv[0]:[{!s}]'.format(os.path.dirname(sys.argv[0])))
     logging.debug('       INIfile:[{!s}]'.format(UPLDRConstants.INIfile))
 # -----------------------------------------------------------------------------
 

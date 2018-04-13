@@ -169,6 +169,8 @@ script:
   - if [[ $TestScenario == ExcludedFolders ]]; then cp ./tests/uploadr_excluded.ini ./uploadr.ini; fi
 
   - if [[ $TestScenario == Old273INI ]]; then cp ./tests/uploadr_excluded_2.7.3.ini ./uploadr.ini; fi
+  
+  - if [[ $TestScenario == NoVerbose ]]; then cp ./tests/uploadr_NoVerbose.ini ./uploadr.ini; fi
 
   - coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
@@ -216,6 +218,7 @@ after_script:
 # After script: Save build related data
   - echo -e "TRAVIS_PYTHON_VERSION|TRAVIS_TEST_RESULT|TRAVIS_EVENT_TYPE|TRAVIS_COMMIT|TRAVIS_COMMIT_MESSAGE|TRAVIS_BUILD_DIR|TRAVIS_BUILD_ID|TRAVIS_BUILD_NUMBER|TRAVIS_JOB_NUMBER" > build.txt
   - echo -e "$TRAVIS_PYTHON_VERSION|$TRAVIS_TEST_RESULT|$TRAVIS_EVENT_TYPE|$TRAVIS_COMMIT|$TRAVIS_COMMIT_MESSAGE|$TRAVIS_BUILD_DIR|$TRAVIS_BUILD_ID|$TRAVIS_BUILD_NUMBER|$TRAVIS_JOB_NUMBER" >> build.txt
+  - echo -e "TRAVIS_PYTHON_VERSION:\t${RAVIS_PYTHON_VERSION}\nTRAVIS_TEST_RESULT:\t${TRAVIS_TEST_RESULT}\nTRAVIS_EVENT_TYPE:\t${TRAVIS_EVENT_TYPE}\nTRAVIS_COMMIT:\t${TRAVIS_COMMIT}\nTRAVIS_COMMIT_MESSAGE:\t${TRAVIS_COMMIT_MESSAGE}\nTRAVIS_BUILD_DIR:\t${TRAVIS_BUILD_DIR}\nTRAVIS_BUILD_ID:\t${TRAVIS_BUILD_ID}\nTRAVIS_BUILD_NUMBER:\t${TRAVIS_BUILD_NUMBER}\nTRAVIS_JOB_NUMBER:\t${TRAVIS_JOB_NUMBER}" >> build.txt
 # Upload LOG/ERR files to Dropbox
   - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER/$TRAVIS_JOB_NUMBER
   - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER/$TRAVIS_JOB_NUMBER

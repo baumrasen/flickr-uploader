@@ -38,6 +38,7 @@ from . import niceprint
 # -----------------------------------------------------------------------------
 np = niceprint.niceprint()
 StrUnicodeOut = np.StrUnicodeOut
+reportError = np.reportError
 
 
 # -----------------------------------------------------------------------------
@@ -60,6 +61,22 @@ class MyConfig(object):
 
         Loads default configuration files. Overwrites with any specific values
         found on INI config file.
+        
+        >>> import lib.myconfig as myconfig
+        >>> Cfg = myconfig.MyConfig()
+        >>> Cfg.processconfig()
+        True
+        >>> ELog = Cfg.LOGGING_LEVEL
+        >>> Cfg.verifyconfig()
+        True
+        >>> Cfg.verifyconfig()
+        True
+        >>> Cfg.LOGGING_LEVEL = 'a'
+        >>> Cfg.verifyconfig()
+        True
+        >>> Cfg.LOGGING_LEVEL == ELog
+        True
+
     """
     # Config section ----------------------------------------------------------
     INISections = ['Config']
@@ -141,7 +158,7 @@ class MyConfig(object):
         "3",
         # MAX_UPLOAD_ATTEMPTS
         "10",
-        # LOGGING_LEVEL
+        # LOGGING_LEVEL logging.ERROR
         "40"
     ]
 
@@ -215,7 +232,7 @@ class MyConfig(object):
     # MyConfig.processconfig
     #
     def processconfig(self):
-        """ process
+        """ processconfig
         """
         # Default types for keys/values pairs ---------------------------------
         INItypes = [
@@ -267,6 +284,11 @@ class MyConfig(object):
                 else:
                     raise
             except BaseException:
+                reportError(Caught=True,
+                            CaughtPrefix='+++ ',
+                            CaughtCode='999',
+                            CaughtMsg='Caught an exception INIcheck',
+                            exceptSysInfo=True)
                 logging.critical('Invalid INI value for:[{!s}] '
                                  'Using default value:[{!s}]'
                                  .format(item,
@@ -298,7 +320,7 @@ class MyConfig(object):
     # MyConfig.verifyconfig
     #
     def verifyconfig(self):
-        """ readconfig
+        """ verifyconfig
         """
 
         # Further specific processing... LOGGING_LEVEL
@@ -309,7 +331,7 @@ class MyConfig(object):
                  logging.WARNING,
                  logging.ERROR,
                  logging.CRITICAL]:
-            self.__dict__['LOGGING_LEVEL'] = logging.WARNING
+            self.__dict__['LOGGING_LEVEL'] = logging.ERROR
         # Convert LOGGING_LEVEL into int() for later use in conditionals
         self.__dict__['LOGGING_LEVEL'] = int(str(
             self.__dict__['LOGGING_LEVEL']))
@@ -317,11 +339,12 @@ class MyConfig(object):
         # Further specific processing... FILES_DIR
         for item in ['FILES_DIR']:  # Check if dir exists. Unicode Support
             logging.debug('verifyconfig for [{!s}]'.format(item))
-            self.__dict__[item] = unicode(  # noqa
-                                      self.__dict__[item],
-                                      'utf-8') \
-                                  if sys.version_info < (3, ) \
-                                  else str(self.__dict__[item])
+            if not(np.isThisStringUnicode(self.__dict__[item])):
+                self.__dict__[item] = unicode(  # noqa
+                                          self.__dict__[item],
+                                          'utf-8') \
+                                      if sys.version_info < (3, ) \
+                                      else str(self.__dict__[item])
             if not os.path.isdir(self.__dict__[item]):
                 logging.critical('{!s}: [{!s}] is not a valid folder.'
                                  .format(item,
@@ -338,11 +361,12 @@ class MyConfig(object):
                      'TOKEN_CACHE',
                      'TOKEN_PATH']:
             logging.debug('verifyconfig for [{!s}]'.format(item))
-            self.__dict__[item] = unicode(  # noqa
-                                      self.__dict__[item],
-                                      'utf-8') \
-                                  if sys.version_info < (3, ) \
-                                  else str(self.__dict__[item])
+            if not(np.isThisStringUnicode(self.__dict__[item])):
+                self.__dict__[item] = unicode(  # noqa
+                                          self.__dict__[item],
+                                          'utf-8') \
+                                      if sys.version_info < (3, ) \
+                                      else str(self.__dict__[item])
             if not os.path.isdir(os.path.dirname(self.__dict__[item])):
                 logging.critical('{!s}:[{!s}] is not in a valid folder:[{!s}].'
                                  .format(item,
@@ -359,9 +383,12 @@ class MyConfig(object):
                       .format(inEXCLUDED_FOLDERS))
         outEXCLUDED_FOLDERS = []
         for folder in inEXCLUDED_FOLDERS:
-            outEXCLUDED_FOLDERS.append(unicode(folder, 'utf-8')  # noqa
-                                       if sys.version_info < (3, )
-                                       else str(folder))
+            if not(np.isThisStringUnicode(folder)):
+                outEXCLUDED_FOLDERS.append(unicode(folder, 'utf-8')  # noqa
+                                           if sys.version_info < (3, )
+                                           else str(folder))
+            else:
+                outEXCLUDED_FOLDERS.append(str(folder))
             logging.debug('folder from EXCLUDED_FOLDERS:[{!s}] '
                           'type:[{!s}]\n'
                           .format(
@@ -401,7 +428,7 @@ class MyConfig(object):
 #
 if __name__ == "__main__":
 
-    logging.basicConfig(level=logging.DEBUG,
+    logging.basicConfig(level=logging.WARNING,
                         format='[%(asctime)s]:[%(processName)-11s]' +
                                '[%(levelname)-8s]:[%(name)s] %(message)s')
 
@@ -409,4 +436,14 @@ if __name__ == "__main__":
     doctest.testmod()
 
     # Comment following line to allow further debugging/testing
-    sys.exit(0)
+    # sys.exit(0)
+
+    import lib.myconfig as myconfig
+
+    Cfg = myconfig.MyConfig()
+    if Cfg.processconfig():
+        if Cfg.verifyconfig():
+            print('Test Myconfig: Ok')
+        else:
+            print('Test Myconfig: Not Ok')
+    

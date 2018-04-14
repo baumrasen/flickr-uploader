@@ -1413,16 +1413,17 @@ class Uploadr:
                                          'duplicates/wrong checksum...'
                                          .format(StrUnicodeOut(file),
                                                  photo_id))
+                            if (ARGS.verbose):
+                                np.niceprint('  Uploaded file:[{!s}] '
+                                             'ID=[{!s}]. Check for '
+                                             'duplicates/wrong checksum...'
+                                             .format(StrUnicodeOut(file),
+                                                     photo_id))
+
+                            break
                         else:
                             ZuploadError = True
                             raise IOError(uploadResp)
-
-                        if (ARGS.verbose):
-                            np.niceprint('  Uploaded file:[{!s}] '
-                                         'ID=[{!s}]. Check for '
-                                         'duplicates/wrong checksum...'
-                                         .format(StrUnicodeOut(file),
-                                                 photo_id))
 
                     except (IOError, httplib.HTTPException):
                         reportError(Caught=True,

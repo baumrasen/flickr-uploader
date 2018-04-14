@@ -4450,6 +4450,7 @@ def run_uploadr():
             FLICK.printStat(UPLDRConstants.nuMediacount)
     # Run Uploadr -------------------------------------------------------------
 
+
 # -----------------------------------------------------------------------------
 # checkBaseDir_INIfile
 #
@@ -4457,7 +4458,7 @@ def run_uploadr():
 # Check function FileWithCallback definition
 # Uses global ARGS.verbose-progress parameter
 #
-def checkBaseDir_INIfile( baseDir, INIfile):
+def checkBaseDir_INIfile(baseDir, INIfile):
     """checkBaseDir_INIfile
 
     baseDir = Folder
@@ -4467,7 +4468,7 @@ def checkBaseDir_INIfile( baseDir, INIfile):
     resultCheck = True
     try:
         if not ((baseDir == '' or os.path.isdir(baseDir)) and
-            os.path.isfile(INIfile)):
+                os.path.isfile(INIfile)):
             raise OSError('[Errno 2] No such file or directory')
     except Exception as err:
         resultCheck = False
@@ -4599,7 +4600,7 @@ if __name__ == "__main__":
             UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir,
                                                   "uploadr.ini")
             if not checkBaseDir_INIfile(UPLDRConstants.baseDir,
-                                    UPLDRConstants.INIfile):
+                                        UPLDRConstants.INIfile):
                 reportError(Caught=True,
                             CaughtPrefix='+++ ',
                             CaughtCode='992',

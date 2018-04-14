@@ -122,13 +122,13 @@ class MyConfig(object):
         # DRIP_TIME
         "1 * 60",
         #  DB_PATH
-        "os.path.join(os.getcwd(), 'flickrdb')"
+        "os.path.join(os.getcwd(), 'flickrdb')",
         # LOCK_PATH
-        "os.path.join(os.getcwd(), '.flickrlock')"
+        "os.path.join(os.getcwd(), '.flickrlock')",
         # TOKEN_CACHE
-        "os.path.join(os.getcwd(), 'token')"
+        "os.path.join(os.getcwd(), 'token')",
         # TOKEN_PATH
-        "os.path.join(os.getcwd(), '.flickrToken')"
+        "os.path.join(os.getcwd(), '.flickrToken')",
         # EXCLUDED_FOLDERS (need to process for unicode support)
         "['@eaDir','#recycle','.picasaoriginals','_ExcludeSync',\
           'Corel Auto-Preserve','Originals',\

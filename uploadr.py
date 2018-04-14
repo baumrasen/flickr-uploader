@@ -1219,9 +1219,6 @@ class Uploadr:
                                           xCfg.FULL_SET_NAME)
 
         success = False
-        # For tracking bad response from search_photos
-        # CODING: Disabled
-        # TraceBackIndexError = False
         con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
         with con:
@@ -1356,25 +1353,23 @@ class Uploadr:
                     logging.info('title from INI file:[{!s}]'
                                  .format(title_filename))
 
-                # CODING: Focus this try/except and not cover so much code!
-                # try:
-                # Perform actual upload of the file
-                # search_result = None
-                ZuploadError = False
+                # CODING: Check MAX_UPLOAD_ATTEMPTS. Replace with @retry?
+                uploadResp = None
+                photo_id = None
+                ZuploadOK = False
                 ZbadFile = False
-
-                # CODING: Check MAX_ATTEMPTS. Replace with @retry?
+                ZuploadError = False
                 for x in range(0, xCfg.MAX_UPLOAD_ATTEMPTS):
                     # Reset variables on each iteration
-                    # CODING Use is_already_uploaded instead
-                    # search_result = None
-                    ZuploadError = False
                     uploadResp = None
-                    logging.warning('Uploading/Reuploading '
-                                    '[{!s}/{!s} attempts].'
+                    photo_id = None
+                    ZuploadOK = False
+                    ZbadFile = False
+                    ZuploadError = False
+                    logging.warning('Up/Reuploading:[{!s}/{!s} attempts].'
                                     .format(x, xCfg.MAX_UPLOAD_ATTEMPTS))
                     if (x > 0):
-                        np.niceprint('Reuploading:[{!s}]...'
+                        np.niceprint('    Reuploading:[{!s}] '
                                      '[{!s}/{!s} attempts].'
                                      .format(StrUnicodeOut(file),
                                              x,
@@ -1409,22 +1404,25 @@ class Uploadr:
                             encoding='utf-8',
                             method='xml'))
 
-                        # Save photo_id returned from Flickr upload
-                        photo_id = uploadResp.findall('photoid')[0].text
-                        logging.info('  Uploaded file:[{!s}] '
-                                     'Id=[{!s}]. Check for '
-                                     'duplicates/wrong checksum...'
-                                     .format(StrUnicodeOut(file),
-                                             photo_id))
+                        if self.isGood(uploadResp):
+                            ZuploadOK = True
+                            # Save photo_id returned from Flickr upload
+                            photo_id = uploadResp.findall('photoid')[0].text
+                            logging.info('  Uploaded file:[{!s}] '
+                                         'Id=[{!s}]. Check for '
+                                         'duplicates/wrong checksum...'
+                                         .format(StrUnicodeOut(file),
+                                                 photo_id))
+                        else:
+                            ZuploadError = True
+                            raise IOError(uploadResp)
+
                         if (ARGS.verbose):
                             np.niceprint('  Uploaded file:[{!s}] '
                                          'ID=[{!s}]. Check for '
                                          'duplicates/wrong checksum...'
                                          .format(StrUnicodeOut(file),
                                                  photo_id))
-
-                        # Successful upload. Break attempts cycle
-                        break
 
                     except (IOError, httplib.HTTPException):
                         reportError(Caught=True,
@@ -1457,19 +1455,10 @@ class Uploadr:
                         #     raise IOError(search_result)
                         if ZisCount == 0:
                             ZuploadError = True
-                            if x == xCfg.MAX_UPLOAD_ATTEMPTS - 1:
-                                np.niceprint('Reached maximum number '
-                                             'of attempts to upload, '
-                                             'file: [{!s}]'.format(file))
-                                raise ValueError('Reached maximum number '
-                                                 'of attempts to upload, '
-                                                 'skipping')
-                            np.niceprint('Not found, reuploading '
-                                         '[{!s}/{!s} attempts].'
-                                         .format(x,
-                                                 xCfg.MAX_UPLOAD_ATTEMPTS))
                             continue
                         elif ZisCount == 1:
+                            ZuploadOK = True
+                            ZuploadError = False
                             np.niceprint('Found, '
                                          'continuing with next image.')
                             break
@@ -1477,7 +1466,6 @@ class Uploadr:
                             ZuploadError = True
                             raise IOError('More than one file with same '
                                           'checksum! Any collisions? ')
-                            # CODING: commented: + search_result)
 
                     except flickrapi.exceptions.FlickrError as ex:
                         reportError(Caught=True,
@@ -1493,10 +1481,15 @@ class Uploadr:
                         # Error code: [Error: 5: Filetype was not recognised]
                         # Error code: [8]
                         # Error code: [Error: 8: Filesize was too large]
-                        if (((format(ex.code) == '5') or (
-                                format(ex.code) == '8')) and (ARGS.bad_files)):
+                        if ((format(ex.code) == '5') or (
+                                format(ex.code) == '8')):
                             # Badfile
                             ZbadFile = True
+                            if not ARGS.bad_files:
+                                # Break for ATTEMPTS cycle
+                                break
+
+                            # ARGS.bad_files is True
                             # Add to db the file NOT uploaded
                             # Set locking for when running multiprocessing
                             np.niceprint('   Log Bad file:[{!s}] due to [{!s}]'
@@ -1507,112 +1500,77 @@ class Uploadr:
                                          )
                             logging.info('Bad file:[{!s}]'.format(file))
 
-                            self.useDBLock(lock, True)
-                            # files_id is autoincrement. No need to mention.
-                            cur.execute(
-                                'INSERT INTO badfiles ( path, md5, '
-                                'last_modified, tagged) VALUES (?, ?, ?, 1)',
-                                (file, file_checksum, last_modified))
-                            # Control for when running multiprocessing
-                            # release locking
-                            self.useDBLock(lock, False)
+                            try:
+                                self.useDBLock(lock, True)
+                                # files_id is autoincrement. No need to mention
+                                cur.execute(
+                                    'INSERT INTO badfiles '
+                                    '( path, md5, last_modified, tagged) '
+                                    'VALUES (?, ?, ?, 1)',
+                                    (file, file_checksum, last_modified))
+                            except lite.Error as e:
+                                reportError(Caught=True,
+                                            CaughtPrefix='+++ DB',
+                                            CaughtCode='041',
+                                            CaughtMsg='DB error on INSERT: '
+                                                      '[{!s}]'
+                                                      .format(e.args[0]),
+                                            NicePrint=True)
+                            finally:
+                                # Control for when running multiprocessing
+                                # release locking
+                                self.useDBLock(lock, False)
 
                             # Break for ATTEMPTS cycle
                             break
-                        elif ((format(ex.code) == '5') or (
-                               format(ex.code) == '8')):
-                            ZbadFile = True
-                            # Break for ATTEMPTS cycle
-                            break
-
-                    except lite.Error as e:
-                        reportError(Caught=True,
-                                    CaughtPrefix='+++ DB',
-                                    CaughtCode='041',
-                                    CaughtMsg='DB error on INSERT: [{!s}]'
-                                              .format(e.args[0]),
-                                    NicePrint=True)
-                        self.useDBLock(lock, False)
-
-                        return False
 
                     finally:
                         con.commit()
 
-                    # CODING: is_already_uploaded may have to return exception
-                    # to replace this code.
-                    # Error on upload and search for photo not performed/empty
-                    # if not search_result and not self.isGood(uploadResp):
-                    if ZuploadError and not self.isGood(uploadResp):
-                        np.niceprint('A problem occurred while attempting to '
-                                     'upload the file:[{!s}]'
-                                     .format(StrUnicodeOut(file)))
-                        raise IOError(uploadResp)
+                logging.debug('After CYCLE '
+                              'Up/Reuploading:[{!s}/{!s} attempts].'
+                              .format(x, xCfg.MAX_UPLOAD_ATTEMPTS))
 
-                    # Successful update
-                    elif ZbadFile:
-                        np.niceprint('       Bad file:[{!s}]'
-                                     .format(StrUnicodeOut(file)))
-                    else:
-                        np.niceprint('Successful file:[{!s}]'
-                                     .format(StrUnicodeOut(file)))
+                if (not ZuploadOK) and (x == (xCfg.MAX_UPLOAD_ATTEMPTS - 1)):
+                    np.niceprint('Reached maximum number '
+                                 'of attempts to upload, '
+                                 'file: [{!s}]'.format(file))
+                    raise ValueError('Reached maximum number '
+                                     'of attempts to upload, '
+                                     'skipping')
 
-                        assert photo_id is not None, niceassert(
-                            'photo_id None:[{!s}]'
-                            .format(StrUnicodeOut(file)))
-                        # Save file_id: from uploadResp or is_already_uploaded
-                        file_id = photo_id
+                # CODING: is_already_uploaded may have to return exception
+                # to replace this code.
+                # Error on upload and search for photo not performed/empty
+                # if not search_result and not self.isGood(uploadResp):
+                elif (not ZuploadOK) and ZuploadError:
+                    np.niceprint('A problem occurred while attempting to '
+                                 'upload the file:[{!s}]'
+                                 .format(StrUnicodeOut(file)))
+                    raise IOError(uploadResp)
 
-# Save file_id... from uploadResp or search_result
-# CODING: Obtained IndexOut of Range error after 1st load
-# attempt failed and when search_Result returns 1 entry
-# logging.info('search_result:[{!s}]'.format(search_result))
-# if search_result:
-#     logging.info('len(search_result(photos)'
-#                  '.[photo]=[{!s}]'
-#                  .format(len(search_result
-#                              .find('photos')
-#                              .findall('photo'))))
-#     if (len(search_result
-#             .find('photos')
-#             .findall('photo')) == 0):
-#         logging.error('xxx #E10 Error: '
-#                       'IndexError: search_result yields '
-#                       'Index out of range. '
-#                       'Manually check file:[{!s}] '
-#                       'Continuing with next image.'
-#                       .format(file))
-#         TraceBackIndexError = True
-#     else:
-#         file_id = search_result.find('photos')\
-#             .findall('photo')[0].attrib['id']
-#         # file_id = uploadResp.findall('photoid')[0].text
-#         logging.debug('Output for {!s}:'
-#                       .format('search_result'))
-#         logging.debug(xml.etree.ElementTree.tostring(
-#             search_result,
-#             encoding='utf-8',
-#             method='xml'))
-#         logging.warning('SEARCH_RESULT file_id={!s}'
-#                         .format(file_id))
-# else:
-    # Successful update given that search_result is None
-    # file_id = photo_id
+                # Successful update
+                elif (not ZuploadOK) and ZbadFile:
+                    np.niceprint('       Bad file:[{!s}]'
+                                 .format(StrUnicodeOut(file)))
+                elif ZuploadOK:
+                    np.niceprint('Successful file:[{!s}]'
+                                 .format(StrUnicodeOut(file)))
 
-                        # For tracking bad response from search_photos
-                        # logging.info('TraceBackIndexError:[{!s}]'
-                        #              .format(TraceBackIndexError))
-                        # if not TraceBackIndexError:
-                        # Insert into DB files
-                        dbInsertIntoFiles(lock, file_id, file,
-                                          file_checksum, last_modified)
+                    assert photo_id is not None, niceassert(
+                        'photo_id None:[{!s}]'
+                        .format(StrUnicodeOut(file)))
+                    # Save file_id: from uploadResp or is_already_uploaded
+                    file_id = photo_id
 
-                        # Update the Video Date Taken
-                        self.updatedVideoDate(file_id, file, last_modified)
+                    # Insert into DB files
+                    dbInsertIntoFiles(lock, file_id, file,
+                                      file_checksum, last_modified)
 
-                        success = True
-                        # else:
-                        #     success = False
+                    # Update the Video Date Taken
+                    self.updatedVideoDate(file_id, file, last_modified)
+
+                    success = True
 
             # C) File loaded. Recorded on DB. Look for changes...
             elif (xCfg.MANAGE_CHANGES):
@@ -4198,14 +4156,14 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                             .findall('photo')):
                     logging.info('Photo Not in Set: id:[{!s}] title:[{!s}]'
                                  .format(row.attrib['id'],
-                                         row.attrib['title']))
+                                         StrUnicodeOut(row.attrib['title'])))
                     logging.debug(xml.etree.ElementTree.tostring(
                         row,
                         encoding='utf-8',
                         method='xml'))
                     np.niceprint('Photo get_not_in_set: id:[{!s}] title:[{!s}]'
                                  .format(row.attrib['id'],
-                                         row.attrib['title']))
+                                         StrUnicodeOut(row.attrib['title'])))
                     logging.info('count=[{!s}]'.format(count))
                     if (count == 500) or \
                             (count >= (ARGS.list_photos_not_in_set - 1)) or \

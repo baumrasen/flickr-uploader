@@ -1067,9 +1067,6 @@ class Uploadr:
                 if not self.isGood(res_set_date):
                     raise IOError(res_set_date)
 
-            np.niceprint('Successful date:[{!s}] for file:[{!s}]'
-                         .format(StrUnicodeOut(video_date),
-                                 StrUnicodeOut(xfile)))
             return True
         else:
             return True

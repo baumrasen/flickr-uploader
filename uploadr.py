@@ -4224,7 +4224,7 @@ def parse_arguments():
                             # dest='xINIfile',
                             metavar='filename.ini',
                             type=str,
-                            default=UPLDRConstants.INIfile,
+                            # default=UPLDRConstants.INIfile,
                             help='Optional configuration file.'
                                  'default is [{!s}]'
                                  .format(UPLDRConstants.INIfile))
@@ -4450,6 +4450,35 @@ def run_uploadr():
             FLICK.printStat(UPLDRConstants.nuMediacount)
     # Run Uploadr -------------------------------------------------------------
 
+# -----------------------------------------------------------------------------
+# checkBaseDir_INIfile
+#
+# For use with flickrapi upload for showing callback progress information
+# Check function FileWithCallback definition
+# Uses global ARGS.verbose-progress parameter
+#
+def checkBaseDir_INIfile( baseDir, INIfile):
+    """checkBaseDir_INIfile
+
+    baseDir = Folder
+    INIfile = INI File path
+    """
+
+    resultCheck = True
+    try:
+        if not ((baseDir == '' or os.path.isdir(baseDir)) and
+            os.path.isfile(INIfile)):
+            raise OSError('[Errno 2] No such file or directory')
+    except Exception as err:
+        resultCheck = False
+        logging.critical(
+            'Config folder [{!s}] and/or INI file: [{!s}] not found or '
+            'incorrect format: [{!s}]!'
+            .format(baseDir, INIfile, str(err)))
+    finally:
+        logging.debug('resultCheck=[{!s}]'.format(resultCheck))
+        return resultCheck
+
 
 # =============================================================================
 # Global Variables
@@ -4480,10 +4509,13 @@ retry = rate_limited.retry
 # -----------------------------------------------------------------------------
 # UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 UPLDRConstants.nuMediacount = 0
-# Base dir for config and support files. Current Working Directory.
-# See also option --config-file argument option
-UPLDRConstants.baseDir = os.getcwd()
+# Base dir for config and support files.
+#   Will use --config-file argument option
+#   If not, first try sys.prefix/etc folder
+#   If not, then try Current Working Directory
+UPLDRConstants.baseDir = os.path.join(sys.prefix, 'etc')
 UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")
+
 if xCfg.LOGGING_LEVEL <= logging.DEBUG:
     logging.debug('       baseDir:[{!s}]'.format(UPLDRConstants.baseDir))
     logging.debug('           cwd:[{!s}]'.format(os.getcwd()))
@@ -4544,21 +4576,37 @@ if __name__ == "__main__":
         UPLDRConstants.INIfile = ARGS.config_file
         logging.info('UPLDRConstants.INIfile:[{!s}]'
                      .format(StrUnicodeOut(UPLDRConstants.INIfile)))
-
-    try:
-        if not (
-            (UPLDRConstants.baseDir == '' or os.path.isdir(
-                UPLDRConstants.baseDir)) and os.path.isfile(
-                UPLDRConstants.INIfile)):
-            raise OSError('[Errno 2] No such file or directory')
-    except Exception as err:
-        logging.critical(
-            'Config folder [{!s}] and/or INI file: [{!s}] not found or '
-            'incorrect format: [{!s}]! Exiting...\n'
-            .format(UPLDRConstants.baseDir,
-                    UPLDRConstants.INIfile,
-                    str(err)))
-        sys.exit(2)
+        if not checkBaseDir_INIfile(UPLDRConstants.baseDir,
+                                    UPLDRConstants.INIfile):
+            reportError(Caught=True,
+                        CaughtPrefix='+++ ',
+                        CaughtCode='990',
+                        CaughtMsg='Exiting.',
+                        NicePrint=True)
+            sys.exit(2)
+    else:
+        # sys.prefix
+        if not checkBaseDir_INIfile(UPLDRConstants.baseDir,
+                                    UPLDRConstants.INIfile):
+            reportError(Caught=True,
+                        CaughtPrefix='+++ ',
+                        CaughtCode='991',
+                        CaughtMsg='Invalid sys.prefix INI file. '
+                                  'Trying current working directory.',
+                        NicePrint=True)
+            # cwd
+            UPLDRConstants.baseDir = os.getcwd()
+            UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir,
+                                                  "uploadr.ini")
+            if not checkBaseDir_INIfile(UPLDRConstants.baseDir,
+                                    UPLDRConstants.INIfile):
+                reportError(Caught=True,
+                            CaughtPrefix='+++ ',
+                            CaughtCode='992',
+                            CaughtMsg='Invalid current directory INI file'
+                                      'Exiting...',
+                            NicePrint=True)
+                sys.exit(2)
 
     # Source configuration from INIfile
     xCfg.readconfig(UPLDRConstants.INIfile, ['Config'])

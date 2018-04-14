@@ -17,8 +17,10 @@
 * **[NOT FULLY TESTED YET]** You can try and run (Let me know if it works!)
    * `python3 setup.py install --prefix=~/apps/Python`
    * `python3 setup.py installcfg --folder=~/apps/Python` to install config
-  Need to align this change with 1) uploadr.ini change from dirname to getcwd
-  and 2) uploadr.py use baseDir as a getcwd()
+  From v2.7.4 uploadr.ini is searched form CWD (current working directory)
+  which allows to run upload.py form the --prefix/bin folder as it is
+  installed wiht "python setup.py install". Note that uploadr.ini definition
+  for DB_PATH, LOCK_PATH, TOKEN_CACHE and TOKEN_PATH as to be changed.
 * Error 040 on upload (issue #28) try/exception flickrapi is not triggered
   within the inner scope and it does not reupload. Only IOError. HTTPException.
   Move also upload to @retry control! This may be the cause to some files not

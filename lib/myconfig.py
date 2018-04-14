@@ -122,13 +122,13 @@ class MyConfig(object):
         # DRIP_TIME
         "1 * 60",
         #  DB_PATH
-        "os.path.join(os.path.dirname(sys.argv[0]), 'flickrdb')",
+        "os.path.join(os.getcwd(), 'flickrdb')"
         # LOCK_PATH
-        "os.path.join(os.path.dirname(sys.argv[0]), '.flickrlock')",
+        "os.path.join(os.getcwd(), '.flickrlock')"
         # TOKEN_CACHE
-        "os.path.join(os.path.dirname(sys.argv[0]), 'token')",
+        "os.path.join(os.getcwd(), 'token')"
         # TOKEN_PATH
-        "os.path.join(os.path.dirname(sys.argv[0]), '.flickrToken')",
+        "os.path.join(os.getcwd(), '.flickrToken')"
         # EXCLUDED_FOLDERS (need to process for unicode support)
         "['@eaDir','#recycle','.picasaoriginals','_ExcludeSync',\
           'Corel Auto-Preserve','Originals',\
@@ -158,7 +158,7 @@ class MyConfig(object):
         "3",
         # MAX_UPLOAD_ATTEMPTS
         "10",
-        # LOGGING_LEVEL logging.ERROR
+        # LOGGING_LEVEL (40 = logging.ERROR)
         "40"
     ]
 

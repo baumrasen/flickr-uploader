@@ -105,6 +105,7 @@ before_script:
   - echo ${TRAVIS_PYTHON_VERSION}
   - cp tests/uploadr.ini .
   - cp tests/uploadr.ini /home/travis/virtualenv/python$pythonVersion/bin/uploadr.ini || cp tests/uploadr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/uploadr.ini
+  - cp tests/uploadr.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini || cp tests/uploadr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/etc/uploadr.ini
   - grep FILES_DIR uploadr.ini
 #  - cat uploadr.ini
   - echo "INSERT INTO oauth_tokens ( api_key, lookup_key, oauth_token, oauth_token_secret, access_level, fullname, username, user_nsid) VALUES ( '"$api_key"', '', '"$oauth_token"', '"$oauth_token_secret"', 'delete', '"$fullname"', '"$username"', '"$user_nsid"');" | sqlite3 token/oauth-tokens.sqlite
@@ -166,11 +167,11 @@ script:
   - if [[ $TestScenario == RemoveReplace ]]; then cp "./tests/Test Photo Library/ReplaceTest/file_35.jpg.ForReplace" "./tests/Test Photo Library/Pics.Replaced/file_35.jpg"; fi
   - if [[ $TestScenario == RemoveReplace ]]; then cp "./tests/Test Photo Library/ReplaceTest/Video03.ToReplace.MP4.ForReplace" "./tests/Test Photo Library/Pics.Replaced/Video03.ToReplace.MP4"; fi
 
-  - if [[ $TestScenario == ExcludedFolders ]]; then cp ./tests/uploadr_excluded.ini ./uploadr.ini; fi
+  - if [[ $TestScenario == ExcludedFolders ]]; then cp ./tests/uploadr_excluded.ini ./uploadr.ini; cp ./tests/uploadr_excluded.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini; fi
 
-  - if [[ $TestScenario == Old273INI ]]; then cp ./tests/uploadr_excluded_2.7.3.ini ./uploadr.ini; fi
+  - if [[ $TestScenario == Old273INI ]]; then cp ./tests/uploadr_excluded_2.7.3.ini ./uploadr.ini; cp ./tests/uploadr_excluded_2.7.3.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini; fi
   
-  - if [[ $TestScenario == NoVerbose ]]; then cp ./tests/uploadr_NoVerbose.ini ./uploadr.ini; fi
+  - if [[ $TestScenario == NoVerbose ]]; then cp ./tests/uploadr_NoVerbose.ini ./uploadr.ini; cp ./tests/uploadr_NoVerbose.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini; fi
 
   - coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log

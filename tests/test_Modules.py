@@ -90,3 +90,11 @@ if __name__ == '__main__':
 
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMethods)
     unittest.TextTestRunner(verbosity=2).run(suite)
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestNicePrintMethods)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(
+        TestUPLDRConstantsMethods)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+

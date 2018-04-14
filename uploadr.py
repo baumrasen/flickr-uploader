@@ -1888,7 +1888,9 @@ class Uploadr:
                         exceptSysInfo=True)
             # Error: 8: Videos can't be replaced
             if (ex.code == 8):
-                np.niceprint('Videos can\'t be replaced, delete/uploading...')
+                np.niceprint('  Video replace:[{!s}]'
+                             .format(StrUnicodeOut(file)),
+                             fname='replace')
                 logging.error('Videos can\'t be replaced, delete/uploading...')
                 xrow = [file_id, file]
                 logging.debug('delete/uploading '
@@ -1896,16 +1898,24 @@ class Uploadr:
                               'xrow[1].file=[{!s}]'
                               .format(xrow[0], xrow[1]))
                 if (self.deleteFile(xrow, cur, lock)):
-                    np.niceprint('Delete for replace succeed!')
+                    np.niceprint('..Video deleted:[{!s}]'
+                                 .format(StrUnicodeOut(file)),
+                                 fname='replace')
                     logging.warning('Delete for replace succeed!')
                     if self.uploadFile(lock, file):
-                        np.niceprint('Upload for replace succeed!')
+                        np.niceprint('.Video replaced:[{!s}]'
+                                     .format(StrUnicodeOut(file)),
+                                     fname='replace')
                         logging.warning('Upload for replace succeed!')
                     else:
-                        np.niceprint('Upload for replace failed!')
+                        np.niceprint('..Failed upload:[{!s}]'
+                                     .format(StrUnicodeOut(file)),
+                                     fname='replace')
                         logging.error('Upload for replace failed!')
                 else:
-                    np.niceprint('Delete for replace failed!')
+                    np.niceprint('..Failed delete:[{!s}]'
+                                 .format(StrUnicodeOut(file)),
+                                 fname='replace')
                     logging.error('Delete for replace failed!')
 
         except lite.Error as e:

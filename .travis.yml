@@ -129,7 +129,7 @@ script:
 # flake8
   - flake8
 # unittests
-   - python tests/test_Modules.py
+  - python tests/test_Modules.py
 
 # DELETE RUN ------------------------------------------------------------------
 # !!!!!!!!!!!!!!!!!!!!!!!!!! CAREFULL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

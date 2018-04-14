@@ -97,4 +97,3 @@ if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
         TestUPLDRConstantsMethods)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

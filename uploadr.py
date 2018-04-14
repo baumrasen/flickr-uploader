@@ -3562,7 +3562,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         logging.warning('   Setting Date:[{!s}] Id=[{!s}]'
                         .format(datetxt, photo_id))
 
-        @retry(attempts=3, waittime=10, randtime=True)
+        @retry(attempts=3, waittime=15, randtime=True)
         def R_photos_setdates(kwargs):
             return nuflickr.photos.setdates(**kwargs)
 

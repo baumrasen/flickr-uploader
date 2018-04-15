@@ -4,3 +4,4 @@ flickrapi ; python_version >= '2.7'
 pytest-flakes ; python_version >= '2.7'
 coverage ; python_version >= '2.7'
 flake8
+dropbox

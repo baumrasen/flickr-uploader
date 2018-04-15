@@ -49,7 +49,7 @@ If you have the following folders and pics  (the name of the flickr Sets/Albums 
 /home/user/media/folderAlbum5/pic01.jpg
 /home/user/media/folderAlbum5/Sub/pic051.jpg
 ```
-#### Settin your source folder with  FILES_DIR
+#### Setting your source folder with  FILES_DIR
 And you setup FILES_DIR
 ```bash
 FILES_DIR=/home/user/media

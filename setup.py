@@ -30,6 +30,8 @@ VERSION = None  # Load from LIB/__version__.py dictionary
 REQUIRED = [
     'flickrapi',
 ]
+# What data_files are required for this applicaiton to be configured?
+DATA_FILES = [('', ['uploadr.ini', 'uploadr.cron'])]
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
@@ -59,9 +61,14 @@ class UploadCommand(Command):
     user_options = []
 
     @staticmethod
-    def status(s):
+    def bstatus(s):
         """Prints things in bold."""
         print('\033[1m{0}\033[0m'.format(s))
+
+    @staticmethod
+    def status(s):
+        """Prints things."""
+        print('{0}'.format(s))
 
     def initialize_options(self):
         pass
@@ -71,58 +78,112 @@ class UploadCommand(Command):
 
     def run(self):
         try:
-            self.status('Removing previous builds…')
+            self.bstatus('Removing previous builds…')
             rmtree(os.path.join(here, 'dist'))
         except OSError:
             pass
 
-        self.status('Building Source and Wheel (universal) distribution…')
+        self.bstatus('Building Source and Wheel (universal) distribution…')
         os.system('{0} setup.py sdist bdist_wheel --universal'
                   .format(sys.executable))
 
         # Upload disabled for now
-        # self.status('Uploading the package to PyPi via Twine…')
+        # self.bstatus('Uploading the package to PyPi via Twine...')
         # os.system('twine upload dist/*')
 
         # upload to GitHub disbled for now
-        # self.status('Pushing git tags…')
+        # self.bstatus('Pushing git tags...')
         # os.system('git tag v{0}'.format(about['__version__']))
         # os.system('git push --tags')
 
         sys.exit()
 
 
-class CustomInstallCommand(Command):
-    """Support setup.py upload."""
+class InstallCfg(Command):
+    """
+    Support setup.py install flickr-uploader configuration files:
 
-    description = 'Custom install the packagei to include uploadr.ini'
-    user_options = []
+    DATA_FILES   = list of configuration options files (.ini, .cron, etc)
+    """
+
+    # Show files to be coopied =under 'python setup.py installcfg --help'
+    str_user_options = ''
+    dcnt = 0
+    for tuple in DATA_FILES:
+        dcnt += 1
+        if dcnt > 1:
+            str_user_options = str_user_options + ', '
+        cfgdir = tuple[0]
+        cnt = 0
+        for cfgfile in tuple[1]:
+            cnt += 1
+            if cnt > 1:
+                str_user_options = str_user_options + ', '
+            str_user_options = str_user_options + \
+                '"' + os.path.join(cfgdir, cfgfile) + '"'
+
+    description = 'Custom install flickr-uploader configuration files'
+    user_options = [
+        ('folder=',
+            None,
+            'Folder location for ' + str_user_options + ' files.'),
+    ]
 
     @staticmethod
-    def status(s):
+    def bstatus(s):
         """Prints things in bold."""
         print('\033[1m{0}\033[0m'.format(s))
 
+    @staticmethod
+    def status(s):
+        """Prints things."""
+        print('{0}'.format(s))
+
     def initialize_options(self):
-        pass
+        self.folder = os.path.join(sys.prefix, 'etc')
 
     def finalize_options(self):
         pass
 
     def run(self):
 
-        src = resource_filename(Requirement.parse(NAME), "uploadr.ini")
-        dst = os.path.join(sys.prefix, 'etc')
+        self.bstatus('Installing config files into folder [%s]'
+                     % str(self.folder))
 
-        try:
-            os.makedirs(dst)
-        except OSError as exc:
-            if exc.errno == errno.EEXIST and os.path.isdir(dst):
-                pass
-            else:
-                raise
+        if self.folder:
+            dst = self.folder
 
-        copy(src, dst, follow_symlinks=True)
+            try:
+                os.makedirs(dst)
+            except OSError as exc:
+                if exc.errno == errno.EEXIST and os.path.isdir(dst):
+                    pass
+                else:
+                    raise
+
+            # Save file list to be copied within the run method.
+            # Note: Does not account for files wihtin folders of the package!
+            src = []
+            for tuple in DATA_FILES:
+                for cfgfile in tuple[1]:
+                    src.append(resource_filename(Requirement.parse(NAME),
+                                                 cfgfile))
+            for f in src:
+                self.status("Copying [%s] into folder [%s]"
+                            % (str(f), str(dst)))
+                copy(f, dst) if sys.version_info < (3, ) \
+                    else copy(f, dst, follow_symlinks=True)
+
+        if self.folder:
+            assert os.path.exists(self.folder), (
+                'flickr-uploadr config folder %s does not exist.'
+                .format(str(self.folder)))
+            for f in src:
+                assert os.path.exists(f), (
+                    'flickr-uploadr config file %s does not exist.'
+                    .format(str(f)))
+            self.bstatus('Installed config files into folder [%s]'
+                         % str(self.folder))
 
         sys.exit()
 
@@ -151,7 +212,7 @@ setup(
     install_requires=REQUIRED,
     include_package_data=True,
     scripts=['uploadr.py'],
-    data_files=[('', ['uploadr.ini'])],
+    data_files=DATA_FILES,
     license='MIT',
     classifiers=[
         # Trove classifiers
@@ -174,6 +235,6 @@ setup(
     # $ setup.py publish support.
     cmdclass={
         'upload': UploadCommand,
-        'custominstall': CustomInstallCommand,
+        'installcfg': InstallCfg,
     },
 )

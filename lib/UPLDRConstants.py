@@ -45,7 +45,7 @@ class UPLDRConstants:
     #   INIfile      = Location of INI file, normally named "uploadr.ini"
     #
     TimeFormat = '%Y.%m.%d %H:%M:%S'
-    Run = eval(time.strftime('int("%j")+int("%H")*100+int("%M")'))
+    Run = eval(time.strftime('int("%j")+int("%H")*100+int("%M")*10+int("%S")'))
     try:
         if __version__.__version__ is not None:
             Version = __version__.__version__

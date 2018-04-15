@@ -2,9 +2,9 @@
     by oPromessa, 2017
     Published on https://github.com/oPromessa/flickr-uploader/
 
-    __version__ = Semantic Versioniung number Major.Minor.Patch
+    __version__ = Semantic Versioning number Major.Minor.Patch
                   Check https://semver.org
 """
-VERSION = (2, 7, 3)
+VERSION = (2, 7, 5)
 
 __version__ = '.'.join(map(str, VERSION))

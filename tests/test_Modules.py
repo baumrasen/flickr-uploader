@@ -51,15 +51,17 @@ class TestMethods(unittest.TestCase):
             s.split(2)
 
     def test_RUN(self):
-        print(eval(time.strftime('int("%j")+int("%H")*100+int("%M")')))
+        print(eval(time.strftime('int("%j")+int("%H")*100'
+                                 '+int("%M")*10+int("%S")')))
         self.assertTrue(
             1 <= eval(
-                time.strftime('int("%j")+int("%H")*100+int("%M")')) <= 2725)
+                time.strftime('int("%j")+int("%H")*100'
+                              '+int("%M")*10+int("%S")')) <= 3415)
         for j in range(1, 366 + 1):
             for h in range(24):
                 for m in range(60):
-                    self.assertTrue(1 <= eval(time.strftime(
-                                'int("%j")+int("%H")*100+int("%M")')) <= 2725)
+                    for s in range(60):
+                        self.assertTrue(1 <= j+h*100+m*10+s <= 3415)
 
     def test_Unicode(self):
         np = niceprint.niceprint()
@@ -87,4 +89,11 @@ if __name__ == '__main__':
     # unittest.main()
 
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMethods)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestNicePrintMethods)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(
+        TestUPLDRConstantsMethods)
     unittest.TextTestRunner(verbosity=2).run(suite)

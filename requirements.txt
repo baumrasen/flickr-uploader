@@ -6,5 +6,5 @@ coverage ; python_version >= '2.7'
 flake8
 dropbox
 portalocker==1.2.0
-# this is a neccessary dependevy for portalocker on Windows
+# this is a neccessary dependency for portalocker on Windows
 # pypiwin32==223

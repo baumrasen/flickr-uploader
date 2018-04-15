@@ -60,9 +60,13 @@ import time
 import sqlite3 as lite
 import hashlib
 try:
-    import portalocker as FileLocker  # Use portalocker if available (Windows)
+    # Use portalocker if available
+    import portalocker as FileLocker  # noqa
+    FileLock = FileLocker.lock
 except ImportError:
-    import fcntl as FileLocker        # Use fcntl if portalocker not available
+    # Use fcntl
+    import fcntl as FileLocker
+    FileLock = FileLocker.lockf
 import errno
 import subprocess
 import multiprocessing
@@ -4619,7 +4623,7 @@ if __name__ == "__main__":
     f = open(xCfg.LOCK_PATH, 'w')
     try:
         # FileLocker is an alias to portalocker (if available) or fcntl
-        FileLocker.lock(f, portalocker.LOCK_EX | portalocker.LOCK_NB)
+        FileLock(f, FileLocker.LOCK_EX | FileLocker.LOCK_NB)
     except IOError as e:
         if e.errno == errno.EAGAIN:
             sys.stderr.write('[{!s}] Script already running.\n'

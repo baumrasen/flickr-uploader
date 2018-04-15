@@ -4570,32 +4570,25 @@ if __name__ == "__main__":
             reportError(Caught=True,
                         CaughtPrefix='+++ ',
                         CaughtCode='601',
-                        CaughtMsg='Exiting.',
+                        CaughtMsg='Invalid -C parameter INI file. '
+                                  'Exiting...',
                         NicePrint=True)
             sys.exit(2)
     else:
-        # sys.prefix
+        # sys.argv[0]
+        UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
+        UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir,
+                                              "uploadr.ini")
+
         if not checkBaseDir_INIfile(UPLDRConstants.baseDir,
                                     UPLDRConstants.INIfile):
             reportError(Caught=True,
                         CaughtPrefix='+++ ',
                         CaughtCode='602',
-                        CaughtMsg='Invalid sys.prefix INI file. '
-                                  'Trying current working directory.',
+                        CaughtMsg='Invalid sys.argv INI file. '
+                                  'Exiting...',
                         NicePrint=True)
-            # cwd
-            UPLDRConstants.baseDir = os.getcwd()
-            UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir,
-                                                  "uploadr.ini")
-            if not checkBaseDir_INIfile(UPLDRConstants.baseDir,
-                                        UPLDRConstants.INIfile):
-                reportError(Caught=True,
-                            CaughtPrefix='+++ ',
-                            CaughtCode='603',
-                            CaughtMsg='Invalid current directory INI file'
-                                      'Exiting...',
-                            NicePrint=True)
-                sys.exit(2)
+            sys.exit(2)
 
     # Source configuration from INIfile
     xCfg.readconfig(UPLDRConstants.INIfile, ['Config'])

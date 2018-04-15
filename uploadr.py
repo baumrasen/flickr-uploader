@@ -59,7 +59,10 @@ import os
 import time
 import sqlite3 as lite
 import hashlib
-import fcntl
+try:
+    import portalocker as FileLocker  # Use portalocker if available (Windows)
+except ImportError:
+    import fcntl as FileLocker        # Use fcntl if portalocker not available
 import errno
 import subprocess
 import multiprocessing
@@ -1428,7 +1431,8 @@ class Uploadr:
                                     CaughtCode='038',
                                     CaughtMsg='Caught IOError, '
                                     'HTTP exception',
-                                    NicePrint=True)
+                                    NicePrint=True,
+                                    exceptSysInfo=True)
                         logging.error('Sleep 10 and check if file is '
                                       'already uploaded')
                         np.niceprint('Sleep 10 and check if file is '
@@ -1447,10 +1451,7 @@ class Uploadr:
                                         'ZisNoSet:[{!s}]'
                                         .format(ZisLoaded, ZisCount,
                                                 photo_id, zisNoSet))
-                        # CODING: To check how to replace following lines.
-                        # search_result = self.photos_search(file_checksum)
-                        # if not self.isGood(search_result):
-                        #     raise IOError(search_result)
+
                         if ZisCount == 0:
                             ZuploadError = True
                             continue
@@ -1459,11 +1460,20 @@ class Uploadr:
                             ZuploadError = False
                             np.niceprint('Found, '
                                          'continuing with next image.')
+                            logging.warning('Found, '
+                                            'continuing with next image.')
                             break
                         elif ZisCount > 1:
                             ZuploadError = True
-                            raise IOError('More than one file with same '
-                                          'checksum! Any collisions? ')
+                            np.niceprint('More than one file with same '
+                                         'checksum/album tag! Any collisions?'
+                                         ' File: [{!s}]'
+                                         .format(StrUnicodeOut(file)))
+                            logging.error('More than one file with same '
+                                          'checksum/album tag! Any collisions?'
+                                          ' File: [{!s}]'
+                                          .format(StrUnicodeOut(file)))
+                            break
 
                     except flickrapi.exceptions.FlickrError as ex:
                         reportError(Caught=True,
@@ -1529,28 +1539,25 @@ class Uploadr:
                               'Up/Reuploading:[{!s}/{!s} attempts].'
                               .format(x, xCfg.MAX_UPLOAD_ATTEMPTS))
 
+                # Max attempts reached
                 if (not ZuploadOK) and (x == (xCfg.MAX_UPLOAD_ATTEMPTS - 1)):
-                    np.niceprint('Reached maximum number '
-                                 'of attempts to upload, '
-                                 'file: [{!s}]'.format(file))
-                    raise ValueError('Reached maximum number '
-                                     'of attempts to upload, '
-                                     'skipping')
-
-                # CODING: is_already_uploaded may have to return exception
-                # to replace this code.
-                # Error on upload and search for photo not performed/empty
-                # if not search_result and not self.isGood(uploadResp):
+                    np.niceprint('Reached max attempts to upload. Skipping '
+                                 'file: [{!s}]'.format(StrUnicodeOut(file)))
+                    logging.error('Reached max attempts to upload. Skipping '
+                                  'file: [{!s}]'.format(StrUnicodeOut(file)))
+                # Error
                 elif (not ZuploadOK) and ZuploadError:
-                    np.niceprint('A problem occurred while attempting to '
-                                 'upload the file:[{!s}]'
+                    np.niceprint('Error occurred while uploading. Skipping '
+                                 'file:[{!s}]'
                                  .format(StrUnicodeOut(file)))
-                    raise IOError(uploadResp)
-
-                # Successful update
+                    logging.error('Error occurred while uploading. Skipping '
+                                  'file:[{!s}]'
+                                  .format(StrUnicodeOut(file)))
+                # Bad file
                 elif (not ZuploadOK) and ZbadFile:
                     np.niceprint('       Bad file:[{!s}]'
                                  .format(StrUnicodeOut(file)))
+                # Successful update
                 elif ZuploadOK:
                     np.niceprint('Successful file:[{!s}]'
                                  .format(StrUnicodeOut(file)))
@@ -4611,7 +4618,8 @@ if __name__ == "__main__":
     # Ensure that only one instance of this script is running
     f = open(xCfg.LOCK_PATH, 'w')
     try:
-        fcntl.lockf(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        # FileLocker is an alias to portalocker (if available) or fcntl
+        FileLocker.lock(f, portalocker.LOCK_EX | portalocker.LOCK_NB)
     except IOError as e:
         if e.errno == errno.EAGAIN:
             sys.stderr.write('[{!s}] Script already running.\n'

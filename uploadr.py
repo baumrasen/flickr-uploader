@@ -60,7 +60,7 @@ import time
 import sqlite3 as lite
 import hashlib
 try:
-    # Use portalocker if available
+    # Use portalocker if available. Required for Windows systems
     import portalocker as FileLocker  # noqa
     FileLock = FileLocker.lock
 except ImportError:

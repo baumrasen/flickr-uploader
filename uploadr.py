@@ -59,7 +59,7 @@ import os
 import time
 import sqlite3 as lite
 import hashlib
-import fcntl
+import portalocker
 import errno
 import subprocess
 import multiprocessing
@@ -4618,7 +4618,7 @@ if __name__ == "__main__":
     # Ensure that only one instance of this script is running
     f = open(xCfg.LOCK_PATH, 'w')
     try:
-        fcntl.lockf(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        portalocker.lock(f, portalocker.LOCK_EX | portalocker.LOCK_NB)
     except IOError as e:
         if e.errno == errno.EAGAIN:
             sys.stderr.write('[{!s}] Script already running.\n'

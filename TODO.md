@@ -21,16 +21,26 @@
   which allows to run upload.py form the --prefix/bin folder as it is
   installed wiht "python setup.py install". Note that uploadr.ini definition
   for DB_PATH, LOCK_PATH, TOKEN_CACHE and TOKEN_PATH as to be changed.
-* Error 040 on upload (issue #28) try/exception flickrapi is not triggered
-  within the inner scope and it does not reupload. Only IOError. HTTPException.
-  Move also upload to @retry control! This may be the cause to some files not
-  being added to their sets. Although subsequent runs should find and deal
-  with this pending assignment to set.
 * Apply multiprocessing to Add pics to sets. For 50K pics takes a long time
   (enhancemente #11)
 * updatedVideoDate fails on three attempts (is it 'cause Flickr is processing
   the video? and raises error caught on #210! Next run does not update video
-  date.
+  date. V2.7.5 testing with 15 seconds.
+* When QPS (Queries per second) are very high dyring a certain period, Flickr
+  does not provide back reliable information. For instance, photos.search
+  may return X pics but not actually list them.
+  ```python
+  # CODING
+        if (len(searchIsUploaded.find('photos').findall('photo')) == 0):
+            logging.critical('xxx #E10 Error: '
+                             'IndexError: searchIsUploaded yields '
+                             'Index out of range. '
+                             'Manually check file:[{!s}] '
+                             'Flickr possibly overloaded!!! '
+                             'Continuing with next image.'
+                             .format(xfile))
+             raise IOError('Unreliable FLickr return info')
+  ```
 
 ## Known issues
 ---------------

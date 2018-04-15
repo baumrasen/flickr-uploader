@@ -75,4 +75,4 @@
 
 ## Update History
 -----------------
-* Check releases at [https://github.com/oPromessa/flickr-uploader/](https://github.com/oPromessa/flickr-uploader/)
+* Check releases at [https://github.com/oPromessa/flickr-uploader/releases](https://github.com/oPromessa/flickr-uploader/releases)

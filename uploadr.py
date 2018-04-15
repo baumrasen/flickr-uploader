@@ -1888,7 +1888,7 @@ class Uploadr:
                         exceptSysInfo=True)
             # Error: 8: Videos can't be replaced
             if (ex.code == 8):
-                np.niceprint('  Video replace:[{!s}]'
+                np.niceprint('..Video replace:[{!s}]'
                              .format(StrUnicodeOut(file)),
                              fname='replace')
                 logging.error('Videos can\'t be replaced, delete/uploading...')
@@ -2041,7 +2041,7 @@ class Uploadr:
         def R_photos_delete(kwargs):
             return nuflickr.photos.delete(**kwargs)
 
-        np.niceprint('Deleting file:[{!s}]'.format(StrUnicodeOut(file[1])))
+        np.niceprint('  Deleting file:[{!s}]'.format(StrUnicodeOut(file[1])))
 
         success = False
 
@@ -2058,7 +2058,8 @@ class Uploadr:
 
                 dbDeleteRecordLocalDB(lock, file)
 
-                np.niceprint("Successful deletion.")
+                np.niceprint('   Deleted file:[{!s}]'
+                             .format(StrUnicodeOut(file[1])))
                 success = True
             else:
                 reportError(Caught=True,

@@ -1443,6 +1443,7 @@ class Uploadr:
                                      'already uploaded')
                         nutime.sleep(10)
 
+                        # CODING: Repeat also below on FlickError (!= 5 and 8)
                         # on error, check if exists a photo
                         # with file_checksum
                         ZisLoaded, ZisCount, photo_id, zisNoSet = \
@@ -1535,6 +1536,43 @@ class Uploadr:
 
                             # Break for ATTEMPTS cycle
                             break
+                        else:
+                            # CODING: Repeat above on IOError
+                            # on error, check if exists a photo
+                            # with file_checksum
+                            ZisLoaded, ZisCount, photo_id, zisNoSet = \
+                                self.is_already_uploaded(
+                                    file,
+                                    file_checksum,
+                                    setName)
+                            logging.warning('is_already_uploaded:[{!s}] '
+                                            'Zcount:[{!s}] Zpic:[{!s}] '
+                                            'ZisNoSet:[{!s}]'
+                                            .format(ZisLoaded, ZisCount,
+                                                    photo_id, zisNoSet))
+    
+                            if ZisCount == 0:
+                                ZuploadError = True
+                                continue
+                            elif ZisCount == 1:
+                                ZuploadOK = True
+                                ZuploadError = False
+                                np.niceprint('Found, '
+                                             'continuing with next image.')
+                                logging.warning('Found, '
+                                                'continuing with next image.')
+                                break
+                            elif ZisCount > 1:
+                                ZuploadError = True
+                                np.niceprint('More than one file with same '
+                                             'checksum/album tag! Any collisions?'
+                                             ' File: [{!s}]'
+                                             .format(StrUnicodeOut(file)))
+                                logging.error('More than one file with same '
+                                              'checksum/album tag! Any collisions?'
+                                              ' File: [{!s}]'
+                                              .format(StrUnicodeOut(file)))
+                                break                        
 
                     finally:
                         con.commit()

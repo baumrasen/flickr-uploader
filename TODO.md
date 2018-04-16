@@ -16,6 +16,8 @@
   (without the -u option, it should find the file and update database).
   This should avoid errors on creating sets with invalid primarykey (photo id
   has changed while the actual checksum/album of the file is actually the same)
+* Consider new option --remove-ignored to address IGNORED_REGEX changes
+  similar to how --remove-excluded handles changes in EXCLUDED_FOLDERS.
 * Align try/except handling within functions like people_get_photos or outside
   like photos_get_not_in_set
 * **[NOT FULLY TESTED YET]** You can try and run (Let me know if it works!)

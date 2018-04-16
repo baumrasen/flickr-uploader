@@ -1993,7 +1993,7 @@ class Uploadr:
     # Delete files from flickr
     #
     # When EXCLUDED_FOLDERS defintion changes. You can run the -g
-    # or --remove-ignored option in order to remove files previously loaded
+    # or --remove-excluded option in order to remove files previously loaded
     #
     def deleteFile(self, file, cur, lock=None):
         """ deleteFile
@@ -4355,13 +4355,13 @@ def parse_arguments():
     bgrpparser.add_argument('-s', '--list-bad-files', action='store_true',
                             help='List the badfiles table/list.')
     # when you change EXCLUDED_FOLDERS setting
-    bgrpparser.add_argument('-g', '--remove-excluded', '--remove-ignored',
+    bgrpparser.add_argument('-g', '--remove-excluded',
                             action='store_true',
                             help='Remove previously uploaded files, that are '
                                  'now being excluded due to change of the INI '
                                  'file configuration EXCLUDED_FOLDERS.'
-                                 'NOTE: Please drop use of --remove-ignored '
-                                 'in favor of --remove-excluded or -r. '
+                                 'NOTE: For clarity option --remove-ignored '
+                                 'dropped in favor of --remove-excluded. '
                                  'From version 2.7.0 it will be dropped.')
 
     # Migration related options -----------------------------------------------

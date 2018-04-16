@@ -351,6 +351,8 @@ class Uploadr:
 
         # Show url. Copy and paste it in your browser
         authorize_url = nuflickr.auth_url(perms=u'delete')
+        np.niceprint('Copy and paste following authorizaiton URL '
+                     'in your browser to obtain Verifier Code.')
         print(authorize_url)
 
         # Prompt for verifier code from the user.
@@ -4262,8 +4264,8 @@ def parse_arguments():
                             metavar='filename.ini',
                             type=str,
                             # default=UPLDRConstants.INIfile,
-                            help='Optional configuration file.'
-                                 'default is [{!s}]'
+                            help='Optional configuration file. '
+                                 'Default is:[{!s}]'
                                  .format(UPLDRConstants.INIfile))
     # cgrpparser.add_argument('-C', '--config-file', action='store',
     #                         # dest='xINIfile',

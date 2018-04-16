@@ -1,6 +1,6 @@
 # flickr-uploader
 -----------------
-by oPromessa, 2017, V2.7.3 [![Master Build Status](https://travis-ci.org/oPromessa/flickr-uploader.svg?branch=master)](https://travis-ci.org/oPromessa/flickr-uploader)
+by oPromessa, 2017, V2.7.7 [![Master Build Status](https://travis-ci.org/oPromessa/flickr-uploader.svg?branch=master)](https://travis-ci.org/oPromessa/flickr-uploader)
 Published on [https://github.com/oPromessa/flickr-uploader/](https://github.com/oPromessa/flickr-uploader/)
 
 
@@ -71,8 +71,10 @@ You should get the following depending on how the setting FULL_SET_NAME is set:
 ## Requirements
 ---------------
 * Python 2.7+ (should work on DSM from Synology (v6.1), Windows and MAC)
+* Also compatile with Python 3.6
 * flicrkapi module. May need to install get-pip.py. (Instructions for
   Synology DSM below.)
+* portalocker module for Windows systems. Not mandatory for Synology.
 * File write access (for the token and local database)
 * Flickr API key (free)
 
@@ -194,8 +196,32 @@ of the upload arguments above correspond to for Flickr's API.
 - Before running uploadr.py make sure you run the command below:
   - To avoid running this command exerytime you log-in into your system, follow the [notes on this link](https://scipher.wordpress.com/2010/05/10/setting-your-pythonpath-environment-variable-linuxunixosx/) to edit file ~/.bashrc and place this command there.
 ```bash
- $  export PYTHONPATH=~/apps/Python/lib/python2.7/site-packages
- $ ./uploadr.py -v
+$  export PYTHONPATH=~/apps/Python/lib/python2.7/site-packages
+```
+
+- On the **first run** you need to authenticate the applicaiton against Flickr.
+   - uploadr.py will provide you a URL/link which you need to run
+```bash
+$ cd dev
+dev$ uploadr.py 
+Importing xml.etree.ElementTree...done. Continuing.
+--------- (V2.7.7) Init:  ---------
+Python version on this system: 3.6.3 (default, Oct  3 2017, 21:45:48) 
+[GCC 7.2.0]
+[2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] --------- (V2.7.7) Start time: 2018.04.16 23:55:09 ---------(Log:40)
+[2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] Setting up database:[/home/user/dev/flickrdb]
+[2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] Database version: [3]
+[2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] Completed database setup
+[2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] Checking if token is available... if not will authenticate
+[2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] Getting new token.
+[2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] Copy and paste following authorizaiton URL in your browser to obtain Verifier Code.
+https://www.flickr.com/services/oauth/authorize?oauth_token=xxxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx&perms=delete
+Verifier code (NNN-NNN-NNN):
+```
+
+- Following **runs** can be launched unattended:
+```
+ dev$ ./uploadr.py -v
 ```
 
 ## Usage/Arguments/Options
@@ -208,20 +234,30 @@ the upload process.
 $ ./uploadr.py
 ```
 To check what files uploadr.py would upload and delete you can run the
-script withe option --dry-run:
+script with option `--dry-run`:
 ```bash
 $ ./uploadr.py --dry-run
 ```
-Run ./uploadrd.py --help for up to the minute information or arguments:
+Run `./uploadrd.py --help` for up to the minute information on arguments:
 ```bash
-usage: uploadr.py [-h] [-v] [-x] [-n] [-i TITLE] [-e DESCRIPTION] [-t TAGS]
-                  [-l N] [-z] [-r] [-p P] [-u] [-d] [-b] [-c] [-s] [-g]
-                  [--add-albums-migrate]
+Importing xml.etree.ElementTree...done. Continuing.
+--------- (V2.7.7) Init:  ---------
+Python version on this system: 3.6.3 (default, Oct  3 2017, 21:45:48) 
+[GCC 7.2.0]
+[2930][2018.04.16 23:47:54]:[12706      ][PRINT   ]:[uploadr] --------- (V2.7.7) Start time: 2018.04.16 23:47:54 ---------(Log:40)
+usage: uploadr.py [-h] [-C filename.ini] [-v] [-x] [-n] [-i TITLE]
+                  [-e DESCRIPTION] [-t TAGS] [-l N] [-z] [-r] [-p P] [-u] [-d]
+                  [-b] [-c] [-s] [-g] [--add-albums-migrate]
 
 Upload files to Flickr. Uses uploadr.ini as config file.
 
 optional arguments:
   -h, --help            show this help message and exit
+
+Configuration related options:
+  -C filename.ini, --config-file filename.ini
+                        Optional configuration file. Default is:
+                        [/home/ruler/uploader/etc/uploadr.ini]
 
 Verbose and dry-run options:
   -v, --verbose         Provides some more verbose output. See also -x option.
@@ -255,7 +291,9 @@ Processing related options:
   -p P, --processes P   Number of photos to upload simultaneously.
   -u, --not-is-already-uploaded
                         Do not check if file is already uploaded and exists on
-                        flickr prior to uploading.
+                        flickr prior to uploading. Use this option for faster
+                        INITIAL upload. Do not use it in subsequent uploads to
+                        prevent/recover orphan pics without a set.
   -d, --daemon          Run forever as a daemon.Uploading every SLEEP_TIME
                         seconds. Please note it only performs upload/replace.
 
@@ -270,12 +308,11 @@ Handling bad and excluded files:
                         in your Library that flickr does not recognize (Error
                         5) or are too large (Error 8). Check also option -b.
   -s, --list-bad-files  List the badfiles table/list.
-  -g, --remove-excluded, --remove-ignored
+  -g, --remove-excluded
                         Remove previously uploaded files, that are now being
                         excluded due to change of the INI file configuration
-                        EXCLUDED_FOLDERS.NOTE: Please drop use of --remove-
-                        ignored in favor of --remove-excluded or -r. From
-                        version 2.7.0 it will be dropped.
+                        EXCLUDED_FOLDERS.NOTE: Option --remove-ignored was
+                        dropped in favor of --remove-excluded.
 
 Migrate to v2.7.0:
   --add-albums-migrate  From v2.7.0 onwards, uploadr adds to Flickr an album

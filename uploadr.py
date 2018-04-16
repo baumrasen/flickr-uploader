@@ -1550,7 +1550,7 @@ class Uploadr:
                                             'ZisNoSet:[{!s}]'
                                             .format(ZisLoaded, ZisCount,
                                                     photo_id, zisNoSet))
-    
+
                             if ZisCount == 0:
                                 ZuploadError = True
                                 continue
@@ -1565,14 +1565,14 @@ class Uploadr:
                             elif ZisCount > 1:
                                 ZuploadError = True
                                 np.niceprint('More than one file with same '
-                                             'checksum/album tag! Any collisions?'
-                                             ' File: [{!s}]'
+                                             'checksum/album tag! '
+                                             'Any collisions? File: [{!s}]'
                                              .format(StrUnicodeOut(file)))
                                 logging.error('More than one file with same '
-                                              'checksum/album tag! Any collisions?'
-                                              ' File: [{!s}]'
+                                              'checksum/album tag! '
+                                              'Any collisions? File: [{!s}]'
                                               .format(StrUnicodeOut(file)))
-                                break                        
+                                break
 
                     finally:
                         con.commit()

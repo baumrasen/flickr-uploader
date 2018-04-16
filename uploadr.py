@@ -4360,9 +4360,8 @@ def parse_arguments():
                             help='Remove previously uploaded files, that are '
                                  'now being excluded due to change of the INI '
                                  'file configuration EXCLUDED_FOLDERS.'
-                                 'NOTE: For clarity option --remove-ignored '
-                                 'dropped in favor of --remove-excluded. '
-                                 'From version 2.7.0 it will be dropped.')
+                                 'NOTE: Option --remove-ignored was '
+                                 'dropped in favor of --remove-excluded.')
 
     # Migration related options -----------------------------------------------
     # 2.7.0 Version will add album/setName as one

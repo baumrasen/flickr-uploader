@@ -11,7 +11,11 @@
 * Would be nice to update ALL tags on replacePhoto and not only the
   mandatory checksum tag as FLICKR maintains the tags from the first load.
 * Change code to insert on database prior to upload and then update result.
-* Test if it Re-upload or not pictures removed from flickr Web interface.
+* Test if it Re-uploads or not pictures removed/deleted from flickr Web
+  interface; while they still exist on local filesystem and local DB.
+  (without the -u option, it should find the file and update database).
+  This should avoid errors on creating sets with invalid primarykey (photo id
+  has changed while the actual checksum/album of the file is actually the same)
 * Align try/except handling within functions like people_get_photos or outside
   like photos_get_not_in_set
 * **[NOT FULLY TESTED YET]** You can try and run (Let me know if it works!)

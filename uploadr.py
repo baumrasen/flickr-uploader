@@ -59,7 +59,14 @@ import os
 import time
 import sqlite3 as lite
 import hashlib
-import fcntl
+try:
+    # Use portalocker if available. Required for Windows systems
+    import portalocker as FileLocker  # noqa
+    FileLock = FileLocker.lock
+except ImportError:
+    # Use fcntl
+    import fcntl as FileLocker
+    FileLock = FileLocker.lockf
 import errno
 import subprocess
 import multiprocessing
@@ -344,6 +351,8 @@ class Uploadr:
 
         # Show url. Copy and paste it in your browser
         authorize_url = nuflickr.auth_url(perms=u'delete')
+        np.niceprint('Copy and paste following authorizaiton URL '
+                     'in your browser to obtain Verifier Code.')
         print(authorize_url)
 
         # Prompt for verifier code from the user.
@@ -1428,13 +1437,15 @@ class Uploadr:
                                     CaughtCode='038',
                                     CaughtMsg='Caught IOError, '
                                     'HTTP exception',
-                                    NicePrint=True)
+                                    NicePrint=True,
+                                    exceptSysInfo=True)
                         logging.error('Sleep 10 and check if file is '
                                       'already uploaded')
                         np.niceprint('Sleep 10 and check if file is '
                                      'already uploaded')
                         nutime.sleep(10)
 
+                        # CODING: Repeat also below on FlickError (!= 5 and 8)
                         # on error, check if exists a photo
                         # with file_checksum
                         ZisLoaded, ZisCount, photo_id, zisNoSet = \
@@ -1447,10 +1458,7 @@ class Uploadr:
                                         'ZisNoSet:[{!s}]'
                                         .format(ZisLoaded, ZisCount,
                                                 photo_id, zisNoSet))
-                        # CODING: To check how to replace following lines.
-                        # search_result = self.photos_search(file_checksum)
-                        # if not self.isGood(search_result):
-                        #     raise IOError(search_result)
+
                         if ZisCount == 0:
                             ZuploadError = True
                             continue
@@ -1459,11 +1467,20 @@ class Uploadr:
                             ZuploadError = False
                             np.niceprint('Found, '
                                          'continuing with next image.')
+                            logging.warning('Found, '
+                                            'continuing with next image.')
                             break
                         elif ZisCount > 1:
                             ZuploadError = True
-                            raise IOError('More than one file with same '
-                                          'checksum! Any collisions? ')
+                            np.niceprint('More than one file with same '
+                                         'checksum/album tag! Any collisions?'
+                                         ' File: [{!s}]'
+                                         .format(StrUnicodeOut(file)))
+                            logging.error('More than one file with same '
+                                          'checksum/album tag! Any collisions?'
+                                          ' File: [{!s}]'
+                                          .format(StrUnicodeOut(file)))
+                            break
 
                     except flickrapi.exceptions.FlickrError as ex:
                         reportError(Caught=True,
@@ -1521,6 +1538,43 @@ class Uploadr:
 
                             # Break for ATTEMPTS cycle
                             break
+                        else:
+                            # CODING: Repeat above on IOError
+                            # on error, check if exists a photo
+                            # with file_checksum
+                            ZisLoaded, ZisCount, photo_id, zisNoSet = \
+                                self.is_already_uploaded(
+                                    file,
+                                    file_checksum,
+                                    setName)
+                            logging.warning('is_already_uploaded:[{!s}] '
+                                            'Zcount:[{!s}] Zpic:[{!s}] '
+                                            'ZisNoSet:[{!s}]'
+                                            .format(ZisLoaded, ZisCount,
+                                                    photo_id, zisNoSet))
+
+                            if ZisCount == 0:
+                                ZuploadError = True
+                                continue
+                            elif ZisCount == 1:
+                                ZuploadOK = True
+                                ZuploadError = False
+                                np.niceprint('Found, '
+                                             'continuing with next image.')
+                                logging.warning('Found, '
+                                                'continuing with next image.')
+                                break
+                            elif ZisCount > 1:
+                                ZuploadError = True
+                                np.niceprint('More than one file with same '
+                                             'checksum/album tag! '
+                                             'Any collisions? File: [{!s}]'
+                                             .format(StrUnicodeOut(file)))
+                                logging.error('More than one file with same '
+                                              'checksum/album tag! '
+                                              'Any collisions? File: [{!s}]'
+                                              .format(StrUnicodeOut(file)))
+                                break
 
                     finally:
                         con.commit()
@@ -1529,28 +1583,25 @@ class Uploadr:
                               'Up/Reuploading:[{!s}/{!s} attempts].'
                               .format(x, xCfg.MAX_UPLOAD_ATTEMPTS))
 
+                # Max attempts reached
                 if (not ZuploadOK) and (x == (xCfg.MAX_UPLOAD_ATTEMPTS - 1)):
-                    np.niceprint('Reached maximum number '
-                                 'of attempts to upload, '
-                                 'file: [{!s}]'.format(file))
-                    raise ValueError('Reached maximum number '
-                                     'of attempts to upload, '
-                                     'skipping')
-
-                # CODING: is_already_uploaded may have to return exception
-                # to replace this code.
-                # Error on upload and search for photo not performed/empty
-                # if not search_result and not self.isGood(uploadResp):
+                    np.niceprint('Reached max attempts to upload. Skipping '
+                                 'file: [{!s}]'.format(StrUnicodeOut(file)))
+                    logging.error('Reached max attempts to upload. Skipping '
+                                  'file: [{!s}]'.format(StrUnicodeOut(file)))
+                # Error
                 elif (not ZuploadOK) and ZuploadError:
-                    np.niceprint('A problem occurred while attempting to '
-                                 'upload the file:[{!s}]'
+                    np.niceprint('Error occurred while uploading. Skipping '
+                                 'file:[{!s}]'
                                  .format(StrUnicodeOut(file)))
-                    raise IOError(uploadResp)
-
-                # Successful update
+                    logging.error('Error occurred while uploading. Skipping '
+                                  'file:[{!s}]'
+                                  .format(StrUnicodeOut(file)))
+                # Bad file
                 elif (not ZuploadOK) and ZbadFile:
                     np.niceprint('       Bad file:[{!s}]'
                                  .format(StrUnicodeOut(file)))
+                # Successful update
                 elif ZuploadOK:
                     np.niceprint('Successful file:[{!s}]'
                                  .format(StrUnicodeOut(file)))
@@ -1944,7 +1995,7 @@ class Uploadr:
     # Delete files from flickr
     #
     # When EXCLUDED_FOLDERS defintion changes. You can run the -g
-    # or --remove-ignored option in order to remove files previously loaded
+    # or --remove-excluded option in order to remove files previously loaded
     #
     def deleteFile(self, file, cur, lock=None):
         """ deleteFile
@@ -4213,8 +4264,8 @@ def parse_arguments():
                             metavar='filename.ini',
                             type=str,
                             # default=UPLDRConstants.INIfile,
-                            help='Optional configuration file.'
-                                 'default is [{!s}]'
+                            help='Optional configuration file. '
+                                 'Default is:[{!s}]'
                                  .format(UPLDRConstants.INIfile))
     # cgrpparser.add_argument('-C', '--config-file', action='store',
     #                         # dest='xINIfile',
@@ -4306,14 +4357,13 @@ def parse_arguments():
     bgrpparser.add_argument('-s', '--list-bad-files', action='store_true',
                             help='List the badfiles table/list.')
     # when you change EXCLUDED_FOLDERS setting
-    bgrpparser.add_argument('-g', '--remove-excluded', '--remove-ignored',
+    bgrpparser.add_argument('-g', '--remove-excluded',
                             action='store_true',
                             help='Remove previously uploaded files, that are '
                                  'now being excluded due to change of the INI '
                                  'file configuration EXCLUDED_FOLDERS.'
-                                 'NOTE: Please drop use of --remove-ignored '
-                                 'in favor of --remove-excluded or -r. '
-                                 'From version 2.7.0 it will be dropped.')
+                                 'NOTE: Option --remove-ignored was '
+                                 'dropped in favor of --remove-excluded.')
 
     # Migration related options -----------------------------------------------
     # 2.7.0 Version will add album/setName as one
@@ -4611,7 +4661,8 @@ if __name__ == "__main__":
     # Ensure that only one instance of this script is running
     f = open(xCfg.LOCK_PATH, 'w')
     try:
-        fcntl.lockf(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        # FileLocker is an alias to portalocker (if available) or fcntl
+        FileLock(f, FileLocker.LOCK_EX | FileLocker.LOCK_NB)
     except IOError as e:
         if e.errno == errno.EAGAIN:
             sys.stderr.write('[{!s}] Script already running.\n'

@@ -578,12 +578,12 @@ class Uploadr:
         allMedia = self.grabNewFiles()
         # If managing changes, consider all files
         if xCfg.MANAGE_CHANGES:
-            logging.warning('MANAGED_CHANGES is True. Reviewing allMedia.')
+            logging.warning('MANAGE_CHANGES is True. Reviewing allMedia.')
             changedMedia = allMedia
 
         # If not, then get just the new and missing files
         else:
-            logging.warning('MANAGED_CHANGES is False. Reviewing only '
+            logging.warning('MANAGE_CHANGES is False. Reviewing only '
                             'changedMedia.')
             con = lite.connect(xCfg.DB_PATH)
             con.text_factory = str
@@ -778,7 +778,6 @@ class Uploadr:
             # Show number of total files processed
             self.niceprocessedfiles(count, UPLDRConstants.nuMediacount, True)
 
-        # CODING: replace Video
         # Closing DB connection
         if con is not None:
             con.close()
@@ -799,6 +798,13 @@ class Uploadr:
         # CONVERT_RAW_FILES = False
         # Change and use at your own risk at this time.
 
+        # CODING: Maybe save RAWfiles list from grabNewFiles function...
+        # for post-processing...
+        # - would have to then updated the result of the GrabNew files function
+        # Alternative run grabnewfiles with parameter with extention to look
+        # for. returned list would then be processed.
+        # upload would then find all current JPG and newly JPG converted.
+        # Still one would have two cycles over the filesystem :(
         """ convertRawFiles
         """
         if (not xCfg.CONVERT_RAW_FILES):
@@ -922,6 +928,99 @@ class Uploadr:
         np.niceprint('*****Completed converting files*****')
 
     # -------------------------------------------------------------------------
+    # convertRawFile
+    #
+    def convertRawFile(self,
+                       Ddirpath, Ffname, Fextension, Rfname):
+        """ convertRawFile
+
+        Ddirpath   = dirpath folder for filename
+        Ffname     = filename (including extension)
+        Fextension = lower case extension of current file
+        """
+
+        np.niceprint(' Converting raw:[{!s}]'.format(Ffname))
+        success = False
+        Rfname = None
+
+        # fileExt = FFname's extension
+        fileExt = Ffname.split(".")[-1].lower()
+        assert StrUnicodeOut(Fextension) == StrUnicodeOut(fileExt),\
+            niceassert('File extensions differ:[{!s}]!=[{!s}]'
+                       .format(StrUnicodeOut(Fextension),
+                               StrUnicodeOut(fileExt)))
+        # filename = Ffname without extension
+        filename = Ffname.split(".")[0]
+        if (not os.path.exists(Ddirpath + "/" +
+                               filename + ".JPG")):
+            np.niceprint('     Create JPG:[{!s}] raw:{!s}] ext:[{!s}]'
+                         .format(StrUnicodeOut(Ffname),
+                                 StrUnicodeOut(filename),
+                                 StrUnicodeOut(fileExt)))
+
+            flag = ""
+            if Fextension is "cr2":
+                flag = "PreviewImage"
+            else:
+                flag = "JpgFromRaw"
+
+            command = xCfg.RAW_TOOL_PATH +\
+                "exiftool -b -" + flag + " -w .JPG -ext " + ext + " -r '" +\
+                dirpath + "/" + filename + "." + fileExt + "'"
+            logging.info(command)
+
+            try:
+                p = subprocess.call(command, shell=True)
+            except BaseException:
+                reportError(Caught=True,
+                            CaughtPrefix='+++',
+                            CaughtCode='999',
+                            CaughtMsg='Error calling exiftool (create JPG)!',
+                            NicePrint=True,
+                            exceptSysInfo=True)
+                success = False
+            finally:
+                if not(success):
+                    if p is None:
+                        del p
+                    np.niceprint('.....raw failed:[{!s}]'.format(Ffname))
+                        
+                    return success
+
+        # Successful conversion as no .JPG_original file exists!!!
+        if (not os.path.exists(dirpath + "/" +
+                               filename + ".JPG_original")):
+
+            np.niceprint('   Copying tags:[{!s}]'
+                         .format(StrUnicodeOut(Ffname)))
+
+            command = xCfg.RAW_TOOL_PATH +\
+                "exiftool -tagsfromfile '" + dirpath + "/" + f +\
+                "' -r -all:all -ext JPG '" + dirpath + "/" + filename + ".JPG'"
+            logging.info(command)
+
+            try:
+                p = subprocess.call(command, shell=True)
+            except BaseException:
+                reportError(Caught=True,
+                            CaughtPrefix='+++',
+                            CaughtCode='999',
+                            CaughtMsg='Error calling exiftool (copy TAGS)!',
+                            NicePrint=True,
+                            exceptSysInfo=True)
+                success = False
+            
+            Rfname = filename + ".JPG'"
+            np.niceprint('Finished copying tags.')
+
+        np.niceprint('  Converted raw:[{!s}]'.format(StrUnicodeOut(Ffname)))
+
+        if p is None:
+            del p
+
+        return success
+
+    # -------------------------------------------------------------------------
     # grabNewFiles
     #
     def grabNewFiles(self):
@@ -956,12 +1055,7 @@ class Uploadr:
 
             for f in filenames:
                 filePath = os.path.join(dirpath, f)
-                # CODING: No need as files in EXCLUDED_FOLDERS were already
-                # removed.
-                # if self.isFileExcluded(filePath):
-                #     logging.debug('File {!s} in EXCLUDED_FOLDERS:'
-                #                   .format(filePath.encode('utf-8')))
-                #     continue
+                # Ignore filenames wihtin IGNORED_REGEX
                 if any(ignored.search(f) for ignored in xCfg.IGNORED_REGEX):
                     logging.debug('File {!s} in IGNORED_REGEX:'
                                   .format(filePath.encode('utf-8')))
@@ -982,6 +1076,32 @@ class Uploadr:
                                              StrUnicodeOut(dirpath) +
                                              StrUnicodeOut('/') +
                                              StrUnicodeOut(f))))
+                # Assumes xCFG.ALLOWED_EXT and xCFG.RAW_EXT are disjoint
+                elif xCfg.CONVERT_RAW_FILES and (ext in xCfg.RAW_EXT):
+                    fileSize = os.path.getsize(dirpath + "/" + f)
+                    if (fileSize < xCfg.FILE_MAX_SIZE):
+                        # Perform Raw conversion
+                        if convertRawFile(dirpath, f, ext, convertedf):
+                            files.append(
+                                os.path.normpath(
+                                    StrUnicodeOut(dirpath) +
+                                    StrUnicodeOut("/") +
+                                    StrUnicodeOut(convertedf)
+                                                  .replace("'", "\'")))
+                        else:
+                            np.niceprint('Convert raw file failed. '
+                                         'Skipping file: [{!s}]'.format(
+                                             os.path.normpath(
+                                                 StrUnicodeOut(dirpath) +
+                                                 StrUnicodeOut('/') +
+                                                 StrUnicodeOut(f))))                            
+                    else:
+                        np.niceprint('Skipping file due to '
+                                     'size restriction: [{!s}]'.format(
+                                         os.path.normpath(
+                                             StrUnicodeOut(dirpath) +
+                                             StrUnicodeOut('/') +
+                                             StrUnicodeOut(f))))                        
         files.sort()
         if xCfg.LOGGING_LEVEL <= logging.DEBUG:
             np.niceprint('Pretty Print Output for {!s}:'.format('files'))
@@ -1439,16 +1559,16 @@ class Uploadr:
                                     'HTTP exception',
                                     NicePrint=True,
                                     exceptSysInfo=True)
+                        # CODING: Repeat also below on FlickError (!= 5 and 8)
+                        # On error, check if exists a photo with
+                        # file_checksum
                         logging.error('Sleep 10 and check if file is '
                                       'already uploaded')
                         np.niceprint('Sleep 10 and check if file is '
                                      'already uploaded')
                         nutime.sleep(10)
 
-                        # CODING: Repeat also below on FlickError (!= 5 and 8)
-                        # on error, check if exists a photo
-                        # with file_checksum
-                        ZisLoaded, ZisCount, photo_id, zisNoSet = \
+                        ZisLoaded, ZisCount, photo_id, ZisNoSet = \
                             self.is_already_uploaded(
                                 file,
                                 file_checksum,
@@ -1457,7 +1577,7 @@ class Uploadr:
                                         'Zcount:[{!s}] Zpic:[{!s}] '
                                         'ZisNoSet:[{!s}]'
                                         .format(ZisLoaded, ZisCount,
-                                                photo_id, zisNoSet))
+                                                photo_id, ZisNoSet))
 
                         if ZisCount == 0:
                             ZuploadError = True
@@ -1473,12 +1593,12 @@ class Uploadr:
                         elif ZisCount > 1:
                             ZuploadError = True
                             np.niceprint('More than one file with same '
-                                         'checksum/album tag! Any collisions?'
-                                         ' File: [{!s}]'
+                                         'checksum/album tag! '
+                                         'Any collisions? File: [{!s}]'
                                          .format(StrUnicodeOut(file)))
                             logging.error('More than one file with same '
-                                          'checksum/album tag! Any collisions?'
-                                          ' File: [{!s}]'
+                                          'checksum/album tag! '
+                                          'Any collisions? File: [{!s}]'
                                           .format(StrUnicodeOut(file)))
                             break
 
@@ -1540,9 +1660,15 @@ class Uploadr:
                             break
                         else:
                             # CODING: Repeat above on IOError
-                            # on error, check if exists a photo
-                            # with file_checksum
-                            ZisLoaded, ZisCount, photo_id, zisNoSet = \
+                            # On error, check if exists a photo with
+                            # file_checksum
+                            logging.error('Sleep 10 and check if file is '
+                                          'already uploaded')
+                            np.niceprint('Sleep 10 and check if file is '
+                                         'already uploaded')
+                            nutime.sleep(10)
+
+                            ZisLoaded, ZisCount, photo_id, ZisNoSet = \
                                 self.is_already_uploaded(
                                     file,
                                     file_checksum,
@@ -1551,7 +1677,7 @@ class Uploadr:
                                             'Zcount:[{!s}] Zpic:[{!s}] '
                                             'ZisNoSet:[{!s}]'
                                             .format(ZisLoaded, ZisCount,
-                                                    photo_id, zisNoSet))
+                                                    photo_id, ZisNoSet))
 
                             if ZisCount == 0:
                                 ZuploadError = True
@@ -1623,8 +1749,8 @@ class Uploadr:
 
             # C) File loaded. Recorded on DB. Look for changes...
             elif (xCfg.MANAGE_CHANGES):
-                # we have a file from disk which is found on the database
-                # and is also on flickr but is set on flickr is not defined.
+                # We have a file from disk which is found on the database
+                # and is also on flickr but its set on flickr is not defined.
                 # So we need to reset the local datbase set_id so that it will
                 # be later assigned once we run createSets()
                 logging.debug('str(row[1]) == str(isfile_id:[{!s}])'
@@ -2445,7 +2571,6 @@ class Uploadr:
                         CaughtMsg='Caught exception in addFiletoSet',
                         NicePrint=True,
                         exceptSysInfo=True)
-        # CODING: replace Video
         # Closing DB connection
         if con is not None:
             con.close()
@@ -2656,7 +2781,6 @@ class Uploadr:
                 con.close()
             sys.exit(6)
         finally:
-            # CODING: replace Video
             # Closing DB connection
             if con is not None:
                 con.close()
@@ -2720,7 +2844,6 @@ class Uploadr:
             np.niceprint('Completed cleaning up badfiles table '
                          'from the database.')
 
-        # CODING: replace Video
         # Closing DB connection
         if con is not None:
             con.close()
@@ -4418,7 +4541,7 @@ def run_uploadr():
                          'with media available to sync with Flickr. '
                          'FILES_DIR: [{!s}] is not valid.'
                          .format(StrUnicodeOut(xCfg.FILES_DIR)))
-            sys.exit(9)
+            sys.exit(8)
 
     if xCfg.FLICKR["api_key"] == "" or xCfg.FLICKR["secret"] == "":
         logging.critical('Please enter an API key and secret in the '
@@ -4426,7 +4549,7 @@ def run_uploadr():
                          'script file, normaly uploadr.ini (see README).')
         np.niceprint('Please enter an API key and secret in the configuration '
                      'script file, normaly uploadr.ini (see README).')
-        sys.exit(10)
+        sys.exit(9)
 
     # Instantiate class Uploadr
     logging.debug('Instantiating the Main class FLICK = Uploadr()')
@@ -4450,7 +4573,7 @@ def run_uploadr():
             FLICK.authenticate()
 
         if ARGS.add_albums_migrate:
-            np.niceprint('Performing preparation for migrate to 2.7.0',
+            np.niceprint('Performing preparation for migration to 2.7.0',
                          fname='addAlbumsMigrate')
 
             if FLICK.addAlbumsMigrate():
@@ -4465,6 +4588,7 @@ def run_uploadr():
                              'on upload. '
                              'Please check logs, correct, and retry.',
                              fname='addAlbumsMigrate')
+                sys.exit(10)
         elif ARGS.list_bad_files:
             np.niceprint('Listing badfiles: Start.',
                          fname='listBadFiles')

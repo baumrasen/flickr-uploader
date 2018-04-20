@@ -925,7 +925,7 @@ class Uploadr:
                 command = os.path.join(xCfg.RAW_TOOL_PATH, 'exiftool') +\
                     " -overwrite_original_in_place -tagsfromfile '" +\
                     Ddirpath + "/" + f + "' -r -all:all -ext JPG '" +\
-                    Ddirpath + "/" + filename + ".JPG'"
+                    Ddirpath + "/" + Ffilename + ".JPG'"
             else:
                 # Nothing to do
                 return False
@@ -960,12 +960,13 @@ class Uploadr:
             niceassert('File extensions differ:[{!s}]!=[{!s}]'
                        .format(StrUnicodeOut(Fextension),
                                StrUnicodeOut(fileExt)))
+
         # filename = Ffname without extension
-        filename = Ffname.split(".")[0]
-        if (not os.path.exists(Ddirpath + "/" + filename + ".JPG")):
+        Ffilename = Ffname.split(".")[0]
+        if (not os.path.exists(Ddirpath + "/" + Ffilename + ".JPG")):
             logging.info('.....Create JPG:[{!s}] raw:[{!s}] ext:[{!s}]'
                          .format(StrUnicodeOut(Ffname),
-                                 StrUnicodeOut(filename),
+                                 StrUnicodeOut(Ffilename),
                                  StrUnicodeOut(fileExt)))
             if convertRawFileCommand('Convert'):
                 np.niceprint('....Created JPG:[{!s}]'
@@ -980,7 +981,7 @@ class Uploadr:
                             .format(StrUnicodeOut(Ffname)))
             return success
 
-        if (os.path.exists(Ddirpath + "/" + filename + ".JPG")):
+        if (os.path.exists(Ddirpath + "/" + Ffilename + ".JPG")):
             np.niceprint('...Copying tags:[{!s}]'
                          .format(StrUnicodeOut(Ffname)))
 

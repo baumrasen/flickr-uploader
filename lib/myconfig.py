@@ -147,7 +147,7 @@ class MyConfig(object):
           'orf', 'pef', 'ptx', 'pxn', 'r3d', 'raf', 'raw', 'rwl',\
           'rw2', 'rwz', 'sr2', 'srf', 'srw', 'x3f' ]",
         # RAW_TOOL_PATH
-        "'/volume1/photo/Image-ExifTool-9.69'",
+        "'/usr/bin/'",
         # FILE_MAX_SIZE
         "50000000",
         # MANAGE_CHANGES
@@ -359,7 +359,8 @@ class MyConfig(object):
         for item in ['DB_PATH',  # Check if basedir exists. Unicode Support
                      'LOCK_PATH',
                      'TOKEN_CACHE',
-                     'TOKEN_PATH']:
+                     'TOKEN_PATH',
+                     'RAW_TOOL_PATH']:
             logging.debug('verifyconfig for [{!s}]'.format(item))
             if not(np.isThisStringUnicode(self.__dict__[item])):
                 self.__dict__[item] = unicode(  # noqa

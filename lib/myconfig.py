@@ -323,6 +323,7 @@ class MyConfig(object):
         """ verifyconfig
         """
 
+        returnverify = True
         # Further specific processing... LOGGING_LEVEL
         if self.__dict__['LOGGING_LEVEL'] not in\
                 [logging.NOTSET,
@@ -349,6 +350,7 @@ class MyConfig(object):
                 logging.critical('{!s}: [{!s}] is not a valid folder.'
                                  .format(item,
                                          StrUnicodeOut(self.__dict__[item])))
+                returnverify = False
 
         # Further specific processing...
         #       DB_PATH
@@ -374,6 +376,7 @@ class MyConfig(object):
                                          StrUnicodeOut(os.path.dirname(
                                              self.__dict__[item]))
                                          ))
+                returnverify = False
 
         for item in ['RAW_TOOL_PATH']:
             logging.debug('verifyconfig for [{!s}]'.format(item))
@@ -387,6 +390,7 @@ class MyConfig(object):
                 logging.critical('{!s}:[{!s}] is not a valid folder.'
                                  .format(item,
                                          StrUnicodeOut(self.__dict__[item])))
+                returnverify = False
 
         # Further specific processing... EXCLUDED_FOLDERS
         #     Read EXCLUDED_FOLDERS and convert them into Unicode folders
@@ -433,7 +437,7 @@ class MyConfig(object):
                                      type(self.__dict__[item]),
                                      StrUnicodeOut(self.__dict__[item])))
 
-        return True
+        return returnverify
 
 
 # -----------------------------------------------------------------------------

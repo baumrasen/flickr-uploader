@@ -918,12 +918,12 @@ class Uploadr:
                 else:
                     flag = "JpgFromRaw"
 
-                command = xCfg.RAW_TOOL_PATH +\
-                    "exiftool -b -" + flag + " -w .JPG -ext " + Fextension +\
+                command =  os.path.join(xCfg.RAW_TOOL_PATH, 'exiftool') +\
+                    " -b -" + flag + " -w .JPG -ext " + Fextension +\
                     " -r '" + Ddirpath + "/" + filename + "." + fileExt + "'"
             elif ConvertOrCopyTags == 'CopyTags':
-                command = xCfg.RAW_TOOL_PATH +\
-                    "exiftool -overwrite_original_in_place -tagsfromfile '" +\
+                command =  os.path.join(xCfg.RAW_TOOL_PATH, 'exiftool') +\
+                    " -overwrite_original_in_place -tagsfromfile '" +\
                     Ddirpath + "/" + f + "' -r -all:all -ext JPG '" +\
                     Ddirpath + "/" + filename + ".JPG'"
             else:

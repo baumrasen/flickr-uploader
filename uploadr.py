@@ -809,7 +809,9 @@ class Uploadr:
         """
         if (not xCfg.CONVERT_RAW_FILES):
             return
-
+        np.niceprint('*****Converting files*****CODING DO NOT EXECUTE')
+        return
+    
         np.niceprint('*****Converting files*****')
         for ext in xCfg.RAW_EXT:
             np.niceprint('About to convert files with extension: [{!s}]'
@@ -834,26 +836,6 @@ class Uploadr:
                                          'raw[{!s}/{!s}]'
                                          .format(StrUnicodeOut(dirpath),
                                                  StrUnicodeOut(f)))
-                            # CODING if previous like ok, eliminate next line:
-                            # if isThisStringUnicode(dirpath):
-                            #     if isThisStringUnicode(f):
-                            #         print(u'About to create JPG from raw ' +
-                            #               dirpath.encode('utf-8') +
-                            #               u'/' +
-                            #               f.encode('utf-8'))
-                            #     else:
-                            #         print(u'About to create JPG from raw ' +
-                            #               dirpath.encode('utf-8') +
-                            #               u'/' +
-                            #               f)
-                            # elif isThisStringUnicode(f):
-                            #     print("About to create JPG from raw " +
-                            #           dirpath +
-                            #           "/" +
-                            #           f.encode('utf-8'))
-                            # else:
-                            #     print("About to create JPG from raw " +
-                            #           dirpath + "/" + f)
 
                             flag = ""
                             if ext is "cr2":
@@ -881,32 +863,6 @@ class Uploadr:
                                                  f.encode('utf-8')
                                                  if isThisStringUnicode(f)
                                                  else f))
-                            # CODING if line above ok remove next lines
-                            # if isThisStringUnicode(dirpath):
-                            #     if isThisStringUnicode(f):
-                            #         print(u'About to copy tags from ' +
-                            #               dirpath.encode('utf-8') +
-                            #               u'/' +
-                            #               f.encode('utf-8') +
-                            #               u' to JPG.')
-                            #     else:
-                            #         print(u'About to copy tags from ' +
-                            #               dirpath.encode('utf-8') +
-                            #               u'/' +
-                            #               f +
-                            #               " to JPG.")
-                            # elif isThisStringUnicode(f):
-                            #     print("About to copy tags from " +
-                            #           dirpath +
-                            #           "/" +
-                            #           f.encode('utf-8') +
-                            #           u' to JPG.')
-                            # else:
-                            #     print("About to copy tags from " +
-                            #           dirpath +
-                            #           "/" +
-                            #           f +
-                            #           " to JPG.")
 
                             command = xCfg.RAW_TOOL_PATH +\
                                 "exiftool -tagsfromfile '" +\

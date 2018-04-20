@@ -947,10 +947,11 @@ class Uploadr:
                                 'CopyTags'
             """
 
-            assert ConvertOrCopyTags not in ['Convert',
-                                             ' CopyTags'],\
-                niceassert('convertRawFileCommand: wrong argument')
+            assert ConvertOrCopyTags in ['Convert', 'CopyTags'],\
+                niceassert('convertRawFileCommand: wrong argument:[{!s}]'
+                           .format(ConvertOrCopyTags))
 
+            resultCmd = True
             if ConvertOrCopyTags == 'Convert':
                 flag = ""
                 if Fextension is "cr2":
@@ -981,13 +982,11 @@ class Uploadr:
                                       .format(ConvertOrCopyTags),
                             NicePrint=True,
                             exceptSysInfo=True)
-                success = False
+                resultCmd = False
             finally:
-                if not(success):
-                    if p is None:
-                        del p
-                    np.niceprint('.....raw failed:[{!s}]'.format(Ffname))
-                return True
+                if p is None:
+                    del p
+                return resultCmd
         # ---------------------------------------------------------------------
 
         np.niceprint(' Converting raw:[{!s}]'
@@ -1013,6 +1012,7 @@ class Uploadr:
                 np.niceprint('....Created JPG:[{!s}]'
                              .format(StrUnicodeOut(Ffname)))
             else:
+                np.niceprint('.....raw failed:[{!s}]'.format(Ffname))
                 return success
         else:
             np.niceprint('raw: JPG exists:[{!s}]'
@@ -1029,12 +1029,11 @@ class Uploadr:
                 np.niceprint('....Copied tags:[{!s}]'
                              .format(StrUnicodeOut(Ffname)))
             else:
+                np.niceprint('raw tags failed:[{!s}]'.format(Ffname))
                 return success
         else:
-            np.niceprint('....Failed tags:[{!s}]'
-                         .format(StrUnicodeOut(Ffname)))
-            logging.warning('....Failed tags:[{!s}]'
-                            .format(StrUnicodeOut(Ffname)))
+            np.niceprint('.....raw failed:[{!s}]'.format(Ffname))
+            logging.warning('.....raw failed:[{!s}]'.format(Ffname))
             return success
 
         success = True
@@ -1119,7 +1118,7 @@ class Uploadr:
                                                  StrUnicodeOut(dirpath) +
                                                  StrUnicodeOut('/') +
                                                  StrUnicodeOut(f))))
-                    else:
+                 else:
                         np.niceprint('Convert raw file failed. '
                                      'Skipping file: [{!s}]'.format(
                                          os.path.normpath(

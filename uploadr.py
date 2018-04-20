@@ -924,7 +924,7 @@ class Uploadr:
             elif ConvertOrCopyTags == 'CopyTags':
                 command = os.path.join(xCfg.RAW_TOOL_PATH, 'exiftool') +\
                     " -overwrite_original_in_place -tagsfromfile '" +\
-                    Ddirpath + "/" + f + "' -r -all:all -ext JPG '" +\
+                    Ddirpath + "/" + Ffname + "' -r -all:all -ext JPG '" +\
                     Ddirpath + "/" + Ffilename + ".JPG'"
             else:
                 # Nothing to do

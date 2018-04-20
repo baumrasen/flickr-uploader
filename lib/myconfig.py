@@ -243,7 +243,7 @@ class MyConfig(object):
             'str',   # 'DB_PATH',
             'str',   # 'LOCK_PATH',
             'str',   # 'TOKEN_CACHE',
-            'str',   #'TOKEN_PATH',
+            'str',   # 'TOKEN_PATH',
             'list',  # 'EXCLUDED_FOLDERS',
             'list',  # 'IGNORED_REGEX',
             'list',  # 'ALLOWED_EXT',
@@ -392,10 +392,8 @@ class MyConfig(object):
                                          StrUnicodeOut(self.__dict__[item])))
                 returnverify = False
 
-                os.path.isfile(fpath) and os.access(fpath, os.X_OK)
-
-            if (os.path.isfile(os.path.join(self.__dict__[item],'exiftool'))
-                and os.access(os.path.join(self.__dict__[item],'exiftool'),
+            if (os.path.isfile(os.path.join(self.__dict__[item], 'exiftool'))
+                and os.access(os.path.join(self.__dict__[item], 'exiftool'),
                               os.X_OK)):
                 logging.critical('{!s}: [{!s}] is not a valid executable.'
                                  .format(item,

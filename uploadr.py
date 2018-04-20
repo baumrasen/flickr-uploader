@@ -930,18 +930,71 @@ class Uploadr:
     # -------------------------------------------------------------------------
     # convertRawFile
     #
-    def convertRawFile(self,
-                       Ddirpath, Ffname, Fextension, Rfname):
+    def convertRawFile(self, Ddirpath, Ffname, Fextension):
         """ convertRawFile
 
         Ddirpath   = dirpath folder for filename
         Ffname     = filename (including extension)
         Fextension = lower case extension of current file
         """
+        # ---------------------------------------------------------------------
+        # convertRawFileCommand
+        #
+        def convertRawFileCommand(ConvertOrCopyTags ):
+            """ convertRawFileCommand
 
-        np.niceprint(' Converting raw:[{!s}]'.format(Ffname))
+            ConvertOrCopyTags = 'Convert'
+                                'CopyTags'
+            """
+
+            assert ConvertOrCopyTags not in ['Convert',
+                                             ' CopyTags'],\
+                niceassert('convertRawFileCommand: wrong argument')
+
+            if ConvertOrCopyTags == 'Convert':
+                flag = ""
+                if Fextension is "cr2":
+                    flag = "PreviewImage"
+                else:
+                    flag = "JpgFromRaw"
+
+                command = xCfg.RAW_TOOL_PATH +\
+                    "exiftool -b -" + flag + " -w .JPG -ext " + Fextension +\
+                    " -r '" + Ddirpath + "/" + filename + "." + fileExt + "'"
+            elif ConvertOrCopyTags == 'CopyTags':
+                command = xCfg.RAW_TOOL_PATH +\
+                    "exiftool -overwrite_original_in_place -tagsfromfile '" +\
+                    Ddirpath + "/" + f + "' -r -all:all -ext JPG '" +\
+                    Ddirpath + "/" + filename + ".JPG'"
+            else:
+                # Nothing to do
+                return False
+
+            logging.info(command)
+            try:
+                p = subprocess.call(command, shell=True)
+            except BaseException:
+                reportError(Caught=True,
+                            CaughtPrefix='+++',
+                            CaughtCode='999',
+                            CaughtMsg='Error calling exiftool (!{s})!'
+                                      .format(ConvertOrCopyTags),
+                            NicePrint=True,
+                            exceptSysInfo=True)
+                success = False
+            finally:
+                if not(success):
+                    if p is None:
+                        del p
+                    np.niceprint('.....raw failed:[{!s}]'.format(Ffname))
+                return True
+        # ---------------------------------------------------------------------
+
+        np.niceprint(' Converting raw:[{!s}]'
+                     .format(StrUnicodeOut(Ffname)))
+        logging.info(' Converting raw:[{!s}]'
+                     .format(StrUnicodeOut(Ffname)))
         success = False
-        Rfname = None
 
         # fileExt = FFname's extension
         fileExt = Ffname.split(".")[-1].lower()
@@ -951,72 +1004,42 @@ class Uploadr:
                                StrUnicodeOut(fileExt)))
         # filename = Ffname without extension
         filename = Ffname.split(".")[0]
-        if (not os.path.exists(Ddirpath + "/" +
-                               filename + ".JPG")):
-            np.niceprint('     Create JPG:[{!s}] raw:{!s}] ext:[{!s}]'
+        if (not os.path.exists(Ddirpath + "/" + filename + ".JPG")):
+            logging.info('.....Create JPG:[{!s}] raw:{!s}] ext:[{!s}]'
                          .format(StrUnicodeOut(Ffname),
                                  StrUnicodeOut(filename),
                                  StrUnicodeOut(fileExt)))
-
-            flag = ""
-            if Fextension is "cr2":
-                flag = "PreviewImage"
+            if convertRawFileCommand('Convert'):
+                np.niceprint('....Created JPG:[{!s}]'
+                             .format(StrUnicodeOut(Ffname)))
             else:
-                flag = "JpgFromRaw"
+                return success
+        else:
+            np.niceprint('raw: JPG exists:[{!s}]'
+                         .format(StrUnicodeOut(Ffname)))
+            logging.warning('raw: JPG exists:[{!s}]'
+                            .format(StrUnicodeOut(Ffname)))
+            return success
 
-            command = xCfg.RAW_TOOL_PATH +\
-                "exiftool -b -" + flag + " -w .JPG -ext " + Fextension +\
-                " -r '" + Ddirpath + "/" + filename + "." + fileExt + "'"
-            logging.info(command)
-
-            try:
-                p = subprocess.call(command, shell=True)
-            except BaseException:
-                reportError(Caught=True,
-                            CaughtPrefix='+++',
-                            CaughtCode='999',
-                            CaughtMsg='Error calling exiftool (create JPG)!',
-                            NicePrint=True,
-                            exceptSysInfo=True)
-                success = False
-            finally:
-                if not(success):
-                    if p is None:
-                        del p
-                    np.niceprint('.....raw failed:[{!s}]'.format(Ffname))
-
-                    return success
-
-        # Successful conversion as no .JPG_original file exists!!!
-        if (not os.path.exists(Ddirpath + "/" +
-                               filename + ".JPG_original")):
-
-            np.niceprint('   Copying tags:[{!s}]'
+        if (os.path.exists(Ddirpath + "/" + filename + ".JPG")):
+            np.niceprint('...Copying tags:[{!s}]'
                          .format(StrUnicodeOut(Ffname)))
 
-            command = xCfg.RAW_TOOL_PATH +\
-                "exiftool -tagsfromfile '" + Ddirpath + "/" + f +\
-                "' -r -all:all -ext JPG '" + Ddirpath + "/" + filename + ".JPG'"
-            logging.info(command)
+            if convertRawFileCommand('CopyTags'):
+                np.niceprint('....Copied tags:[{!s}]'
+                             .format(StrUnicodeOut(Ffname)))
+            else:
+                return success
+        else:
+            np.niceprint('....Failed tags:[{!s}]'
+                         .format(StrUnicodeOut(Ffname)))
+            logging.warning('....Failed tags:[{!s}]'
+                            .format(StrUnicodeOut(Ffname)))
+            return success
 
-            try:
-                p = subprocess.call(command, shell=True)
-            except BaseException:
-                reportError(Caught=True,
-                            CaughtPrefix='+++',
-                            CaughtCode='999',
-                            CaughtMsg='Error calling exiftool (copy TAGS)!',
-                            NicePrint=True,
-                            exceptSysInfo=True)
-                success = False
-
-            Rfname = filename + ".JPG'"
-            np.niceprint('Finished copying tags.')
-
+        success = True
         np.niceprint('  Converted raw:[{!s}]'.format(StrUnicodeOut(Ffname)))
-
-        if p is None:
-            del p
+        logging.info('  Converted raw:[{!s}]'.format(StrUnicodeOut(Ffname)))
 
         return success
 
@@ -1078,10 +1101,10 @@ class Uploadr:
                                              StrUnicodeOut(f))))
                 # Assumes xCFG.ALLOWED_EXT and xCFG.RAW_EXT are disjoint
                 elif xCfg.CONVERT_RAW_FILES and (ext in xCfg.RAW_EXT):
-                    fileSize = os.path.getsize(dirpath + "/" + f)
-                    if (fileSize < xCfg.FILE_MAX_SIZE):
-                        # Perform Raw conversion
-                        if self.convertRawFile(dirpath, f, ext, convertedf):
+                    # Perform Raw conversion
+                    if self.convertRawFile(dirpath, f, ext, convertedf):
+                        fileSize = os.path.getsize(dirpath + "/" + f)
+                        if (fileSize < xCfg.FILE_MAX_SIZE):
                             files.append(
                                 os.path.normpath(
                                     StrUnicodeOut(dirpath) +
@@ -1089,15 +1112,15 @@ class Uploadr:
                                     StrUnicodeOut(convertedf)
                                     .replace("'", "\'")))
                         else:
-                            np.niceprint('Convert raw file failed. '
-                                         'Skipping file: [{!s}]'.format(
+                            np.niceprint('Skipping file due to '
+                                         'size restriction: [{!s}]'.format(
                                              os.path.normpath(
                                                  StrUnicodeOut(dirpath) +
                                                  StrUnicodeOut('/') +
                                                  StrUnicodeOut(f))))
                     else:
-                        np.niceprint('Skipping file due to '
-                                     'size restriction: [{!s}]'.format(
+                        np.niceprint('Convert raw file failed. '
+                                     'Skipping file: [{!s}]'.format(
                                          os.path.normpath(
                                              StrUnicodeOut(dirpath) +
                                              StrUnicodeOut('/') +

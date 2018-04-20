@@ -1109,9 +1109,9 @@ class Uploadr:
                                 os.path.normpath(
                                     StrUnicodeOut(dirpath) +
                                     StrUnicodeOut("/") +
-                                    StrUnicodeOut(f.split(".")[0]) +
-                                    StrUnicodeOut('.JPG') +
-                                    .replace("'", "\'")))
+                                    StrUnicodeOut(f.split(".")[0])
+                                    .replace("'", "\'")+
+                                    StrUnicodeOut('.JPG')))
                         else:
                             np.niceprint('Skipping file due to '
                                          'size restriction: [{!s}]'.format(

@@ -965,8 +965,8 @@ class Uploadr:
                 flag = "JpgFromRaw"
 
             command = xCfg.RAW_TOOL_PATH +\
-                "exiftool -b -" + flag + " -w .JPG -ext " + ext + " -r '" +\
-                dirpath + "/" + filename + "." + fileExt + "'"
+                "exiftool -b -" + flag + " -w .JPG -ext " + Fextension +\
+                " -r '" + Ddirpath + "/" + filename + "." + fileExt + "'"
             logging.info(command)
 
             try:
@@ -984,19 +984,19 @@ class Uploadr:
                     if p is None:
                         del p
                     np.niceprint('.....raw failed:[{!s}]'.format(Ffname))
-                        
+
                     return success
 
         # Successful conversion as no .JPG_original file exists!!!
-        if (not os.path.exists(dirpath + "/" +
+        if (not os.path.exists(Ddirpath + "/" +
                                filename + ".JPG_original")):
 
             np.niceprint('   Copying tags:[{!s}]'
                          .format(StrUnicodeOut(Ffname)))
 
             command = xCfg.RAW_TOOL_PATH +\
-                "exiftool -tagsfromfile '" + dirpath + "/" + f +\
-                "' -r -all:all -ext JPG '" + dirpath + "/" + filename + ".JPG'"
+                "exiftool -tagsfromfile '" + Ddirpath + "/" + f +\
+                "' -r -all:all -ext JPG '" + Ddirpath + "/" + filename + ".JPG'"
             logging.info(command)
 
             try:
@@ -1009,7 +1009,7 @@ class Uploadr:
                             NicePrint=True,
                             exceptSysInfo=True)
                 success = False
-            
+
             Rfname = filename + ".JPG'"
             np.niceprint('Finished copying tags.')
 
@@ -1081,27 +1081,27 @@ class Uploadr:
                     fileSize = os.path.getsize(dirpath + "/" + f)
                     if (fileSize < xCfg.FILE_MAX_SIZE):
                         # Perform Raw conversion
-                        if convertRawFile(dirpath, f, ext, convertedf):
+                        if self.convertRawFile(dirpath, f, ext, convertedf):
                             files.append(
                                 os.path.normpath(
                                     StrUnicodeOut(dirpath) +
                                     StrUnicodeOut("/") +
                                     StrUnicodeOut(convertedf)
-                                                  .replace("'", "\'")))
+                                    .replace("'", "\'")))
                         else:
                             np.niceprint('Convert raw file failed. '
                                          'Skipping file: [{!s}]'.format(
                                              os.path.normpath(
                                                  StrUnicodeOut(dirpath) +
                                                  StrUnicodeOut('/') +
-                                                 StrUnicodeOut(f))))                            
+                                                 StrUnicodeOut(f))))
                     else:
                         np.niceprint('Skipping file due to '
                                      'size restriction: [{!s}]'.format(
                                          os.path.normpath(
                                              StrUnicodeOut(dirpath) +
                                              StrUnicodeOut('/') +
-                                             StrUnicodeOut(f))))                        
+                                             StrUnicodeOut(f))))
         files.sort()
         if xCfg.LOGGING_LEVEL <= logging.DEBUG:
             np.niceprint('Pretty Print Output for {!s}:'.format('files'))

@@ -379,19 +379,23 @@ class MyConfig(object):
 
         for item in ['RAW_TOOL_PATH']:
             logging.debug('verifyconfig for [{!s}]'.format(item))
+            logging.debug('RAW_TOOL_PATH/exiftool=[{!s}]'
+                          .format(os.path.join(self.__dict__[item],
+                                               'exiftool')))
+
             if not(np.isThisStringUnicode(self.__dict__[item])):
                 self.__dict__[item] = unicode(  # noqa
                                           self.__dict__[item],
                                           'utf-8') \
                                       if sys.version_info < (3, ) \
                                       else str(self.__dict__[item])
+
             if not os.path.isdir(self.__dict__[item]):
                 logging.critical('{!s}:[{!s}] is not a valid folder.'
                                  .format(item,
                                          StrUnicodeOut(self.__dict__[item])))
                 returnverify = False
-
-            if not (
+            elif not (
                 os.path.isfile(os.path.join(self.__dict__[item], 'exiftool'))
                 and os.access(os.path.join(self.__dict__[item], 'exiftool'),
                               os.X_OK)):

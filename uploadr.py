@@ -1110,7 +1110,7 @@ class Uploadr:
                                     StrUnicodeOut(dirpath) +
                                     StrUnicodeOut("/") +
                                     StrUnicodeOut(f.split(".")[0])
-                                    .replace("'", "\'")+
+                                    .replace("'", "\'") +
                                     StrUnicodeOut('.JPG')))
                         else:
                             np.niceprint('Skipping file due to '

@@ -14,7 +14,7 @@ python:
 # branches blacklist for TravisCI testing
 branches:
   except:
-  - dev-apr18-issue16
+    - dev-apr18-issue46
 
 before_install:
 # For use with wget into github account

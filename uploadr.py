@@ -913,16 +913,16 @@ class Uploadr:
             resultCmd = True
             if ConvertOrCopyTags == 'Convert':
                 flag = ""
-                if Fextension is "cr2":
+                if Fextension == 'cr2':
                     flag = "PreviewImage"
                 else:
                     flag = "JpgFromRaw"
 
-                command =  os.path.join(xCfg.RAW_TOOL_PATH, 'exiftool') +\
+                command = os.path.join(xCfg.RAW_TOOL_PATH, 'exiftool') +\
                     " -b -" + flag + " -w .JPG -ext " + Fextension +\
-                    " -r '" + Ddirpath + "/" + filename + "." + fileExt + "'"
+                    " -r '" + Ddirpath + "/" + Ffname + "'"
             elif ConvertOrCopyTags == 'CopyTags':
-                command =  os.path.join(xCfg.RAW_TOOL_PATH, 'exiftool') +\
+                command = os.path.join(xCfg.RAW_TOOL_PATH, 'exiftool') +\
                     " -overwrite_original_in_place -tagsfromfile '" +\
                     Ddirpath + "/" + f + "' -r -all:all -ext JPG '" +\
                     Ddirpath + "/" + filename + ".JPG'"

@@ -351,6 +351,16 @@ class MyConfig(object):
                                  .format(item,
                                          StrUnicodeOut(self.__dict__[item])))
                 returnverify = False
+                
+            def is_exe(fpath):
+                return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+                
+            if is_exe(os.path.join(self.__dict__[item],'exiftool')):
+                logging.critical('{!s}: [{!s}] is not a valid executable.'
+                                 .format(item,
+                                         os.path.join(self.__dict__[item],
+                                                      'exiftool')))
+                returnverify = False
 
         # Further specific processing...
         #       DB_PATH
@@ -391,6 +401,8 @@ class MyConfig(object):
                                  .format(item,
                                          StrUnicodeOut(self.__dict__[item])))
                 returnverify = False
+            
+                
 
         # Further specific processing... EXCLUDED_FOLDERS
         #     Read EXCLUDED_FOLDERS and convert them into Unicode folders

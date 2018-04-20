@@ -960,7 +960,7 @@ class Uploadr:
         # filename = Ffname without extension
         filename = Ffname.split(".")[0]
         if (not os.path.exists(Ddirpath + "/" + filename + ".JPG")):
-            logging.info('.....Create JPG:[{!s}] raw:{!s}] ext:[{!s}]'
+            logging.info('.....Create JPG:[{!s}] raw:[{!s}] ext:[{!s}]'
                          .format(StrUnicodeOut(Ffname),
                                  StrUnicodeOut(filename),
                                  StrUnicodeOut(fileExt)))

@@ -811,7 +811,7 @@ class Uploadr:
             return
         np.niceprint('*****Converting files*****CODING DO NOT EXECUTE')
         return
-    
+
         np.niceprint('*****Converting files*****')
         for ext in xCfg.RAW_EXT:
             np.niceprint('About to convert files with extension: [{!s}]'
@@ -1074,7 +1074,7 @@ class Uploadr:
                                                  StrUnicodeOut(dirpath) +
                                                  StrUnicodeOut('/') +
                                                  StrUnicodeOut(f))))
-                 else:
+                    else:
                         np.niceprint('Convert raw file failed. '
                                      'Skipping file: [{!s}]'.format(
                                          os.path.normpath(

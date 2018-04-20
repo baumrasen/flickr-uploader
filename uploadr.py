@@ -940,7 +940,7 @@ class Uploadr:
         # ---------------------------------------------------------------------
         # convertRawFileCommand
         #
-        def convertRawFileCommand(ConvertOrCopyTags ):
+        def convertRawFileCommand(ConvertOrCopyTags):
             """ convertRawFileCommand
 
             ConvertOrCopyTags = 'Convert'
@@ -1102,14 +1102,15 @@ class Uploadr:
                 # Assumes xCFG.ALLOWED_EXT and xCFG.RAW_EXT are disjoint
                 elif xCfg.CONVERT_RAW_FILES and (ext in xCfg.RAW_EXT):
                     # Perform Raw conversion
-                    if self.convertRawFile(dirpath, f, ext, convertedf):
+                    if self.convertRawFile(dirpath, f, ext):
                         fileSize = os.path.getsize(dirpath + "/" + f)
                         if (fileSize < xCfg.FILE_MAX_SIZE):
                             files.append(
                                 os.path.normpath(
                                     StrUnicodeOut(dirpath) +
                                     StrUnicodeOut("/") +
-                                    StrUnicodeOut(convertedf)
+                                    StrUnicodeOut(f.split(".")[0]) +
+                                    StrUnicodeOut('.JPG') +
                                     .replace("'", "\'")))
                         else:
                             np.niceprint('Skipping file due to '

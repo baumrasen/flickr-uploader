@@ -112,18 +112,21 @@ import lib.myconfig as myconfig
 #
 # Getting definitions from UPLDRConstants
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
-# Inits with default configuration values.
-xCfg = myconfig.MyConfig()
-# Get LOGGING_LEVEL to allow logging even if everything else is wrong!
-xCfg.LOGGING_LEVEL = int(str(xCfg.LOGGING_LEVEL))
+# Sets LOGGING_LEVEL to allow logging even if everything else is wrong!
 logging.basicConfig(stream=sys.stderr,
-                    level=int(str(xCfg.LOGGING_LEVEL)),
+                    level=int(str(logging.WARNING)),  # logging.DEBUG
                     datefmt=UPLDRConstants.TimeFormat,
                     format=UPLDRConstants.P + '[' +
                     str(UPLDRConstants.Run) + ']' +
                     '[%(asctime)s]:[%(processName)-11s]' +
                     UPLDRConstants.W +
                     '[%(levelname)-8s]:[%(name)s] %(message)s')
+# Inits with default configuration values.
+xCfg = myconfig.MyConfig()
+# Get LOGGING_LEVEL defaul configuration
+xCfg.LOGGING_LEVEL = int(str(xCfg.LOGGING_LEVEL))
+# Update logging level as per LOGGING_LEVEL from default config
+logging.getLogger().setLevel(xCfg.LOGGING_LEVEL)
 # -----------------------------------------------------------------------------
 
 

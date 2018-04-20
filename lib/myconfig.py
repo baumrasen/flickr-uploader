@@ -357,7 +357,6 @@ class MyConfig(object):
         #       LOCK_PATH
         #       TOKEN_CACHE
         #       TOKEN_PATH
-        #       RAW_TOOL_PATH  # Not used for now!
         for item in ['DB_PATH',  # Check if basedir exists. Unicode Support
                      'LOCK_PATH',
                      'TOKEN_CACHE',
@@ -392,7 +391,8 @@ class MyConfig(object):
                                          StrUnicodeOut(self.__dict__[item])))
                 returnverify = False
 
-            if (os.path.isfile(os.path.join(self.__dict__[item], 'exiftool'))
+            if not (
+                os.path.isfile(os.path.join(self.__dict__[item], 'exiftool'))
                 and os.access(os.path.join(self.__dict__[item], 'exiftool'),
                               os.X_OK)):
                 logging.critical('{!s}: [{!s}] is not a valid executable.'

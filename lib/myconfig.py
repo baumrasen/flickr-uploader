@@ -359,8 +359,7 @@ class MyConfig(object):
         for item in ['DB_PATH',  # Check if basedir exists. Unicode Support
                      'LOCK_PATH',
                      'TOKEN_CACHE',
-                     'TOKEN_PATH',
-                     'RAW_TOOL_PATH']:
+                     'TOKEN_PATH']:
             logging.debug('verifyconfig for [{!s}]'.format(item))
             if not(np.isThisStringUnicode(self.__dict__[item])):
                 self.__dict__[item] = unicode(  # noqa
@@ -375,6 +374,22 @@ class MyConfig(object):
                                          StrUnicodeOut(os.path.dirname(
                                              self.__dict__[item]))
                                          ))
+
+        for item in ['RAW_TOOL_PATH']:
+            logging.debug('verifyconfig for [{!s}]'.format(item))
+            if not(np.isThisStringUnicode(self.__dict__[item])):
+                self.__dict__[item] = unicode(  # noqa
+                                          self.__dict__[item],
+                                          'utf-8') \
+                                      if sys.version_info < (3, ) \
+                                      else str(self.__dict__[item])
+            if not os.path.isdir(self.__dict__[item]):
+                logging.critical('{!s}:[{!s}] is not in a valid folder:[{!s}].'
+                                 .format(item,
+                                         StrUnicodeOut(self.__dict__[item]),
+                                         StrUnicodeOut(os.path.dirname(
+                                             self.__dict__[item]))
+                                         ))            
 
         # Further specific processing... EXCLUDED_FOLDERS
         #     Read EXCLUDED_FOLDERS and convert them into Unicode folders

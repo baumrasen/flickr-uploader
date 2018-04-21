@@ -871,7 +871,7 @@ class Uploadr:
                 flag = "-PreviewImage" \
                        if Fext == 'cr2' else "-JpgFromRaw"
                 command = os.path.join(xCfg.RAW_TOOL_PATH, 'exiftool') +\
-                    " -b" + flag + " -w .JPG -ext " + Fext + " -r " +\
+                    " -b " + flag + " -w .JPG -ext " + Fext + " -r " +\
                     "'" + os.path.join(Ddirpath, Ffname) + "'"
             elif ConvertOrCopyTags == 'CopyTags':
                 command = os.path.join(xCfg.RAW_TOOL_PATH, 'exiftool') +\

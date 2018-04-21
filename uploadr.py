@@ -901,6 +901,11 @@ class Uploadr:
                 return resultCmd
         # ---------------------------------------------------------------------
 
+        if (ARGS.dry_run is True):
+            np.niceprint('Dry Run rawfile:[{!s}]...'
+                         .format(StrUnicodeOut(os.path.join(Ddirpath,
+                                                            Ffname))))
+            return True
         np.niceprint(' Converting raw:[{!s}]'
                      .format(StrUnicodeOut(os.path.join(Ddirpath, Ffname))))
         logging.info(' Converting raw:[{!s}]'

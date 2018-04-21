@@ -377,7 +377,7 @@ class MyConfig(object):
                                          ))
                 returnverify = False
 
-        if self.__dict__['CONVERT_RAW_FILES'] == True:
+        if (self.__dict__['CONVERT_RAW_FILES']):
             for item in ['RAW_TOOL_PATH']:
                 logging.debug('verifyconfig for [{!s}]'.format(item))
                 logging.debug('RAW_TOOL_PATH/exiftool=[{!s}]'

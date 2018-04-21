@@ -819,7 +819,7 @@ class Uploadr:
                                      fnameonly + '.JPG'))
                     logging.debug('Converted .JPG file size=[{!s}]'
                                   .format(fileSize))
-                except Exception as ex:
+                except Exception:
                     okfileSize = False
                     reportError(Caught=True,
                                 CaughtPrefix='+++',

@@ -15,7 +15,7 @@ python:
 branches:
   except:
     - dev-apr18-issue46
-    - dev-apr18-convertRAW
+    #- dev-apr18-convertRAW
 
 before_install:
 # For use with wget into github account
@@ -27,6 +27,10 @@ before_install:
 # =============================================================================
 # command to install dependencies
 install:
+# Install exiftool
+  - apt install libimage-exiftool-perl
+  - sudo apt install libimage-exiftool-perl
+# Install requirements  
   - pip install -r requirements.txt
 # Get deletr to delete all pics Flickr prior to a run
   - wget https://github.com/oPromessa/flickr-deletr/archive/master.tar.gz -O flickr-deletr-master.tar.gz
@@ -86,7 +90,9 @@ env:
     - TestScenario=addAlbumsMigrate UploadrOptions="$VerboseVar -p 25"
 # RemoveReplace, Multiprocessing. Also test cleaning up badfiles database entries
     - TestScenario=RemoveReplace UploadrOptions="$VerboseVar $BadFilesVar $ListPhotosNotInSet -p 10 -c"
-# ExcludedFolders+IgnoredFiles in Single Processing mode. Also test cleaning up badfiles database entries and listing files not in set
+# ExcludedFolders+IgnoredFiles in Single Processing mode.
+# Also test cleaning up badfiles database entries and listing files not in set.
+# Plus RAW files
     - TestScenario=ExcludedFolders UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -c -l 50"
 # Old273INI to test previous INI config file format using os.path.dirname(sys.argv[0]) vs os.getcwd()
     - TestScenario=Old273INI UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -p 10"
@@ -198,9 +204,9 @@ after_failure:
   - echo -e "TRAVIS_TEST_RESULT:\t${TRAVIS_TEST_RESULT}\nTRAVIS_PYTHON_VERSION:\t${TRAVIS_PYTHON_VERSION}\nTRAVIS_BUILD_DIR:\t${TRAVIS_BUILD_DIR}\nTRAVIS_BUILD_ID:\t${TRAVIS_BUILD_ID}\nTRAVIS_BUILD_NUMBER:\t${TRAVIS_BUILD_NUMBER}\nTRAVIS_JOB_NUMBER:\t${TRAVIS_JOB_NUMBER}\nTRAVIS_EVENT_TYPE:\t${TRAVIS_EVENT_TYPE}\nTRAVIS_COMMIT:\t\t${TRAVIS_COMMIT}\nTRAVIS_COMMIT_MESSAGE:\t${TRAVIS_COMMIT_MESSAGE}\n" >> build.txt
 #
 # Upload LOG/ERR files to dropbox
-  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}_$TestScenario
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}_$TestScenario
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}_$TestScenario
+  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst
@@ -222,10 +228,10 @@ after_script:
   - echo -e "TRAVIS_TEST_RESULT:\t${TRAVIS_TEST_RESULT}\nTRAVIS_PYTHON_VERSION:\t${TRAVIS_PYTHON_VERSION}\nTRAVIS_BUILD_DIR:\t${TRAVIS_BUILD_DIR}\nTRAVIS_BUILD_ID:\t${TRAVIS_BUILD_ID}\nTRAVIS_BUILD_NUMBER:\t${TRAVIS_BUILD_NUMBER}\nTRAVIS_JOB_NUMBER:\t${TRAVIS_JOB_NUMBER}\nTRAVIS_EVENT_TYPE:\t${TRAVIS_EVENT_TYPE}\nTRAVIS_COMMIT:\t\t${TRAVIS_COMMIT}\nTRAVIS_COMMIT_MESSAGE:\t${TRAVIS_COMMIT_MESSAGE}\n" >> build.txt
 #
 # Upload LOG/ERR files to Dropbox
-  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}_$TestScenario
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}_$TestScenario
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}_$TestScenario
-  
+  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+
 # =============================================================================
 # Deploy to Heroku
 deploy:

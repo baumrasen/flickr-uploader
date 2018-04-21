@@ -619,6 +619,9 @@ class Uploadr:
                          .format(len(badMedia),
                                  changedMedia_count))
 
+        # CODING Not finished
+        FLICK.convertRawFiles([], changedMedia)
+
         # running in multi processing mode
         if (ARGS.processes and ARGS.processes > 0):
             logging.debug('Running Pool of [{!s}] processes...'
@@ -797,24 +800,11 @@ class Uploadr:
                               list will be sorted
         """
 
-        # CODING: Not tested. Not in use at this time. I do not use RAW Files.
-        # Also you need Image-ExifTool-9.69 or similar installed.
-        # Check INI config file for and make sure you keep
-        # CONVERT_RAW_FILES = False
-        # Change and use at your own risk at this time.
-
-        # CODING: Maybe save RAWfiles list from grabNewFiles function...
+        # CODING: To do: save RAWfiles list from grabNewFiles function...
         # for post-processing...
-        # - would have to then updated the result of the GrabNew files function
-        # Alternative run grabnewfiles with parameter with extension to look
-        # for. returned list would then be processed.
-        # upload would then find all current JPG and newly JPG converted.
-        # Still one would have two cycles over the filesystem :(
 
         if (not xCfg.CONVERT_RAW_FILES):
             return
-        np.niceprint('*****Converting files*****CODING DO NOT EXECUTE')
-        return
 
         np.niceprint('*****Converting files*****')
         for fullpath in rawfiles:
@@ -872,9 +862,9 @@ class Uploadr:
             resultCmd = True
             if ConvertOrCopyTags == 'Convert':
                 flag = "-PreviewImage" \
-                       if Fextension == 'cr2' else "-JpgFromRaw"
+                       if Fext == 'cr2' else "-JpgFromRaw"
                 command = os.path.join(xCfg.RAW_TOOL_PATH, 'exiftool') +\
-                    " -b" + flag + " -w .JPG -ext " + Fextension + " -r " +\
+                    " -b" + flag + " -w .JPG -ext " + Fext + " -r " +\
                     "'" + os.path.join(Ddirpath, Ffname) + "'"
             elif ConvertOrCopyTags == 'CopyTags':
                 command = os.path.join(xCfg.RAW_TOOL_PATH, 'exiftool') +\
@@ -912,9 +902,9 @@ class Uploadr:
 
         # fileExt = FFname's extension (without the ".")
         fileExt = os.path.splitext(Ffname)[-1][1:].lower()
-        assert StrUnicodeOut(Fextension) == StrUnicodeOut(fileExt),\
+        assert StrUnicodeOut(Fext) == StrUnicodeOut(fileExt),\
             niceassert('File extensions differ:[{!s}]!=[{!s}]'
-                       .format(StrUnicodeOut(Fextension),
+                       .format(StrUnicodeOut(Fext),
                                StrUnicodeOut(fileExt)))
 
         if (not os.path.exists(os.path.join(Ddirpath, Ffnameonly) + ".JPG")):
@@ -4543,7 +4533,7 @@ def run_uploadr():
         else:
             FLICK.removeUselessSetsTable()
             FLICK.getFlickrSets()
-            FLICK.convertRawFiles()
+            # FLICK.convertRawFiles()
             FLICK.upload()
             FLICK.removeDeletedMedia()
 

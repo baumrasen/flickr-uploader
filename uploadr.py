@@ -3113,7 +3113,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         logging.info('Set found on DB:[{!s}]'
                                      .format(StrUnicodeOut(setName)))
                         if (ARGS.verbose):
-                            np.niceprint('Set exists on DB:[{!s}]'
+                            np.niceprint('Set found on DB:[{!s}]'
                                          .format(StrUnicodeOut(setName)))
 
                 con.commit()

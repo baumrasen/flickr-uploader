@@ -812,12 +812,26 @@ class Uploadr:
             fnameonly = os.path.splitext(f)[0]
             ext = os.path.splitext(f)[1][1:].lower()
             if self.convertRawFile(dirpath, f, ext, fnameonly):
-                fileSize = os.path.getsize(
-                    os.path.join(dirpath,
-                                 fnameonly + '.JPG'))
-                logging.debug('Converted .JPG file size=[{!s}]'
-                              .format(fileSize))
-                if (fileSize < xCfg.FILE_MAX_SIZE):
+                try:
+                    okfileSize = True
+                    fileSize = os.path.getsize(
+                        os.path.join(dirpath,
+                                     fnameonly + '.JPG'))
+                    logging.debug('Converted .JPG file size=[{!s}]'
+                                  .format(fileSize))
+                except Exception as ex:
+                    okfileSize = False
+                    reportError(Caught=True,
+                                CaughtPrefix='+++',
+                                CaughtCode='009',
+                                CaughtMsg='Exception in convertRawFiles',
+                                exceptUse=True,
+                                exceptCode=ex.code,
+                                exceptMsg=ex,
+                                NicePrint=False,
+                                exceptSysInfo=True)                    
+
+                if okfileSize and (fileSize < xCfg.FILE_MAX_SIZE):
                     finalMediafiles.append(
                         os.path.normpath(
                             StrUnicodeOut(dirpath) +
@@ -826,18 +840,18 @@ class Uploadr:
                             StrUnicodeOut('.JPG')))
                 else:
                     np.niceprint('Skipping file due to '
-                                 'size restriction: [{!s}]'.format(
-                                     os.path.normpath(
-                                         StrUnicodeOut(dirpath) +
-                                         StrUnicodeOut('/') +
-                                         StrUnicodeOut(f))))
-            else:
-                np.niceprint('Convert raw file failed. '
-                             'Skipping file: [{!s}]'.format(
-                                 os.path.normpath(
+                                 'size restriction/issue: [{!s}]'
+                                 .format(os.path.normpath(
                                      StrUnicodeOut(dirpath) +
                                      StrUnicodeOut('/') +
                                      StrUnicodeOut(f))))
+            else:
+                np.niceprint('Convert raw file failed. '
+                             'Skipping file: [{!s}]'
+                             .format(os.path.normpath(
+                                 StrUnicodeOut(dirpath) +
+                                 StrUnicodeOut('/') +
+                                 StrUnicodeOut(f))))
         finalMediafiles.sort()
         np.niceprint('*****Completed converting files*****')
 
@@ -906,6 +920,7 @@ class Uploadr:
                          .format(StrUnicodeOut(os.path.join(Ddirpath,
                                                             Ffname))))
             return True
+
         np.niceprint(' Converting raw:[{!s}]'
                      .format(StrUnicodeOut(os.path.join(Ddirpath, Ffname))))
         logging.info(' Converting raw:[{!s}]'

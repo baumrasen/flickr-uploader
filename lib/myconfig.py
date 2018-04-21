@@ -106,7 +106,7 @@ class MyConfig(object):
     # Default configuration keys/values pairs ---------------------------------
     INIvalues = [
         # FILES_DIR
-        "'photos'",
+        "'.'",  # Other possible default: "'photos'",
         # FLICKR
         "{ 'title'       : '',\
            'description' : '',\
@@ -377,33 +377,40 @@ class MyConfig(object):
                                          ))
                 returnverify = False
 
-        for item in ['RAW_TOOL_PATH']:
-            logging.debug('verifyconfig for [{!s}]'.format(item))
-            logging.debug('RAW_TOOL_PATH/exiftool=[{!s}]'
-                          .format(os.path.join(self.__dict__[item],
-                                               'exiftool')))
+        if self.__dict__['CONVERT_RAW_FILES'] == True:
+            for item in ['RAW_TOOL_PATH']:
+                logging.debug('verifyconfig for [{!s}]'.format(item))
+                logging.debug('RAW_TOOL_PATH/exiftool=[{!s}]'
+                              .format(os.path.join(self.__dict__[item],
+                                                   'exiftool')))
 
-            if not(np.isThisStringUnicode(self.__dict__[item])):
-                self.__dict__[item] = unicode(  # noqa
-                                          self.__dict__[item],
-                                          'utf-8') \
-                                      if sys.version_info < (3, ) \
-                                      else str(self.__dict__[item])
+                if not(np.isThisStringUnicode(self.__dict__[item])):
+                    self.__dict__[item] = unicode(  # noqa
+                                              self.__dict__[item],
+                                              'utf-8') \
+                                          if sys.version_info < (3, ) \
+                                          else str(self.__dict__[item])
 
-            if not os.path.isdir(self.__dict__[item]):
-                logging.critical('{!s}:[{!s}] is not a valid folder.'
-                                 .format(item,
-                                         StrUnicodeOut(self.__dict__[item])))
-                returnverify = False
-            elif not (
-                os.path.isfile(os.path.join(self.__dict__[item], 'exiftool'))
-                and os.access(os.path.join(self.__dict__[item], 'exiftool'),
-                              os.X_OK)):
-                logging.critical('{!s}: [{!s}] is not a valid executable.'
-                                 .format(item,
-                                         os.path.join(self.__dict__[item],
-                                                      'exiftool')))
-                returnverify = False
+                if not os.path.isdir(self.__dict__[item]):
+                    logging.critical('{!s}:[{!s}] is not a valid folder.'
+                                     .format(item,
+                                             StrUnicodeOut(
+                                                self.__dict__[item])))
+                    returnverify = False
+                elif not (
+                    os.path.isfile(os.path.join(self.__dict__[item],
+                                                'exiftool'))
+                    and os.access(os.path.join(self.__dict__[item],
+                                               'exiftool'),
+                                  os.X_OK)):
+                    logging.critical('{!s}: [{!s}] is not a valid executable.'
+                                     .format(item,
+                                             os.path.join(self.__dict__[item],
+                                                          'exiftool')))
+                    returnverify = False
+        else:
+            logging.debug('verifyconfig: [{!s}] is False: bypass for [{!s}]'
+                          .format('CONVERT_RAW_FILES', 'RAW_TOOL_PATH'))
 
         # Further specific processing... EXCLUDED_FOLDERS
         #     Read EXCLUDED_FOLDERS and convert them into Unicode folders

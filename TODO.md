@@ -4,10 +4,6 @@
 
 ## Pending improvements
 -----------------------
-* converRawFiles is executed while searching for files. May not be as speedy
-  as it culd be! Requires exiftool to be installed and appropriate
-  configuration of RAW_TOOL_PATH in INI file. Also set CONVERT_RAW_FILES = True
-  in INI file. Use at your own risk.
 * Consider using python module exiftool?
 * Would be nice to update ALL tags on replacePhoto and not only the
   mandatory checksum tag as FLICKR maintains the tags from the first load.

@@ -988,7 +988,7 @@ class Uploadr:
                     continue
                 ext = os.path.splitext(os.path.basename(f))[1][1:].lower()
                 if ext in xCfg.ALLOWED_EXT:
-                    fileSize = os.path.getsize(os.path.jon(dirpath, f))
+                    fileSize = os.path.getsize(os.path.join(dirpath, f))
                     if (fileSize < xCfg.FILE_MAX_SIZE):
                         files.append(
                             os.path.normpath(

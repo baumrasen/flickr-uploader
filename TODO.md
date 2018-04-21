@@ -4,9 +4,10 @@
 
 ## Pending improvements
 -----------------------
-* converRawFiles is not tested. Also requires an exif tool to be installed
-  and configured as RAW_TOOL_PATH in INI file. Make sure to leave
-  CONVERT_RAW_FILES = False in INI file or use at your own risk.
+* converRawFiles is executed while searching for files. May not be as speedy
+  as it culd be! Requires exiftool to be installed and appropriate
+  configuration of RAW_TOOL_PATH in INI file. Also set CONVERT_RAW_FILES = True
+  in INI file. Use at your own risk.
 * Consider using python module exiftool?
 * Would be nice to update ALL tags on replacePhoto and not only the
   mandatory checksum tag as FLICKR maintains the tags from the first load.
@@ -32,7 +33,7 @@
 * updatedVideoDate fails on three attempts (is it 'cause Flickr is processing
   the video? and raises error caught on #210! Next run does not update video
   date. V2.7.5 testing with 15 seconds.
-* When QPS (Queries per second) are very high dyring a certain period, Flickr
+* When QPS (Queries per second) are very high during a certain period, Flickr
   does not provide back reliable information. For instance, photos.search
   may return X pics but not actually list them.
   ```python
@@ -77,8 +78,6 @@
    * -z (not yet fully developed)
 * Functions not migrated...
    * convertRawFiles
-* Arguments are parsed with get/set (Python 2.7 and 3.6 compatible) and not
-  dictionary like accesse (Python 3.6 compatible only)
 
 ## Update History
 -----------------

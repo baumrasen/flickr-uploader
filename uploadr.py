@@ -789,10 +789,12 @@ class Uploadr:
     # -------------------------------------------------------------------------
     # convertRawFiles
     #
-    def convertRawFiles(self):
+    def convertRawFiles(self, rawfiles, finalMediafiles):
         """ convertRawFiles
 
-        CODING: Not converted yet.
+            rawfiles        = List with raw files
+            finalMediafiles = Converted Raw files will be appended to this list
+                              list will be sorted
         """
 
         # CODING: Not tested. Not in use at this time. I do not use RAW Files.
@@ -804,97 +806,54 @@ class Uploadr:
         # CODING: Maybe save RAWfiles list from grabNewFiles function...
         # for post-processing...
         # - would have to then updated the result of the GrabNew files function
-        # Alternative run grabnewfiles with parameter with extention to look
+        # Alternative run grabnewfiles with parameter with extension to look
         # for. returned list would then be processed.
         # upload would then find all current JPG and newly JPG converted.
         # Still one would have two cycles over the filesystem :(
-        """ convertRawFiles
-        """
+
         if (not xCfg.CONVERT_RAW_FILES):
             return
         np.niceprint('*****Converting files*****CODING DO NOT EXECUTE')
         return
 
         np.niceprint('*****Converting files*****')
-        for ext in xCfg.RAW_EXT:
-            np.niceprint('About to convert files with extension: [{!s}]'
-                         .format(StrUnicodeOut(ext)))
-
-            for dirpath, dirnames, filenames in os.walk(
-                    xCfg.FILES_DIR,
-                    followlinks=True):
-                if '.picasaoriginals' in dirnames:
-                    dirnames.remove('.picasaoriginals')
-                if '@eaDir' in dirnames:
-                    dirnames.remove('@eaDir')
-                for f in filenames:
-
-                    fileExt = f.split(".")[-1]
-                    filename = f.split(".")[0]
-                    if (fileExt.lower() == ext):
-
-                        if (not os.path.exists(dirpath + "/" +
-                                               filename + ".JPG")):
-                            np.niceprint('About to create JPG from '
-                                         'raw[{!s}/{!s}]'
-                                         .format(StrUnicodeOut(dirpath),
-                                                 StrUnicodeOut(f)))
-
-                            flag = ""
-                            if ext is "cr2":
-                                flag = "PreviewImage"
-                            else:
-                                flag = "JpgFromRaw"
-
-                            command = xCfg.RAW_TOOL_PATH +\
-                                "exiftool -b -" + flag +\
-                                " -w .JPG -ext " + ext + " -r '" +\
-                                dirpath + "/" +\
-                                filename + "." + fileExt + "'"
-                            logging.info(command)
-
-                            p = subprocess.call(command, shell=True)
-
-                        if (not os.path.exists(dirpath + "/" +
-                                               filename + ".JPG_original")):
-
-                            np.niceprint('About to copy tags from:[{!s}/{!s}]'
-                                         .format(dirpath.encode('utf-8')
-                                                 if
-                                                 isThisStringUnicode(dirpath)
-                                                 else dirpath,
-                                                 f.encode('utf-8')
-                                                 if isThisStringUnicode(f)
-                                                 else f))
-
-                            command = xCfg.RAW_TOOL_PATH +\
-                                "exiftool -tagsfromfile '" +\
-                                dirpath + "/" + f +\
-                                "' -r -all:all -ext JPG '" +\
-                                dirpath + "/" + filename + ".JPG'"
-                            logging.info(command)
-
-                            p = subprocess.call(command, shell=True)
-
-                            np.niceprint('Finished copying tags.')
-
-            np.niceprint('Finished converting files with extension:[{!s}]'
-                         .format(StrUnicodeOut(ext)))
-
-        if p is None:
-            del p
-
+        for fullpath in rawfiles:
+            dirpath, f = os.path.split(fullpath)
+            fnameonly = os.path.splitext(f)[0]
+            ext = os.path.splitext(f)[1][1:].lower()
+            if self.convertRawFile(dirpath, f, ext, fnameonly):
+                fileSize = os.path.getsize(
+                    os.path.join(dirpath,
+                                 fnameonly + '.JPG'))
+                logging.debug('Converted .JPG file size=[{!s}]'
+                              .format(fileSize))
+                if (fileSize < xCfg.FILE_MAX_SIZE):
+                    finalMediafiles.append(
+                        os.path.normpath(
+                            StrUnicodeOut(dirpath) +
+                            StrUnicodeOut("/") +
+                            StrUnicodeOut(fnameonly).replace("'", "\'") +
+                            StrUnicodeOut('.JPG')))
+                else:
+                    np.niceprint('Skipping file due to '
+                                 'size restriction: [{!s}]'.format(
+                                     os.path.normpath(
+                                         StrUnicodeOut(dirpath) +
+                                         StrUnicodeOut('/') +
+                                         StrUnicodeOut(f))))
+        finalMediafiles.sort()
         np.niceprint('*****Completed converting files*****')
 
     # -------------------------------------------------------------------------
     # convertRawFile
     #
-    def convertRawFile(self, Ddirpath, Ffname, Fextension):
+    def convertRawFile(self, Ddirpath, Ffname, Fext, Ffnameonly):
         """ convertRawFile
 
         Ddirpath   = dirpath folder for filename
         Ffname     = filename (including extension)
-        Fextension = lower case extension of current file
+        Fext       = lower case extension of current file
+        Ffnameonly = filiename without extension
         """
         # ---------------------------------------------------------------------
         # convertRawFileCommand
@@ -902,8 +861,8 @@ class Uploadr:
         def convertRawFileCommand(ConvertOrCopyTags):
             """ convertRawFileCommand
 
-            ConvertOrCopyTags = 'Convert'
-                                'CopyTags'
+            ConvertOrCopyTags = 'Convert'  converts a raw file to JPG
+                                'CopyTags' copy tags from raw file to JPG
             """
 
             assert ConvertOrCopyTags in ['Convert', 'CopyTags'],\
@@ -912,20 +871,17 @@ class Uploadr:
 
             resultCmd = True
             if ConvertOrCopyTags == 'Convert':
-                flag = ""
-                if Fextension == 'cr2':
-                    flag = "PreviewImage"
-                else:
-                    flag = "JpgFromRaw"
-
+                flag = "-PreviewImage" \
+                       if Fextension == 'cr2' else "-JpgFromRaw"
                 command = os.path.join(xCfg.RAW_TOOL_PATH, 'exiftool') +\
-                    " -b -" + flag + " -w .JPG -ext " + Fextension +\
-                    " -r '" + Ddirpath + "/" + Ffname + "'"
+                    " -b" + flag + " -w .JPG -ext " + Fextension + " -r " +\
+                    "'" + os.path.join(Ddirpath, Ffname) + "'"
             elif ConvertOrCopyTags == 'CopyTags':
                 command = os.path.join(xCfg.RAW_TOOL_PATH, 'exiftool') +\
-                    " -overwrite_original_in_place -tagsfromfile '" +\
-                    Ddirpath + "/" + Ffname + "' -r -all:all -ext JPG '" +\
-                    Ddirpath + "/" + Ffilename + ".JPG'"
+                    " -overwrite_original_in_place -tagsfromfile " +\
+                    "'" + os.path.join(Ddirpath, Ffname) + "'" +\
+                    " -r -all:all -ext JPG " +\
+                    "'" + os.path.join(Ddirpath, Ffnameonly) + ".JPG'"
             else:
                 # Nothing to do
                 return False
@@ -949,39 +905,37 @@ class Uploadr:
         # ---------------------------------------------------------------------
 
         np.niceprint(' Converting raw:[{!s}]'
-                     .format(StrUnicodeOut(Ffname)))
+                     .format(StrUnicodeOut(os.path.join(Ddirpath, Ffname))))
         logging.info(' Converting raw:[{!s}]'
-                     .format(StrUnicodeOut(Ffname)))
+                     .format(StrUnicodeOut(os.path.join(Ddirpath, Ffname))))
         success = False
 
-        # fileExt = FFname's extension
-        fileExt = Ffname.split(".")[-1].lower()
+        # fileExt = FFname's extension (without the ".")
+        fileExt = os.path.splitext(Ffname)[-1][1:].lower()
         assert StrUnicodeOut(Fextension) == StrUnicodeOut(fileExt),\
             niceassert('File extensions differ:[{!s}]!=[{!s}]'
                        .format(StrUnicodeOut(Fextension),
                                StrUnicodeOut(fileExt)))
 
-        # filename = Ffname without extension
-        Ffilename = Ffname.split(".")[0]
-        if (not os.path.exists(Ddirpath + "/" + Ffilename + ".JPG")):
-            logging.info('.....Create JPG:[{!s}] raw:[{!s}] ext:[{!s}]'
+        if (not os.path.exists(os.path.join(Ddirpath, Ffnameonly) + ".JPG")):
+            logging.info('.....Create JPG:[{!s}] jpg:[{!s}] ext:[{!s}]'
                          .format(StrUnicodeOut(Ffname),
-                                 StrUnicodeOut(Ffilename),
+                                 StrUnicodeOut(Ffnameonly),
                                  StrUnicodeOut(fileExt)))
             if convertRawFileCommand('Convert'):
                 np.niceprint('....Created JPG:[{!s}]'
-                             .format(StrUnicodeOut(Ffname)))
+                             .format(StrUnicodeOut(Ffnameonly) + ".JPG"))
             else:
                 np.niceprint('.....raw failed:[{!s}]'.format(Ffname))
                 return success
         else:
             np.niceprint('raw: JPG exists:[{!s}]'
-                         .format(StrUnicodeOut(Ffname)))
+                         .format(StrUnicodeOut(Ffnameonly) + ".JPG"))
             logging.warning('raw: JPG exists:[{!s}]'
-                            .format(StrUnicodeOut(Ffname)))
+                            .format(StrUnicodeOut(Ffnameonly) + ".JPG"))
             return success
 
-        if (os.path.exists(Ddirpath + "/" + Ffilename + ".JPG")):
+        if (os.path.exists(os.path.join(Ddirpath, Ffnameonly) + ".JPG")):
             np.niceprint('...Copying tags:[{!s}]'
                          .format(StrUnicodeOut(Ffname)))
 
@@ -1044,7 +998,7 @@ class Uploadr:
                     continue
                 ext = os.path.splitext(os.path.basename(f))[1][1:].lower()
                 if ext in xCfg.ALLOWED_EXT:
-                    fileSize = os.path.getsize(dirpath + "/" + f)
+                    fileSize = os.path.getsize(os.path.jon(dirpath, f))
                     if (fileSize < xCfg.FILE_MAX_SIZE):
                         files.append(
                             os.path.normpath(
@@ -1061,14 +1015,22 @@ class Uploadr:
                 # Assumes xCFG.ALLOWED_EXT and xCFG.RAW_EXT are disjoint
                 elif xCfg.CONVERT_RAW_FILES and (ext in xCfg.RAW_EXT):
                     # Perform Raw conversion
-                    if self.convertRawFile(dirpath, f, ext):
-                        fileSize = os.path.getsize(dirpath + "/" + f)
+                    # dirpath   = folder location
+                    # f         = filename inclueding extension
+                    # extension = lowercase extension (without the dot)
+                    fnameonly = os.path.splitext(f)[0]
+                    if self.convertRawFile(dirpath, f, ext, fnameonly):
+                        fileSize = os.path.getsize(
+                            os.path.join(dirpath,
+                                         fnameonly + '.JPG'))
+                        logging.debug('Converted .JPG file size=[{!s}]'
+                                      .format(fileSize))
                         if (fileSize < xCfg.FILE_MAX_SIZE):
                             files.append(
                                 os.path.normpath(
                                     StrUnicodeOut(dirpath) +
                                     StrUnicodeOut("/") +
-                                    StrUnicodeOut(f.split(".")[0])
+                                    StrUnicodeOut(os.path.splitext(f)[0])
                                     .replace("'", "\'") +
                                     StrUnicodeOut('.JPG')))
                         else:

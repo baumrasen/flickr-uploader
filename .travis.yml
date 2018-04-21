@@ -15,6 +15,7 @@ python:
 branches:
   except:
     - dev-apr18-issue46
+    - dev-apr18-convertRAW
 
 before_install:
 # For use with wget into github account

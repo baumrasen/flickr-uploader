@@ -578,7 +578,7 @@ class Uploadr:
         np.niceprint("*****Uploading files*****")
 
         con = None
-        allMedia = self.grabNewFiles()
+        allMedia, rawfiles = self.grabNewFiles()
         # If managing changes, consider all files
         if xCfg.MANAGE_CHANGES:
             logging.warning('MANAGE_CHANGES is True. Reviewing allMedia.')
@@ -601,6 +601,9 @@ class Uploadr:
         np.niceprint('Found [{!s:>6s}] files to upload.'
                      .format(str(changedMedia_count)))
 
+        # Convert Raw files
+        FLICK.convertRawFiles(rawfiles, changedMedia)
+
         if (ARGS.bad_files):
             # Cater for bad files
             con = lite.connect(xCfg.DB_PATH)
@@ -618,9 +621,6 @@ class Uploadr:
             np.niceprint('Removing {!s} badfiles. Found {!s} files to upload.'
                          .format(len(badMedia),
                                  changedMedia_count))
-
-        # CODING Not finished
-        FLICK.convertRawFiles([], changedMedia)
 
         # running in multi processing mode
         if (ARGS.processes and ARGS.processes > 0):
@@ -954,10 +954,13 @@ class Uploadr:
 
             Select files from FILES_DIR taking into consideration
             EXCLUDED_FOLDERS and IGNORED_REGEX filenames.
-            Returns sorted file list.
+            Returns two sorted file lists:
+                JPG files found
+                RAW files found
         """
 
         files = []
+        rawfiles = []
         for dirpath, dirnames, filenames in\
                 os.walk(xCfg.FILES_DIR, followlinks=True):
 
@@ -1004,45 +1007,53 @@ class Uploadr:
                                              StrUnicodeOut(f))))
                 # Assumes xCFG.ALLOWED_EXT and xCFG.RAW_EXT are disjoint
                 elif xCfg.CONVERT_RAW_FILES and (ext in xCfg.RAW_EXT):
+                    rawfiles.append(
+                        os.path.normpath(
+                            StrUnicodeOut(dirpath) +
+                            StrUnicodeOut("/") +
+                            StrUnicodeOut(f).replace("'", "\'")))
+                    # CODING----------------------Code moved to ConvertRawFiles
                     # Perform Raw conversion
                     # dirpath   = folder location
                     # f         = filename inclueding extension
                     # extension = lowercase extension (without the dot)
-                    fnameonly = os.path.splitext(f)[0]
-                    if self.convertRawFile(dirpath, f, ext, fnameonly):
-                        fileSize = os.path.getsize(
-                            os.path.join(dirpath,
-                                         fnameonly + '.JPG'))
-                        logging.debug('Converted .JPG file size=[{!s}]'
-                                      .format(fileSize))
-                        if (fileSize < xCfg.FILE_MAX_SIZE):
-                            files.append(
-                                os.path.normpath(
-                                    StrUnicodeOut(dirpath) +
-                                    StrUnicodeOut("/") +
-                                    StrUnicodeOut(os.path.splitext(f)[0])
-                                    .replace("'", "\'") +
-                                    StrUnicodeOut('.JPG')))
-                        else:
-                            np.niceprint('Skipping file due to '
-                                         'size restriction: [{!s}]'.format(
-                                             os.path.normpath(
-                                                 StrUnicodeOut(dirpath) +
-                                                 StrUnicodeOut('/') +
-                                                 StrUnicodeOut(f))))
-                    else:
-                        np.niceprint('Convert raw file failed. '
-                                     'Skipping file: [{!s}]'.format(
-                                         os.path.normpath(
-                                             StrUnicodeOut(dirpath) +
-                                             StrUnicodeOut('/') +
-                                             StrUnicodeOut(f))))
+                    # fnameonly = os.path.splitext(f)[0]
+                    # if self.convertRawFile(dirpath, f, ext, fnameonly):
+                    #     fileSize = os.path.getsize(
+                    #         os.path.join(dirpath,
+                    #                      fnameonly + '.JPG'))
+                    #     logging.debug('Converted .JPG file size=[{!s}]'
+                    #                   .format(fileSize))
+                    #     if (fileSize < xCfg.FILE_MAX_SIZE):
+                    #         files.append(
+                    #             os.path.normpath(
+                    #                 StrUnicodeOut(dirpath) +
+                    #                 StrUnicodeOut("/") +
+                    #                 StrUnicodeOut(os.path.splitext(f)[0])
+                    #                 .replace("'", "\'") +
+                    #                 StrUnicodeOut('.JPG')))
+                    #     else:
+                    #         np.niceprint('Skipping file due to '
+                    #                      'size restriction: [{!s}]'.format(
+                    #                          os.path.normpath(
+                    #                              StrUnicodeOut(dirpath) +
+                    #                              StrUnicodeOut('/') +
+                    #                              StrUnicodeOut(f))))
+                    # else:
+                    #     np.niceprint('Convert raw file failed. '
+                    #                  'Skipping file: [{!s}]'.format(
+                    #                      os.path.normpath(
+                    #                          StrUnicodeOut(dirpath) +
+                    #                          StrUnicodeOut('/') +
+                    #                          StrUnicodeOut(f))))
+        rawfiles.sort()
         files.sort()
         if xCfg.LOGGING_LEVEL <= logging.DEBUG:
-            np.niceprint('Pretty Print Output for {!s}:'.format('files'))
+            np.niceprint('Pretty Print Output for [files]-------')
             pprint.pprint(files)
-
-        return files
+            np.niceprint('Pretty Print Output for [rawfiles]----')
+            pprint.pprint(rawfiles)
+        return files, rawfiles
 
     # -------------------------------------------------------------------------
     # isFileExcluded
@@ -4533,7 +4544,6 @@ def run_uploadr():
         else:
             FLICK.removeUselessSetsTable()
             FLICK.getFlickrSets()
-            # FLICK.convertRawFiles()
             FLICK.upload()
             FLICK.removeDeletedMedia()
 

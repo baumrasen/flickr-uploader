@@ -28,8 +28,8 @@ before_install:
 # command to install dependencies
 install:
 # Install exiftool
-  - apt install libimage-exiftool-perl
   - sudo apt install libimage-exiftool-perl
+  - exiftool
 # Install requirements  
   - pip install -r requirements.txt
 # Get deletr to delete all pics Flickr prior to a run

@@ -1038,7 +1038,7 @@ class Uploadr:
                                 os.path.splitext(f)[0])
                             + ".JPG")):
                         logging.debug('rawfiles: including:[{!s}]'
-                                      .format(SrtUnicodeOut(f)))
+                                      .format(StrUnicodeOut(f)))
                         rawfiles.append(
                             os.path.normpath(
                                 StrUnicodeOut(dirpath) +

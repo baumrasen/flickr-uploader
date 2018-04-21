@@ -72,8 +72,6 @@
   (which match such regular expression) are not removed.
 * Arguments not fully tested:
    * -z (not yet fully developed)
-* Functions not migrated...
-   * convertRawFiles
 
 ## Update History
 -----------------

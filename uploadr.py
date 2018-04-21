@@ -1038,7 +1038,7 @@ class Uploadr:
                                 os.path.splitext(f)[0])
                             + ".JPG")):
                         logging.debug('rawfiles: including:[{!s}]'
-                                      .format(f))
+                                      .format(SrtUnicodeOut(f)))
                         rawfiles.append(
                             os.path.normpath(
                                 StrUnicodeOut(dirpath) +
@@ -1047,7 +1047,7 @@ class Uploadr:
                     else:
                         logging.warning('rawfiles: JPG exists. '
                                         'Not including:[{!s}]'
-                                        .format(f))
+                                        .format(StrUnicodeOut(f)))
                     # CODING----------------------Code moved to ConvertRawFiles
                     # Perform Raw conversion
                     # dirpath   = folder location
@@ -3102,7 +3102,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                                   .format(e.args[0]),
                                         NicePrint=True)
                     else:
-                        logging.info('Set exists on DB:[{!s}]'
+                        logging.info('Set found on DB:[{!s}]'
                                      .format(StrUnicodeOut(setName)))
                         if (ARGS.verbose):
                             np.niceprint('Set exists on DB:[{!s}]'

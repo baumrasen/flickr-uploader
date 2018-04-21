@@ -824,12 +824,9 @@ class Uploadr:
                     reportError(Caught=True,
                                 CaughtPrefix='+++',
                                 CaughtCode='009',
-                                CaughtMsg='Exception in convertRawFiles',
-                                exceptUse=True,
-                                exceptCode=ex.code,
-                                exceptMsg=ex,
+                                CaughtMsg='Exception in size convertRawFiles',
                                 NicePrint=False,
-                                exceptSysInfo=True)                    
+                                exceptSysInfo=True)
 
                 if okfileSize and (fileSize < xCfg.FILE_MAX_SIZE):
                     finalMediafiles.append(
@@ -1034,9 +1031,12 @@ class Uploadr:
                                              StrUnicodeOut(f))))
                 # Assumes xCFG.ALLOWED_EXT and xCFG.RAW_EXT are disjoint
                 elif xCfg.CONVERT_RAW_FILES and (ext in xCfg.RAW_EXT):
-                    if not (os.path.exists(os.path.join(dirpath,
-                                           os.path.splitext(f)[0])
-                                           + ".JPG")):
+                    if not (
+                        os.path.exists(
+                            os.path.join(
+                                dirpath,
+                                os.path.splitext(f)[0])
+                            + ".JPG")):
                         logging.debug('rawfiles: including:[{!s}]'
                                       .format(f))
                         rawfiles.append(

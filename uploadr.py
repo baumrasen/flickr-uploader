@@ -831,6 +831,13 @@ class Uploadr:
                                          StrUnicodeOut(dirpath) +
                                          StrUnicodeOut('/') +
                                          StrUnicodeOut(f))))
+            else:
+                np.niceprint('Convert raw file failed. '
+                             'Skipping file: [{!s}]'.format(
+                                 os.path.normpath(
+                                     StrUnicodeOut(dirpath) +
+                                     StrUnicodeOut('/') +
+                                     StrUnicodeOut(f))))
         finalMediafiles.sort()
         np.niceprint('*****Completed converting files*****')
 
@@ -1007,11 +1014,20 @@ class Uploadr:
                                              StrUnicodeOut(f))))
                 # Assumes xCFG.ALLOWED_EXT and xCFG.RAW_EXT are disjoint
                 elif xCfg.CONVERT_RAW_FILES and (ext in xCfg.RAW_EXT):
-                    rawfiles.append(
-                        os.path.normpath(
-                            StrUnicodeOut(dirpath) +
-                            StrUnicodeOut("/") +
-                            StrUnicodeOut(f).replace("'", "\'")))
+                    if not (os.path.exists(os.path.join(dirpath,
+                                           os.path.splitext(f)[0])
+                                           + ".JPG")):
+                        logging.debug('rawfiles: including:[{!s}]'
+                                      .format(f))
+                        rawfiles.append(
+                            os.path.normpath(
+                                StrUnicodeOut(dirpath) +
+                                StrUnicodeOut("/") +
+                                StrUnicodeOut(f).replace("'", "\'")))
+                    else:
+                        logging.warning('rawfiles: JPG exists. '
+                                        'Not including:[{!s}]'
+                                        .format(f))
                     # CODING----------------------Code moved to ConvertRawFiles
                     # Perform Raw conversion
                     # dirpath   = folder location

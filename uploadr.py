@@ -815,8 +815,8 @@ class Uploadr:
                 try:
                     okfileSize = True
                     fileSize = os.path.getsize(
-                        os.path.join(dirpath,
-                                     fnameonly + '.JPG'))
+                        os.path.join(StrUnicodeOut(dirpath),
+                                     StrUnicodeOut(fnameonly) + '.JPG'))
                     logging.debug('Converted .JPG file size=[{!s}]'
                                   .format(fileSize))
                 except Exception:
@@ -881,15 +881,20 @@ class Uploadr:
             if ConvertOrCopyTags == 'Convert':
                 flag = "-PreviewImage" \
                        if Fext == 'cr2' else "-JpgFromRaw"
-                command = os.path.join(xCfg.RAW_TOOL_PATH, 'exiftool') +\
+                command = os.path.join(StrUnicodeOut(xCfg.RAW_TOOL_PATH),
+                                       'exiftool') +\
                     " -b " + flag + " -w .JPG -ext " + Fext + " -r " +\
-                    "'" + os.path.join(Ddirpath, Ffname) + "'"
+                    "'" + os.path.join(StrUnicodeOut(Ddirpath),
+                                       StrUnicodeOut(Ffname)) + "'"
             elif ConvertOrCopyTags == 'CopyTags':
-                command = os.path.join(xCfg.RAW_TOOL_PATH, 'exiftool') +\
+                command = os.path.join(StrUnicodeOut(xCfg.RAW_TOOL_PATH),
+                                       'exiftool') +\
                     " -overwrite_original_in_place -tagsfromfile " +\
-                    "'" + os.path.join(Ddirpath, Ffname) + "'" +\
+                    "'" + os.path.join(StrUnicodeOut(Ddirpath),
+                                       StrUnicodeOut(Ffname)) + "'" +\
                     " -r -all:all -ext JPG " +\
-                    "'" + os.path.join(Ddirpath, Ffnameonly) + ".JPG'"
+                    "'" + os.path.join(StrUnicodeOut(Ddirpath),
+                                       StrUnicodeOut(Ffnameonly)) + ".JPG'"
             else:
                 # Nothing to do
                 return False
@@ -949,7 +954,8 @@ class Uploadr:
                             .format(StrUnicodeOut(Ffnameonly) + ".JPG"))
             return success
 
-        if (os.path.exists(os.path.join(Ddirpath, Ffnameonly) + ".JPG")):
+        if (os.path.exists(StrUnicodeOut(os.path.join(Ddirpath, Ffnameonly)) +
+                           ".JPG")):
             np.niceprint('...Copying tags:[{!s}]'
                          .format(StrUnicodeOut(Ffname)))
 
@@ -1007,7 +1013,8 @@ class Uploadr:
                                  StrUnicodeOut(os.path.normpath(dirpath))))
 
             for f in filenames:
-                filePath = os.path.join(dirpath, f)
+                filePath = os.path.join(StrUnicodeOut(dirpath),
+                                        StrUnicodeOut(f))
                 # Ignore filenames wihtin IGNORED_REGEX
                 if any(ignored.search(f) for ignored in xCfg.IGNORED_REGEX):
                     logging.debug('File {!s} in IGNORED_REGEX:'
@@ -1015,7 +1022,8 @@ class Uploadr:
                     continue
                 ext = os.path.splitext(os.path.basename(f))[1][1:].lower()
                 if ext in xCfg.ALLOWED_EXT:
-                    fileSize = os.path.getsize(os.path.join(dirpath, f))
+                    fileSize = os.path.getsize(os.path.join(
+                        StrUnicodeOut(dirpath), StrUnicodeOut(f)))
                     if (fileSize < xCfg.FILE_MAX_SIZE):
                         files.append(
                             os.path.normpath(
@@ -1034,9 +1042,9 @@ class Uploadr:
                     if not (
                         os.path.exists(
                             os.path.join(
-                                dirpath,
-                                os.path.splitext(f)[0])
-                            + ".JPG")):
+                                StrUnicodeOut(dirpath),
+                                StrUnicodeOut(os.path.splitext(f)[0])) +
+                            ".JPG")):
                         logging.debug('rawfiles: including:[{!s}]'
                                       .format(StrUnicodeOut(f)))
                         rawfiles.append(

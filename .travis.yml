@@ -139,7 +139,7 @@ script:
 
 # DELETE RUN: DeleteAllFromFlickr ==1 -----------------------------------------
 # Comaptiblw with Python 2.7 only!
-  - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then cp flickr-deletr-master/tests/uploadr.ini flickr-deletr-master/uploadr.ini; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then cp flickr-deletr-master/tests/deletr.ini flickr-deletr-master/deletr.ini; fi
   - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then cp token/oauth-tokens.sqlite flickr-deletr-master/token/oauth-tokens.sqlite; fi
   - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then coverage run -a --concurrency multiprocessing ./flickr-deletr-master/delete.py; fi
 

@@ -2467,7 +2467,7 @@ class Uploadr:
 
         con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
-        con.create_function("getSet", 3, getSetNameFromFile)
+        con.create_function("getSet", 3, self.getSetNameFromFile)
 
         with con:
             cur = con.cursor()
@@ -2503,7 +2503,7 @@ class Uploadr:
                                      setId))
 
             cur.execute('SELECT files_id, path, set_id '
-                        'FROM files'
+                        'FROM files '
                         'WHERE set_id is NULL')
             files = cur.fetchall()
 

@@ -122,7 +122,8 @@ before_script:
   - touch build.txt
   - touch /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - touch /home/travis/build/oPromessa/flickr-uploader/nohup.lst
-
+# INI File for deletr... to bypass erro "pytest --doctest-modules" exited with 2.
+  - cp flickr-deletr-master/tests/deletr.ini /home/travis/virtualenv/python$pythonVersion/bin/deletr.ini || cp flickr-deletr-master/tests/deletr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/deletr.ini
 # =============================================================================
 # run script for tests
 script:

@@ -1956,18 +1956,18 @@ class Uploadr:
                                     if (tag.attrib['raw'] ==
                                             'checksum:{}'.format(oldFileMd5)):
                                         tag_id = tag.attrib['id']
-                                        logging.info('Found tag_id:[{!s}]'
+                                        logging.info('   Found tag_id:[{!s}]'
                                                      .format(tag_id))
                                         break
                                 if not tag_id:
-                                    np.niceprint('Can\'t find tag [{!s}]'
+                                    np.niceprint(' Can\'t find tag:[{!s}]'
                                                  'for file [{!s}]'
                                                  .format(tag_id, file_id))
                                     # break from attempting to update tag_id
                                     break
                                 else:
                                     # update tag_id with new Md5
-                                    logging.info('Will remove tag_id:[{!s}]'
+                                    logging.info('Removing tag_id:[{!s}]'
                                                  .format(tag_id))
                                     remtagResp = self.photos_remove_tag(tag_id)
                                     logging.debug('remtagResp: ')
@@ -1976,7 +1976,7 @@ class Uploadr:
                                                             encoding='utf-8',
                                                             method='xml'))
                                     if (self.isGood(remtagResp)):
-                                        np.niceprint('Tag removed.')
+                                        np.niceprint('    Tag removed.')
                                     else:
                                         np.niceprint('Tag Not removed.')
 
@@ -2003,8 +2003,7 @@ class Uploadr:
             if (not self.isGood(replaceResp)) or \
                 (not self.isGood(res_add_tag)) or \
                     (not self.isGood(res_get_info)):
-                np.niceprint('A problem occurred while attempting to '
-                             'replace the file:[{!s}]'
+                np.niceprint('Issue replacing:[{!s}]'
                              .format(StrUnicodeOut(file)))
 
             if (not self.isGood(replaceResp)):

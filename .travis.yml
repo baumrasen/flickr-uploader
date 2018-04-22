@@ -112,7 +112,6 @@ before_script:
   - echo Travis Python Version
   - echo ${TRAVIS_PYTHON_VERSION}
   - cp tests/uploadr.ini .
-  - cp tests/uploadr.ini /home/travis/virtualenv/python$pythonVersion/bin/uploadr.ini || cp tests/uploadr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/uploadr.ini
   - cp tests/uploadr.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini || cp tests/uploadr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/etc/uploadr.ini
   - grep PATH uploadr.ini
   - echo "INSERT INTO oauth_tokens ( api_key, lookup_key, oauth_token, oauth_token_secret, access_level, fullname, username, user_nsid) VALUES ( '"$api_key"', '', '"$oauth_token"', '"$oauth_token_secret"', 'delete', '"$fullname"', '"$username"', '"$user_nsid"');" | sqlite3 token/oauth-tokens.sqlite

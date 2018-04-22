@@ -4,9 +4,6 @@
 
 ## Pending improvements
 -----------------------
-* converRawFiles is not tested. Also requires an exif tool to be installed
-  and configured as RAW_TOOL_PATH in INI file. Make sure to leave
-  CONVERT_RAW_FILES = False in INI file or use at your own risk.
 * Consider using python module exiftool?
 * Would be nice to update ALL tags on replacePhoto and not only the
   mandatory checksum tag as FLICKR maintains the tags from the first load.
@@ -32,7 +29,7 @@
 * updatedVideoDate fails on three attempts (is it 'cause Flickr is processing
   the video? and raises error caught on #210! Next run does not update video
   date. V2.7.5 testing with 15 seconds.
-* When QPS (Queries per second) are very high dyring a certain period, Flickr
+* When QPS (Queries per second) are very high during a certain period, Flickr
   does not provide back reliable information. For instance, photos.search
   may return X pics but not actually list them.
   ```python
@@ -50,6 +47,7 @@
 
 ## Known issues
 ---------------
+* Performance (with options: "-u -p 25"): 340 pics/min ~= 20.000 pics/hour.
 * AVOID using uploadr when performing massive delete operations on flicr.
   While deleting many files on flickr some of the function calls return
   values like the title of a Set as empty(None). This prompts printing
@@ -74,10 +72,6 @@
   (which match such regular expression) are not removed.
 * Arguments not fully tested:
    * -z (not yet fully developed)
-* Functions not migrated...
-   * convertRawFiles
-* Arguments are parsed with get/set (Python 2.7 and 3.6 compatible) and not
-  dictionary like accesse (Python 3.6 compatible only)
 
 ## Update History
 -----------------

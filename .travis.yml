@@ -12,9 +12,10 @@ python:
 
 # =============================================================================
 # branches blacklist for TravisCI testing
-#branches:
-#  except:
-#  - dev-apr18
+branches:
+  except:
+    - dev-apr18-issue46
+    #- dev-apr18-convertRAW
 
 before_install:
 # For use with wget into github account
@@ -22,10 +23,15 @@ before_install:
 
   - echo -e "files:\n  - /home/travis/build/oPromessa/flickr-uploader/nohup.lst\n  - /home/travis/build/oPromessa/flickr-uploader/nohup.log\ndestination:\n  $PT_HOSTNAME\n  $PT_PORT\n  $PT_PROTOCOL\n" > ~/syslog2.yml
   - cat ~/syslog2.yml
+# Install exiftool
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libimage-exiftool-perl
+  - which exiftool
 
 # =============================================================================
 # command to install dependencies
 install:
+# Install requirements  
   - pip install -r requirements.txt
 # Get deletr to delete all pics Flickr prior to a run
   - wget https://github.com/oPromessa/flickr-deletr/archive/master.tar.gz -O flickr-deletr-master.tar.gz
@@ -41,6 +47,7 @@ install:
   - pythonVersion=`python -V 2>&1 | cut -d\  -f2`
   - python setup.py installcfg
   - python setup.py installcfg --folder /home/travis/virtualenv/python$pythonVersion/etc
+  - which uploadr.py
 
 # =============================================================================
 # env
@@ -55,8 +62,7 @@ env:
     - ExcludedVar=--remove-excluded
     - ListPhotosNotInSet="-l 100"
     - TAIL_LINES=20    # Tail $TAIL_LINES for output logging. Default: 20
-    - WAIT_TIME=2      # Sleep time between first and second run
-# Delete !!!!!!!!!!!!!!!!!!! CAREFULL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    - WAIT_TIME=1      # Sleep time between first and second run
 # To ensure an empty Flickr database. Set DeleteAllFromFlickr=1. 0 otherwise.
     - DeleteAllFromFlickr=0
   # ---------------------------------------------------------------------------
@@ -85,7 +91,9 @@ env:
     - TestScenario=addAlbumsMigrate UploadrOptions="$VerboseVar -p 25"
 # RemoveReplace, Multiprocessing. Also test cleaning up badfiles database entries
     - TestScenario=RemoveReplace UploadrOptions="$VerboseVar $BadFilesVar $ListPhotosNotInSet -p 10 -c"
-# ExcludedFolders+IgnoredFiles in Single Processing mode. Also test cleaning up badfiles database entries and listing files not in set
+# ExcludedFolders+IgnoredFiles in Single Processing mode.
+# Also test cleaning up badfiles database entries and listing files not in set.
+# Plus RAW files
     - TestScenario=ExcludedFolders UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -c -l 50"
 # Old273INI to test previous INI config file format using os.path.dirname(sys.argv[0]) vs os.getcwd()
     - TestScenario=Old273INI UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -p 10"
@@ -104,13 +112,11 @@ before_script:
   - echo Travis Python Version
   - echo ${TRAVIS_PYTHON_VERSION}
   - cp tests/uploadr.ini .
-  - cp tests/uploadr.ini /home/travis/virtualenv/python$pythonVersion/bin/uploadr.ini || cp tests/uploadr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/uploadr.ini
   - cp tests/uploadr.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini || cp tests/uploadr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/etc/uploadr.ini
-  - grep FILES_DIR uploadr.ini
-#  - cat uploadr.ini
+  - grep PATH uploadr.ini
   - echo "INSERT INTO oauth_tokens ( api_key, lookup_key, oauth_token, oauth_token_secret, access_level, fullname, username, user_nsid) VALUES ( '"$api_key"', '', '"$oauth_token"', '"$oauth_token_secret"', 'delete', '"$fullname"', '"$username"', '"$user_nsid"');" | sqlite3 token/oauth-tokens.sqlite
   - sqlite3 token/oauth-tokens.sqlite 'SELECT * FROM oauth_tokens;'
-  - find "./tests/Test Photo Library" -type f -exec md5sum '{}' \;
+#  - find "./tests/Test Photo Library" -type f -exec md5sum '{}' \;
 #  - remote_syslog/remote_syslog -c ~/syslog2.yml
 # Prevent errors in case log and err files are not generated
   - touch build.txt
@@ -131,9 +137,8 @@ script:
 # unittests
   - python tests/test_Modules.py
 
-# DELETE RUN ------------------------------------------------------------------
-# !!!!!!!!!!!!!!!!!!!!!!!!!! CAREFULL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# COMPATIBLE WITH PYTHON 2.7 ONLY
+# DELETE RUN: DeleteAllFromFlickr ==1 -----------------------------------------
+# Comaptiblw with Python 2.7 only!
   - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then cp flickr-deletr-master/tests/uploadr.ini flickr-deletr-master/uploadr.ini; fi
   - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then cp token/oauth-tokens.sqlite flickr-deletr-master/token/oauth-tokens.sqlite; fi
   - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then coverage run -a --concurrency multiprocessing ./flickr-deletr-master/delete.py; fi
@@ -173,7 +178,11 @@ script:
   
   - if [[ $TestScenario == NoVerbose ]]; then cp ./tests/uploadr_NoVerbose.ini ./uploadr.ini; cp ./tests/uploadr_NoVerbose.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini; fi
 
-  - coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst
+# Run coverage uploadr.ini
+  - if [[ $TestScenario == Old273INI ]]; then coverage run -a --concurrency multiprocessing ./uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst; fi
+  - if [[ $TestScenario != Old273INI ]]; then coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst; fi
+
+  #- coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst
 
@@ -191,15 +200,14 @@ script:
 
 # =============================================================================
 # after_failure
-# No applicable to "Build times out because no output was received"
+# Not applicable to "Build times out because no output was received"
 after_failure:
 # After failure: Save build related data
   - echo -e "TRAVIS_TEST_RESULT:\t${TRAVIS_TEST_RESULT}\nTRAVIS_PYTHON_VERSION:\t${TRAVIS_PYTHON_VERSION}\nTRAVIS_BUILD_DIR:\t${TRAVIS_BUILD_DIR}\nTRAVIS_BUILD_ID:\t${TRAVIS_BUILD_ID}\nTRAVIS_BUILD_NUMBER:\t${TRAVIS_BUILD_NUMBER}\nTRAVIS_JOB_NUMBER:\t${TRAVIS_JOB_NUMBER}\nTRAVIS_EVENT_TYPE:\t${TRAVIS_EVENT_TYPE}\nTRAVIS_COMMIT:\t\t${TRAVIS_COMMIT}\nTRAVIS_COMMIT_MESSAGE:\t${TRAVIS_COMMIT_MESSAGE}\n" >> build.txt
-#
 # Upload LOG/ERR files to dropbox
-  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}_$TestScenario
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}_$TestScenario
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}_$TestScenario
+  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst
@@ -219,12 +227,11 @@ after_script:
 
 # After script: Save build related data
   - echo -e "TRAVIS_TEST_RESULT:\t${TRAVIS_TEST_RESULT}\nTRAVIS_PYTHON_VERSION:\t${TRAVIS_PYTHON_VERSION}\nTRAVIS_BUILD_DIR:\t${TRAVIS_BUILD_DIR}\nTRAVIS_BUILD_ID:\t${TRAVIS_BUILD_ID}\nTRAVIS_BUILD_NUMBER:\t${TRAVIS_BUILD_NUMBER}\nTRAVIS_JOB_NUMBER:\t${TRAVIS_JOB_NUMBER}\nTRAVIS_EVENT_TYPE:\t${TRAVIS_EVENT_TYPE}\nTRAVIS_COMMIT:\t\t${TRAVIS_COMMIT}\nTRAVIS_COMMIT_MESSAGE:\t${TRAVIS_COMMIT_MESSAGE}\n" >> build.txt
-#
 # Upload LOG/ERR files to Dropbox
-  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}_$TestScenario
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}_$TestScenario
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}_$TestScenario
-  
+  - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+
 # =============================================================================
 # Deploy to Heroku
 deploy:

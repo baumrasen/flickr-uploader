@@ -27,7 +27,7 @@ local storage.
 * Reuploads modified images as well as Videos (via delete/upload).
 * Automatically removes images from Flickr when they are removed from your
   local hard drive
-* Convert RAW files (with an external tool). Check Known issues section.
+* Optionally convert RAW files (with use of external tool: [exiftool by Phil Harvey](https://sno.phy.queensu.ca/~phil/exiftool/)).
 
 THIS SCRIPT IS PROVIDED WITH NO WARRANTY WHATSOEVER.
 PLEASE REVIEW THE SOURCE CODE TO MAKE SURE IT WILL WORK FOR YOUR NEEDS.
@@ -360,7 +360,7 @@ $ ./uploadr.py -v -d
 Inspired by:
 * https://github.com/sybrenstuvel/flickrapi
 * http://micampe.it/things/flickruploadr
-* https://github.com/joelmx/flickrUploadr/blob/master/python3/uploadr.py
+* https://github.com/joelmx/flickrUploadr
 
 ## Final remarks
 ---------------

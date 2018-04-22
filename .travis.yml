@@ -15,7 +15,7 @@ python:
 branches:
   except:
     - dev-apr18-issue46
-    - dev-apr18-issue11
+    #- dev-apr18-issue11
 
 before_install:
 # For use with wget into github account

@@ -2492,15 +2492,15 @@ class Uploadr:
                              xCfg.FULL_SET_NAME,
                              setName,))
                 primaryPic = cur.fetchone()
-                np.niceprint('   Creating set:[{!s}]'
-                             .format(StrUnicodeOut(setName)))
 
                 # primaryPic[0] = files_id from files table
                 setId = self.createSet(setName, primaryPic[0], cur, con)
                 np.niceprint('Created the set:[{!s}] '
-                             'setId=[{!s}]'
+                             'setId=[{!s}] '
+                             'primaryId=[{!s}]'
                              .format(StrUnicodeOut(setName),
-                                     setId))
+                                     setId,
+                                     primaryPic[0]))
 
             cur.execute('SELECT files_id, path, set_id '
                         'FROM files '

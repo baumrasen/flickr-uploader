@@ -47,6 +47,7 @@ install:
   - pythonVersion=`python -V 2>&1 | cut -d\  -f2`
   - python setup.py installcfg
   - python setup.py installcfg --folder /home/travis/virtualenv/python$pythonVersion/etc
+  - which uploadr.py
 
 # =============================================================================
 # env
@@ -61,8 +62,7 @@ env:
     - ExcludedVar=--remove-excluded
     - ListPhotosNotInSet="-l 100"
     - TAIL_LINES=20    # Tail $TAIL_LINES for output logging. Default: 20
-    - WAIT_TIME=2      # Sleep time between first and second run
-# Delete !!!!!!!!!!!!!!!!!!! CAREFULL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    - WAIT_TIME=1      # Sleep time between first and second run
 # To ensure an empty Flickr database. Set DeleteAllFromFlickr=1. 0 otherwise.
     - DeleteAllFromFlickr=0
   # ---------------------------------------------------------------------------
@@ -114,11 +114,10 @@ before_script:
   - cp tests/uploadr.ini .
   - cp tests/uploadr.ini /home/travis/virtualenv/python$pythonVersion/bin/uploadr.ini || cp tests/uploadr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/uploadr.ini
   - cp tests/uploadr.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini || cp tests/uploadr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/etc/uploadr.ini
-  - grep FILES_DIR uploadr.ini
-#  - cat uploadr.ini
+  - grep PATH uploadr.ini
   - echo "INSERT INTO oauth_tokens ( api_key, lookup_key, oauth_token, oauth_token_secret, access_level, fullname, username, user_nsid) VALUES ( '"$api_key"', '', '"$oauth_token"', '"$oauth_token_secret"', 'delete', '"$fullname"', '"$username"', '"$user_nsid"');" | sqlite3 token/oauth-tokens.sqlite
   - sqlite3 token/oauth-tokens.sqlite 'SELECT * FROM oauth_tokens;'
-  - find "./tests/Test Photo Library" -type f -exec md5sum '{}' \;
+#  - find "./tests/Test Photo Library" -type f -exec md5sum '{}' \;
 #  - remote_syslog/remote_syslog -c ~/syslog2.yml
 # Prevent errors in case log and err files are not generated
   - touch build.txt
@@ -139,9 +138,8 @@ script:
 # unittests
   - python tests/test_Modules.py
 
-# DELETE RUN ------------------------------------------------------------------
-# !!!!!!!!!!!!!!!!!!!!!!!!!! CAREFULL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# COMPATIBLE WITH PYTHON 2.7 ONLY
+# DELETE RUN: DeleteAllFromFlickr ==1 -----------------------------------------
+# Comaptiblw with Python 2.7 only!
   - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then cp flickr-deletr-master/tests/uploadr.ini flickr-deletr-master/uploadr.ini; fi
   - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then cp token/oauth-tokens.sqlite flickr-deletr-master/token/oauth-tokens.sqlite; fi
   - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then coverage run -a --concurrency multiprocessing ./flickr-deletr-master/delete.py; fi
@@ -181,7 +179,11 @@ script:
   
   - if [[ $TestScenario == NoVerbose ]]; then cp ./tests/uploadr_NoVerbose.ini ./uploadr.ini; cp ./tests/uploadr_NoVerbose.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini; fi
 
-  - coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst
+# Run coverage uploadr.ini
+  - if [[ $TestScenario == Old273INI ]]; then coverage run -a --concurrency multiprocessing ./uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst; fi
+  - if [[ $TestScenario != Old273INI ]]; then coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst; fi
+
+  #- coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst
 
@@ -199,11 +201,10 @@ script:
 
 # =============================================================================
 # after_failure
-# No applicable to "Build times out because no output was received"
+# Not applicable to "Build times out because no output was received"
 after_failure:
 # After failure: Save build related data
   - echo -e "TRAVIS_TEST_RESULT:\t${TRAVIS_TEST_RESULT}\nTRAVIS_PYTHON_VERSION:\t${TRAVIS_PYTHON_VERSION}\nTRAVIS_BUILD_DIR:\t${TRAVIS_BUILD_DIR}\nTRAVIS_BUILD_ID:\t${TRAVIS_BUILD_ID}\nTRAVIS_BUILD_NUMBER:\t${TRAVIS_BUILD_NUMBER}\nTRAVIS_JOB_NUMBER:\t${TRAVIS_JOB_NUMBER}\nTRAVIS_EVENT_TYPE:\t${TRAVIS_EVENT_TYPE}\nTRAVIS_COMMIT:\t\t${TRAVIS_COMMIT}\nTRAVIS_COMMIT_MESSAGE:\t${TRAVIS_COMMIT_MESSAGE}\n" >> build.txt
-#
 # Upload LOG/ERR files to dropbox
   - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
@@ -227,7 +228,6 @@ after_script:
 
 # After script: Save build related data
   - echo -e "TRAVIS_TEST_RESULT:\t${TRAVIS_TEST_RESULT}\nTRAVIS_PYTHON_VERSION:\t${TRAVIS_PYTHON_VERSION}\nTRAVIS_BUILD_DIR:\t${TRAVIS_BUILD_DIR}\nTRAVIS_BUILD_ID:\t${TRAVIS_BUILD_ID}\nTRAVIS_BUILD_NUMBER:\t${TRAVIS_BUILD_NUMBER}\nTRAVIS_JOB_NUMBER:\t${TRAVIS_JOB_NUMBER}\nTRAVIS_EVENT_TYPE:\t${TRAVIS_EVENT_TYPE}\nTRAVIS_COMMIT:\t\t${TRAVIS_COMMIT}\nTRAVIS_COMMIT_MESSAGE:\t${TRAVIS_COMMIT_MESSAGE}\n" >> build.txt
-#
 # Upload LOG/ERR files to Dropbox
   - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}

@@ -2388,12 +2388,76 @@ class Uploadr:
         return asetName
 
     # -------------------------------------------------------------------------
+    # OldcreateSets
+    #
+    # def OldcreateSets(self):
+    #     """
+    #         Creates a set (Album) in Flickr
+    #     """
+    #     np.niceprint('*****Creating Sets*****')
+    # 
+    #     if ARGS.dry_run:
+    #         return True
+    # 
+    #     con = lite.connect(xCfg.DB_PATH)
+    #     con.text_factory = str
+    #     with con:
+    #         cur = con.cursor()
+    #         cur.execute("SELECT files_id, path, set_id FROM files")
+    # 
+    #         files = cur.fetchall()
+    # 
+    #         for row in files:
+    #             # row[1] = path for the file from table files
+    #             setName = self.getSetNameFromFile(row[1],
+    #                                               xCfg.FILES_DIR,
+    #                                               xCfg.FULL_SET_NAME)
+    #             newSetCreated = False
+    # 
+    #             # Search local DB for set_id by setName(folder name )
+    #             cur.execute("SELECT set_id, name FROM sets WHERE name = ?",
+    #                         (setName,))
+    #             set = cur.fetchone()
+    # 
+    #             if set is None:
+    #                 # row[0] = files_id from files table
+    #                 setId = self.createSet(setName, row[0], cur, con)
+    #                 np.niceprint('Created the set:[{!s}]'.
+    #                              format(StrUnicodeOut(setName)))
+    #                 newSetCreated = True
+    #             else:
+    #                 # set[0] = set_id from sets table
+    #                 setId = set[0]
+    # 
+    #             logging.debug('Creating Sets newSetCreated:[{!s}]'
+    #                           'setId=[{!s}]'.format(newSetCreated, setId))
+    # 
+    #             # row[1] = path for the file from table files
+    #             # row[2] = set_id from files table
+    #             if row[2] is None and newSetCreated is False:
+    #                 np.niceprint('Add file to set:[{!s}] set:[{!s}]'
+    #                              .format(StrUnicodeOut(row[1]),
+    #                                      StrUnicodeOut(setName)))
+    # 
+    #                 self.addFileToSet(setId, row, cur)
+    # 
+    #     # Closing DB connection
+    #     if con is not None:
+    #         con.close()
+    #     np.niceprint('*****Completed creating sets*****')
+
+   # -------------------------------------------------------------------------
     # createSets
     #
     def createSets(self):
         """
             Creates a set (Album) in Flickr
         """
+        # [FIND SETS] Find sets to be created
+        # [PRIMARY PIC] For each set found, determine the primary picture
+        # [CREATE SET] Create Sets wiht primary picture: CODING: what if it is not found?
+        # [WORK THRU PICS] After, then split work and add files to set in multi-processing
+        #   CODING use xLocks 
         np.niceprint('*****Creating Sets*****')
 
         if ARGS.dry_run:
@@ -2401,45 +2465,71 @@ class Uploadr:
 
         con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
+        con.create_function("getSet", 3, getSetNameFromFile)
+        
         with con:
             cur = con.cursor()
-            cur.execute("SELECT files_id, path, set_id FROM files")
+            # List of Sets to be created
+            cur.execute('SELECT DISTINCT getSet(path, ?, ?) '
+                        'FROM files WHERE getSet(path, ?, ?) '
+                        'NOT IN (SELECT name FROM sets)',
+                        (xCfg.FILES_DIR, xCfg.FULL_SET_NAME,
+                         xCfg.FILES_DIR, xCfg.FULL_SET_NAME,))
+            
+            setsToCreate = cur.fetchall()
+            
+            for set in SetsToCreate:
+                # set[0] = setName
+                # Find Primary photo
+                setName = StrUnicodeOut(set[0])
+                cur.execute('SELECT MIN(files_id), path '
+                            'FROM files '
+                            'WHERE set_id is NULL '
+                            'AND getSet(path, ?, ?) = ?',
+                            (xCfg.FILES_DIR,
+                             xCfg.FULL_SET_NAME,
+                             setName,))
+                primaryPic = cur.fetchone()
+                np.niceprint('   Creating set:[{!s}]'
+                             .format(StrUnicodeOut(setName)))
 
+                # primaryPic[0] = files_id from files table
+                setId = self.createSet(setName, primaryPic[0], cur, con)
+                np.niceprint('Created the set:[{!s}]'.
+                             format(StrUnicodeOut(setName)))
+
+                logging.debug('Creating Set newSetCreated:[{!s}]'
+                              'setId=[{!s}]'
+                              .format(newSetCreated, setId))
+            
+            cur.execute('SELECT files_id, path, set_id '
+                        'FROM files'
+                        'WHERE set_id is NULL' )
             files = cur.fetchall()
-
-            for row in files:
-                # row[1] = path for the file from table files
-                setName = self.getSetNameFromFile(row[1],
+            
+            for filepic in files:
+                # filepic[1] = path for the file from table files
+                # filepic[2] = set_id from files table
+                setName = self.getSetNameFromFile(filepic[1],
                                                   xCfg.FILES_DIR,
                                                   xCfg.FULL_SET_NAME)
-                newSetCreated = False
-
-                # Search local DB for set_id by setName(folder name )
-                cur.execute("SELECT set_id, name FROM sets WHERE name = ?",
+                
+                cur.execute('SELECT set_id, name '
+                            'FROM sets WHERE name = ?',
                             (setName,))
                 set = cur.fetchone()
-
-                if set is None:
-                    # row[0] = files_id from files table
-                    setId = self.createSet(setName, row[0], cur, con)
-                    np.niceprint('Created the set:[{!s}]'.
-                                 format(StrUnicodeOut(setName)))
-                    newSetCreated = True
-                else:
-                    # set[0] = set_id from sets table
+                if set is not None:
                     setId = set[0]
-
-                logging.debug('Creating Sets newSetCreated:[{!s}]'
-                              'setId=[{!s}]'.format(newSetCreated, setId))
-
-                # row[1] = path for the file from table files
-                # row[2] = set_id from files table
-                if row[2] is None and newSetCreated is False:
-                    np.niceprint('Add file to set:[{!s}] set:[{!s}]'
-                                 .format(StrUnicodeOut(row[1]),
-                                         StrUnicodeOut(setName)))
-
-                    self.addFileToSet(setId, row, cur)
+                
+                    np.niceprint('Add file to set:[{!s}] '
+                                 'set:[{!s}] setId=[{!s}]'
+                                 .format(StrUnicodeOut(filepic[1]),
+                                         StrUnicodeOut(setName),
+                                         setId))
+                    self.addFileToSet(setId, filepic, cur)
+                else:
+                    np.niceprint('Not able to assign pic to set')
+                    logging.error('Not able to assign pic to set')
 
         # Closing DB connection
         if con is not None:
@@ -2454,8 +2544,8 @@ class Uploadr:
 
             adds a file to set...
             setID = set
-            file = file
-            cur = cursor for updating local DB
+            file  = file is a list with file[0]=id, file[1]=path
+            cur   = cursor for updating local DB
         """
 
         global nuflickr

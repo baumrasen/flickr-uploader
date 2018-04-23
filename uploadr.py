@@ -2397,7 +2397,7 @@ class Uploadr:
     #
     def createSets(self):
         """
-            Creates a set (Album) in Flickr
+            Creates Sets (Album) in Flickr
         """
         # [FIND SETS] Find sets to be created
         # [PRIMARY PIC] For each set found, determine the primary picture
@@ -2406,6 +2406,17 @@ class Uploadr:
         # [WORK THRU PICS] After, then split work and add files to set
         # in multi-processing
         #   CODING use xLocks
+        
+        # ---------------------------------------------------------------------
+        # Local Variables
+        #
+        #   slockDB     = multiprocessing Lock for access to Database
+        #   smutex      = multiprocessing mutex for access to value srunning
+        #   srunning    = multiprocessing Value to count processed photos
+        slockDB = None
+        smutex = None
+        srunning = None        
+        
         np.niceprint('*****Creating Sets*****')
 
         if ARGS.dry_run:
@@ -2473,8 +2484,147 @@ class Uploadr:
                 logging.debug('__name__:[{!s}] to prevent recursive calling)!'
                               .format(__name__))
                 
-                
+                # To prevent recursive calling, check if __name__ == '__main__'
+                if __name__ == '__main__':
+                    logging.debug('===Multiprocessing=== Setting up logger!')
+                    multiprocessing.log_to_stderr()
+                    logger = multiprocessing.get_logger()
+                    logger.setLevel(xCfg.LOGGING_LEVEL)
 
+                    logging.debug('===Multiprocessing=== Lock defined!')
+                    # ---------------------------------------------------------
+                    # chunk
+                    #
+                    # Divides an iterable in slices/chunks of size size
+                    #
+                    from itertools import islice
+
+                    def chunk(it, size):
+                        """
+                            Divides an iterable in slices/chunks of size size
+                        """
+                        it = iter(it)
+                        # lambda: creates a returning expression function
+                        # which returns slices
+                        # iter, with the second argument () stops creating
+                        # iterators when it reaches the end
+                        return iter(lambda: tuple(islice(it, size)), ())
+
+                    setsPool = []
+                    slockDB = multiprocessing.Lock()
+                    srunning = multiprocessing.Value('i', 0)
+                    smutex = multiprocessing.Lock()
+
+                    sz = (len(files) // int(ARGS.processes)) \
+                        if ((len(files) // int(ARGS.processes)) > 0) \
+                        else 1
+
+                    logging.debug('len(files):[{!s}] '
+                                  'int(ARGS.processes):[{!s}] '
+                                  'sz per process:[{!s}]'
+                                  .format(len(files),
+                                          int(ARGS.processes),
+                                          sz))                    
+
+                    # Split the Media in chunks to distribute accross Processes
+                    for sfiles in chunk(files, sz):
+                        logging.warning('===Actual/Planned Chunk size: '
+                                        '[{!s}]/[{!s}]'
+                                        .format(len(sfiles), sz))
+                        logging.debug('===type(sfiles)=[{!s}]'
+                                      .format(type(sfiles)))
+                        logging.debug('===Job/Task Process: Creating...')
+                        setTask = multiprocessing.Process(
+                            # CODING: Need wrapper function
+                            #    which performs actual task
+                            #    has to make use of slockDB for DB access
+                            target=self.screateSets,
+                            args=(slockDB,
+                                  srunning,
+                                  smutex,
+                                  sfiles,
+                                  countTotal,))
+                        setsPool.append(setTask)
+                        logging.debug('===Job/Task Process: Starting...')
+                        setTask.start()
+                        logging.debug('===Job/Task Process: Started')
+                        if (ARGS.verbose):
+                            np.niceprint('===Job/Task Process: [{!s}] Started '
+                                         'with pid:[{!s}]'
+                                         .format(setTask.name,
+                                                 setTask.pid))
+
+                    # Check status of jobs/tasks in the Process Pool
+                    if xCfg.LOGGING_LEVEL <= logging.DEBUG:
+                        logging.debug('===Checking Processes launched/status:')
+                        for j in setsPool:
+                            np.niceprint('{!s}.is_alive = {!s}'
+                                         .format(j.name, j.is_alive()))
+
+                    # Regularly print status of jobs/tasks in the Process Pool
+                    # Prints status while there are processes active
+                    # Exits when all jobs/tasks are done.
+                    while (True):
+                        if not (any(multiprocessing.active_children())):
+                            logging.debug('===No active children Processes.')
+                            break
+                        for p in multiprocessing.active_children():
+                            logging.debug('==={!s}.is_alive = {!s}'
+                                          .format(p.name, p.is_alive()))
+                            sTaskActive = p
+                        logging.info('===Will wait for 60 on '
+                                     '{!s}.is_alive = {!s}'
+                                     .format(sTaskActive.name,
+                                             sTaskActive.is_alive()))
+                        if (ARGS.verbose_progress):
+                            np.niceprint('===Will wait for 60 on '
+                                         '{!s}.is_alive = {!s}'
+                                         .format(sTaskActive.name,
+                                                 sTaskActive.is_alive()))
+
+                        sTaskActive.join(timeout=60)
+                        logging.info('===Waited for 60s on '
+                                     '{!s}.is_alive = {!s}'
+                                     .format(sTaskActive.name,
+                                             sTaskActive.is_alive()))
+                        if (ARGS.verbose):
+                            np.niceprint('===Waited for 60s on '
+                                         '{!s}.is_alive = {!s}'
+                                         .format(sTaskActive.name,
+                                                 sTaskActive.is_alive()))
+
+                    # Wait for join all jobs/tasks in the Process Pool
+                    # All should be done by now!
+                    for j in setsPool:
+                        j.join()
+                        if (ARGS.verbose):
+                            np.niceprint('==={!s} '
+                                         '(is alive: {!s}).exitcode = {!s}'
+                                         .format(j.name,
+                                                 j.is_alive(),
+                                                 j.exitcode))
+
+                    logging.warning('===Multiprocessing=== pool joined! '
+                                    'All processes finished.')
+
+                    # Will release (set to None) the nulockDB lock control
+                    # this prevents subsequent calls to
+                    # useDBLock( nuLockDB, False)
+                    # to raise exception:
+                    #   ValueError('semaphore or lock released too many times')
+                    logging.info('===Multiprocessing=== pool joined! '
+                                 'What happens to mlockDB is None:[{!s}]? '
+                                 'It seems not, it still has a value! '
+                                 'Setting it to None!'
+                                 .format(slockDB is None))
+                    slockDB = None
+
+                    # Show number of total files processed
+                    self.niceprocessedfiles(srunning.value,
+                                            countTotal,
+                                            True)                    
+                    
+            # running in single processing mode
             else:
                 for filepic in files:
                     # filepic[1] = path for the file from table files

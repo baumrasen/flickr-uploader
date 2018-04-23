@@ -24,8 +24,8 @@
   which allows to run upload.py form the --prefix/bin folder as it is
   installed wiht "python setup.py install". Note that uploadr.ini definition
   for DB_PATH, LOCK_PATH, TOKEN_CACHE and TOKEN_PATH as to be changed.
-* Apply multiprocessing to Add pics to sets. For 50K pics takes a long time
-  (enhancemente #11)
+* For multiprocessing purposes (uploadfilex, maddalbumsmigrate, screateSets)
+  consider creating a single wrapper function (@).
 * updatedVideoDate fails on three attempts (is it 'cause Flickr is processing
   the video? and raises error caught on #210! Next run does not update video
   date. V2.7.5 testing with 15 seconds.

@@ -2494,6 +2494,7 @@ class Uploadr:
                             exceptMsg=ex,
                             NicePrint=True,
                             exceptSysInfo = True)
+                raise
 
             for set in setsToCreate:
                 # set[0] = setName

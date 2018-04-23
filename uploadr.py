@@ -2469,11 +2469,11 @@ class Uploadr:
         con.text_factory = str
         con.create_function("getSet", 3, self.getSetNameFromFile)
         # Enable traceback return from the customer function.
-        lite.enable_callback_tracebacks(True)        
+        lite.enable_callback_tracebacks(True)
 
         with con:
             cur = con.cursor()
-            
+
             try:
                 # List of Sets to be created
                 cur.execute('SELECT DISTINCT getSet(path, ?, ?) '
@@ -2493,7 +2493,7 @@ class Uploadr:
                             exceptCode=e.code,
                             exceptMsg=e,
                             NicePrint=True,
-                            exceptSysInfo = True)
+                            exceptSysInfo=True)
                 raise
 
             for set in setsToCreate:

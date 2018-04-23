@@ -636,7 +636,7 @@ class Uploadr:
                 logger = multiprocessing.get_logger()
                 logger.setLevel(xCfg.LOGGING_LEVEL)
 
-                logging.debug('===Multiprocessing=== Lock defined!')
+                logging.debug('===Multiprocessing=== Logging defined!')
 
                 # -------------------------------------------------------------------------
                 # chunk
@@ -2406,7 +2406,7 @@ class Uploadr:
         # [WORK THRU PICS] After, then split work and add files to set
         # in multi-processing
         #   CODING use xLocks
-        
+
         # ---------------------------------------------------------------------
         # Local Variables
         #
@@ -2415,8 +2415,8 @@ class Uploadr:
         #   srunning    = multiprocessing Value to count processed photos
         slockDB = None
         smutex = None
-        srunning = None        
-        
+        srunning = None
+
         np.niceprint('*****Creating Sets*****')
 
         if ARGS.dry_run:
@@ -2483,7 +2483,7 @@ class Uploadr:
                               .format(ARGS.processes))
                 logging.debug('__name__:[{!s}] to prevent recursive calling)!'
                               .format(__name__))
-                
+
                 # To prevent recursive calling, check if __name__ == '__main__'
                 if __name__ == '__main__':
                     logging.debug('===Multiprocessing=== Setting up logger!')
@@ -2491,7 +2491,7 @@ class Uploadr:
                     logger = multiprocessing.get_logger()
                     logger.setLevel(xCfg.LOGGING_LEVEL)
 
-                    logging.debug('===Multiprocessing=== Lock defined!')
+                    logging.debug('===Multiprocessing=== Logging defined!')
                     # ---------------------------------------------------------
                     # chunk
                     #
@@ -2524,7 +2524,7 @@ class Uploadr:
                                   'sz per process:[{!s}]'
                                   .format(len(files),
                                           int(ARGS.processes),
-                                          sz))                    
+                                          sz))
 
                     # Split the Media in chunks to distribute accross Processes
                     for sfiles in chunk(files, sz):
@@ -2622,8 +2622,8 @@ class Uploadr:
                     # Show number of total files processed
                     self.niceprocessedfiles(srunning.value,
                                             countTotal,
-                                            True)                    
-                    
+                                            True)
+
             # running in single processing mode
             else:
                 for filepic in files:
@@ -2632,14 +2632,14 @@ class Uploadr:
                     setName = self.getSetNameFromFile(filepic[1],
                                                       xCfg.FILES_DIR,
                                                       xCfg.FULL_SET_NAME)
-    
+
                     cur.execute('SELECT set_id, name '
                                 'FROM sets WHERE name = ?',
                                 (setName,))
                     set = cur.fetchone()
                     if set is not None:
                         setId = set[0]
-    
+
                         np.niceprint('Add file to set:[{!s}] '
                                      'set:[{!s}] setId=[{!s}]'
                                      .format(StrUnicodeOut(filepic[1]),
@@ -4020,9 +4020,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
             Wrapper function for multiprocessing support to call uploadFile
             with a chunk of the files.
-            lock = for database access control in multiprocessing
-            running = shared value to count processed files in multiprocessing
-            mutex = for running access control in multiprocessing
+            lock       = for database access control in multiprocessing
+            running    = shared value to count processed files in
+                         multiprocessing
+            mutex      = for running access control in multiprocessing
             countTotal = grand total of items.
         """
 
@@ -4094,6 +4095,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
             # Show number of files processed so far
             self.niceprocessedfiles(xcount, countTotal, False)
 
+            # Control pace (rate limit) of each proceess
             self.rate4maddAlbumsMigrate()
 
     # -------------------------------------------------------------------------
@@ -4149,7 +4151,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     logger = multiprocessing.get_logger()
                     logger.setLevel(xCfg.LOGGING_LEVEL)
 
-                    logging.debug('===Multiprocessing=== Lock defined!')
+                    logging.debug('===Multiprocessing=== Logging defined!')
 
                     # ---------------------------------------------------------
                     # chunk
@@ -4300,6 +4302,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                                       xCfg.FILES_DIR,
                                                       xCfg.FULL_SET_NAME)
                     try:
+                        terr = False
                         tfind, tid = self.photos_find_tag(
                             photo_id=row[0],
                             intag='album:{}'.format(row[2]
@@ -4325,12 +4328,14 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                      'Continuing...'
                                      .format(str(row[0])),
                                      fname='addAlbumMigrate')
+                        
+                        terr = True
 
                         self.niceprocessedfiles(count, countTotal, False)
 
                         continue
 
-                    if not tfind:
+                    if not terr and not tfind:
                         res_add_tag = self.photos_add_tags(
                             row[0],
                             ['album:"{}"'.format(row[2]

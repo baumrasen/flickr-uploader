@@ -2490,8 +2490,8 @@ class Uploadr:
                             CaughtMsg='DB error on DB create: [{!s}]'
                             .format(e.args[0]),
                             exceptUse=True,
-                            exceptCode=ex.code,
-                            exceptMsg=ex,
+                            exceptCode=e.code,
+                            exceptMsg=e,
                             NicePrint=True,
                             exceptSysInfo = True)
                 raise

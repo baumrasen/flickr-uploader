@@ -2375,7 +2375,9 @@ class Uploadr:
 
         logging.debug('getSetNameFromFile in: '
                       'afile:[{!s}] aFILES_DIR=[{!s}] aFULL_SET_NAME:[{!s}]'
-                      .format(afile, aFILES_DIR, aFULL_SET_NAME))
+                      .format(StrUnicodeOut(afile),
+                              aFILES_DIR,
+                              aFULL_SET_NAME))
         if aFULL_SET_NAME:
             asetName = os.path.relpath(os.path.dirname(afile), aFILES_DIR)
         else:
@@ -2383,7 +2385,10 @@ class Uploadr:
         logging.debug('getSetNameFromFile out: '
                       'afile:[{!s}] aFILES_DIR=[{!s}] aFULL_SET_NAME:[{!s}]'
                       ' asetName:[{!s}]'
-                      .format(afile, aFILES_DIR, aFULL_SET_NAME, asetName))
+                      .format(StrUnicodeOut(afile),
+                              aFILES_DIR,
+                              aFULL_SET_NAME,
+                              StrUnicodeOut(asetName)))
 
         return asetName
 
@@ -2481,7 +2486,7 @@ class Uploadr:
                             'NOT IN (SELECT name FROM sets)',
                             (xCfg.FILES_DIR, xCfg.FULL_SET_NAME,
                              xCfg.FILES_DIR, xCfg.FULL_SET_NAME,))
-    
+
                 setsToCreate = cur.fetchall()
             except lite.Error as e:
                 reportError(Caught=True,
@@ -2489,9 +2494,6 @@ class Uploadr:
                             CaughtCode='145',
                             CaughtMsg='DB error on DB create: [{!s}]'
                             .format(e.args[0]),
-                            exceptUse=True,
-                            exceptCode=e.code,
-                            exceptMsg=e,
                             NicePrint=True,
                             exceptSysInfo=True)
                 raise

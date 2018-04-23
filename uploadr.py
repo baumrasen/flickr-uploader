@@ -2468,32 +2468,17 @@ class Uploadr:
         con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
         con.create_function("getSet", 3, self.getSetNameFromFile)
-        # Enable traceback return from the customer function.
-        lite.enable_callback_tracebacks(True)        
 
         with con:
             cur = con.cursor()
-            
-            try:
-                # List of Sets to be created
-                cur.execute('SELECT DISTINCT getSet(path, ?, ?) '
-                            'FROM files WHERE getSet(path, ?, ?) '
-                            'NOT IN (SELECT name FROM sets)',
-                            (xCfg.FILES_DIR, xCfg.FULL_SET_NAME,
-                             xCfg.FILES_DIR, xCfg.FULL_SET_NAME,))
-    
-                setsToCreate = cur.fetchall()
-            except lite.Error as e:
-                reportError(Caught=True,
-                            CaughtPrefix='+++ DB',
-                            CaughtCode='145',
-                            CaughtMsg='DB error on DB create: [{!s}]'
-                            .format(e.args[0]),
-                            exceptUse=True,
-                            exceptCode=ex.code,
-                            exceptMsg=ex,
-                            NicePrint=True,
-                            exceptSysInfo = True)
+            # List of Sets to be created
+            cur.execute('SELECT DISTINCT getSet(path, ?, ?) '
+                        'FROM files WHERE getSet(path, ?, ?) '
+                        'NOT IN (SELECT name FROM sets)',
+                        (xCfg.FILES_DIR, xCfg.FULL_SET_NAME,
+                         xCfg.FILES_DIR, xCfg.FULL_SET_NAME,))
+
+            setsToCreate = cur.fetchall()
 
             for set in setsToCreate:
                 # set[0] = setName

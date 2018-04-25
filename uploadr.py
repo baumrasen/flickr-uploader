@@ -2447,10 +2447,15 @@ class Uploadr:
                                                   xCfg.FILES_DIR,
                                                   xCfg.FULL_SET_NAME)
 
+                # Acquire DBlock if in multiprocessing mode
+                self.useDBLock(lockDB, True)
                 cur.execute('SELECT set_id, name '
                             'FROM sets WHERE name = ?',
                             (setName,))
                 set = cur.fetchone()
+                # Release DBlock if in multiprocessing mode
+                self.useDBLock(lock, False)
+
                 if set is not None:
                     setId = set[0]
 
@@ -2463,6 +2468,7 @@ class Uploadr:
                 else:
                     np.niceprint('Not able to assign pic to set')
                     logging.error('Not able to assign pic to set')
+        # ---------------------------------------------------------------------
 
         np.niceprint('*****Creating Sets*****')
 

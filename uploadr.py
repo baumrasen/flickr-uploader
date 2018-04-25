@@ -106,6 +106,10 @@ import lib.rate_limited as rate_limited
 # -----------------------------------------------------------------------------
 # Helper class and functions to load, process and verify INI configuration.
 import lib.myconfig as myconfig
+# -----------------------------------------------------------------------------
+# Helper module function to split work accross functions in multiprocessing
+import lib.mprocessing as mp
+
 
 # =============================================================================
 # Logging init code

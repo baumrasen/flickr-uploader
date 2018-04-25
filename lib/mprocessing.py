@@ -26,6 +26,8 @@ from . import niceprint as npc
 # CODING EXTREME
 ARGS_verbose = True
 ARGS_verbose_progress = True
+np = npc.niceprint()
+
 
 # -------------------------------------------------------------------------
 # niceprocessedfiles
@@ -52,7 +54,6 @@ def niceprocessedfiles(count, cTotal, total):
 
     sys.stdout.flush()
 
-np = npc.niceprint()
 
 # -----------------------------------------------------------------------------
 # mprocessing
@@ -125,7 +126,7 @@ def mprocessing(nprocs, lockDB, running, mutex, itemslist, f, cur):
                         '[{!s}]/[{!s}]'
                         .format(len(splititemslist), sz))
         logging.debug('===type(splititemslist)=[{!s}]'
-                      .format(type(splititemslist )))
+                      .format(type(splititemslist)))
         logging.debug('===Job/Task Process: Creating...')
         pTask = multiprocessing.Process(
             target=f,  # argument function
@@ -215,6 +216,7 @@ def mprocessing(nprocs, lockDB, running, mutex, itemslist, f, cur):
                        True)
 
     return True
+
 
 # -----------------------------------------------------------------------------
 # If called to have multiprocessing running under main!

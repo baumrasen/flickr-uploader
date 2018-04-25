@@ -2420,7 +2420,7 @@ class Uploadr:
         slockDB = None
         smutex = None
         srunning = None
-        
+
         # ---------------------------------------------------------------------
         # Processing function
         def fn_addFilesToSets(lockDB, running, mutex, sfiles, cur):
@@ -2519,13 +2519,13 @@ class Uploadr:
 
                 # To prevent recursive calling, check if __name__ == '__main__'
                 if __name__ == '__main__':
-
                     mp.mprocessing(ARGS.processes,
                                    slockDB,
                                    srunning,
                                    smutex,
                                    files,
-                                   fn_addFilesToSets)
+                                   fn_addFilesToSets,
+                                   cur)
 
             # running in single processing mode
             else:
@@ -4231,7 +4231,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                      'Continuing...'
                                      .format(str(row[0])),
                                      fname='addAlbumMigrate')
-                        
+
                         terr = True
 
                         self.niceprocessedfiles(count, countTotal, False)

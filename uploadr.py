@@ -2423,7 +2423,9 @@ class Uploadr:
         
         # ---------------------------------------------------------------------
         # Processing function
-        def fn_addFilesToSets(sfiles, cur):
+        def fn_addFilesToSets(lockDB, running, mutex, sfiles, cur):
+            """ fn_addFilesToSets
+            """
             for filepic in sfiles:
                 # filepic[1] = path for the file from table files
                 # filepic[2] = set_id from files table
@@ -2523,7 +2525,7 @@ class Uploadr:
                                    srunning,
                                    smutex,
                                    files,
-                                   )
+                                   fn_addFilesToSets)
 
             # running in single processing mode
             else:

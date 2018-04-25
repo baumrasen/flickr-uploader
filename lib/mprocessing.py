@@ -57,7 +57,7 @@ np = npc.niceprint()
 # -----------------------------------------------------------------------------
 # mprocessing
 #
-def mprocessing(nprocs, lockDB, running, mutex, itemslist, f):
+def mprocessing(nprocs, lockDB, running, mutex, itemslist, f, cur):
     """ mprocessing Function
 
     nprocs     = Number of processes to launch
@@ -65,12 +65,12 @@ def mprocessing(nprocs, lockDB, running, mutex, itemslist, f):
     running    = Value to count processed items
     mutex      = mutex for access to value running
     itemslist  = list of items to be processed
+    cur        = cursor variable for DB access
     """
     # procPool   = Local variable procPool for Pool of processes
     # LOGlevel   = LOGlevel
     # countTotal = Total counter of items. to distribute/play/indicate progress
     #              lem(itemslist)
-    
 
     LOGlevel = logging.getLogger().getEffectiveLevel()
     if LOGlevel <= logging.WARNING:
@@ -133,7 +133,7 @@ def mprocessing(nprocs, lockDB, running, mutex, itemslist, f):
                   running,
                   mutex,
                   splititemslist,
-                  countTotal,))
+                  cur))
         procPool.append(pTask)
         logging.debug('===Job/Task Process: Starting...')
         pTask.start()

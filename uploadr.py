@@ -1258,7 +1258,7 @@ class Uploadr:
 
             Insert into local DB files table.
 
-            lock          = for multiprocessing
+            lock          = for multiprocessing access control to DB
             file_id       = pic id
             file          = filename
             file_checksum = md5 checksum
@@ -2445,7 +2445,7 @@ class Uploadr:
                                  .format(StrUnicodeOut(filepic[1]),
                                          StrUnicodeOut(setName),
                                          setId))
-                    self.addFileToSet(setId, filepic, cur)
+                    self.addFileToSet(lockDB, setId, filepic, cur)
                 else:
                     np.niceprint('Not able to assign pic to set')
                     logging.error('Not able to assign pic to set')
@@ -2548,7 +2548,7 @@ class Uploadr:
                                      .format(StrUnicodeOut(filepic[1]),
                                              StrUnicodeOut(setName),
                                              setId))
-                        self.addFileToSet(setId, filepic, cur)
+                        self.addFileToSet(slockDB, setId, filepic, cur)
                     else:
                         np.niceprint('Not able to assign pic to set')
                         logging.error('Not able to assign pic to set')
@@ -2561,10 +2561,12 @@ class Uploadr:
     # -------------------------------------------------------------------------
     # addFiletoSet
     #
-    def addFileToSet(self, setId, file, cur):
+    def addFileToSet(self, lock, setId, file, cur):
         """ addFileToSet
 
             adds a file to set...
+
+            lock  = for multiprocessing access control to DB
             setID = set
             file  = file is a list with file[0]=id, file[1]=path
             cur   = cursor for updating local DB
@@ -2603,10 +2605,11 @@ class Uploadr:
                              .format(StrUnicodeOut(file[1]),
                                      StrUnicodeOut(setId)))
                 try:
+                    # Acquire DBlock if in multiprocessing mode
+                    self.useDBLock(lock, True)
                     cur.execute("UPDATE files SET set_id = ? "
                                 "WHERE files_id = ?",
                                 (setId, file[0]))
-                    con.commit()
                 except lite.Error as e:
                     reportError(Caught=True,
                                 CaughtPrefix='+++ DB',
@@ -2614,6 +2617,10 @@ class Uploadr:
                                 CaughtMsg='DB error on UPDATE files: [{!s}]'
                                           .format(e.args[0]),
                                 NicePrint=True)
+                finally:
+                    con.commit()
+                    # Release DBlock if in multiprocessing mode
+                    self.useDBLock(lock, False)
             else:
                 reportError(Caught=True,
                             CaughtPrefix='xxx',
@@ -2642,9 +2649,10 @@ class Uploadr:
                     np.niceprint('Photo already in set... updating DB'
                                  'set_id=[{!s}] photo_id=[{!s}]'
                                  .format(setId, file[0]))
+                    # Acquire DBlock if in multiprocessing mode
+                    self.useDBLock(lock, True)
                     cur.execute('UPDATE files SET set_id = ? '
                                 'WHERE files_id = ?', (setId, file[0]))
-                    con.commit()
                 except lite.Error as e:
                     reportError(Caught=True,
                                 CaughtPrefix='+++ DB',
@@ -2652,6 +2660,10 @@ class Uploadr:
                                 CaughtMsg='DB error on UPDATE SET: [{!s}]'
                                           .format(e.args[0]),
                                 NicePrint=True)
+                finally:
+                    con.commit()
+                    # Release DBlock if in multiprocessing mode
+                    self.useDBLock(lock, False)
             else:
                 reportError(Caught=True,
                             CaughtPrefix='xxx',

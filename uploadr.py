@@ -249,8 +249,8 @@ class Uploadr:
             logging.debug('useDBLock: useDBthisLock is [None].')
             return useDBLockReturn
 
-            logging.debug('useDBLock: useDBthisLock is [{!s}].'
-                          .format(useDBthisLock._semlock))
+        logging.debug('useDBLock: useDBthisLock is [{!s}].'
+                      .format(useDBthisLock._semlock))
 
         if useDBoperation is None:
             return useDBLockReturn
@@ -260,7 +260,7 @@ class Uploadr:
            (ARGS.processes > 0):
             if useDBoperation:
                 # Control for when running multiprocessing set locking
-                logging.debug('===Multiprocessing=== in.lock.acquire')
+                logging.debug('===Multiprocessing=== --  in.lock.acquire')
                 try:
                     if useDBthisLock.acquire():
                         useDBLockReturn = True
@@ -272,10 +272,10 @@ class Uploadr:
                                 NicePrint=True,
                                 exceptSysInfo=True)
                     raise
-                logging.info('===Multiprocessing=== out.lock.acquire')
+                logging.info('===Multiprocessing=== -->out.lock.acquire')
             else:
                 # Control for when running multiprocessing release locking
-                logging.debug('===Multiprocessing=== in.lock.release')
+                logging.debug('===Multiprocessing===  -- in.lock.release')
                 try:
                     useDBthisLock.release()
                     useDBLockReturn = True
@@ -288,7 +288,7 @@ class Uploadr:
                                 exceptSysInfo=True)
                     # Raise aborts execution
                     raise
-                logging.info('===Multiprocessing=== out.lock.release')
+                logging.info('===Multiprocessing=== <--out.lock.release')
 
             logging.info('Exiting useDBLock with useDBoperation:[{!s}]. '
                          'Result:[{!s}]'
@@ -2580,7 +2580,7 @@ class Uploadr:
     def addFileToSet(self, lock, setId, file, cur):
         """ addFileToSet
 
-            adds a file to set...
+            Adds a file to set...
 
             lock  = for multiprocessing access control to DB
             setID = set
@@ -2596,6 +2596,12 @@ class Uploadr:
         @retry(attempts=2, waittime=0, randtime=False)
         def R_photosets_addPhoto(kwargs):
             return nuflickr.photosets.addPhoto(**kwargs)
+
+        @retry(attempts=xCfg.MAX_SQL_ATTEMPTS, waittime=2, randtime=True)
+        def R_DB_UPDATE_files(setID, file):
+            cur.execute("UPDATE files SET set_id = ? "
+                        "WHERE files_id = ?",
+                        (setId, file[0]))
 
         try:
             con = lite.connect(xCfg.DB_PATH)
@@ -2623,9 +2629,12 @@ class Uploadr:
                 try:
                     # Acquire DBlock if in multiprocessing mode
                     self.useDBLock(lock, True)
-                    cur.execute("UPDATE files SET set_id = ? "
-                                "WHERE files_id = ?",
-                                (setId, file[0]))
+                    R_DB_UPDATE_files(dict(setId=setId,
+                                           file0=file[0]))
+
+                    # cur.execute("UPDATE files SET set_id = ? "
+                    #             "WHERE files_id = ?",
+                    #             (setId, file[0]))
                 except lite.Error as e:
                     reportError(Caught=True,
                                 CaughtPrefix='+++ DB',

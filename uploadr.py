@@ -2630,7 +2630,7 @@ class Uploadr:
                     # Acquire DBlock if in multiprocessing mode
                     self.useDBLock(lock, True)
                     R_DB_UPDATE_files(dict(setId=setId,
-                                           file0=file[0]))
+                                           file=file))
 
                     # cur.execute("UPDATE files SET set_id = ? "
                     #             "WHERE files_id = ?",

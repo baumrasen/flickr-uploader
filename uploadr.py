@@ -2271,7 +2271,7 @@ class Uploadr:
     #
     #   Creates on flickrdb local database a SetName(Album)
     #
-    def logSetCreation(self, lock setId, setName, primaryPhotoId, cur, con):
+    def logSetCreation(self, lock, setId, setName, primaryPhotoId, cur, con):
         """ logSetCreation
 
         Creates on flickrdb local database a SetName(Album)
@@ -2507,7 +2507,9 @@ class Uploadr:
                 primaryPic = cur.fetchone()
 
                 # primaryPic[0] = files_id from files table
-                setId = self.createSet(lockDB, setName, primaryPic[0], cur, con)
+                setId = self.createSet(lockDB,
+                                       setName, primaryPic[0],
+                                       cur, con)
                 np.niceprint('Created the set:[{!s}] '
                              'setId=[{!s}] '
                              'primaryId=[{!s}]'

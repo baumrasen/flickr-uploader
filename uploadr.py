@@ -260,7 +260,7 @@ class Uploadr:
            (ARGS.processes > 0):
             if useDBoperation:
                 # Control for when running multiprocessing set locking
-                logging.debug('===Multiprocessing=== --  in.lock.acquire')
+                logging.debug('===Multiprocessing=== -->[ ].lock.acquire')
                 try:
                     if useDBthisLock.acquire():
                         useDBLockReturn = True
@@ -272,10 +272,10 @@ class Uploadr:
                                 NicePrint=True,
                                 exceptSysInfo=True)
                     raise
-                logging.info('===Multiprocessing=== -->out.lock.acquire')
+                logging.info('===Multiprocessing=== -->[v].lock.acquire')
             else:
                 # Control for when running multiprocessing release locking
-                logging.debug('===Multiprocessing===  -- in.lock.release')
+                logging.debug('===Multiprocessing=== <--[ ].lock.release')
                 try:
                     useDBthisLock.release()
                     useDBLockReturn = True
@@ -288,7 +288,7 @@ class Uploadr:
                                 exceptSysInfo=True)
                     # Raise aborts execution
                     raise
-                logging.info('===Multiprocessing=== <--out.lock.release')
+                logging.info('===Multiprocessing=== <--[v].lock.release')
 
             logging.info('Exiting useDBLock with useDBoperation:[{!s}]. '
                          'Result:[{!s}]'

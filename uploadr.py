@@ -246,7 +246,11 @@ class Uploadr:
                       .format(useDBoperation))
 
         if useDBthisLock is None:
+            logging.debug('useDBLock: useDBthisLock is [None].')
             return useDBLockReturn
+
+            logging.debug('useDBLock: useDBthisLock is [{!s}].'
+                          .format(useDBthisLock._semlock))
 
         if useDBoperation is None:
             return useDBLockReturn

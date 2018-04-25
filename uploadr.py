@@ -2676,8 +2676,10 @@ class Uploadr:
                                  .format(setId, file[0]))
                     # Acquire DBlock if in multiprocessing mode
                     self.useDBLock(lock, True)
-                    cur.execute('UPDATE files SET set_id = ? '
-                                'WHERE files_id = ?', (setId, file[0]))
+                    R_DB_UPDATE_files(dict(setId=setId,
+                                           file=file))
+                    # cur.execute('UPDATE files SET set_id = ? '
+                    #             'WHERE files_id = ?', (setId, file[0]))
                 except lite.Error as e:
                     reportError(Caught=True,
                                 CaughtPrefix='+++ DB',
@@ -2709,6 +2711,11 @@ class Uploadr:
                         CaughtMsg='Caught exception in addFiletoSet',
                         NicePrint=True,
                         exceptSysInfo=True)
+        finally:
+            con.commit()
+            # Release DBlock if in multiprocessing mode
+            self.useDBLock(lock, False)
+
         # Closing DB connection
         if con is not None:
             con.close()

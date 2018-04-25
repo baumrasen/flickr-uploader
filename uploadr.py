@@ -2507,7 +2507,7 @@ class Uploadr:
                 primaryPic = cur.fetchone()
 
                 # primaryPic[0] = files_id from files table
-                setId = self.createSet(lockDB,
+                setId = self.createSet(slockDB,
                                        setName, primaryPic[0],
                                        cur, con)
                 np.niceprint('Created the set:[{!s}] '

@@ -2271,7 +2271,7 @@ class Uploadr:
     #
     #   Creates on flickrdb local database a SetName(Album)
     #
-    def logSetCreation(self, setId, setName, primaryPhotoId, cur, con):
+    def logSetCreation(self, lock setId, setName, primaryPhotoId, cur, con):
         """ logSetCreation
 
         Creates on flickrdb local database a SetName(Album)
@@ -2289,6 +2289,8 @@ class Uploadr:
                          .format(StrUnicodeOut(setName)))
 
         try:
+            # Acquire DBlock if in multiprocessing mode
+            self.useDBLock(lock, True)
             cur.execute('INSERT INTO sets (set_id, name, primary_photo_id) '
                         'VALUES (?,?,?)',
                         (setId, setName, primaryPhotoId))
@@ -2299,8 +2301,14 @@ class Uploadr:
                         CaughtMsg='DB error on INSERT: [{!s}]'
                         .format(e.args[0]),
                         NicePrint=True)
+        finally:
+            con.commit()
+            # Release DBlock if in multiprocessing mode
+            self.useDBLock(lock, False)
 
         try:
+            # Acquire DBlock if in multiprocessing mode
+            self.useDBLock(lock, True)
             cur.execute('UPDATE files SET set_id = ? WHERE files_id = ?',
                         (setId, primaryPhotoId))
         except lite.Error as e:
@@ -2310,8 +2318,10 @@ class Uploadr:
                         CaughtMsg='DB error on UPDATE: [{!s}]'.format(
                             e.args[0]),
                         NicePrint=True)
-
-        con.commit()
+        finally:
+            con.commit()
+            # Release DBlock if in multiprocessing mode
+            self.useDBLock(lock, False)
 
         return True
 
@@ -2497,7 +2507,7 @@ class Uploadr:
                 primaryPic = cur.fetchone()
 
                 # primaryPic[0] = files_id from files table
-                setId = self.createSet(setName, primaryPic[0], cur, con)
+                setId = self.createSet(lockDB, setName, primaryPic[0], cur, con)
                 np.niceprint('Created the set:[{!s}] '
                              'setId=[{!s}] '
                              'primaryId=[{!s}]'
@@ -2642,7 +2652,7 @@ class Uploadr:
                 setName = self.getSetNameFromFile(file[1],
                                                   xCfg.FILES_DIR,
                                                   xCfg.FULL_SET_NAME)
-                self.createSet(setName, file[0], cur, con)
+                self.createSet(lock, setName, file[0], cur, con)
             # Error: 3: Photo Already in set
             elif (ex.code == 3):
                 try:
@@ -2691,7 +2701,7 @@ class Uploadr:
     # -------------------------------------------------------------------------
     # createSet
     #
-    def createSet(self, setName, primaryPhotoId, cur, con):
+    def createSet(self, lock, setName, primaryPhotoId, cur, con):
         """ createSet
 
         Creates an Album in Flickr.
@@ -2763,7 +2773,8 @@ class Uploadr:
                 logging.warning('createResp["photoset"]["id"]:[{!s}]'
                                 .format(createResp.find('photoset')
                                         .attrib['id']))
-                self.logSetCreation(createResp.find('photoset').attrib['id'],
+                self.logSetCreation(lock,
+                                    createResp.find('photoset').attrib['id'],
                                     setName,
                                     primaryPhotoId,
                                     cur,

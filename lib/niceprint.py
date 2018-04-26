@@ -229,6 +229,31 @@ class niceprint:
         if NicePrint is not None and NicePrint:
             sys.stdout.flush()
 
+    # -------------------------------------------------------------------------
+    # niceprocessedfiles
+    #
+    # Nicely print number of processed files
+    #
+    def niceprocessedfiles(self, count, cTotal, total):
+        """
+        niceprocessedfiles
+
+        count  = Nicely print number of processed files rounded to 100's
+        cTotal = Shows also the total number of items to be processed
+        total  = if true shows the final count (use at the end of processing)
+        """
+
+        if not total:
+            if (int(count) % 100 == 0):
+                self.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
+                               .format(count, cTotal))
+        else:
+            if (int(count) % 100 > 0):
+                self.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
+                               .format(count, cTotal))
+
+        sys.stdout.flush()
+
 
 # -----------------------------------------------------------------------------
 # If called directly run doctests

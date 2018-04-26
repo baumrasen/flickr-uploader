@@ -303,31 +303,6 @@ class Uploadr:
         return useDBLockReturn
 
     # -------------------------------------------------------------------------
-    # niceprocessedfiles
-    #
-    # Nicely print number of processed files
-    #
-    def niceprocessedfiles(self, count, cTotal, total):
-        """
-        niceprocessedfiles
-
-        count  = Nicely print number of processed files rounded to 100's
-        cTotal = Shows also the total number of items to be processed
-        total  = if true shows the final count (use at the end of processing)
-        """
-
-        if not total:
-            if (int(count) % 100 == 0):
-                np.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
-                             .format(count, cTotal))
-        else:
-            if (int(count) % 100 > 0):
-                np.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
-                             .format(count, cTotal))
-
-        sys.stdout.flush()
-
-    # -------------------------------------------------------------------------
     # authenticate
     #
     # Authenticates via flickrapi on flickr.com
@@ -2564,7 +2539,9 @@ class Uploadr:
 
                 # To prevent recursive calling, check if __name__ == '__main__'
                 if __name__ == '__main__':
-                    mp.mprocessing(ARGS.processes,
+                    mp.mprocessing(ARGS.verbose,
+                                   ARGS.verbose_progress,
+                                   ARGS.processes,
                                    slockDB,
                                    srunning,
                                    smutex,
@@ -2735,6 +2712,11 @@ class Uploadr:
                         exceptSysInfo=True)
         # Closing DB connection
         if con is not None and con in locals():
+            reportError(Caught=True,
+                        CaughtPrefix='+++ DB',
+                        CaughtCode='122',
+                        CaughtMsg='Closing DB connection on addFileToSet',
+                        NicePrint=True)
             con.close()
 
     # -------------------------------------------------------------------------
@@ -4862,12 +4844,14 @@ if xCfg.LOGGING_LEVEL <= logging.DEBUG:
 #   isThisStringUnicode = from niceprint module
 #   niceassert          = from niceprint module
 #   reportError         = from niceprint module
+#   niceprocessedfiles  = from niceprint module
 # -----------------------------------------------------------------------------
 np = niceprint.niceprint()
 StrUnicodeOut = np.StrUnicodeOut
 isThisStringUnicode = np.isThisStringUnicode
 niceassert = np.niceassert
 reportError = np.reportError
+niceprocessedfiles = np.niceprocessedfiles
 # -----------------------------------------------------------------------------
 
 # =============================================================================

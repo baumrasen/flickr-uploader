@@ -16,7 +16,7 @@ branches:
   except:
     - dev-apr18-issue46
     - dev-apr18-issue11
-    #- dev-apr18-issue11-back
+    - dev-apr18-issue11-back
 
 before_install:
 # For use with wget into github account
@@ -163,7 +163,10 @@ script:
   - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;'; fi
   - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;' > dbrun1.log; fi
   - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT sets.set_id, sets.name, files_id, path FROM sets, files WHERE sets.set_id = files.set_id ORDER BY sets.name, path;'; fi
-
+  - echo DBRUN1-----Start DB sets check
+  - diff <(sed -r 's/^[0-9]{17}\|/REPLACE\|/' dbrun1.log) <(sed -r 's/^[0-9]{17}\|/REPLACE\|/' tests/dbrunok.log)
+  - echo DBRUN1-------End DB sets check
+  
 # WAIT TIME BEFORE SECOND RUN -------------------------------------------------
   - sleep $WAIT_TIME
 
@@ -232,7 +235,9 @@ after_script:
   - sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;'
   - sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;' > dbrun2.log
   - sqlite3 flickrdb 'SELECT sets.set_id, sets.name, files_id, path FROM sets, files WHERE sets.set_id = files.set_id ORDER BY sets.name, path;'
-
+  - echo DBRUN2-----Start DB sets check
+  - diff <(sed -r 's/^[0-9]{17}\|/REPLACE\|/' dbrun1.log) <(sed -r 's/^[0-9]{17}\|/REPLACE\|/' tests/dbrunok.log)
+  - echo DBRUN2-------End DB sets check
 # After script: Save build related data
   - echo -e "TRAVIS_TEST_RESULT:\t${TRAVIS_TEST_RESULT}\nTRAVIS_PYTHON_VERSION:\t${TRAVIS_PYTHON_VERSION}\nTRAVIS_BUILD_DIR:\t${TRAVIS_BUILD_DIR}\nTRAVIS_BUILD_ID:\t${TRAVIS_BUILD_ID}\nTRAVIS_BUILD_NUMBER:\t${TRAVIS_BUILD_NUMBER}\nTRAVIS_JOB_NUMBER:\t${TRAVIS_JOB_NUMBER}\nTRAVIS_EVENT_TYPE:\t${TRAVIS_EVENT_TYPE}\nTRAVIS_COMMIT:\t\t${TRAVIS_COMMIT}\nTRAVIS_COMMIT_MESSAGE:\t${TRAVIS_COMMIT_MESSAGE}\n" >> build.txt
 # Upload LOG/ERR files to Dropbox

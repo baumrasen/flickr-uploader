@@ -23,11 +23,14 @@ import multiprocessing
 from itertools import islice
 from . import niceprint as npc
 
-# CODING EXTREME
-ARGS_verbose = True
-ARGS_verbose_progress = True
+# =============================================================================
+# Functions aliases
+#
+#   np.niceprint = from niceprint module
+#   ARGS_verbose
+#   ARGS_verbose_progress
+# -----------------------------------------------------------------------------
 np = npc.niceprint()
-
 
 # -------------------------------------------------------------------------
 # niceprocessedfiles
@@ -58,7 +61,8 @@ def niceprocessedfiles(count, cTotal, total):
 # -----------------------------------------------------------------------------
 # mprocessing
 #
-def mprocessing(nprocs, lockDB, running, mutex, itemslist, f, cur):
+def mprocessing(ARGS_verbose, ARGS_verbose_progress,
+                nprocs, lockDB, running, mutex, itemslist, f, cur):
     """ mprocessing Function
 
     nprocs     = Number of processes to launch

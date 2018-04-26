@@ -16,7 +16,7 @@ branches:
   except:
     - dev-apr18-issue46
     - dev-apr18-issue11
-    - dev-apr18-issue11-back
+    #- dev-apr18-issue11-back
 
 before_install:
 # For use with wget into github account

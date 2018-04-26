@@ -2471,7 +2471,7 @@ class Uploadr:
                                     exceptSysInfo=True)
                     finally:
                         # Release DBlock if in multiprocessing mode
-                        self.useDBLock(lock, False)
+                        self.useDBLock(lockDB, False)
     
                     if set is not None:
                         setId = set[0]

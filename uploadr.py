@@ -4962,7 +4962,10 @@ if __name__ == "__main__":
             sys.exit(-1)
         raise
     finally:
-        run_uploadr()
+        pass
+    # Run uploader
+    run_uploadr()
+
 np.niceprint('--------- (V{!s}) End time: {!s} -----------(Log:{!s})'
              .format(UPLDRConstants.Version,
                      nutime.strftime(UPLDRConstants.TimeFormat),

@@ -2410,6 +2410,62 @@ class Uploadr:
 
         return asetName
 
+    # ---------------------------------------------------------------------
+    # Processing function
+    def fn_addFilesToSets(self, lockDB, running, mutex, sfiles, cur):
+        """ fn_addFilesToSets
+        """
+
+        # CODING to avoid 096 try to use a differnt conn and cur
+        fn_con = lite.connect(xCfg.DB_PATH)
+        fn_con.text_factory = str
+
+        with fn_con:
+            acur = fn_con.cursor()
+            for filepic in sfiles:
+                # filepic[1] = path for the file from table files
+                # filepic[2] = set_id from files table
+                setName = self.getSetNameFromFile(filepic[1],
+                                                  xCfg.FILES_DIR,
+                                                  xCfg.FULL_SET_NAME)
+                set = None
+                try:
+                    # Acquire DBlock if in multiprocessing mode
+                    self.useDBLock(lockDB, True)
+                    acur.execute('SELECT set_id, name '
+                                 'FROM sets WHERE name = ?',
+                                 (setName,))
+                    set = acur.fetchone()
+                except lite.Error as e:
+                    reportError(Caught=True,
+                                CaughtPrefix='+++ DB',
+                                CaughtCode='999',
+                                CaughtMsg='DB error on DB create: [{!s}]'
+                                .format(e.args[0]),
+                                NicePrint=True,
+                                exceptSysInfo=True)
+                finally:
+                    # Release DBlock if in multiprocessing mode
+                    self.useDBLock(lockDB, False)
+
+                if set is not None:
+                    setId = set[0]
+
+                    np.niceprint('Add file to set:[{!s}] '
+                                 'set:[{!s}] setId=[{!s}]'
+                                 .format(StrUnicodeOut(filepic[1]),
+                                         StrUnicodeOut(setName),
+                                         setId))
+                    self.addFileToSet(lockDB, setId, filepic, acur)
+                else:
+                    np.niceprint('Not able to assign pic to set')
+                    logging.error('Not able to assign pic to set')
+
+        # Closing DB connection
+        if fn_con is not None:
+            fn_con.close()
+    # -------------------------------------------------------------------------
+
     # -------------------------------------------------------------------------
     # createSets
     #
@@ -2434,62 +2490,6 @@ class Uploadr:
         slockDB = None
         smutex = None
         srunning = None
-
-        # ---------------------------------------------------------------------
-        # Processing function
-        def fn_addFilesToSets(lockDB, running, mutex, sfiles, cur):
-            """ fn_addFilesToSets
-            """
-
-            # CODING to avoid 096 try to use a differnt conn and cur
-            fn_con = lite.connect(xCfg.DB_PATH)
-            fn_con.text_factory = str
-
-            with fn_con:
-                acur = fn_con.cursor()
-                for filepic in sfiles:
-                    # filepic[1] = path for the file from table files
-                    # filepic[2] = set_id from files table
-                    setName = self.getSetNameFromFile(filepic[1],
-                                                      xCfg.FILES_DIR,
-                                                      xCfg.FULL_SET_NAME)
-                    set = None
-                    try:
-                        # Acquire DBlock if in multiprocessing mode
-                        self.useDBLock(lockDB, True)
-                        acur.execute('SELECT set_id, name '
-                                     'FROM sets WHERE name = ?',
-                                     (setName,))
-                        set = acur.fetchone()
-                    except lite.Error as e:
-                        reportError(Caught=True,
-                                    CaughtPrefix='+++ DB',
-                                    CaughtCode='999',
-                                    CaughtMsg='DB error on DB create: [{!s}]'
-                                    .format(e.args[0]),
-                                    NicePrint=True,
-                                    exceptSysInfo=True)
-                    finally:
-                        # Release DBlock if in multiprocessing mode
-                        self.useDBLock(lockDB, False)
-
-                    if set is not None:
-                        setId = set[0]
-
-                        np.niceprint('Add file to set:[{!s}] '
-                                     'set:[{!s}] setId=[{!s}]'
-                                     .format(StrUnicodeOut(filepic[1]),
-                                             StrUnicodeOut(setName),
-                                             setId))
-                        self.addFileToSet(lockDB, setId, filepic, acur)
-                    else:
-                        np.niceprint('Not able to assign pic to set')
-                        logging.error('Not able to assign pic to set')
-
-            # Closing DB connection
-            if fn_con is not None:
-                fn_con.close()
-        # ---------------------------------------------------------------------
 
         np.niceprint('*****Creating Sets*****')
 
@@ -2569,7 +2569,7 @@ class Uploadr:
                                    srunning,
                                    smutex,
                                    files,
-                                   fn_addFilesToSets,
+                                   self.fn_addFilesToSets,
                                    cur)
                     con.commit()
 

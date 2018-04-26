@@ -2734,7 +2734,7 @@ class Uploadr:
                         NicePrint=True,
                         exceptSysInfo=True)
         # Closing DB connection
-        if con is not None and local:
+        if con is not None and con in locals():
             con.close()
 
     # -------------------------------------------------------------------------

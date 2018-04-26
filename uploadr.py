@@ -1133,8 +1133,10 @@ class Uploadr:
     # Update the video date taken based on last_modified time of file
     #
     def updatedVideoDate(self, xfile_id, xfile, xlast_modified):
-    """ updatedVideoDate
-    """
+        """ updatedVideoDate
+
+        read file to upload into Flickr with FileWithCallback
+        """
         # Update Date/Time on Flickr for Video files
         # Flickr doesn't read it from the video file itself.
         filetype = mimetypes.guess_type(xfile)

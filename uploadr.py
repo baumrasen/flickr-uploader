@@ -2701,7 +2701,7 @@ class Uploadr:
                     # Acquire DBlock if in multiprocessing mode
                     self.useDBLock(lock, True)
                     bcur.execute('UPDATE files SET set_id = ? '
-                                'WHERE files_id = ?', (setId, file[0]))
+                                 'WHERE files_id = ?', (setId, file[0]))
                 except lite.Error as e:
                     reportError(Caught=True,
                                 CaughtPrefix='+++ DB',

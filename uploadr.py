@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-    by oPromessa, 2017
+    by oPromessa, 2017, 2018
     Published on https://github.com/oPromessa/flickr-uploader/
 
     ## LICENSE.txt
@@ -775,6 +775,9 @@ class Uploadr:
     # -------------------------------------------------------------------------
     # convertRawFiles
     #
+    # Processes RAW files and adds the converted JPG files to the
+    # finalMediafiles
+    #
     def convertRawFiles(self, rawfiles, finalMediafiles):
         """ convertRawFiles
 
@@ -838,6 +841,9 @@ class Uploadr:
     # -------------------------------------------------------------------------
     # convertRawFile
     #
+    # Converts a RAW file into JPG. Also copies tags from RAW file.
+    # Uses external exiftool.
+    #
     def convertRawFile(self, Ddirpath, Ffname, Fext, Ffnameonly):
         """ convertRawFile
 
@@ -848,6 +854,8 @@ class Uploadr:
         """
         # ---------------------------------------------------------------------
         # convertRawFileCommand
+        #
+        # Prepare and executes the command for RAW file conversion.
         #
         def convertRawFileCommand(ConvertOrCopyTags):
             """ convertRawFileCommand
@@ -962,6 +970,8 @@ class Uploadr:
     # -------------------------------------------------------------------------
     # grabNewFiles
     #
+    # Select files and RAW files from FILES_DIR to be uploaded
+    #
     def grabNewFiles(self):
         """ grabNewFiles
 
@@ -969,7 +979,7 @@ class Uploadr:
             EXCLUDED_FOLDERS and IGNORED_REGEX filenames.
             Returns two sorted file lists:
                 JPG files found
-                RAW files found
+                RAW files found (if RAW conversion option is enabled)
         """
 
         files = []
@@ -1120,13 +1130,12 @@ class Uploadr:
     # -------------------------------------------------------------------------
     # updatedVideoDate
     #
+    # Update the video date taken based on last_modified time of file
+    #
+    def updatedVideoDate(self, xfile_id, xfile, xlast_modified):
     """ updatedVideoDate
 
-    Update the video date taken based on last_modified time of file
     """
-
-    def updatedVideoDate(self, xfile_id, xfile, xlast_modified):
-
         # Update Date/Time on Flickr for Video files
         # Flickr doesn't read it from the video file itself.
         filetype = mimetypes.guess_type(xfile)
@@ -2307,6 +2316,8 @@ class Uploadr:
     # -------------------------------------------------------------------------
     # isGood
     #
+    # Checks if res.attrib['stat'] == "ok"
+    #
     def isGood(self, res):
         """ isGood
 
@@ -2386,7 +2397,10 @@ class Uploadr:
         return asetName
 
     # ---------------------------------------------------------------------
-    # Processing function
+    # fn_addFilesToSets
+    #
+    # Processing function for adding files to set in multiprocessing mode
+    #
     def fn_addFilesToSets(self, lockDB, running, mutex, sfiles, cur):
         """ fn_addFilesToSets
         """
@@ -2445,7 +2459,8 @@ class Uploadr:
     # createSets
     #
     def createSets(self):
-        """
+        """ createSets
+
             Creates Sets (Album) in Flickr
         """
         # [FIND SETS] Find sets to be created
@@ -2722,6 +2737,8 @@ class Uploadr:
     # -------------------------------------------------------------------------
     # createSet
     #
+    # Creates an Album in Flickr.
+    #
     def createSet(self, lock, setName, primaryPhotoId, cur, con):
         """ createSet
 
@@ -2827,8 +2844,7 @@ class Uploadr:
     # Creates the control database
     #
     def setupDB(self):
-        """
-            setupDB
+        """ setupDB
 
             Creates the control database
         """
@@ -3644,8 +3660,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #         ispublic="0" isfriend="1" isfamily="1" />
     # </photos>
     def photos_search(self, checksum):
-        """
-            photos_search
+        """ photos_search
+
             Searchs for image with on tag:checksum
         """
         global nuflickr
@@ -3940,6 +3956,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
     # CODING: to be developed. Consider making allMedia (coming from
     # grabnewfiles from  uploadr) a global variable to pass onto this function
     def searchForDuplicates(self):
+    """ searchForDuplicates
+
+        Not implemented.
+    """
 
         pass
 
@@ -3952,7 +3972,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #   1/n = for n seconds per call (ex. 0.5 meand 4 seconds in between calls)
     @rate_limited.rate_limited(5)  # 5 calls per second
     def rate4maddAlbumsMigrate(self):
-        """
+        """ rate4maddAlbumsMigrate
         """
         logging.debug('rate_limit timestamp:[{!s}]'
                       .format(time.strftime('%T')))
@@ -4595,7 +4615,8 @@ def parse_arguments():
                                  'files.')
     pgrpparser.add_argument('-p', '--processes',
                             metavar='P', type=int,
-                            help='Number of photos to upload simultaneously.')
+                            help='Number of photos to upload simultaneously. '
+                                 'Number of process to assign pics to sets.')
     pgrpparser.add_argument('-u', '--not-is-already-uploaded',
                             action='store_true',
                             help='Do not check if file is already uploaded '
@@ -4765,9 +4786,7 @@ def run_uploadr():
 # -----------------------------------------------------------------------------
 # checkBaseDir_INIfile
 #
-# For use with flickrapi upload for showing callback progress information
-# Check function FileWithCallback definition
-# Uses global ARGS.verbose-progress parameter
+# Check if baseDir folder exists and INIfile exists and is a file
 #
 def checkBaseDir_INIfile(baseDir, INIfile):
     """checkBaseDir_INIfile

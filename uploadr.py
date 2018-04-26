@@ -2632,6 +2632,7 @@ class Uploadr:
         try:
             con = lite.connect(xCfg.DB_PATH)
             con.text_factory = str
+            bcur = con.cursor()
 
             logging.info('Calling nuflickr.photosets.addPhoto'
                          'set_id=[{!s}] photo_id=[{!s}]'
@@ -2655,9 +2656,9 @@ class Uploadr:
                 try:
                     # Acquire DBlock if in multiprocessing mode
                     self.useDBLock(lock, True)
-                    cur.execute("UPDATE files SET set_id = ? "
-                                "WHERE files_id = ?",
-                                (setId, file[0]))
+                    bcur.execute("UPDATE files SET set_id = ? "
+                                 "WHERE files_id = ?",
+                                 (setId, file[0]))
                     con.commit()
                 except lite.Error as e:
                     reportError(Caught=True,
@@ -2699,7 +2700,7 @@ class Uploadr:
                                  .format(setId, file[0]))
                     # Acquire DBlock if in multiprocessing mode
                     self.useDBLock(lock, True)
-                    cur.execute('UPDATE files SET set_id = ? '
+                    bcur.execute('UPDATE files SET set_id = ? '
                                 'WHERE files_id = ?', (setId, file[0]))
                 except lite.Error as e:
                     reportError(Caught=True,
@@ -2733,7 +2734,7 @@ class Uploadr:
                         NicePrint=True,
                         exceptSysInfo=True)
         # Closing DB connection
-        if con is not None:
+        if con is not None and local:
             con.close()
 
     # -------------------------------------------------------------------------

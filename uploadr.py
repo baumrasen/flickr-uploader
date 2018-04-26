@@ -739,9 +739,9 @@ class Uploadr:
                 nulockDB = None
 
                 # Show number of total files processed
-                self.niceprocessedfiles(nurunning.value,
-                                        UPLDRConstants.nuMediacount,
-                                        True)
+                niceprocessedfiles(nurunning.value,
+                                   UPLDRConstants.nuMediacount,
+                                   True)
 
             else:
                 np.niceprint('Pool not in __main__ process. '
@@ -760,12 +760,12 @@ class Uploadr:
                                  .format(str(xCfg.DRIP_TIME)))
                     nutime.sleep(xCfg.DRIP_TIME)
                 count = count + 1
-                self.niceprocessedfiles(count,
-                                        UPLDRConstants.nuMediacount,
-                                        False)
+                niceprocessedfiles(count,
+                                   UPLDRConstants.nuMediacount,
+                                   False)
 
             # Show number of total files processed
-            self.niceprocessedfiles(count, UPLDRConstants.nuMediacount, True)
+            niceprocessedfiles(count, UPLDRConstants.nuMediacount, True)
 
         # Closing DB connection
         if con is not None:
@@ -1205,7 +1205,7 @@ class Uploadr:
             logging.warning('===Multiprocessing=== out.mutex.release(w)')
 
             # Show number of files processed so far
-            self.niceprocessedfiles(xcount, UPLDRConstants.nuMediacount, False)
+            niceprocessedfiles(xcount, UPLDRConstants.nuMediacount, False)
 
     # -------------------------------------------------------------------------
     # uploadFile
@@ -4040,7 +4040,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
             logging.info('===Multiprocessing=== out.mutex.release(w)')
 
             # Show number of files processed so far
-            self.niceprocessedfiles(xcount, countTotal, False)
+            niceprocessedfiles(xcount, countTotal, False)
 
             # Control pace (rate limit) of each proceess
             self.rate4maddAlbumsMigrate()
@@ -4225,9 +4225,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     mlockDB = None
 
                     # Show number of total files processed
-                    self.niceprocessedfiles(mrunning.value,
-                                            countTotal,
-                                            True)
+                    niceprocessedfiles(mrunning.value,
+                                       countTotal,
+                                       True)
 
             else:
                 count = 0
@@ -4278,7 +4278,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
                         terr = True
 
-                        self.niceprocessedfiles(count, countTotal, False)
+                        niceprocessedfiles(count, countTotal, False)
 
                         continue
 
@@ -4294,9 +4294,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             res_add_tag,
                             encoding='utf-8',
                             method='xml'))
-                    self.niceprocessedfiles(count, countTotal, False)
+                    niceprocessedfiles(count, countTotal, False)
 
-                self.niceprocessedfiles(count, countTotal, True)
+                niceprocessedfiles(count, countTotal, True)
 
         return True
 
@@ -4349,7 +4349,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                               nutime.localtime(row[5]))))
                 sys.stdout.flush()
 
-            self.niceprocessedfiles(count, countTotal, True)
+            niceprocessedfiles(count, countTotal, True)
 
         return True
 

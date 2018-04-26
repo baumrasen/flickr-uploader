@@ -2440,11 +2440,11 @@ class Uploadr:
         def fn_addFilesToSets(lockDB, running, mutex, sfiles, cur):
             """ fn_addFilesToSets
             """
-            
+
             # CODING to avoid 096 try to use a differnt conn and cur
             fn_con = lite.connect(xCfg.DB_PATH)
             fn_con.text_factory = str
-            
+
             with fn_con:
                 acur = fn_con.cursor()
                 for filepic in sfiles:
@@ -2472,10 +2472,10 @@ class Uploadr:
                     finally:
                         # Release DBlock if in multiprocessing mode
                         self.useDBLock(lockDB, False)
-    
+
                     if set is not None:
                         setId = set[0]
-    
+
                         np.niceprint('Add file to set:[{!s}] '
                                      'set:[{!s}] setId=[{!s}]'
                                      .format(StrUnicodeOut(filepic[1]),

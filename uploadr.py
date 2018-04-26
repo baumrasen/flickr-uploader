@@ -3957,10 +3957,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
     # CODING: to be developed. Consider making allMedia (coming from
     # grabnewfiles from  uploadr) a global variable to pass onto this function
     def searchForDuplicates(self):
-    """ searchForDuplicates
-
-        Not implemented.
-    """
+        """ searchForDuplicates
+    
+            Not implemented.
+        """
 
         pass
 

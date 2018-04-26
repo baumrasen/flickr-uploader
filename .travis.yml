@@ -123,6 +123,8 @@ before_script:
   - touch build.txt
   - touch /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - touch /home/travis/build/oPromessa/flickr-uploader/nohup.lst
+  - touch /home/travis/build/oPromessa/flickr-uploader/dbrun1.log
+  - touch /home/travis/build/oPromessa/flickr-uploader/dbrun2.log
 # INI File for deletr... to bypass erro "pytest --doctest-modules" exited with 2.
   - cp flickr-deletr-master/tests/deletr.ini /home/travis/virtualenv/python$pythonVersion/bin/deletr.ini || cp flickr-deletr-master/tests/deletr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/deletr.ini
 # =============================================================================
@@ -159,6 +161,7 @@ script:
   - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT * FROM badfiles ORDER BY path;'; fi
   - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT * FROM sets ORDER BY name;'; fi
   - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;'; fi
+  - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;' > dbrun1.log; fi
   - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT sets.set_id, sets.name, files_id, path FROM sets, files WHERE sets.set_id = files.set_id ORDER BY sets.name, path;'; fi
 
 # WAIT TIME BEFORE SECOND RUN -------------------------------------------------
@@ -210,6 +213,8 @@ after_failure:
   - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN dbrun1.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN dbrun2.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst
@@ -225,6 +230,7 @@ after_script:
   - sqlite3 flickrdb 'SELECT * FROM badfiles ORDER BY path;'
   - sqlite3 flickrdb 'SELECT * FROM sets ORDER BY name;'
   - sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;'
+  - sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;' > dbrun2.log
   - sqlite3 flickrdb 'SELECT sets.set_id, sets.name, files_id, path FROM sets, files WHERE sets.set_id = files.set_id ORDER BY sets.name, path;'
 
 # After script: Save build related data
@@ -233,6 +239,8 @@ after_script:
   - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN dbrun1.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN dbrun2.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
 
 # =============================================================================
 # Deploy to Heroku

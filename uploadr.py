@@ -1134,7 +1134,6 @@ class Uploadr:
     #
     def updatedVideoDate(self, xfile_id, xfile, xlast_modified):
     """ updatedVideoDate
-
     """
         # Update Date/Time on Flickr for Video files
         # Flickr doesn't read it from the video file itself.

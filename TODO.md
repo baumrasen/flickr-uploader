@@ -48,7 +48,7 @@
 ---------------
 * Performance (with options: "-u -p 30"):
         upload: 340 pics/min ~= 20.000 pics/hour.
-  addfiletoset: 
+  addfiletoset: ~1000 albums/65000pic = 17.000 pics/hour
 * AVOID using uploadr when performing massive delete operations on flicr.
   While deleting many files on flickr some of the function calls return
   values like the title of a Set as empty(None). This prompts printing

@@ -249,11 +249,10 @@ after_script:
 
 # =============================================================================
 # Deploy to Heroku
-deploy:
-  provider: heroku
-  api_key: $HEROKU_API_KEY
-  #app: uploadr-showcase
-  on:
-    branch: master
-    #branch: do-not-load-duplicates
-    #repo: oPromessa/flickr-uploadr
+#deploy:
+#  provider: heroku
+#  api_key: $HEROKU_API_KEY
+#  #app: uploadr-showcase
+#  on:
+#    branch: master
+#    #repo: oPromessa/flickr-uploadr

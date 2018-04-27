@@ -2,11 +2,8 @@
     by oPromessa, 2018
     Published on https://github.com/oPromessa/flickr-uploader/
 
-    mprocessing  = Helper function to run function calls in multiprocessing
-                   mode with Python Decorators.
+    mprocessing  = Helper function to run function in multiprocessing mode
 """
-# CODING EXTREME ARGS.verbose = ARGS_verbose
-# CODING EXTREME ARGS.verbose_progress = ARGS_verbose_progress
 
 # -----------------------------------------------------------------------------
 # Import section for Python 2 and 3 compatible code
@@ -27,8 +24,6 @@ from . import niceprint as npc
 # Functions aliases
 #
 #   np.niceprint = from niceprint module
-#   ARGS_verbose
-#   ARGS_verbose_progress
 # -----------------------------------------------------------------------------
 np = npc.niceprint()
 
@@ -66,6 +61,8 @@ def mprocessing(ARGS_verbose, ARGS_verbose_progress,
                 nprocs, lockDB, running, mutex, itemslist, f, cur):
     """ mprocessing Function
 
+    verbose    = verbose info
+    verbose_progress = further verbose
     nprocs     = Number of processes to launch
     lockDB     = lock for access to Database
     running    = Value to count processed items
@@ -221,10 +218,3 @@ def mprocessing(ARGS_verbose, ARGS_verbose_progress,
                        True)
 
     return True
-
-
-# -----------------------------------------------------------------------------
-# If called to have multiprocessing running under main!
-#
-def main():
-    logging.info('mprocessing.MAIN=[{!s}]'.format(__name__))

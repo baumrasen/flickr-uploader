@@ -28,32 +28,6 @@ from . import niceprint as npc
 np = npc.niceprint()
 
 
-# -------------------------------------------------------------------------
-# niceprocessedfiles
-#
-# Nicely print number of processed files
-#
-def niceprocessedfiles(count, cTotal, total):
-    """
-    niceprocessedfiles
-
-    count  = Nicely print number of processed files rounded to 100's
-    cTotal = Shows also the total number of items to be processed
-    total  = if true shows the final count (use at the end of processing)
-    """
-
-    if not total:
-        if (int(count) % 100 == 0):
-            np.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
-                         .format(count, cTotal))
-    else:
-        if (int(count) % 100 > 0):
-            np.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
-                         .format(count, cTotal))
-
-    sys.stdout.flush()
-
-
 # -----------------------------------------------------------------------------
 # mprocessing
 #
@@ -213,8 +187,8 @@ def mprocessing(ARGS_verbose, ARGS_verbose_progress,
     lockDB = None
 
     # Show number of total files processed
-    niceprocessedfiles(running.value,
-                       countTotal,
-                       True)
+    np.niceprocessedfiles(running.value,
+                          countTotal,
+                          True)
 
     return True

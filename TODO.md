@@ -1,9 +1,10 @@
 # flickr-uploader: TO DO
-* by oPromessa, 2017, V2.7.3
+* by oPromessa, 2017, V2.8.0
 * Published on https://github.com/oPromessa/flickr-uploader/
 
 ## Pending improvements
 -----------------------
+* Move useDBlock to mprocessing file?
 * Consider using python module exiftool?
 * Would be nice to update ALL tags on replacePhoto and not only the
   mandatory checksum tag as FLICKR maintains the tags from the first load.
@@ -24,8 +25,6 @@
   which allows to run upload.py form the --prefix/bin folder as it is
   installed wiht "python setup.py install". Note that uploadr.ini definition
   for DB_PATH, LOCK_PATH, TOKEN_CACHE and TOKEN_PATH as to be changed.
-* Apply multiprocessing to Add pics to sets. For 50K pics takes a long time
-  (enhancemente #11)
 * updatedVideoDate fails on three attempts (is it 'cause Flickr is processing
   the video? and raises error caught on #210! Next run does not update video
   date. V2.7.5 testing with 15 seconds.
@@ -47,7 +46,9 @@
 
 ## Known issues
 ---------------
-* Performance (with options: "-u -p 25"): 340 pics/min ~= 20.000 pics/hour.
+* Performance (with options: "-u -p 30"):
+        upload: 340 pics/min ~= 20.000 pics/hour.
+  addfiletoset: ~1000 albums/65000pic = 17.000 pics/hour
 * AVOID using uploadr when performing massive delete operations on flicr.
   While deleting many files on flickr some of the function calls return
   values like the title of a Set as empty(None). This prompts printing

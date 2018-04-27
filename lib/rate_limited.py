@@ -190,12 +190,12 @@ def rate_limited(max_per_second):
 # retry
 #
 # retries execution of a function
-#
 def retry(attempts=3, waittime=5, randtime=False):
     """
     Catches exceptions while running a supplied function
-    Re-runs it for times while sleeping X seconds in-between
-    outputs 3 types of errors (coming from the parameters)
+    Re-runs it for "attempts" while sleeping "waittime" seconds in-between
+    "waititme" is randomized if "randtime" is True.
+    Outputs 3 types of errors (coming from the parameters)
 
     attempts = Max Number of Attempts
     waittime = Wait time in between Attempts

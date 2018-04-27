@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-    by oPromessa, 2017
+    by oPromessa, 2017, 2018
     Published on https://github.com/oPromessa/flickr-uploader/
 
     ## LICENSE.txt
@@ -106,6 +106,10 @@ import lib.rate_limited as rate_limited
 # -----------------------------------------------------------------------------
 # Helper class and functions to load, process and verify INI configuration.
 import lib.myconfig as myconfig
+# -----------------------------------------------------------------------------
+# Helper module function to split work accross functions in multiprocessing
+import lib.mprocessing as mp
+
 
 # =============================================================================
 # Logging init code
@@ -242,7 +246,11 @@ class Uploadr:
                       .format(useDBoperation))
 
         if useDBthisLock is None:
+            logging.debug('useDBLock: useDBthisLock is [None].')
             return useDBLockReturn
+
+        logging.debug('useDBLock: useDBthisLock is [{!s}].'
+                      .format(useDBthisLock._semlock))
 
         if useDBoperation is None:
             return useDBLockReturn
@@ -252,7 +260,7 @@ class Uploadr:
            (ARGS.processes > 0):
             if useDBoperation:
                 # Control for when running multiprocessing set locking
-                logging.debug('===Multiprocessing=== in.lock.acquire')
+                logging.debug('===Multiprocessing=== -->[ ].lock.acquire')
                 try:
                     if useDBthisLock.acquire():
                         useDBLockReturn = True
@@ -264,10 +272,10 @@ class Uploadr:
                                 NicePrint=True,
                                 exceptSysInfo=True)
                     raise
-                logging.info('===Multiprocessing=== out.lock.acquire')
+                logging.info('===Multiprocessing=== --->[v].lock.acquire')
             else:
                 # Control for when running multiprocessing release locking
-                logging.debug('===Multiprocessing=== in.lock.release')
+                logging.debug('===Multiprocessing=== <--[ ].lock.release')
                 try:
                     useDBthisLock.release()
                     useDBLockReturn = True
@@ -280,7 +288,7 @@ class Uploadr:
                                 exceptSysInfo=True)
                     # Raise aborts execution
                     raise
-                logging.info('===Multiprocessing=== out.lock.release')
+                logging.info('===Multiprocessing=== <--[v].lock.release')
 
             logging.info('Exiting useDBLock with useDBoperation:[{!s}]. '
                          'Result:[{!s}]'
@@ -293,31 +301,6 @@ class Uploadr:
                             .format(useDBoperation, useDBLockReturn))
 
         return useDBLockReturn
-
-    # -------------------------------------------------------------------------
-    # niceprocessedfiles
-    #
-    # Nicely print number of processed files
-    #
-    def niceprocessedfiles(self, count, cTotal, total):
-        """
-        niceprocessedfiles
-
-        count  = Nicely print number of processed files rounded to 100's
-        cTotal = Shows also the total number of items to be processed
-        total  = if true shows the final count (use at the end of processing)
-        """
-
-        if not total:
-            if (int(count) % 100 == 0):
-                np.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
-                             .format(count, cTotal))
-        else:
-            if (int(count) % 100 > 0):
-                np.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
-                             .format(count, cTotal))
-
-        sys.stdout.flush()
 
     # -------------------------------------------------------------------------
     # authenticate
@@ -636,7 +619,7 @@ class Uploadr:
                 logger = multiprocessing.get_logger()
                 logger.setLevel(xCfg.LOGGING_LEVEL)
 
-                logging.debug('===Multiprocessing=== Lock defined!')
+                logging.debug('===Multiprocessing=== Logging defined!')
 
                 # -------------------------------------------------------------------------
                 # chunk
@@ -756,9 +739,9 @@ class Uploadr:
                 nulockDB = None
 
                 # Show number of total files processed
-                self.niceprocessedfiles(nurunning.value,
-                                        UPLDRConstants.nuMediacount,
-                                        True)
+                niceprocessedfiles(nurunning.value,
+                                   UPLDRConstants.nuMediacount,
+                                   True)
 
             else:
                 np.niceprint('Pool not in __main__ process. '
@@ -777,12 +760,12 @@ class Uploadr:
                                  .format(str(xCfg.DRIP_TIME)))
                     nutime.sleep(xCfg.DRIP_TIME)
                 count = count + 1
-                self.niceprocessedfiles(count,
-                                        UPLDRConstants.nuMediacount,
-                                        False)
+                niceprocessedfiles(count,
+                                   UPLDRConstants.nuMediacount,
+                                   False)
 
             # Show number of total files processed
-            self.niceprocessedfiles(count, UPLDRConstants.nuMediacount, True)
+            niceprocessedfiles(count, UPLDRConstants.nuMediacount, True)
 
         # Closing DB connection
         if con is not None:
@@ -791,6 +774,9 @@ class Uploadr:
 
     # -------------------------------------------------------------------------
     # convertRawFiles
+    #
+    # Processes RAW files and adds the converted JPG files to the
+    # finalMediafiles
     #
     def convertRawFiles(self, rawfiles, finalMediafiles):
         """ convertRawFiles
@@ -855,6 +841,9 @@ class Uploadr:
     # -------------------------------------------------------------------------
     # convertRawFile
     #
+    # Converts a RAW file into JPG. Also copies tags from RAW file.
+    # Uses external exiftool.
+    #
     def convertRawFile(self, Ddirpath, Ffname, Fext, Ffnameonly):
         """ convertRawFile
 
@@ -865,6 +854,8 @@ class Uploadr:
         """
         # ---------------------------------------------------------------------
         # convertRawFileCommand
+        #
+        # Prepare and executes the command for RAW file conversion.
         #
         def convertRawFileCommand(ConvertOrCopyTags):
             """ convertRawFileCommand
@@ -979,6 +970,8 @@ class Uploadr:
     # -------------------------------------------------------------------------
     # grabNewFiles
     #
+    # Select files and RAW files from FILES_DIR to be uploaded
+    #
     def grabNewFiles(self):
         """ grabNewFiles
 
@@ -986,7 +979,7 @@ class Uploadr:
             EXCLUDED_FOLDERS and IGNORED_REGEX filenames.
             Returns two sorted file lists:
                 JPG files found
-                RAW files found
+                RAW files found (if RAW conversion option is enabled)
         """
 
         files = []
@@ -1137,13 +1130,13 @@ class Uploadr:
     # -------------------------------------------------------------------------
     # updatedVideoDate
     #
-    """ updatedVideoDate
-
-    Update the video date taken based on last_modified time of file
-    """
-
+    # Update the video date taken based on last_modified time of file
+    #
     def updatedVideoDate(self, xfile_id, xfile, xlast_modified):
+        """ updatedVideoDate
 
+        read file to upload into Flickr with FileWithCallback
+        """
         # Update Date/Time on Flickr for Video files
         # Flickr doesn't read it from the video file itself.
         filetype = mimetypes.guess_type(xfile)
@@ -1222,7 +1215,7 @@ class Uploadr:
             logging.warning('===Multiprocessing=== out.mutex.release(w)')
 
             # Show number of files processed so far
-            self.niceprocessedfiles(xcount, UPLDRConstants.nuMediacount, False)
+            niceprocessedfiles(xcount, UPLDRConstants.nuMediacount, False)
 
     # -------------------------------------------------------------------------
     # uploadFile
@@ -1254,7 +1247,7 @@ class Uploadr:
 
             Insert into local DB files table.
 
-            lock          = for multiprocessing
+            lock          = for multiprocessing access control to DB
             file_id       = pic id
             file          = filename
             file_checksum = md5 checksum
@@ -2267,7 +2260,7 @@ class Uploadr:
     #
     #   Creates on flickrdb local database a SetName(Album)
     #
-    def logSetCreation(self, setId, setName, primaryPhotoId, cur, con):
+    def logSetCreation(self, lock, setId, setName, primaryPhotoId, cur, con):
         """ logSetCreation
 
         Creates on flickrdb local database a SetName(Album)
@@ -2285,6 +2278,8 @@ class Uploadr:
                          .format(StrUnicodeOut(setName)))
 
         try:
+            # Acquire DBlock if in multiprocessing mode
+            self.useDBLock(lock, True)
             cur.execute('INSERT INTO sets (set_id, name, primary_photo_id) '
                         'VALUES (?,?,?)',
                         (setId, setName, primaryPhotoId))
@@ -2295,8 +2290,14 @@ class Uploadr:
                         CaughtMsg='DB error on INSERT: [{!s}]'
                         .format(e.args[0]),
                         NicePrint=True)
+        finally:
+            con.commit()
+            # Release DBlock if in multiprocessing mode
+            self.useDBLock(lock, False)
 
         try:
+            # Acquire DBlock if in multiprocessing mode
+            self.useDBLock(lock, True)
             cur.execute('UPDATE files SET set_id = ? WHERE files_id = ?',
                         (setId, primaryPhotoId))
         except lite.Error as e:
@@ -2306,13 +2307,17 @@ class Uploadr:
                         CaughtMsg='DB error on UPDATE: [{!s}]'.format(
                             e.args[0]),
                         NicePrint=True)
-
-        con.commit()
+        finally:
+            con.commit()
+            # Release DBlock if in multiprocessing mode
+            self.useDBLock(lock, False)
 
         return True
 
     # -------------------------------------------------------------------------
     # isGood
+    #
+    # Checks if res.attrib['stat'] == "ok"
     #
     def isGood(self, res):
         """ isGood
@@ -2375,7 +2380,9 @@ class Uploadr:
 
         logging.debug('getSetNameFromFile in: '
                       'afile:[{!s}] aFILES_DIR=[{!s}] aFULL_SET_NAME:[{!s}]'
-                      .format(afile, aFILES_DIR, aFULL_SET_NAME))
+                      .format(StrUnicodeOut(afile),
+                              aFILES_DIR,
+                              aFULL_SET_NAME))
         if aFULL_SET_NAME:
             asetName = os.path.relpath(os.path.dirname(afile), aFILES_DIR)
         else:
@@ -2383,17 +2390,98 @@ class Uploadr:
         logging.debug('getSetNameFromFile out: '
                       'afile:[{!s}] aFILES_DIR=[{!s}] aFULL_SET_NAME:[{!s}]'
                       ' asetName:[{!s}]'
-                      .format(afile, aFILES_DIR, aFULL_SET_NAME, asetName))
+                      .format(StrUnicodeOut(afile),
+                              aFILES_DIR,
+                              aFULL_SET_NAME,
+                              StrUnicodeOut(asetName)))
 
         return asetName
+
+    # ---------------------------------------------------------------------
+    # fn_addFilesToSets
+    #
+    # Processing function for adding files to set in multiprocessing mode
+    #
+    def fn_addFilesToSets(self, lockDB, running, mutex, sfiles, cur):
+        """ fn_addFilesToSets
+        """
+
+        # CODING to avoid 096 try to use a differnt conn and cur
+        fn_con = lite.connect(xCfg.DB_PATH)
+        fn_con.text_factory = str
+
+        with fn_con:
+            acur = fn_con.cursor()
+            for filepic in sfiles:
+                # filepic[1] = path for the file from table files
+                # filepic[2] = set_id from files table
+                setName = self.getSetNameFromFile(filepic[1],
+                                                  xCfg.FILES_DIR,
+                                                  xCfg.FULL_SET_NAME)
+                set = None
+                try:
+                    # Acquire DBlock if in multiprocessing mode
+                    self.useDBLock(lockDB, True)
+                    acur.execute('SELECT set_id, name '
+                                 'FROM sets WHERE name = ?',
+                                 (setName,))
+                    set = acur.fetchone()
+                except lite.Error as e:
+                    reportError(Caught=True,
+                                CaughtPrefix='+++ DB',
+                                CaughtCode='999',
+                                CaughtMsg='DB error on DB create: [{!s}]'
+                                .format(e.args[0]),
+                                NicePrint=True,
+                                exceptSysInfo=True)
+                finally:
+                    # Release DBlock if in multiprocessing mode
+                    self.useDBLock(lockDB, False)
+
+                if set is not None:
+                    setId = set[0]
+
+                    np.niceprint('Add file to set:[{!s}] '
+                                 'set:[{!s}] setId=[{!s}]'
+                                 .format(StrUnicodeOut(filepic[1]),
+                                         StrUnicodeOut(setName),
+                                         setId))
+                    self.addFileToSet(lockDB, setId, filepic, acur)
+                else:
+                    np.niceprint('Not able to assign pic to set')
+                    logging.error('Not able to assign pic to set')
+
+        # Closing DB connection
+        if fn_con is not None:
+            fn_con.close()
+    # -------------------------------------------------------------------------
 
     # -------------------------------------------------------------------------
     # createSets
     #
     def createSets(self):
+        """ createSets
+
+            Creates Sets (Album) in Flickr
         """
-            Creates a set (Album) in Flickr
-        """
+        # [FIND SETS] Find sets to be created
+        # [PRIMARY PIC] For each set found, determine the primary picture
+        # [CREATE SET] Create Sets wiht primary picture:
+        #   CODING: what if it is not found?
+        # [WORK THRU PICS] After, then split work and add files to set
+        # in multi-processing
+        #   CODING use xLocks
+
+        # ---------------------------------------------------------------------
+        # Local Variables
+        #
+        #   slockDB     = multiprocessing Lock for access to Database
+        #   smutex      = multiprocessing mutex for access to value srunning
+        #   srunning    = multiprocessing Value to count processed photos
+        slockDB = None
+        smutex = None
+        srunning = None
+
         np.niceprint('*****Creating Sets*****')
 
         if ARGS.dry_run:
@@ -2401,45 +2489,110 @@ class Uploadr:
 
         con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
+        con.create_function("getSet", 3, self.getSetNameFromFile)
+        # Enable traceback return from the customer function.
+        lite.enable_callback_tracebacks(True)
+
         with con:
             cur = con.cursor()
-            cur.execute("SELECT files_id, path, set_id FROM files")
 
+            try:
+                # List of Sets to be created
+                cur.execute('SELECT DISTINCT getSet(path, ?, ?) '
+                            'FROM files WHERE getSet(path, ?, ?) '
+                            'NOT IN (SELECT name FROM sets)',
+                            (xCfg.FILES_DIR, xCfg.FULL_SET_NAME,
+                             xCfg.FILES_DIR, xCfg.FULL_SET_NAME,))
+
+                setsToCreate = cur.fetchall()
+            except lite.Error as e:
+                reportError(Caught=True,
+                            CaughtPrefix='+++ DB',
+                            CaughtCode='145',
+                            CaughtMsg='DB error on DB create: [{!s}]'
+                            .format(e.args[0]),
+                            NicePrint=True,
+                            exceptSysInfo=True)
+                raise
+
+            for set in setsToCreate:
+                # set[0] = setName
+                # Find Primary photo
+                setName = StrUnicodeOut(set[0])
+                cur.execute('SELECT MIN(files_id), path '
+                            'FROM files '
+                            'WHERE set_id is NULL '
+                            'AND getSet(path, ?, ?) = ?',
+                            (xCfg.FILES_DIR,
+                             xCfg.FULL_SET_NAME,
+                             setName,))
+                primaryPic = cur.fetchone()
+
+                # primaryPic[0] = files_id from files table
+                setId = self.createSet(slockDB,
+                                       setName, primaryPic[0],
+                                       cur, con)
+                np.niceprint('Created the set:[{!s}] '
+                             'setId=[{!s}] '
+                             'primaryId=[{!s}]'
+                             .format(StrUnicodeOut(setName),
+                                     setId,
+                                     primaryPic[0]))
+
+            cur.execute('SELECT files_id, path, set_id '
+                        'FROM files '
+                        'WHERE set_id is NULL')
             files = cur.fetchall()
+            cur.close()
 
-            for row in files:
-                # row[1] = path for the file from table files
-                setName = self.getSetNameFromFile(row[1],
-                                                  xCfg.FILES_DIR,
-                                                  xCfg.FULL_SET_NAME)
-                newSetCreated = False
+            # running in multi processing mode
+            if (ARGS.processes and ARGS.processes > 0):
+                logging.debug('Running Pool of [{!s}] processes...'
+                              .format(ARGS.processes))
+                logging.debug('__name__:[{!s}] to prevent recursive calling)!'
+                              .format(__name__))
+                cur = con.cursor()
 
-                # Search local DB for set_id by setName(folder name )
-                cur.execute("SELECT set_id, name FROM sets WHERE name = ?",
-                            (setName,))
-                set = cur.fetchone()
+                # To prevent recursive calling, check if __name__ == '__main__'
+                if __name__ == '__main__':
+                    mp.mprocessing(ARGS.verbose,
+                                   ARGS.verbose_progress,
+                                   ARGS.processes,
+                                   slockDB,
+                                   srunning,
+                                   smutex,
+                                   files,
+                                   self.fn_addFilesToSets,
+                                   cur)
+                    con.commit()
 
-                if set is None:
-                    # row[0] = files_id from files table
-                    setId = self.createSet(setName, row[0], cur, con)
-                    np.niceprint('Created the set:[{!s}]'.
-                                 format(StrUnicodeOut(setName)))
-                    newSetCreated = True
-                else:
-                    # set[0] = set_id from sets table
-                    setId = set[0]
+            # running in single processing mode
+            else:
+                cur = con.cursor()
 
-                logging.debug('Creating Sets newSetCreated:[{!s}]'
-                              'setId=[{!s}]'.format(newSetCreated, setId))
+                for filepic in files:
+                    # filepic[1] = path for the file from table files
+                    # filepic[2] = set_id from files table
+                    setName = self.getSetNameFromFile(filepic[1],
+                                                      xCfg.FILES_DIR,
+                                                      xCfg.FULL_SET_NAME)
 
-                # row[1] = path for the file from table files
-                # row[2] = set_id from files table
-                if row[2] is None and newSetCreated is False:
-                    np.niceprint('Add file to set:[{!s}] set:[{!s}]'
-                                 .format(StrUnicodeOut(row[1]),
-                                         StrUnicodeOut(setName)))
+                    cur.execute('SELECT set_id, name '
+                                'FROM sets WHERE name = ?',
+                                (setName,))
+                    set = cur.fetchone()
+                    if set is not None:
+                        setId = set[0]
 
-                    self.addFileToSet(setId, row, cur)
+                        np.niceprint('Add file to set:[{!s}] '
+                                     'set:[{!s}] setId=[{!s}]'
+                                     .format(StrUnicodeOut(filepic[1]),
+                                             StrUnicodeOut(setName),
+                                             setId))
+                        self.addFileToSet(slockDB, setId, filepic, cur)
+                    else:
+                        np.niceprint('Not able to assign pic to set')
+                        logging.error('Not able to assign pic to set')
 
         # Closing DB connection
         if con is not None:
@@ -2449,13 +2602,15 @@ class Uploadr:
     # -------------------------------------------------------------------------
     # addFiletoSet
     #
-    def addFileToSet(self, setId, file, cur):
+    def addFileToSet(self, lock, setId, file, cur):
         """ addFileToSet
 
-            adds a file to set...
+            Adds a file to set...
+
+            lock  = for multiprocessing access control to DB
             setID = set
-            file = file
-            cur = cursor for updating local DB
+            file  = file is a list with file[0]=id, file[1]=path
+            cur   = cursor for updating local DB
         """
 
         global nuflickr
@@ -2470,6 +2625,7 @@ class Uploadr:
         try:
             con = lite.connect(xCfg.DB_PATH)
             con.text_factory = str
+            bcur = con.cursor()
 
             logging.info('Calling nuflickr.photosets.addPhoto'
                          'set_id=[{!s}] photo_id=[{!s}]'
@@ -2491,9 +2647,11 @@ class Uploadr:
                              .format(StrUnicodeOut(file[1]),
                                      StrUnicodeOut(setId)))
                 try:
-                    cur.execute("UPDATE files SET set_id = ? "
-                                "WHERE files_id = ?",
-                                (setId, file[0]))
+                    # Acquire DBlock if in multiprocessing mode
+                    self.useDBLock(lock, True)
+                    bcur.execute("UPDATE files SET set_id = ? "
+                                 "WHERE files_id = ?",
+                                 (setId, file[0]))
                     con.commit()
                 except lite.Error as e:
                     reportError(Caught=True,
@@ -2502,6 +2660,9 @@ class Uploadr:
                                 CaughtMsg='DB error on UPDATE files: [{!s}]'
                                           .format(e.args[0]),
                                 NicePrint=True)
+                finally:
+                    # Release DBlock if in multiprocessing mode
+                    self.useDBLock(lock, False)
             else:
                 reportError(Caught=True,
                             CaughtPrefix='xxx',
@@ -2523,16 +2684,17 @@ class Uploadr:
                 setName = self.getSetNameFromFile(file[1],
                                                   xCfg.FILES_DIR,
                                                   xCfg.FULL_SET_NAME)
-                self.createSet(setName, file[0], cur, con)
+                self.createSet(lock, setName, file[0], cur, con)
             # Error: 3: Photo Already in set
             elif (ex.code == 3):
                 try:
                     np.niceprint('Photo already in set... updating DB'
                                  'set_id=[{!s}] photo_id=[{!s}]'
                                  .format(setId, file[0]))
-                    cur.execute('UPDATE files SET set_id = ? '
-                                'WHERE files_id = ?', (setId, file[0]))
-                    con.commit()
+                    # Acquire DBlock if in multiprocessing mode
+                    self.useDBLock(lock, True)
+                    bcur.execute('UPDATE files SET set_id = ? '
+                                 'WHERE files_id = ?', (setId, file[0]))
                 except lite.Error as e:
                     reportError(Caught=True,
                                 CaughtPrefix='+++ DB',
@@ -2540,6 +2702,10 @@ class Uploadr:
                                 CaughtMsg='DB error on UPDATE SET: [{!s}]'
                                           .format(e.args[0]),
                                 NicePrint=True)
+                finally:
+                    con.commit()
+                    # Release DBlock if in multiprocessing mode
+                    self.useDBLock(lock, False)
             else:
                 reportError(Caught=True,
                             CaughtPrefix='xxx',
@@ -2561,13 +2727,20 @@ class Uploadr:
                         NicePrint=True,
                         exceptSysInfo=True)
         # Closing DB connection
-        if con is not None:
+        if con is not None and con in locals():
+            reportError(Caught=True,
+                        CaughtPrefix='+++ DB',
+                        CaughtCode='122',
+                        CaughtMsg='Closing DB connection on addFileToSet',
+                        NicePrint=True)
             con.close()
 
     # -------------------------------------------------------------------------
     # createSet
     #
-    def createSet(self, setName, primaryPhotoId, cur, con):
+    # Creates an Album in Flickr.
+    #
+    def createSet(self, lock, setName, primaryPhotoId, cur, con):
         """ createSet
 
         Creates an Album in Flickr.
@@ -2639,7 +2812,8 @@ class Uploadr:
                 logging.warning('createResp["photoset"]["id"]:[{!s}]'
                                 .format(createResp.find('photoset')
                                         .attrib['id']))
-                self.logSetCreation(createResp.find('photoset').attrib['id'],
+                self.logSetCreation(lock,
+                                    createResp.find('photoset').attrib['id'],
                                     setName,
                                     primaryPhotoId,
                                     cur,
@@ -2671,8 +2845,7 @@ class Uploadr:
     # Creates the control database
     #
     def setupDB(self):
-        """
-            setupDB
+        """ setupDB
 
             Creates the control database
         """
@@ -3488,8 +3661,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #         ispublic="0" isfriend="1" isfamily="1" />
     # </photos>
     def photos_search(self, checksum):
-        """
-            photos_search
+        """ photos_search
+
             Searchs for image with on tag:checksum
         """
         global nuflickr
@@ -3784,6 +3957,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
     # CODING: to be developed. Consider making allMedia (coming from
     # grabnewfiles from  uploadr) a global variable to pass onto this function
     def searchForDuplicates(self):
+        """ searchForDuplicates
+
+            Not implemented.
+        """
 
         pass
 
@@ -3796,7 +3973,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #   1/n = for n seconds per call (ex. 0.5 meand 4 seconds in between calls)
     @rate_limited.rate_limited(5)  # 5 calls per second
     def rate4maddAlbumsMigrate(self):
-        """
+        """ rate4maddAlbumsMigrate
         """
         logging.debug('rate_limit timestamp:[{!s}]'
                       .format(time.strftime('%T')))
@@ -3811,9 +3988,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
             Wrapper function for multiprocessing support to call uploadFile
             with a chunk of the files.
-            lock = for database access control in multiprocessing
-            running = shared value to count processed files in multiprocessing
-            mutex = for running access control in multiprocessing
+            lock       = for database access control in multiprocessing
+            running    = shared value to count processed files in
+                         multiprocessing
+            mutex      = for running access control in multiprocessing
             countTotal = grand total of items.
         """
 
@@ -3883,8 +4061,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
             logging.info('===Multiprocessing=== out.mutex.release(w)')
 
             # Show number of files processed so far
-            self.niceprocessedfiles(xcount, countTotal, False)
+            niceprocessedfiles(xcount, countTotal, False)
 
+            # Control pace (rate limit) of each proceess
             self.rate4maddAlbumsMigrate()
 
     # -------------------------------------------------------------------------
@@ -3940,7 +4119,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     logger = multiprocessing.get_logger()
                     logger.setLevel(xCfg.LOGGING_LEVEL)
 
-                    logging.debug('===Multiprocessing=== Lock defined!')
+                    logging.debug('===Multiprocessing=== Logging defined!')
 
                     # ---------------------------------------------------------
                     # chunk
@@ -4067,9 +4246,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     mlockDB = None
 
                     # Show number of total files processed
-                    self.niceprocessedfiles(mrunning.value,
-                                            countTotal,
-                                            True)
+                    niceprocessedfiles(mrunning.value,
+                                       countTotal,
+                                       True)
 
             else:
                 count = 0
@@ -4091,6 +4270,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                                       xCfg.FILES_DIR,
                                                       xCfg.FULL_SET_NAME)
                     try:
+                        terr = False
                         tfind, tid = self.photos_find_tag(
                             photo_id=row[0],
                             intag='album:{}'.format(row[2]
@@ -4117,11 +4297,13 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                      .format(str(row[0])),
                                      fname='addAlbumMigrate')
 
-                        self.niceprocessedfiles(count, countTotal, False)
+                        terr = True
+
+                        niceprocessedfiles(count, countTotal, False)
 
                         continue
 
-                    if not tfind:
+                    if not terr and not tfind:
                         res_add_tag = self.photos_add_tags(
                             row[0],
                             ['album:"{}"'.format(row[2]
@@ -4133,9 +4315,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             res_add_tag,
                             encoding='utf-8',
                             method='xml'))
-                    self.niceprocessedfiles(count, countTotal, False)
+                    niceprocessedfiles(count, countTotal, False)
 
-                self.niceprocessedfiles(count, countTotal, True)
+                niceprocessedfiles(count, countTotal, True)
 
         return True
 
@@ -4188,7 +4370,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                               nutime.localtime(row[5]))))
                 sys.stdout.flush()
 
-            self.niceprocessedfiles(count, countTotal, True)
+            niceprocessedfiles(count, countTotal, True)
 
         return True
 
@@ -4434,7 +4616,8 @@ def parse_arguments():
                                  'files.')
     pgrpparser.add_argument('-p', '--processes',
                             metavar='P', type=int,
-                            help='Number of photos to upload simultaneously.')
+                            help='Number of photos to upload simultaneously. '
+                                 'Number of process to assign pics to sets.')
     pgrpparser.add_argument('-u', '--not-is-already-uploaded',
                             action='store_true',
                             help='Do not check if file is already uploaded '
@@ -4604,9 +4787,7 @@ def run_uploadr():
 # -----------------------------------------------------------------------------
 # checkBaseDir_INIfile
 #
-# For use with flickrapi upload for showing callback progress information
-# Check function FileWithCallback definition
-# Uses global ARGS.verbose-progress parameter
+# Check if baseDir folder exists and INIfile exists and is a file
 #
 def checkBaseDir_INIfile(baseDir, INIfile):
     """checkBaseDir_INIfile
@@ -4683,12 +4864,14 @@ if xCfg.LOGGING_LEVEL <= logging.DEBUG:
 #   isThisStringUnicode = from niceprint module
 #   niceassert          = from niceprint module
 #   reportError         = from niceprint module
+#   niceprocessedfiles  = from niceprint module
 # -----------------------------------------------------------------------------
 np = niceprint.niceprint()
 StrUnicodeOut = np.StrUnicodeOut
 isThisStringUnicode = np.isThisStringUnicode
 niceassert = np.niceassert
 reportError = np.reportError
+niceprocessedfiles = np.niceprocessedfiles
 # -----------------------------------------------------------------------------
 
 # =============================================================================
@@ -4784,7 +4967,10 @@ if __name__ == "__main__":
             sys.exit(-1)
         raise
     finally:
-        run_uploadr()
+        pass
+    # Run uploader
+    run_uploadr()
+
 np.niceprint('--------- (V{!s}) End time: {!s} -----------(Log:{!s})'
              .format(UPLDRConstants.Version,
                      nutime.strftime(UPLDRConstants.TimeFormat),

@@ -2480,9 +2480,7 @@ class Uploadr:
         # [PRIMARY PIC] For each set found, determine the primary picture
         # [CREATE SET] Create Sets wiht primary picture:
         #   CODING: what if it is not found?
-        # [WORK THRU PICS] After, then split work and add files to set
-        # in multi-processing
-        #   CODING use xLocks
+        # [WORK THRU PICS] Split work and add files to set in multi-processing
 
         # ---------------------------------------------------------------------
         # Local Variables
@@ -2502,7 +2500,7 @@ class Uploadr:
         con = lite.connect(xCfg.DB_PATH)
         con.text_factory = str
         con.create_function("getSet", 3, self.getSetNameFromFile)
-        # Enable traceback return from the customer function.
+        # Enable traceback return from create_function.
         lite.enable_callback_tracebacks(True)
 
         with con:
@@ -3995,7 +3993,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #
     # maddAlbumsMigrate wrapper for multiprocessing purposes
     #
-    def maddAlbumsMigrate(self, lock, running, mutex, filelist, countTotal):
+    def maddAlbumsMigrate(self, lock, running, mutex, filelist, cur):
         """ maddAlbumsMigrate
 
             Wrapper function for multiprocessing support to call uploadFile
@@ -4004,7 +4002,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
             running    = shared value to count processed files in
                          multiprocessing
             mutex      = for running access control in multiprocessing
-            countTotal = grand total of items.
+            cur        = cursor
         """
 
         for i, f in enumerate(filelist):
@@ -4084,6 +4082,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
     # Prepare for version 2.7.0 Add album info to loaded pics
     #
     def addAlbumsMigrate(self):
+        """ addAlbumsMigrate
+
+            Adds tag:album to pics
+        """
 
         # ---------------------------------------------------------------------
         # Local Variables
@@ -4123,145 +4125,23 @@ set0 = sets.find('photosets').findall('photoset')[0]
                               .format(ARGS.processes))
                 logging.debug('__name__:[{!s}] to prevent recursive calling)!'
                               .format(__name__))
+                cur = con.cursor()
 
                 # To prevent recursive calling, check if __name__ == '__main__'
                 if __name__ == '__main__':
-                    logging.debug('===Multiprocessing=== Setting up logger!')
-                    multiprocessing.log_to_stderr()
-                    logger = multiprocessing.get_logger()
-                    logger.setLevel(xCfg.LOGGING_LEVEL)
+                    mp.mprocessing(ARGS.verbose,
+                                   ARGS.verbose_progress,
+                                   ARGS.processes,
+                                   mlockDB,
+                                   mrunning,
+                                   mmutex,
+                                   existingMedia,
+                                   self.maddAlbumsMigrate,
+                                   cur)
 
-                    logging.debug('===Multiprocessing=== Logging defined!')
+                    con.commit()
 
-                    # ---------------------------------------------------------
-                    # chunk
-                    #
-                    # Divides an iterable in slices/chunks of size size
-                    #
-                    from itertools import islice
-
-                    def chunk(it, size):
-                        """
-                            Divides an iterable in slices/chunks of size size
-                        """
-                        it = iter(it)
-                        # lambda: creates a returning expression function
-                        # which returns slices
-                        # iter, with the second argument () stops creating
-                        # iterators when it reaches the end
-                        return iter(lambda: tuple(islice(it, size)), ())
-
-                    migratePool = []
-                    mlockDB = multiprocessing.Lock()
-                    mrunning = multiprocessing.Value('i', 0)
-                    mmutex = multiprocessing.Lock()
-
-                    sz = (len(existingMedia) // int(ARGS.processes)) \
-                        if ((len(existingMedia) // int(ARGS.processes)) > 0) \
-                        else 1
-
-                    logging.debug('len(existingMedia):[{!s}] '
-                                  'int(ARGS.processes):[{!s}] '
-                                  'sz per process:[{!s}]'
-                                  .format(len(existingMedia),
-                                          int(ARGS.processes),
-                                          sz))
-
-                    # Split the Media in chunks to distribute accross Processes
-                    for mexistingMedia in chunk(existingMedia, sz):
-                        logging.warning('===Actual/Planned Chunk size: '
-                                        '[{!s}]/[{!s}]'
-                                        .format(len(mexistingMedia), sz))
-                        logging.debug('===type(mexistingMedia)=[{!s}]'
-                                      .format(type(mexistingMedia)))
-                        logging.debug('===Job/Task Process: Creating...')
-                        migrateTask = multiprocessing.Process(
-                            target=self.maddAlbumsMigrate,
-                            args=(mlockDB,
-                                  mrunning,
-                                  mmutex,
-                                  mexistingMedia,
-                                  countTotal,))
-                        migratePool.append(migrateTask)
-                        logging.debug('===Job/Task Process: Starting...')
-                        migrateTask.start()
-                        logging.debug('===Job/Task Process: Started')
-                        if (ARGS.verbose):
-                            np.niceprint('===Job/Task Process: [{!s}] Started '
-                                         'with pid:[{!s}]'
-                                         .format(migrateTask.name,
-                                                 migrateTask.pid))
-
-                    # Check status of jobs/tasks in the Process Pool
-                    if xCfg.LOGGING_LEVEL <= logging.DEBUG:
-                        logging.debug('===Checking Processes launched/status:')
-                        for j in migratePool:
-                            np.niceprint('{!s}.is_alive = {!s}'
-                                         .format(j.name, j.is_alive()))
-
-                    # Regularly print status of jobs/tasks in the Process Pool
-                    # Prints status while there are processes active
-                    # Exits when all jobs/tasks are done.
-                    while (True):
-                        if not (any(multiprocessing.active_children())):
-                            logging.debug('===No active children Processes.')
-                            break
-                        for p in multiprocessing.active_children():
-                            logging.debug('==={!s}.is_alive = {!s}'
-                                          .format(p.name, p.is_alive()))
-                            mTaskActive = p
-                        logging.info('===Will wait for 60 on '
-                                     '{!s}.is_alive = {!s}'
-                                     .format(mTaskActive.name,
-                                             mTaskActive.is_alive()))
-                        if (ARGS.verbose_progress):
-                            np.niceprint('===Will wait for 60 on '
-                                         '{!s}.is_alive = {!s}'
-                                         .format(mTaskActive.name,
-                                                 mTaskActive.is_alive()))
-
-                        mTaskActive.join(timeout=60)
-                        logging.info('===Waited for 60s on '
-                                     '{!s}.is_alive = {!s}'
-                                     .format(mTaskActive.name,
-                                             mTaskActive.is_alive()))
-                        if (ARGS.verbose):
-                            np.niceprint('===Waited for 60s on '
-                                         '{!s}.is_alive = {!s}'
-                                         .format(mTaskActive.name,
-                                                 mTaskActive.is_alive()))
-
-                    # Wait for join all jobs/tasks in the Process Pool
-                    # All should be done by now!
-                    for j in migratePool:
-                        j.join()
-                        if (ARGS.verbose):
-                            np.niceprint('==={!s} '
-                                         '(is alive: {!s}).exitcode = {!s}'
-                                         .format(j.name,
-                                                 j.is_alive(),
-                                                 j.exitcode))
-
-                    logging.warning('===Multiprocessing=== pool joined! '
-                                    'All processes finished.')
-
-                    # Will release (set to None) the nulockDB lock control
-                    # this prevents subsequent calls to
-                    # useDBLock( nuLockDB, False)
-                    # to raise exception:
-                    #   ValueError('semaphore or lock released too many times')
-                    logging.info('===Multiprocessing=== pool joined! '
-                                 'What happens to mlockDB is None:[{!s}]? '
-                                 'It seems not, it still has a value! '
-                                 'Setting it to None!'
-                                 .format(mlockDB is None))
-                    mlockDB = None
-
-                    # Show number of total files processed
-                    niceprocessedfiles(mrunning.value,
-                                       countTotal,
-                                       True)
-
+            # running in single processing mode
             else:
                 count = 0
                 countTotal = len(existingMedia)

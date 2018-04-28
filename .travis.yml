@@ -5,18 +5,16 @@
 language: python
 python:
   - "2.7"
-  - "3.6"
+  - "3.6.4"
 #  - "3.7-dev"   # Comment for faster test
 # nightly gets the latest nightly version of python... python 3 in the case. For now I don't want that!
 #  - "nightly"
 
 # =============================================================================
 # branches blacklist for TravisCI testing
-branches:
-  except:
-    - dev-apr18-issue46
-    - dev-apr18-issue11
-    #- dev-apr18-issue11-back
+#branches:
+#  except:
+#    - dev-may18
 
 before_install:
 # For use with wget into github account

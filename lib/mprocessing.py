@@ -67,6 +67,11 @@ def mprocessing(ARGS_verbose, ARGS_verbose_progress,
 
     logging.debug('===Multiprocessing=== Logging defined!')
 
+    # ---------------------------------------------------------
+    # chunk
+    #
+    # Divides an iterable in slices/chunks of size size
+    #
     def chunk(it, size):
         """
             Divides an iterable in slices/chunks of size size
@@ -109,7 +114,8 @@ def mprocessing(ARGS_verbose, ARGS_verbose_progress,
                   running,
                   mutex,
                   splititemslist,
-                  cur))
+                  countTotal,
+                  cur,))
         procPool.append(pTask)
         logging.debug('===Job/Task Process: Starting...')
         pTask.start()

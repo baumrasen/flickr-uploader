@@ -2414,7 +2414,7 @@ class Uploadr:
     #
     # Processing function for adding files to set in multiprocessing mode
     #
-    def fn_addFilesToSets(self, lockDB, running, mutex, sfiles, cur):
+    def fn_addFilesToSets(self, lockDB, running, mutex, sfiles, cTotal, cur):
         """ fn_addFilesToSets
         """
 
@@ -2462,6 +2462,16 @@ class Uploadr:
                 else:
                     np.niceprint('Not able to assign pic to set')
                     logging.error('Not able to assign pic to set')
+
+                logging.debug('===Multiprocessing=== in.mutex.acquire(w)')
+                mutex.acquire()
+                running.value += 1
+                xcount = running.value
+                mutex.release()
+                logging.info('===Multiprocessing=== out.mutex.release(w)')
+     
+                # Show number of files processed so far
+                niceprocessedfiles(xcount, cTotal, False)
 
         # Closing DB connection
         if fn_con is not None:
@@ -3993,7 +4003,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #
     # maddAlbumsMigrate wrapper for multiprocessing purposes
     #
-    def maddAlbumsMigrate(self, lock, running, mutex, filelist, cur):
+    def maddAlbumsMigrate(self, lock, running, mutex, filelist, cTotal, cur):
         """ maddAlbumsMigrate
 
             Wrapper function for multiprocessing support to call uploadFile
@@ -4071,7 +4081,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
             logging.info('===Multiprocessing=== out.mutex.release(w)')
 
             # Show number of files processed so far
-            niceprocessedfiles(xcount, countTotal, False)
+            niceprocessedfiles(xcount, cTotal, False)
 
             # Control pace (rate limit) of each proceess
             self.rate4maddAlbumsMigrate()

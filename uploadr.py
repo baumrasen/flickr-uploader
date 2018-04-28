@@ -1332,12 +1332,12 @@ class Uploadr:
         con.text_factory = str
         with con:
             cur = con.cursor()
-            logging.debug('uploadFILE SELECT:'
-                          '{!s}: {!s}'.format('SELECT rowid,files_id,path,'
-                                              'set_id,md5,tagged,'
-                                              'last_modified FROM '
-                                              'files WHERE path = ?',
-                                              file))
+            logging.debug('uploadFILE SELECT: {!s}: {!s}'
+                          .format('SELECT rowid,files_id,path,'
+                                  'set_id,md5,tagged,'
+                                  'last_modified FROM '
+                                  'files WHERE path = ?',
+                                  file))
 
             try:
                 # Acquire DB lock if running in multiprocessing mode
@@ -1383,6 +1383,14 @@ class Uploadr:
                              .format(isLoaded, isCount,
                                      isfile_id, row is None,
                                      isNoSet))
+            # CODING: REUPLOAD deleted files from Flickr...
+            # A) File loaded. Not recorded on DB. Update local DB.
+            # B) Not loaded. Not recorded on DB. Upload file to FLickr.
+            # C) File loaded. Recorded on DB. Look for changes...
+            # D) Not loaded, Recorded on DB. Reupload.
+            #    Handle D) like B)...
+            #    or (not isLoaded and row is not None)
+            #    ... delete from DB... run normally the (RE)upload process
 
             # A) File loaded. Not recorded on DB. Update local DB.
             if isLoaded and row is None:
@@ -1969,9 +1977,13 @@ class Uploadr:
                                                             encoding='utf-8',
                                                             method='xml'))
                                     if (self.isGood(remtagResp)):
-                                        np.niceprint('    Tag removed.')
+                                        np.niceprint('    Tag removed:[{!s}]'
+                                                     .format(
+                                                        StrUnicodeOut(file)))
                                     else:
-                                        np.niceprint('Tag Not removed.')
+                                        np.niceprint('Tag Not removed:[{!s}]'
+                                                     .format(
+                                                        StrUnicodeOut(file)))
 
                     break
                 # Exceptions for flickr.upload function call handled on the

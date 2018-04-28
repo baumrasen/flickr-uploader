@@ -1979,11 +1979,11 @@ class Uploadr:
                                     if (self.isGood(remtagResp)):
                                         np.niceprint('    Tag removed:[{!s}]'
                                                      .format(
-                                                        StrUnicodeOut(file)))
+                                                         StrUnicodeOut(file)))
                                     else:
                                         np.niceprint('Tag Not removed:[{!s}]'
                                                      .format(
-                                                        StrUnicodeOut(file)))
+                                                         StrUnicodeOut(file)))
 
                     break
                 # Exceptions for flickr.upload function call handled on the
@@ -2469,7 +2469,7 @@ class Uploadr:
                 xcount = running.value
                 mutex.release()
                 logging.info('===Multiprocessing=== out.mutex.release(w)')
-     
+
                 # Show number of files processed so far
                 niceprocessedfiles(xcount, cTotal, False)
 

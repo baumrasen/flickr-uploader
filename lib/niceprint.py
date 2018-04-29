@@ -209,19 +209,21 @@ class niceprint:
         """
 
         if Caught is not None and Caught:
-            logging.error('{!s}#{!s}: {!s}'.format(CaughtPrefix,
-                                                   CaughtCode,
-                                                   CaughtMsg))
+            logging.error('%s#%s: %s',
+                          CaughtPrefix,
+                          CaughtCode,
+                          CaughtMsg)
             if NicePrint is not None and NicePrint:
-                self.niceprint('{!s}#{!s}: {!s}'.format(CaughtPrefix,
-                                                        CaughtCode,
-                                                        CaughtMsg))
+                self.niceprint('%s#%s: %s',
+                               CaughtPrefix,
+                               CaughtCode,
+                               CaughtMsg)
         if exceptUse is not None and exceptUse:
-            logging.error('Error code: [{!s}]'.format(exceptCode))
-            logging.error('Error code: [{!s}]'.format(exceptMsg))
+            logging.error('Error code: [%s]', exceptCode)
+            logging.error('Error code: [%s]', exceptMsg)
             if NicePrint is not None and NicePrint:
-                self.niceprint('Error code: [{!s}]'.format(exceptCode))
-                self.niceprint('Error code: [{!s}]'.format(exceptMsg))
+                self.niceprint('Error code: [%s]', exceptCode)
+                self.niceprint('Error code: [%s]', exceptMsg)
         if exceptSysInfo is not None and exceptSysInfo:
             logging.error(str(sys.exc_info()))
             if NicePrint is not None and NicePrint:
@@ -236,23 +238,23 @@ class niceprint:
     #
     # Nicely print number of processed files
     #
-    def niceprocessedfiles(self, count, cTotal, total):
+    def niceprocessedfiles(self, count, ctotal, total):
         """
         niceprocessedfiles
 
         count  = Nicely print number of processed files rounded to 100's
-        cTotal = Shows also the total number of items to be processed
+        ctotal = Shows also the total number of items to be processed
         total  = if true shows the final count (use at the end of processing)
         """
 
         if not total:
             if int(count) % 100 == 0:
                 self.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
-                               .format(count, cTotal))
+                               .format(count, ctotal))
         else:
             if int(count) % 100 > 0:
                 self.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
-                               .format(count, cTotal))
+                               .format(count, ctotal))
 
         sys.stdout.flush()
 

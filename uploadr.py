@@ -4768,7 +4768,7 @@ if xCfg.LOGGING_LEVEL <= logging.DEBUG:
 #   reportError         = from niceprint module
 #   niceprocessedfiles  = from niceprint module
 # -----------------------------------------------------------------------------
-NP =niceprint.niceprint()
+NP = niceprint.niceprint()
 StrUnicodeOut = NP.StrUnicodeOut
 isThisStringUnicode = NP.isThisStringUnicode
 niceassert = NP.niceassert

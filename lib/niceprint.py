@@ -215,16 +215,15 @@ class niceprint:
                           CaughtCode,
                           CaughtMsg)
             if NicePrint is not None and NicePrint:
-                self.niceprint('%s#%s: %s',
-                               CaughtPrefix,
-                               CaughtCode,
-                               CaughtMsg)
+                self.niceprint('{!s}#{!s}: {!s}'.format(CaughtPrefix,
+                                                        CaughtCode,
+                                                        CaughtMsg))
         if exceptUse is not None and exceptUse:
             logging.error('Error code: [%s]', exceptCode)
             logging.error('Error code: [%s]', exceptMsg)
             if NicePrint is not None and NicePrint:
-                self.niceprint('Error code: [%s]', exceptCode)
-                self.niceprint('Error code: [%s]', exceptMsg)
+                self.niceprint('Error code: [{!s}]'.format(exceptCode))
+                self.niceprint('Error code: [{!s}]'.format(exceptMsg))                
         if exceptSysInfo is not None and exceptSysInfo:
             logging.error(str(sys.exc_info()))
             if NicePrint is not None and NicePrint:

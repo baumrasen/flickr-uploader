@@ -17,7 +17,7 @@ class TestNicePrintMethods(unittest.TestCase):
         self, s, fname='uploadr'
         Print a message with the format:
             [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
-        """        
+        """
         # with captured_stdout() as s:
         #     print "hello"
         # assert s.getvalue() == "hello\n", 'not ok'

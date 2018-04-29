@@ -57,7 +57,7 @@ class niceprint:
     #
     # Returns true if String is Unicode
     #
-    def isThisStringUnicode(self, s):
+    def isThisStringUnicode(self, astr):
         """
         Determines if a string is Unicode (return True) or not (returns False)
         to allow correct print operations.
@@ -76,11 +76,11 @@ class niceprint:
         if sys.version_info < (3, ):
             if isinstance(s, unicode):  # noqa
                 return True
-            elif isinstance(s, str):
+            elif isinstance(astr, str):
                 return False
             else:
                 return False
-        elif isinstance(s, str):
+        elif isinstance(astr, str):
             return False
         else:
             return False
@@ -90,7 +90,7 @@ class niceprint:
     #
     # Returns true if String is Unicode
     #
-    def StrUnicodeOut(self, s):
+    def StrUnicodeOut(self, astr):
         """
         Outputs s.encode('utf-8') if isThisStringUnicode(s) else s
             niceprint('Checking file:[{!s}]...'.format(StrUnicodeOut(file))
@@ -101,7 +101,8 @@ class niceprint:
         'Hello'
         """
         if s is not None:
-            return s.encode('utf-8') if self.isThisStringUnicode(s) else s
+            return astr.encode('utf-8') \
+            if self.isThisStringUnicode(astr) else astr
         else:
             return ''.encode('utf-8') if self.isThisStringUnicode('') else ''
 
@@ -111,7 +112,7 @@ class niceprint:
     # Print a message with the format:
     #   [2017.10.25 22:32:03]:[PRINT   ]:[uploadr] Some Message
     #
-    def niceprint(self, s, fname='uploadr'):
+    def niceprint(self, astr, fname='uploadr'):
         """
         Print a message with the format:
             [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
@@ -126,12 +127,12 @@ class niceprint:
                       UPLDRConstants.W,
                       'PRINT',
                       self.StrUnicodeOut(fname),
-                      self.StrUnicodeOut(s)))
+                      self.StrUnicodeOut(astr)))
 
     # -------------------------------------------------------------------------
     # niceassert
     #
-    def niceassert(self, s):
+    def niceassert(self, astr):
         """
          Returns a message with the format:
              [2017.11.19 01:53:57]:[PID       ][ASSERT  ]:[uploadr] Message
@@ -149,7 +150,7 @@ class niceprint:
                        UPLDRConstants.W,
                        'ASSERT',
                        'uploadr',
-                       self.StrUnicodeOut(s)))
+                       self.StrUnicodeOut(astr)))
 
     # -------------------------------------------------------------------------
     # reportError
@@ -245,11 +246,11 @@ class niceprint:
         """
 
         if not total:
-            if (int(count) % 100 == 0):
+            if int(count) % 100 == 0:
                 self.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
                                .format(count, cTotal))
         else:
-            if (int(count) % 100 > 0):
+            if int(count) % 100 > 0:
                 self.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
                                .format(count, cTotal))
 
@@ -263,7 +264,7 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.DEBUG,
                         format='[%(asctime)s]:[%(processName)-11s]' +
-                               '[%(levelname)-8s]:[%(name)s] %(message)s')
+                        '[%(levelname)-8s]:[%(name)s] %(message)s')
 
     import doctest
     doctest.testmod()

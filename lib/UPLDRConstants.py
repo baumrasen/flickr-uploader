@@ -90,7 +90,7 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.DEBUG,
                         format='[%(asctime)s]:[%(processName)-11s]' +
-                               '[%(levelname)-8s]:[%(name)s] %(message)s')
+                        '[%(levelname)-8s]:[%(name)s] %(message)s')
 
     import doctest
     doctest.testmod()

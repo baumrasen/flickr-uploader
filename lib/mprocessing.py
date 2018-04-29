@@ -30,8 +30,8 @@ NP = niceprint.niceprint()
 # -----------------------------------------------------------------------------
 # mprocessing
 #
-def mprocessing(ARGS_verbose, ARGS_verbose_progress,
-                nprocs, lockDB, running, mutex, itemslist, f, cur):
+def mprocessing(args_verbose, args_verbose_progress,
+                nprocs, lockDB, running, mutex, itemslist, a_fn, cur):
     """ mprocessing Function
 
     verbose    = verbose info
@@ -41,21 +41,22 @@ def mprocessing(ARGS_verbose, ARGS_verbose_progress,
     running    = Value to count processed items
     mutex      = mutex for access to value running
     itemslist  = list of items to be processed
+    a_fn       = a function which is the target of the multiprocessing
     cur        = cursor variable for DB access
     """
-    # procPool   = Local variable procPool for Pool of processes
-    # LOGlevel   = LOGlevel
-    # countTotal = Total counter of items. to distribute/play/indicate progress
-    #              lem(itemslist)
+    # proc_pool   = Local variable proc_pool for Pool of processes
+    # log_level   = log_level
+    # count_total = Total counter of items. to distribute/play/indicate progress
+    #               len(itemslist)
 
-    LOGlevel = logging.getLogger().getEffectiveLevel()
-    if LOGlevel <= logging.WARNING:
+    log_level = logging.getLogger().getEffectiveLevel()
+    if log_level <= logging.WARNING:
         logging.info('===mprocessing f():[{!s}] nprocs:[{!s}]'
-                     .format(f.__name__, nprocs))
+                     .format(a_fn.__name__, nprocs))
         # if args is not None:
-        #     for i, a in enumerate(args):
+        #     for i, arg in enumerate(args):
         #         logging.info('===mprocessing f():[{!s}] arg[{!s}]={!s}'
-        #                      .format(f.__name__, i, a))
+        #                      .format(a_fn.__name__, i, arg))
 
     logging.info('new_wrapper=[{!s}]'.format(__name__))
 
@@ -63,7 +64,7 @@ def mprocessing(ARGS_verbose, ARGS_verbose_progress,
     logging.debug('===Multiprocessing=== Setting up logger!')
     multiprocessing.log_to_stderr()
     logger = multiprocessing.get_logger()
-    logger.setLevel(LOGlevel)
+    logger.setLevel(log_level)
 
     logging.debug('===Multiprocessing=== Logging defined!')
 
@@ -72,24 +73,24 @@ def mprocessing(ARGS_verbose, ARGS_verbose_progress,
     #
     # Divides an iterable in slices/chunks of size size
     #
-    def chunk(it, size):
+    def chunk(iter_list, size):
         """
             Divides an iterable in slices/chunks of size size
         """
-        it = iter(it)
+        iter_list = iter(iter_list)
         # lambda: creates a returning expression function
         # which returns slices
         # iter, with the second argument () stops creating
         # iterators when it reaches the end
-        return iter(lambda: tuple(islice(it, size)), ())
+        return iter(lambda: tuple(islice(iter_list, size)), ())
 
-    procPool = []
+    proc_pool = []
     lockDB = multiprocessing.Lock()
     running = multiprocessing.Value('i', 0)
     mutex = multiprocessing.Lock()
-    countTotal = len(itemslist)
+    count_total = len(itemslist)
 
-    sz = (len(itemslist) // int(nprocs)) \
+    size = (len(itemslist) // int(nprocs)) \
         if ((len(itemslist) // int(nprocs)) > 0) \
         else 1
 
@@ -108,68 +109,68 @@ def mprocessing(ARGS_verbose, ARGS_verbose_progress,
         logging.debug('===type(splititemslist)=[{!s}]'
                       .format(type(splititemslist)))
         logging.debug('===Job/Task Process: Creating...')
-        pTask = multiprocessing.Process(
-            target=f,  # argument function
+        proc_task = multiprocessing.Process(
+            target=a_fn,  # argument function
             args=(lockDB,
                   running,
                   mutex,
                   splititemslist,
-                  countTotal,
+                  count_total,
                   cur,))
-        procPool.append(pTask)
+        proc_pool.append(proc_task)
         logging.debug('===Job/Task Process: Starting...')
-        pTask.start()
+        proc_task.start()
         logging.debug('===Job/Task Process: Started')
-        if (ARGS_verbose):
+        if args_verbose:
             NP.niceprint('===Job/Task Process: [{!s}] Started '
                          'with pid:[{!s}]'
-                         .format(pTask.name,
-                                 pTask.pid))
+                         .format(proc_task.name,
+                                 proc_task.pid))
 
     # Check status of jobs/tasks in the Process Pool
-    if LOGlevel <= logging.DEBUG:
+    if log_level <= logging.DEBUG:
         logging.debug('===Checking Processes launched/status:')
-        for j in procPool:
+        for j in proc_pool:
             NP.niceprint('{!s}.is_alive = {!s}'
                          .format(j.name, j.is_alive()))
 
     # Regularly print status of jobs/tasks in the Process Pool
     # Prints status while there are processes active
     # Exits when all jobs/tasks are done.
-    while (True):
-        if not (any(multiprocessing.active_children())):
+    while True:
+        if not any(multiprocessing.active_children()):
             logging.debug('===No active children Processes.')
             break
-        for p in multiprocessing.active_children():
+        for prc in multiprocessing.active_children():
             logging.debug('==={!s}.is_alive = {!s}'
-                          .format(p.name, p.is_alive()))
-            procTaskActive = p
+                          .format(prc.name, prc.is_alive()))
+            proc_task_active = prc
         logging.info('===Will wait for 60 on '
                      '{!s}.is_alive = {!s}'
-                     .format(procTaskActive.name,
-                             procTaskActive.is_alive()))
-        if (ARGS_verbose_progress):
+                     .format(proc_task_active.name,
+                             proc_task_active.is_alive()))
+        if args_verbose_progress:
             NP.niceprint('===Will wait for 60 on '
                          '{!s}.is_alive = {!s}'
-                         .format(procTaskActive.name,
-                                 procTaskActive.is_alive()))
+                         .format(proc_task_active.name,
+                                 proc_task_active.is_alive()))
 
-        procTaskActive.join(timeout=60)
+        proc_task_active.join(timeout=60)
         logging.info('===Waited for 60s on '
                      '{!s}.is_alive = {!s}'
-                     .format(procTaskActive.name,
-                             procTaskActive.is_alive()))
-        if (ARGS_verbose):
+                     .format(proc_task_active.name,
+                             proc_task_active.is_alive()))
+        if args_verbose:
             NP.niceprint('===Waited for 60s on '
                          '{!s}.is_alive = {!s}'
-                         .format(procTaskActive.name,
-                                 procTaskActive.is_alive()))
+                         .format(proc_task_active.name,
+                                 proc_task_active.is_alive()))
 
     # Wait for join all jobs/tasks in the Process Pool
     # All should be done by now!
-    for j in procPool:
+    for j in proc_pool:
         j.join()
-        if (ARGS_verbose):
+        if args_verbose_progress:
             NP.niceprint('==={!s} '
                          '(is alive: {!s}).exitcode = {!s}'
                          .format(j.name,
@@ -193,7 +194,7 @@ def mprocessing(ARGS_verbose, ARGS_verbose_progress,
 
     # Show number of total files processed
     NP.niceprocessedfiles(running.value,
-                          countTotal,
+                          count_total,
                           True)
 
     return True

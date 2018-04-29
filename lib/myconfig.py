@@ -340,7 +340,7 @@ class MyConfig(object):
         # Further specific processing... FILES_DIR
         for item in ['FILES_DIR']:  # Check if dir exists. Unicode Support
             logging.debug('verifyconfig for [{!s}]'.format(item))
-            if not(np.isThisStringUnicode(self.__dict__[item])):
+            if not np.isThisStringUnicode(self.__dict__[item]):
                 self.__dict__[item] = unicode(  # noqa
                                           self.__dict__[item],
                                           'utf-8') \
@@ -395,14 +395,14 @@ class MyConfig(object):
                     logging.critical('{!s}:[{!s}] is not a valid folder.'
                                      .format(item,
                                              StrUnicodeOut(
-                                                self.__dict__[item])))
+                                                 self.__dict__[item])))
                     returnverify = False
                 elif not (
                     os.path.isfile(os.path.join(self.__dict__[item],
-                                                'exiftool'))
-                    and os.access(os.path.join(self.__dict__[item],
-                                               'exiftool'),
-                                  os.X_OK)):
+                                                'exiftool')) and
+                    os.access(os.path.join(self.__dict__[item],
+                                           'exiftool'),
+                              os.X_OK)):
                     logging.critical('{!s}: [{!s}] is not a valid executable.'
                                      .format(item,
                                              os.path.join(self.__dict__[item],

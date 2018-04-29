@@ -51,14 +51,14 @@ def mprocessing(args_verbose, args_verbose_progress,
 
     log_level = logging.getLogger().getEffectiveLevel()
     if log_level <= logging.WARNING:
-        logging.info('===mprocessing f():[{!s}] nprocs:[{!s}]'
-                     .format(a_fn.__name__, nprocs))
+        logging.info('===mprocessing f():[%s] nprocs:[%s]',
+                     a_fn.__name__, nprocs)
         # if args is not None:
         #     for i, arg in enumerate(args):
-        #         logging.info('===mprocessing f():[{!s}] arg[{!s}]={!s}'
-        #                      .format(a_fn.__name__, i, arg))
+        #         logging.info('===mprocessing f():[%s] arg[%s]={%s}',
+        #                      a_fn.__name__, i, arg)
 
-    logging.info('new_wrapper=[{!s}]'.format(__name__))
+    logging.info('new_wrapper=[%s]',__name__)
 
     # if __name__ == '__main__':
     logging.debug('===Multiprocessing=== Setting up logger!')
@@ -94,20 +94,18 @@ def mprocessing(args_verbose, args_verbose_progress,
         if ((len(itemslist) // int(nprocs)) > 0) \
         else 1
 
-    logging.debug('len(itemslist):[{!s}] '
-                  'int(nprocs):[{!s}] '
-                  'size per process:[{!s}]'
-                  .format(len(itemslist),
-                          int(nprocs),
-                          size))
+    logging.debug('len(itemslist):[%s] '
+                  'int(nprocs):[%s] '
+                  'size per process:[%s]',
+                  len(itemslist),
+                  int(nprocs),
+                  size)
 
     # Split itemslist in chunks to distribute accross Processes
     for splititemslist in chunk(itemslist, size):
-        logging.warning('===Actual/Planned Chunk size: '
-                        '[{!s}]/[{!s}]'
-                        .format(len(splititemslist), size))
-        logging.debug('===type(splititemslist)=[{!s}]'
-                      .format(type(splititemslist)))
+        logging.warning('===Actual/Planned Chunk size: [%s]/[%s]',
+                        len(splititemslist), size)
+        logging.debug('===type(splititemslist)=[%s]', type(splititemslist))
         logging.debug('===Job/Task Process: Creating...')
         proc_task = multiprocessing.Process(
             target=a_fn,  # argument function
@@ -142,13 +140,11 @@ def mprocessing(args_verbose, args_verbose_progress,
             logging.debug('===No active children Processes.')
             break
         for prc in multiprocessing.active_children():
-            logging.debug('==={!s}.is_alive = {!s}'
-                          .format(prc.name, prc.is_alive()))
+            logging.debug('===%s.is_alive = %s', prc.name, prc.is_alive())
             proc_task_active = prc
-        logging.info('===Will wait for 60 on '
-                     '{!s}.is_alive = {!s}'
-                     .format(proc_task_active.name,
-                             proc_task_active.is_alive()))
+        logging.info('===Will wait for 60 on %s.is_alive = %s',
+                     proc_task_active.name,
+                     proc_task_active.is_alive())
         if args_verbose_progress:
             NP.niceprint('===Will wait for 60 on '
                          '{!s}.is_alive = {!s}'
@@ -156,10 +152,9 @@ def mprocessing(args_verbose, args_verbose_progress,
                                  proc_task_active.is_alive()))
 
         proc_task_active.join(timeout=60)
-        logging.info('===Waited for 60s on '
-                     '{!s}.is_alive = {!s}'
-                     .format(proc_task_active.name,
-                             proc_task_active.is_alive()))
+        logging.info('===Waited for 60s on %s.is_alive = %s',
+                     proc_task_active.name,
+                     proc_task_active.is_alive())
         if args_verbose:
             NP.niceprint('===Waited for 60s on '
                          '{!s}.is_alive = {!s}'
@@ -186,10 +181,8 @@ def mprocessing(args_verbose, args_verbose_progress,
     # to raise exception:
     #   ValueError('semaphore or lock released too many times')
     logging.info('===Multiprocessing=== pool joined! '
-                 'What happens to lockDB is None:[{!s}]? '
-                 'It seems not, it still has a value! '
-                 'Setting it to None!'
-                 .format(lockDB is None))
+                 'Is lockDB  None? [%s]. Setting lockDB to None anyhow.',
+                 lockDB is None)
     lockDB = None
 
     # Show number of total files processed

@@ -223,7 +223,7 @@ class niceprint:
             logging.error('Error code: [%s]', exceptMsg)
             if NicePrint is not None and NicePrint:
                 self.niceprint('Error code: [{!s}]'.format(exceptCode))
-                self.niceprint('Error code: [{!s}]'.format(exceptMsg))                
+                self.niceprint('Error code: [{!s}]'.format(exceptMsg))
         if exceptSysInfo is not None and exceptSysInfo:
             logging.error(str(sys.exc_info()))
             if NicePrint is not None and NicePrint:

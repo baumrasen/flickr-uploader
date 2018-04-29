@@ -46,7 +46,7 @@ def mprocessing(args_verbose, args_verbose_progress,
     """
     # proc_pool   = Local variable proc_pool for Pool of processes
     # log_level   = log_level
-    # count_total = Total counter of items. to distribute/play/indicate progress
+    # count_total = Total counter of items to distribute/play/indicate progress
     #               len(itemslist)
 
     log_level = logging.getLogger().getEffectiveLevel()

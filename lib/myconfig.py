@@ -478,7 +478,7 @@ if __name__ == "__main__":
     import lib.myconfig as myconfig
 
     mycfg = myconfig.MyConfig()
-    if myfg.processconfig():
+    if mycfg.processconfig():
         if mycfg.verifyconfig():
             print('Test Myconfig: Ok')
         else:

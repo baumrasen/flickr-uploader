@@ -63,18 +63,18 @@ class MyConfig(object):
         found on INI config file.
 
         >>> import lib.myconfig as myconfig
-        >>> Cfg = myconfig.MyConfig()
-        >>> Cfg.processconfig()
+        >>> CFG = myconfig.MyConfig()
+        >>> CFG.processconfig()
         True
-        >>> ELog = Cfg.LOGGING_LEVEL
-        >>> Cfg.verifyconfig()
+        >>> ELog = CFG.LOGGING_LEVEL
+        >>> CFG.verifyconfig()
         True
-        >>> Cfg.verifyconfig()
+        >>> CFG.verifyconfig()
         True
-        >>> Cfg.LOGGING_LEVEL = 'a'
-        >>> Cfg.verifyconfig()
+        >>> CFG.LOGGING_LEVEL = 'a'
+        >>> CFG.verifyconfig()
         True
-        >>> Cfg.LOGGING_LEVEL == ELog
+        >>> CFG.LOGGING_LEVEL == ELog
         True
 
     """

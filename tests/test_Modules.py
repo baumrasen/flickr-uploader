@@ -13,7 +13,11 @@ import lib.UPLDRConstants as UPLDRConstantsClass
 class TestNicePrintMethods(unittest.TestCase):
 
     def test_niceprint(self):
-
+        """ test_niceprint
+        self, s, fname='uploadr'
+        Print a message with the format:
+            [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
+        """        
         # with captured_stdout() as s:
         #     print "hello"
         # assert s.getvalue() == "hello\n", 'not ok'
@@ -26,12 +30,6 @@ class TestNicePrintMethods(unittest.TestCase):
         print('type:{}'.format(type(s)))
         npre = '\[[0-9. :]+\].+hello$'
         self.assertRegexpMatches(s.getvalue(), npre)
-
-        """
-        self, s, fname='uploadr'
-        Print a message with the format:
-            [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
-        """
 
 
 class TestMethods(unittest.TestCase):

@@ -62,24 +62,38 @@ class LastTime:
         logging.debug('\t__init__: name=[{!s}]'.format(self.name))
 
     def acquire(self):
+        """ acquire
+        """
         self.ratelock.acquire()
 
     def release(self):
+        """ release
+        """
         self.ratelock.release()
 
     def set_last_time_called(self):
+        """ set_last_time_called
+        """
         self.last_time_called.value = time.time()
 
     def get_last_time_called(self):
+        """ get_last_time_called
+        """        
         return self.last_time_called.value
 
     def add_cnt(self):
+        """ add_cnt
+        """        
         self.cnt.value += 1
 
     def get_cnt(self):
+        """ get_cnt
+        """        
         return self.cnt.value
 
     def debug(self, debugname='LT'):
+        """ debug
+        """        
         now = time.time()
         logging.debug('___Rate name:[{!s}] '
                       'debug=[{!s}] '
@@ -120,6 +134,8 @@ def rate_limited(max_per_second):
     NP = niceprint.niceprint()
 
     def decorate(func):
+        """ decorate
+        """        
         LT.acquire()
         if LT.get_last_time_called() == 0:
             LT.set_last_time_called()
@@ -216,8 +232,8 @@ def retry(attempts=3, waittime=5, randtime=False):
     Traceback (most recent call last):
     NameError: ...
     """
-    def wrapper_fn(f):
-        @wraps(f)
+    def wrapper_fn(a_fn):
+        @wraps(a_fn)
         def new_wrapper(*args, **kwargs):
 
             rtime = time
@@ -227,27 +243,27 @@ def retry(attempts=3, waittime=5, randtime=False):
                 if args is not None:
                     logging.info('___Retry f():[{!s}] '
                                  'Max:[{!s}] Delay:[{!s}] Rnd[{!s}]'
-                                 .format(f.__name__, attempts,
+                                 .format(a_fn.__name__, attempts,
                                          waittime, randtime))
                     for i, arg in enumerate(args):
                         logging.info('___Retry f():[{!s}] arg[{!s}]={!s}'
-                                     .format(f.__name__, i, arg))
+                                     .format(a_fn.__name__, i, arg))
             for i in range(attempts if attempts > 0 else 1):
                 try:
                     logging.info('___Retry f():[{!s}]: '
                                  'Attempt:[{!s}] of [{!s}]'
-                                 .format(f.__name__, i + 1, attempts))
-                    return f(*args, **kwargs)
+                                 .format(a_fn.__name__, i + 1, attempts))
+                    return a_fn(*args, **kwargs)
                 except Exception as e:
                     logging.error('___Retry f():[{!s}]: Error code A: [{!s}]'
-                                  .format(f.__name__, e))
+                                  .format(a_fn.__name__, e))
                     error = e
                 except flickrapi.exceptions.FlickrError as ex:
                     logging.error('___Retry f():[{!s}]: Error code B: [{!s}]'
-                                  .format(f.__name__, ex))
+                                  .format(a_fn.__name__, ex))
                 except lite.Error as e:
                     logging.error('___Retry f():[{!s}]: Error code C: [{!s}]'
-                                  .format(f.__name__, e))
+                                  .format(a_fn.__name__, e))
                     error = e
                     # Release the lock on error.
                     # CODING: Check how to handle this particular scenario.
@@ -255,10 +271,10 @@ def retry(attempts=3, waittime=5, randtime=False):
                     # self.useDBLock( lock, True)
                 except BaseException:
                     logging.error('___Retry f():[{!s}]: Error code D: Catchall'
-                                  .format(f.__name__))
+                                  .format(a_fn.__name__))
 
                 logging.warning('___Function:[{!s}] Waiting:[{!s}] Rnd:[{!s}]'
-                                .format(f.__name__, waittime, randtime))
+                                .format(a_fn.__name__, waittime, randtime))
                 if randtime:
                     rtime.sleep(random.randrange(0,
                                                  (waittime + 1)
@@ -268,7 +284,7 @@ def retry(attempts=3, waittime=5, randtime=False):
                     rtime.sleep(waittime if waittime >= 0 else 0)
             logging.error('___Retry f():[{!s}] '
                           'Max:[{!s}] Delay:[{!s}] Rnd[{!s}]: Raising ERROR!'
-                          .format(f.__name__, attempts,
+                          .format(a_fn.__name__, attempts,
                                   waittime, randtime))
             raise error
         return new_wrapper
@@ -345,8 +361,8 @@ if __name__ == "__main__":
     for j in TaskPool:
         print('{!s}.is_alive = {!s}'.format(j.name, j.is_alive()))
 
-    while (True):
-        if not (any(multiprocessing.active_children())):
+    while True:
+        if not any(multiprocessing.active_children()):
             print('===No active children Processes.')
             break
         for p in multiprocessing.active_children():

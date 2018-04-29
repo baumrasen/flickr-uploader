@@ -96,16 +96,16 @@ def mprocessing(args_verbose, args_verbose_progress,
 
     logging.debug('len(itemslist):[{!s}] '
                   'int(nprocs):[{!s}] '
-                  'sz per process:[{!s}]'
+                  'size per process:[{!s}]'
                   .format(len(itemslist),
                           int(nprocs),
-                          sz))
+                          size))
 
     # Split itemslist in chunks to distribute accross Processes
-    for splititemslist in chunk(itemslist, sz):
+    for splititemslist in chunk(itemslist, size):
         logging.warning('===Actual/Planned Chunk size: '
                         '[{!s}]/[{!s}]'
-                        .format(len(splititemslist), sz))
+                        .format(len(splititemslist), size))
         logging.debug('===type(splititemslist)=[{!s}]'
                       .format(type(splititemslist)))
         logging.debug('===Job/Task Process: Creating...')

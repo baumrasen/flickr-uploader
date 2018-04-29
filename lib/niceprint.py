@@ -74,7 +74,7 @@ class niceprint:
         # in the example
         #    s.encode('utf-8') if isThisStringUnicode(s) else s
         if sys.version_info < (3, ):
-            if isinstance(s, unicode):  # noqa
+            if isinstance(astr, unicode):  # noqa
                 return True
             elif isinstance(astr, str):
                 return False

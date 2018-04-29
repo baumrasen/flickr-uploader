@@ -25,8 +25,8 @@ import multiprocessing
 import time
 import random
 import sqlite3 as lite
-import flickrapi
 from functools import wraps
+import flickrapi
 from . import niceprint
 
 
@@ -106,12 +106,18 @@ class LastTime:
 # -----------------------------------------------------------------------------
 # rate_limited
 #
-# retries execution of a function
+# Controls the rate of execution of a function.
+# Applicable to throttle API function calls
 def rate_limited(max_per_second):
+    """ rate_limited
+
+    Controls the rate of execution of a function.
+    Applican;e to throttle API function calls
+    """
 
     min_interval = 1.0 / max_per_second
     LT = LastTime('rate_limited')
-    np = niceprint.niceprint()
+    NP = niceprint.niceprint()
 
     def decorate(func):
         LT.acquire()
@@ -162,7 +168,7 @@ def rate_limited(max_per_second):
                 LT.debug('NEXT')
 
             except Exception as ex:
-                np.reportError(Caught=True,
+                NP.reportError(Caught=True,
                                CaughtPrefix='+++',
                                CaughtCode='000',
                                CaughtMsg='Exception on rate_limited_function',
@@ -223,9 +229,9 @@ def retry(attempts=3, waittime=5, randtime=False):
                                  'Max:[{!s}] Delay:[{!s}] Rnd[{!s}]'
                                  .format(f.__name__, attempts,
                                          waittime, randtime))
-                    for i, a in enumerate(args):
+                    for i, arg in enumerate(args):
                         logging.info('___Retry f():[{!s}] arg[{!s}]={!s}'
-                                     .format(f.__name__, i, a))
+                                     .format(f.__name__, i, arg))
             for i in range(attempts if attempts > 0 else 1):
                 try:
                     logging.info('___Retry f():[{!s}]: '
@@ -290,7 +296,7 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.DEBUG,
                         format='[%(asctime)s]:[%(processName)-11s]' +
-                               '[%(levelname)-8s]:[%(name)s] %(message)s')
+                        '[%(levelname)-8s]:[%(name)s] %(message)s')
 
     import doctest
     doctest.testmod()
@@ -315,18 +321,18 @@ if __name__ == "__main__":
 
     print('-------------------------------------------------Multi Processing')
 
-    def fmulti(x, prc):
+    def fmulti(n_cycles, prc):
 
-        for i in range(1, x):
-            r = random.randrange(6)
+        for i in range(1, n_cycles):
+            rnd_sleep = random.randrange(6)
             print('\t\t[prc:{!s}] [{!s}]'
                   '->- WORKing {!s}s----[{!s}]'
-                  .format(prc, i, r, time.strftime('%T')))
-            time.sleep(r)
-            print('\t\t[prc:{!s}] [{!s}]--> Before:---[{!s}]'
+                  .format(prc, i, rnd_sleep, time.strftime('%T')))
+            time.sleep(rnd_sleep)
+            print('\t\t[prc:{!s}] [{!s}]--> Before rate_limited----[{!s}]'
                   .format(prc, i, time.strftime('%T')))
             print_num(prc, i)
-            print('\t\t[prc:{!s}] [{!s}]<-- After----[{!s}]'
+            print('\t\t[prc:{!s}] [{!s}]<-- After rate_limited-----[{!s}]'
                   .format(prc, i, time.strftime('%T')))
 
     TaskPool = []

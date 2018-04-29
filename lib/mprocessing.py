@@ -17,14 +17,14 @@ from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 import logging
 import multiprocessing
 from itertools import islice
-from . import niceprint as npc
+from . import niceprint
 
 # =============================================================================
 # Functions aliases
 #
-#   np.niceprint = from niceprint module
+#   NP.niceprint = from niceprint module
 # -----------------------------------------------------------------------------
-np = npc.niceprint()
+NP = niceprint.niceprint()
 
 
 # -----------------------------------------------------------------------------
@@ -121,7 +121,7 @@ def mprocessing(ARGS_verbose, ARGS_verbose_progress,
         pTask.start()
         logging.debug('===Job/Task Process: Started')
         if (ARGS_verbose):
-            np.niceprint('===Job/Task Process: [{!s}] Started '
+            NP.niceprint('===Job/Task Process: [{!s}] Started '
                          'with pid:[{!s}]'
                          .format(pTask.name,
                                  pTask.pid))
@@ -130,7 +130,7 @@ def mprocessing(ARGS_verbose, ARGS_verbose_progress,
     if LOGlevel <= logging.DEBUG:
         logging.debug('===Checking Processes launched/status:')
         for j in procPool:
-            np.niceprint('{!s}.is_alive = {!s}'
+            NP.niceprint('{!s}.is_alive = {!s}'
                          .format(j.name, j.is_alive()))
 
     # Regularly print status of jobs/tasks in the Process Pool
@@ -149,7 +149,7 @@ def mprocessing(ARGS_verbose, ARGS_verbose_progress,
                      .format(procTaskActive.name,
                              procTaskActive.is_alive()))
         if (ARGS_verbose_progress):
-            np.niceprint('===Will wait for 60 on '
+            NP.niceprint('===Will wait for 60 on '
                          '{!s}.is_alive = {!s}'
                          .format(procTaskActive.name,
                                  procTaskActive.is_alive()))
@@ -160,7 +160,7 @@ def mprocessing(ARGS_verbose, ARGS_verbose_progress,
                      .format(procTaskActive.name,
                              procTaskActive.is_alive()))
         if (ARGS_verbose):
-            np.niceprint('===Waited for 60s on '
+            NP.niceprint('===Waited for 60s on '
                          '{!s}.is_alive = {!s}'
                          .format(procTaskActive.name,
                                  procTaskActive.is_alive()))
@@ -170,7 +170,7 @@ def mprocessing(ARGS_verbose, ARGS_verbose_progress,
     for j in procPool:
         j.join()
         if (ARGS_verbose):
-            np.niceprint('==={!s} '
+            NP.niceprint('==={!s} '
                          '(is alive: {!s}).exitcode = {!s}'
                          .format(j.name,
                                  j.is_alive(),
@@ -192,7 +192,7 @@ def mprocessing(ARGS_verbose, ARGS_verbose_progress,
     lockDB = None
 
     # Show number of total files processed
-    np.niceprocessedfiles(running.value,
+    NP.niceprocessedfiles(running.value,
                           countTotal,
                           True)
 

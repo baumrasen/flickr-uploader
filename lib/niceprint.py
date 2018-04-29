@@ -75,15 +75,16 @@ class niceprint:
         #    s.encode('utf-8') if isThisStringUnicode(s) else s
         if sys.version_info < (3, ):
             if isinstance(astr, unicode):  # noqa
-                return True
+                result = True
             elif isinstance(astr, str):
-                return False
+                result = False
             else:
-                return False
+                result = False
         elif isinstance(astr, str):
-            return False
+            result = False
         else:
-            return False
+            result = False
+        return result
 
     # -------------------------------------------------------------------------
     # StrUnicodeOut

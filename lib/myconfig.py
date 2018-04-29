@@ -203,15 +203,16 @@ class MyConfig(object):
             # Find incorrect config keys on INI File and delete them
             dropkeys = [key for key in self.__dict__.keys()
                         if key not in self.INIkeys]
-            logging.debug('dropkeys:[{!s}]'.format(dropkeys))
+            logging.debug('dropkeys:[%s]', dropkeys)
             for key in dropkeys:
-                logging.debug('del key:[{!s}]'.format(key))
+                logging.debug('del key:[%s]', key)
                 del self.__dict__[key]
         except Exception as err:
-            logging.critical('INI file: [{!s}] not found or '
-                             'incorrect format: [{!s}]! Will attempt to use '
-                             'default INI values.'
-                             .format(cfg_filename, str(err)))
+            logging.critical('INI file: [%s] not found or '
+                             'incorrect format: [%s]! Will attempt to use '
+                             'default INI values.',
+                             cfg_filename,
+                             str(err))
         finally:
             # Allow to continue with default values...
             if not INIFile:
@@ -274,10 +275,9 @@ class MyConfig(object):
 
             try:
                 if INIcheck[item] in ('list', 'int', 'bool', 'str', 'dict'):
-                    logging.debug('isinstance={!s}'
-                                  .format(
-                                      isinstance(eval(self.__dict__[item]),
-                                                 eval(INIcheck[item]))))
+                    logging.debug('isinstance=%s',
+                                  isinstance(eval(self.__dict__[item]),
+                                             eval(INIcheck[item])))
                     if not(isinstance(eval(self.__dict__[item]),
                                       eval(INIcheck[item]))):
                         raise
@@ -289,11 +289,10 @@ class MyConfig(object):
                             CaughtCode='999',
                             CaughtMsg='Caught an exception INIcheck',
                             exceptSysInfo=True)
-                logging.critical('Invalid INI value for:[{!s}] '
-                                 'Using default value:[{!s}]'
-                                 .format(item,
-                                         self.INIvalues[
-                                             self.INIkeys.index(str(item))]))
+                logging.critical('Invalid INI value for:[%s] '
+                                 'Using default value:[%s]',
+                                 item,
+                                 self.INIvalues[self.INIkeys.index(str(item))])
                 # Use default value or exit...
                 self.__dict__.update(dict(zip(
                     [item],
@@ -339,7 +338,7 @@ class MyConfig(object):
 
         # Further specific processing... FILES_DIR
         for item in ['FILES_DIR']:  # Check if dir exists. Unicode Support
-            logging.debug('verifyconfig for [{!s}]'.format(item))
+            logging.debug('verifyconfig for [%s]', item)
             if not np.isThisStringUnicode(self.__dict__[item]):
                 self.__dict__[item] = unicode(  # noqa
                                           self.__dict__[item],
@@ -347,9 +346,9 @@ class MyConfig(object):
                                       if sys.version_info < (3, ) \
                                       else str(self.__dict__[item])
             if not os.path.isdir(self.__dict__[item]):
-                logging.critical('{!s}: [{!s}] is not a valid folder.'
-                                 .format(item,
-                                         StrUnicodeOut(self.__dict__[item])))
+                logging.critical('%s: [%s] is not a valid folder.',
+                                 item,
+                                 StrUnicodeOut(self.__dict__[item]))
                 returnverify = False
 
         # Further specific processing...
@@ -361,7 +360,7 @@ class MyConfig(object):
                      'LOCK_PATH',
                      'TOKEN_CACHE',
                      'TOKEN_PATH']:
-            logging.debug('verifyconfig for [{!s}]'.format(item))
+            logging.debug('verifyconfig for [%s]', item)
             if not(np.isThisStringUnicode(self.__dict__[item])):
                 self.__dict__[item] = unicode(  # noqa
                                           self.__dict__[item],
@@ -369,20 +368,19 @@ class MyConfig(object):
                                       if sys.version_info < (3, ) \
                                       else str(self.__dict__[item])
             if not os.path.isdir(os.path.dirname(self.__dict__[item])):
-                logging.critical('{!s}:[{!s}] is not in a valid folder:[{!s}].'
-                                 .format(item,
-                                         StrUnicodeOut(self.__dict__[item]),
-                                         StrUnicodeOut(os.path.dirname(
-                                             self.__dict__[item]))
-                                         ))
+                logging.critical('%s:[%s] is not in a valid folder:[%s].',
+                                 item,
+                                 StrUnicodeOut(self.__dict__[item]),
+                                 StrUnicodeOut(os.path.dirname(
+                                     self.__dict__[item])))
                 returnverify = False
 
         if self.__dict__['CONVERT_RAW_FILES']:
             for item in ['RAW_TOOL_PATH']:
-                logging.debug('verifyconfig for [{!s}]'.format(item))
-                logging.debug('RAW_TOOL_PATH/exiftool=[{!s}]'
-                              .format(os.path.join(self.__dict__[item],
-                                                   'exiftool')))
+                logging.debug('verifyconfig for [%s]', item)
+                logging.debug('RAW_TOOL_PATH/exiftool=[%s]',
+                              os.path.join(self.__dict__[item],
+                                           'exiftool'))
 
                 if not np.isThisStringUnicode(self.__dict__[item]):
                     self.__dict__[item] = unicode(  # noqa
@@ -392,10 +390,9 @@ class MyConfig(object):
                                           else str(self.__dict__[item])
 
                 if not os.path.isdir(self.__dict__[item]):
-                    logging.critical('{!s}:[{!s}] is not a valid folder.'
-                                     .format(item,
-                                             StrUnicodeOut(
-                                                 self.__dict__[item])))
+                    logging.critical('%s: [%s] is not a valid folder.',
+                                     item,
+                                     StrUnicodeOut(self.__dict__[item]))
                     returnverify = False
                 elif not (
                     os.path.isfile(os.path.join(self.__dict__[item],
@@ -403,21 +400,20 @@ class MyConfig(object):
                     os.access(os.path.join(self.__dict__[item],
                                            'exiftool'),
                               os.X_OK)):
-                    logging.critical('{!s}: [{!s}] is not a valid executable.'
-                                     .format(item,
-                                             os.path.join(self.__dict__[item],
-                                                          'exiftool')))
+                    logging.critical('%s: [%s] is not a valid executable.',
+                                     item,
+                                     os.path.join(self.__dict__[item],
+                                                  'exiftool'))
                     returnverify = False
         else:
-            logging.debug('verifyconfig: [{!s}] is False: bypass for [{!s}]'
-                          .format('CONVERT_RAW_FILES', 'RAW_TOOL_PATH'))
+            logging.debug('verifyconfig: [%s] is False: bypass for [%s]',
+                          'CONVERT_RAW_FILES', 'RAW_TOOL_PATH')
 
         # Further specific processing... EXCLUDED_FOLDERS
         #     Read EXCLUDED_FOLDERS and convert them into Unicode folders
-        logging.debug('verifyconfig for [{!s}]'.format('EXCLUDED_FOLDERS'))
+        logging.debug('verifyconfig for [%s]', 'EXCLUDED_FOLDERS')
         inEXCLUDED_FOLDERS = self.__dict__['EXCLUDED_FOLDERS']
-        logging.debug('inEXCLUDED_FOLDERS=[{!s}]'
-                      .format(inEXCLUDED_FOLDERS))
+        logging.debug('inEXCLUDED_FOLDERS=[%s]', inEXCLUDED_FOLDERS)
         outEXCLUDED_FOLDERS = []
         for folder in inEXCLUDED_FOLDERS:
             if not np.isThisStringUnicode(folder):
@@ -426,15 +422,13 @@ class MyConfig(object):
                                            else str(folder))
             else:
                 outEXCLUDED_FOLDERS.append(str(folder))
-            logging.debug('folder from EXCLUDED_FOLDERS:[{!s}] '
-                          'type:[{!s}]\n'
-                          .format(
-                              StrUnicodeOut(outEXCLUDED_FOLDERS[
-                                  len(outEXCLUDED_FOLDERS) - 1]),
-                              type(outEXCLUDED_FOLDERS[
-                                  len(outEXCLUDED_FOLDERS) - 1])))
-        logging.info('outEXCLUDED_FOLDERS=[{!s}]'
-                     .format(outEXCLUDED_FOLDERS))
+            logging.debug('folder from EXCLUDED_FOLDERS:[%s] '
+                          'type:[%s]\n',
+                          StrUnicodeOut(outEXCLUDED_FOLDERS[
+                              len(outEXCLUDED_FOLDERS) - 1]),
+                          type(outEXCLUDED_FOLDERS[
+                              len(outEXCLUDED_FOLDERS) - 1]))
+        logging.info('outEXCLUDED_FOLDERS=[%s]', outEXCLUDED_FOLDERS)
         self.__dict__.update(dict(zip(
             ['EXCLUDED_FOLDERS'],
             [outEXCLUDED_FOLDERS])))
@@ -442,11 +436,11 @@ class MyConfig(object):
         # Further specific processing... IGNORED_REGEX
         # Consider Unicode Regular expressions
         for item in ['IGNORED_REGEX']:
-            logging.debug('verifyconfig for [{!s}]'.format(item))
+            logging.debug('verifyconfig for [%s]', item)
             self.__dict__[item] = [re.compile(regex, re.UNICODE)
                                    for regex in self.__dict__[item]]
-            logging.info('Number of IGNORED_REGEX entries:[{!s}]\n'
-                         .format(len(self.__dict__[item])))
+            logging.info('Number of IGNORED_REGEX entries:[%s]\n',
+                         len(self.__dict__[item]))
 
         # ---------------------------------------------------------------------
         if logging.getLogger().getEffectiveLevel() <= logging.INFO:

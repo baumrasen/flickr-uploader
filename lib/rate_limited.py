@@ -330,7 +330,9 @@ if __name__ == "__main__":
     # 1/n for n seconds per call (ex. 0.5 meand 4 seconds in between calls)
     @rate_limited(1)
     def print_num(prc, num):
-        """
+        """ print_num
+
+            Fake function for testing. Print activity and timestamp.
         """
         print('\t\t***prc:[{!s}] num:[{!s}] '
               'rate_limit timestamp:[{!s}]'
@@ -357,14 +359,14 @@ if __name__ == "__main__":
             print('\t\t[prc:{!s}] [{!s}]<-- After rate_limited-----[{!s}]'
                   .format(prc, i, time.strftime('%T')))
 
-    TaskPool = []
+    task_pool = []
 
     for j in range(1, 4):
         Task = multiprocessing.Process(target=fmulti, args=(5, j))
-        TaskPool.append(Task)
+        task_pool.append(Task)
         Task.start()
 
-    for j in TaskPool:
+    for j in task_pool:
         print('{!s}.is_alive = {!s}'.format(j.name, j.is_alive()))
 
     while True:
@@ -384,7 +386,7 @@ if __name__ == "__main__":
 
     # Wait for join all jobs/tasks in the Process Pool
     # All should be done by now!
-    for j in TaskPool:
+    for j in task_pool:
         j.join()
         print('==={!s} (is alive: {!s}).exitcode = {!s}'
               .format(j.name, j.is_alive(), j.exitcode))

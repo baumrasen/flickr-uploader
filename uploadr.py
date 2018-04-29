@@ -56,6 +56,7 @@ except ImportError:
 import argparse
 import mimetypes
 import os
+import os.path
 import time
 import sqlite3 as lite
 import hashlib
@@ -70,7 +71,6 @@ except ImportError:
 import errno
 import subprocess
 import multiprocessing
-import flickrapi
 import xml
 # Avoids error on some systems:
 #    AttributeError: 'module' object has no attribute 'etree'
@@ -91,8 +91,8 @@ except AttributeError:
 finally:
     sys.stderr.write(' Continuing.\n')
     sys.stderr.flush()
-import os.path
 import pprint
+import flickrapi
 # -----------------------------------------------------------------------------
 # Helper class and functions for UPLoaDeR Global Constants.
 import lib.UPLDRConstants as UPLDRConstantsClass

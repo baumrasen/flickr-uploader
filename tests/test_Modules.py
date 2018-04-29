@@ -2,12 +2,12 @@
 
 import sys
 import time
+import unittest
+import test.support
 # -----------------------------------------------------------------------------
 import lib.niceprint as niceprint
 import lib.UPLDRConstants as UPLDRConstantsClass
 # -----------------------------------------------------------------------------
-import unittest
-import test.support
 
 
 class TestNicePrintMethods(unittest.TestCase):
@@ -76,8 +76,11 @@ class TestMethods(unittest.TestCase):
 
 
 class TestUPLDRConstantsMethods(unittest.TestCase):
-
+    """ TestUPLDRConstantsMethods
+    """
     def test_nuMediaCount(self):
+        """ test_nuMediaCount
+        """
         UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 
         for j in range(1, 20):

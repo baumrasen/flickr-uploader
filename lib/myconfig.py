@@ -36,9 +36,9 @@ from . import niceprint
 #
 #   StrUnicodeOut       = from niceprint module
 # -----------------------------------------------------------------------------
-np = niceprint.niceprint()
-StrUnicodeOut = np.StrUnicodeOut
-reportError = np.reportError
+NP = niceprint.niceprint()
+StrUnicodeOut = NP.StrUnicodeOut
+reportError = NP.reportError
 
 
 # -----------------------------------------------------------------------------
@@ -202,8 +202,8 @@ class MyConfig(object):
         config = ConfigParser.ConfigParser()
         config.optionxform = str  # make option names case sensitive
         try:
-            INIFile = None
-            INIFile = config.read(cfg_filename)
+            ini_file = None
+            ini_file = config.read(cfg_filename)
             for name in cfg_sections:
                 self.__dict__.update(config.items(name))
 
@@ -222,7 +222,7 @@ class MyConfig(object):
                              str(err))
         finally:
             # Allow to continue with default values...
-            if not INIFile:
+            if not ini_file:
                 raise ValueError('No config file or unrecoverable error!')
 
         # Parse Configuration file and overwrite any values -------------------
@@ -346,7 +346,7 @@ class MyConfig(object):
         # Further specific processing... FILES_DIR
         for item in ['FILES_DIR']:  # Check if dir exists. Unicode Support
             logging.debug('verifyconfig for [%s]', item)
-            if not np.isThisStringUnicode(self.__dict__[item]):
+            if not NP.isThisStringUnicode(self.__dict__[item]):
                 self.__dict__[item] = unicode(  # noqa
                                           self.__dict__[item],
                                           'utf-8') \
@@ -368,7 +368,7 @@ class MyConfig(object):
                      'TOKEN_CACHE',
                      'TOKEN_PATH']:
             logging.debug('verifyconfig for [%s]', item)
-            if not np.isThisStringUnicode(self.__dict__[item]):
+            if not NP.isThisStringUnicode(self.__dict__[item]):
                 self.__dict__[item] = unicode(  # noqa
                                           self.__dict__[item],
                                           'utf-8') \
@@ -389,7 +389,7 @@ class MyConfig(object):
                               os.path.join(self.__dict__[item],
                                            'exiftool'))
 
-                if not np.isThisStringUnicode(self.__dict__[item]):
+                if not NP.isThisStringUnicode(self.__dict__[item]):
                     self.__dict__[item] = unicode(  # noqa
                                               self.__dict__[item],
                                               'utf-8') \
@@ -402,11 +402,11 @@ class MyConfig(object):
                                      StrUnicodeOut(self.__dict__[item]))
                     returnverify = False
                 elif not (
-                    os.path.isfile(os.path.join(self.__dict__[item],
-                                                'exiftool')) and
-                    os.access(os.path.join(self.__dict__[item],
-                                           'exiftool'),
-                              os.X_OK)):
+                        os.path.isfile(os.path.join(self.__dict__[item],
+                                                    'exiftool')) and
+                        os.access(os.path.join(self.__dict__[item],
+                                               'exiftool'),
+                                  os.X_OK)):
                     logging.critical('%s: [%s] is not a valid executable.',
                                      item,
                                      os.path.join(self.__dict__[item],
@@ -423,7 +423,7 @@ class MyConfig(object):
         logging.debug('inEXCLUDED_FOLDERS=[%s]', in_excluded_folders)
         out_excluded_folders = []
         for folder in in_excluded_folders:
-            if not np.isThisStringUnicode(folder):
+            if not NP.isThisStringUnicode(folder):
                 out_excluded_folders.append(unicode(folder, 'utf-8')  # noqa
                                             if sys.version_info < (3, )
                                             else str(folder))
@@ -468,7 +468,7 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.WARNING,
                         format='[%(asctime)s]:[%(processName)-11s]' +
-                               '[%(levelname)-8s]:[%(name)s] %(message)s')
+                        '[%(levelname)-8s]:[%(name)s] %(message)s')
 
     import doctest
     doctest.testmod()

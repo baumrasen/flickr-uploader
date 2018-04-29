@@ -29,6 +29,13 @@ from functools import wraps
 import flickrapi
 from . import niceprint
 
+# =============================================================================
+# Functions aliases
+#
+#   NP.niceprint = from niceprint module
+# -----------------------------------------------------------------------------
+NP = niceprint.niceprint()
+
 
 # -----------------------------------------------------------------------------
 # class LastTime to be used with rate_limited
@@ -131,7 +138,6 @@ def rate_limited(max_per_second):
 
     min_interval = 1.0 / max_per_second
     LT = LastTime('rate_limited')
-    NP = niceprint.niceprint()
 
     def decorate(func):
         """ decorate

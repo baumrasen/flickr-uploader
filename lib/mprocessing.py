@@ -58,7 +58,7 @@ def mprocessing(args_verbose, args_verbose_progress,
         #         logging.info('===mprocessing f():[%s] arg[%s]={%s}',
         #                      a_fn.__name__, i, arg)
 
-    logging.info('new_wrapper=[%s]',__name__)
+    logging.info('new_wrapper=[%s]', __name__)
 
     # if __name__ == '__main__':
     logging.debug('===Multiprocessing=== Setting up logger!')

@@ -78,22 +78,22 @@ class LastTime:
 
     def get_last_time_called(self):
         """ get_last_time_called
-        """        
+        """
         return self.last_time_called.value
 
     def add_cnt(self):
         """ add_cnt
-        """        
+        """
         self.cnt.value += 1
 
     def get_cnt(self):
         """ get_cnt
-        """        
+        """
         return self.cnt.value
 
     def debug(self, debugname='LT'):
         """ debug
-        """        
+        """
         now = time.time()
         logging.debug('___Rate name:[{!s}] '
                       'debug=[{!s}] '
@@ -135,7 +135,7 @@ def rate_limited(max_per_second):
 
     def decorate(func):
         """ decorate
-        """        
+        """
         LT.acquire()
         if LT.get_last_time_called() == 0:
             LT.set_last_time_called()

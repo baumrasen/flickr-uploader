@@ -43,6 +43,7 @@ class niceprint:
         >>> np.isThisStringUnicode(245)
         False
     """
+
     # -------------------------------------------------------------------------
     # class niceprint __init__
     #
@@ -117,15 +118,15 @@ class niceprint:
             Accounts for UTF-8 Messages
 
         """
-        print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'.format(
-                UPLDRConstants.G,
-                UPLDRConstants.Run,
-                time.strftime(UPLDRConstants.TimeFormat),
-                os.getpid(),
-                UPLDRConstants.W,
-                'PRINT',
-                self.StrUnicodeOut(fname),
-                self.StrUnicodeOut(s)))
+        print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
+              .format(UPLDRConstants.G,
+                      UPLDRConstants.Run,
+                      time.strftime(UPLDRConstants.TimeFormat),
+                      os.getpid(),
+                      UPLDRConstants.W,
+                      'PRINT',
+                      self.StrUnicodeOut(fname),
+                      self.StrUnicodeOut(s)))
 
     # -------------------------------------------------------------------------
     # niceassert
@@ -140,15 +141,15 @@ class niceprint:
              assert param1 >= 0, niceassert('param1 is not >= 0:'
                                             .format(param1))
         """
-        return('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'.format(
-               UPLDRConstants.R,
-               UPLDRConstants.Run,
-               time.strftime(UPLDRConstants.TimeFormat),
-               os.getpid(),
-               UPLDRConstants.W,
-               'ASSERT',
-               'uploadr',
-               self.StrUnicodeOut(s)))
+        return('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
+               .format(UPLDRConstants.R,
+                       UPLDRConstants.Run,
+                       time.strftime(UPLDRConstants.TimeFormat),
+                       os.getpid(),
+                       UPLDRConstants.W,
+                       'ASSERT',
+                       'uploadr',
+                       self.StrUnicodeOut(s)))
 
     # -------------------------------------------------------------------------
     # reportError

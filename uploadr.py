@@ -944,7 +944,7 @@ class Uploadr:
             return success
 
         if os.path.exists(StrUnicodeOut(os.path.join(Ddirpath, Ffnameonly)) +
-                           ".JPG"):
+                          ".JPG"):
             NP.niceprint('...Copying tags:[{!s}]'
                          .format(StrUnicodeOut(Ffname)))
 

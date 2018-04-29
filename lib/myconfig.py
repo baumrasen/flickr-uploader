@@ -187,8 +187,15 @@ class MyConfig(object):
     #
     # Use readconfig to obtain configuration from uploadr.ini
     # Look for [Config] section file uploadr.ini file
-    def readconfig(self, cfg_filename, cfg_Sections=INISections):
+    def readconfig(self, cfg_filename, cfg_sections):
         """ readconfig
+
+            Look for cfg_sections (noramlly [Config]) section in INI file
+
+            cfg_filname  = INI filename with configuration
+            cfg_sections = list of Sections to look for.
+                           eg: ['Config'] or ['Config', 'Additional']
+
         """
 
         # Look for Configuration INI file -------------------------------------
@@ -197,7 +204,7 @@ class MyConfig(object):
         try:
             INIFile = None
             INIFile = config.read(cfg_filename)
-            for name in cfg_Sections:
+            for name in cfg_sections:
                 self.__dict__.update(config.items(name))
 
             # Find incorrect config keys on INI File and delete them
@@ -219,7 +226,7 @@ class MyConfig(object):
                 raise ValueError('No config file or unrecoverable error!')
 
         # Parse Configuration file and overwrite any values -------------------
-        # pprint.pprint(config.items(cfg_Sections[0]))
+        # pprint.pprint(config.items(cfg_sections[0]))
 
         if logging.getLogger().getEffectiveLevel() <= logging.INFO:
             logging.info('\t\t\t\tActive INI key/values pairs...')
@@ -361,7 +368,7 @@ class MyConfig(object):
                      'TOKEN_CACHE',
                      'TOKEN_PATH']:
             logging.debug('verifyconfig for [%s]', item)
-            if not(np.isThisStringUnicode(self.__dict__[item])):
+            if not np.isThisStringUnicode(self.__dict__[item]):
                 self.__dict__[item] = unicode(  # noqa
                                           self.__dict__[item],
                                           'utf-8') \
@@ -412,26 +419,26 @@ class MyConfig(object):
         # Further specific processing... EXCLUDED_FOLDERS
         #     Read EXCLUDED_FOLDERS and convert them into Unicode folders
         logging.debug('verifyconfig for [%s]', 'EXCLUDED_FOLDERS')
-        inEXCLUDED_FOLDERS = self.__dict__['EXCLUDED_FOLDERS']
-        logging.debug('inEXCLUDED_FOLDERS=[%s]', inEXCLUDED_FOLDERS)
-        outEXCLUDED_FOLDERS = []
-        for folder in inEXCLUDED_FOLDERS:
+        in_excluded_folders = self.__dict__['EXCLUDED_FOLDERS']
+        logging.debug('inEXCLUDED_FOLDERS=[%s]', in_excluded_folders)
+        out_excluded_folders = []
+        for folder in in_excluded_folders:
             if not np.isThisStringUnicode(folder):
-                outEXCLUDED_FOLDERS.append(unicode(folder, 'utf-8')  # noqa
-                                           if sys.version_info < (3, )
-                                           else str(folder))
+                out_excluded_folders.append(unicode(folder, 'utf-8')  # noqa
+                                            if sys.version_info < (3, )
+                                            else str(folder))
             else:
-                outEXCLUDED_FOLDERS.append(str(folder))
+                out_excluded_folders.append(str(folder))
             logging.debug('folder from EXCLUDED_FOLDERS:[%s] '
                           'type:[%s]\n',
-                          StrUnicodeOut(outEXCLUDED_FOLDERS[
-                              len(outEXCLUDED_FOLDERS) - 1]),
-                          type(outEXCLUDED_FOLDERS[
-                              len(outEXCLUDED_FOLDERS) - 1]))
-        logging.info('outEXCLUDED_FOLDERS=[%s]', outEXCLUDED_FOLDERS)
+                          StrUnicodeOut(out_excluded_folders[
+                              len(out_excluded_folders) - 1]),
+                          type(out_excluded_folders[
+                              len(out_excluded_folders) - 1]))
+        logging.info('outEXCLUDED_FOLDERS=[%s]', out_excluded_folders)
         self.__dict__.update(dict(zip(
             ['EXCLUDED_FOLDERS'],
-            [outEXCLUDED_FOLDERS])))
+            [out_excluded_folders])))
 
         # Further specific processing... IGNORED_REGEX
         # Consider Unicode Regular expressions
@@ -471,9 +478,9 @@ if __name__ == "__main__":
 
     import lib.myconfig as myconfig
 
-    mycfg = myconfig.MyConfig()
-    if mycfg.processconfig():
-        if mycfg.verifyconfig():
+    MYCFG = myconfig.MyConfig()
+    if MYCFG.processconfig():
+        if MYCFG.verifyconfig():
             print('Test Myconfig: Ok')
         else:
             print('Test Myconfig: Not Ok')

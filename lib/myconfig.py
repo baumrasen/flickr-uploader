@@ -377,14 +377,14 @@ class MyConfig(object):
                                          ))
                 returnverify = False
 
-        if (self.__dict__['CONVERT_RAW_FILES']):
+        if self.__dict__['CONVERT_RAW_FILES']:
             for item in ['RAW_TOOL_PATH']:
                 logging.debug('verifyconfig for [{!s}]'.format(item))
                 logging.debug('RAW_TOOL_PATH/exiftool=[{!s}]'
                               .format(os.path.join(self.__dict__[item],
                                                    'exiftool')))
 
-                if not(np.isThisStringUnicode(self.__dict__[item])):
+                if not np.isThisStringUnicode(self.__dict__[item]):
                     self.__dict__[item] = unicode(  # noqa
                                               self.__dict__[item],
                                               'utf-8') \
@@ -420,7 +420,7 @@ class MyConfig(object):
                       .format(inEXCLUDED_FOLDERS))
         outEXCLUDED_FOLDERS = []
         for folder in inEXCLUDED_FOLDERS:
-            if not(np.isThisStringUnicode(folder)):
+            if not np.isThisStringUnicode(folder):
                 outEXCLUDED_FOLDERS.append(unicode(folder, 'utf-8')  # noqa
                                            if sys.version_info < (3, )
                                            else str(folder))
@@ -477,9 +477,9 @@ if __name__ == "__main__":
 
     import lib.myconfig as myconfig
 
-    Cfg = myconfig.MyConfig()
-    if Cfg.processconfig():
-        if Cfg.verifyconfig():
+    mycfg = myconfig.MyConfig()
+    if myfg.processconfig():
+        if mycfg.verifyconfig():
             print('Test Myconfig: Ok')
         else:
             print('Test Myconfig: Not Ok')

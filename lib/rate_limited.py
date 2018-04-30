@@ -66,8 +66,6 @@ class LastTime:
         self.cnt = multiprocessing.Value('i', 0)
         self.last_time_called = multiprocessing.Value('d', 0.0)
 
-        logging.debug('\t__init__: name=[%s]', self.name)
-
     def acquire(self):
         """ acquire
         """

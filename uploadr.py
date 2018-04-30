@@ -74,13 +74,11 @@ except AttributeError:
     sys.stderr.write('Importing xml.etree.ElementTree...')
     try:
         import xml.etree.ElementTree
-        sys.stderr.write('done.')
+        sys.stderr.write('done. Continuing.\n')
+        sys.stderr.flush()        
     except ImportError:
         sys.stderr.write('failed with ImportError.')
         raise
-finally:
-    sys.stderr.write(' Continuing.\n')
-    sys.stderr.flush()
 import pprint
 # -----------------------------------------------------------------------------
 # Helper FlickrUploadr class to upload pics/videos into Flickr.

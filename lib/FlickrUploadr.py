@@ -273,9 +273,10 @@ class Uploadr(object):
         global nuflickr
 
         # Instantiate nuflickr for connection to flickr via flickrapi
-        nuflickr = flickrapi.FlickrAPI(self.xCfg.FLICKR["api_key"],
-                                   self.xCfg.FLICKR["secret"],
-                                   token_cache_location=self.xCfg.TOKEN_CACHE)
+        nuflickr = flickrapi.FlickrAPI(
+            self.xCfg.FLICKR["api_key"],
+            self.xCfg.FLICKR["secret"],
+            token_cache_location=self.xCfg.TOKEN_CACHE)
         # Get request token
         NP.niceprint('Getting new token.')
         try:
@@ -343,9 +344,10 @@ class Uploadr(object):
 
         logging.info('Obtaining Cached token')
         logging.debug('TOKEN_CACHE:[{!s}]'.format(self.xCfg.TOKEN_CACHE))
-        nuflickr = flickrapi.FlickrAPI(self.xCfg.FLICKR["api_key"],
-                                       self.xCfg.FLICKR["secret"],
-                                       token_cache_location=self.xCfg.TOKEN_CACHE)
+        nuflickr = flickrapi.FlickrAPI(
+            self.xCfg.FLICKR["api_key"],
+            self.xCfg.FLICKR["secret"],
+            token_cache_location=self.xCfg.TOKEN_CACHE)
 
         try:
             # Check if token permissions are correct.
@@ -962,7 +964,8 @@ class Uploadr(object):
                 filePath = os.path.join(StrUnicodeOut(dirpath),
                                         StrUnicodeOut(f))
                 # Ignore filenames wihtin IGNORED_REGEX
-                if any(ignored.search(f) for ignored in self.xCfg.IGNORED_REGEX):
+                if any(ignored.search(f)
+                       for ignored in self.xCfg.IGNORED_REGEX):
                     logging.debug('File {!s} in IGNORED_REGEX:'
                                   .format(filePath.encode('utf-8')))
                     continue
@@ -1210,8 +1213,8 @@ class Uploadr(object):
                                 CaughtPrefix='+++ DB',
                                 CaughtCode='031',
                                 CaughtMsg='Sleep 2 and retry SQL...'
-                                          '[{!s}/{!s} attempts]'
-                                          .format(x, self.xCfg.MAX_SQL_ATTEMPTS),
+                                '[{!s}/{!s} attempts]' .format(x,
+                                                               self.xCfg.MAX_SQL_ATTEMPTS),
                                 NicePrint=True)
                     nutime.sleep(2)
                 else:
@@ -1541,7 +1544,7 @@ class Uploadr(object):
                                                  'Filetype was not recognised'
                                                  if (format(ex.code) == '5')
                                                  else 'Filesize was too large')
-                                        )
+                                         )
                             logging.info('Bad file:[{!s}]'.format(file))
 
                             try:
@@ -1619,7 +1622,8 @@ class Uploadr(object):
                               .format(x, self.xCfg.MAX_UPLOAD_ATTEMPTS))
 
                 # Max attempts reached
-                if (not ZuploadOK) and (x == (self.xCfg.MAX_UPLOAD_ATTEMPTS - 1)):
+                if (not ZuploadOK) and (
+                        x == (self.xCfg.MAX_UPLOAD_ATTEMPTS - 1)):
                     NP.niceprint('Reached max attempts to upload. Skipping '
                                  'file: [{!s}]'.format(StrUnicodeOut(file)))
                     logging.error('Reached max attempts to upload. Skipping '
@@ -1672,7 +1676,7 @@ class Uploadr(object):
                 if (isLoaded and
                         isNoSet and
                         (row is not None) and
-                            (str(row[1]) == str(isfile_id))):
+                        (str(row[1]) == str(isfile_id))):
 
                     logging.info('Will UPDATE files SET set_id = null '
                                  'for pic:[{!s}] '
@@ -4313,8 +4317,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
             # List pics not in sets (if within a parameter, default 10)
             # (per_page=min(self.ARGS.list_photos_not_in_set, 500):
             #       find('photos').attrib['total']
-            res = self.photos_get_not_in_set(min(self.ARGS.list_photos_not_in_set,
-                                                 500))
+            res = self.photos_get_not_in_set(
+                min(self.ARGS.list_photos_not_in_set, 500))
             logging.debug('Output for list get_not_in_set:')
             logging.debug(xml.etree.ElementTree.tostring(res,
                                                          encoding='utf-8',

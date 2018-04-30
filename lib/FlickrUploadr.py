@@ -86,6 +86,61 @@ niceprocessedfiles = NP.niceprocessedfiles
 
 
 # -----------------------------------------------------------------------------
+# FileWithCallback class
+#
+# For use with flickrapi upload for showing callback progress information
+# Check function callback definition
+#
+class FileWithCallback(object):
+    # -------------------------------------------------------------------------
+    # class FileWithCallback __init__
+    #
+    def __init__(self, filename, callback):
+        """ class FileWithCallback __init__
+        """
+        self.file = open(filename, 'rb')
+        self.callback = callback
+        # the following attributes and methods are required
+        self.len = os.path.getsize(filename)
+        self.fileno = self.file.fileno
+        self.tell = self.file.tell
+
+    # -------------------------------------------------------------------------
+    # class FileWithCallback read
+    #
+    def read(self, size):
+        """ read
+
+        read file to upload into Flickr with FileWithCallback
+        """
+        if self.callback:
+            self.callback(self.tell() * 100 // self.len)
+        return self.file.read(size)
+
+
+# -----------------------------------------------------------------------------
+# callback
+#
+# For use with flickrapi upload for showing callback progress information
+# Check function FileWithCallback definition
+# Uses global ARGS.verbose-progress parameter
+#
+def callback(progress):
+    """ callback
+
+    Print progress % while uploading into Flickr.
+    Valid only if global variable ARGS.verbose_progress is True
+    """
+    # only print rounded percentages: 0, 10, 20, 30, up to 100
+    # adapt as required
+    # if (progress % 10) == 0:
+    # if verbose option is set
+    if ARGS.verbose_progress:
+        if (progress % 40) == 0:
+            print(progress)
+
+
+# -----------------------------------------------------------------------------
 # Uploadr class
 #
 #   Main class for uploading of files.

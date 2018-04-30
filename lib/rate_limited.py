@@ -102,26 +102,26 @@ class LastTime:
         """ debug
         """
         now = time.time()
-        logging.debug('___Rate name:[{!s}] '
-                      'debug=[{!s}] '
-                      '\n\t        cnt:[{!s}] '
-                      '\n\tlast_called:{!s} '
-                      '\n\t  timenow():{!s} '
-                      .format(self.name,
-                              debugname,
-                              self.cnt.value,
-                              time.strftime(
-                                  '%T.{}'
-                                  .format(str(self.last_time_called.value -
-                                              int(self.last_time_called.value))
-                                          .split('.')[1][:3]),
-                                  time.localtime(self.last_time_called.value)),
-                              time.strftime(
-                                  '%T.{}'
-                                  .format(str(now -
-                                              int(now))
-                                          .split('.')[1][:3]),
-                                  time.localtime(now))))
+        logging.debug('___Rate name:[%s] '
+                      'debug=[%s] '
+                      '\n\t        cnt:[%s]'
+                      '\n\tlast_called:[%s]'
+                      '\n\t  timenow():[%s]',
+                      self.name,
+                      debugname,
+                      self.cnt.value,
+                      time.strftime(
+                          '%T.{}'
+                          .format(str(self.last_time_called.value -
+                                      int(self.last_time_called.value))
+                                  .split('.')[1][:3]),
+                          time.localtime(self.last_time_called.value)),
+                      time.strftime(
+                          '%T.{}'
+                          .format(str(now -
+                                      int(now))
+                                  .split('.')[1][:3]),
+                          time.localtime(now)))
 
 
 # -----------------------------------------------------------------------------
@@ -151,9 +151,9 @@ def rate_limited(max_per_second):
         @wraps(func)
         def rate_limited_function(*args, **kwargs):
 
-            logging.info('___Rate_limited f():[{!s}]: '
-                         'Max_per_Second:[{!s}]'
-                         .format(func.__name__, max_per_second))
+            logging.info('___Rate_limited f():[%s]: '
+                         'Max_per_Second:[%s]',
+                         func.__name__, max_per_second)
 
             try:
                 LT.acquire()
@@ -162,24 +162,24 @@ def rate_limited(max_per_second):
 
                 elapsed = xfrom - LT.get_last_time_called()
                 left_to_wait = min_interval - elapsed
-                logging.debug('___Rate f():[{!s}] '
-                              'cnt:[{!s}] '
-                              '\n\tlast_called:{!s} '
-                              '\n\t time now():{!s} '
-                              'elapsed:{:6.2f} '
-                              'min:{!s} '
-                              'to_wait:{:6.2f}'
-                              .format(func.__name__,
-                                      LT.get_cnt(),
-                                      time.strftime(
-                                          '%T',
-                                          time.localtime(
-                                              LT.get_last_time_called())),
-                                      time.strftime('%T',
-                                                    time.localtime(xfrom)),
-                                      elapsed,
-                                      min_interval,
-                                      left_to_wait))
+                logging.debug('___Rate f():[%s] '
+                              'cnt:[%s] '
+                              '\n\tlast_called:%s '
+                              '\n\t time now():%s '
+                              'elapsed:%6.2f '
+                              'min:%s '
+                              'to_wait:%6.2f',
+                              func.__name__,
+                              LT.get_cnt(),
+                              time.strftime(
+                                  '%T',
+                                  time.localtime(
+                                      LT.get_last_time_called())),
+                              time.strftime('%T',
+                                            time.localtime(xfrom)),
+                              elapsed,
+                              min_interval,
+                              left_to_wait)
                 if left_to_wait > 0:
                     time.sleep(left_to_wait)
 
@@ -323,7 +323,7 @@ if __name__ == "__main__":
     doctest.testmod()
 
     # Comment following line to allow further debugging/testing
-    sys.exit(0)
+    # sys.exit(0)
 
     # n for n calls per second  (ex. 3 means 3 calls per second)
     # 1/n for n seconds per call (ex. 0.5 meand 4 seconds in between calls)

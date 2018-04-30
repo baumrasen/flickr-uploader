@@ -66,7 +66,7 @@ class LastTime:
         self.cnt = multiprocessing.Value('i', 0)
         self.last_time_called = multiprocessing.Value('d', 0.0)
 
-        logging.debug('\t__init__: name=[{!s}]'.format(self.name))
+        logging.debug('\t__init__: name=[%s]', self.name)
 
     def acquire(self):
         """ acquire
@@ -256,20 +256,20 @@ def retry(attempts=3, waittime=5, randtime=False):
                                      a_fn.__name__, i, arg)
             for i in range(attempts if attempts > 0 else 1):
                 try:
-                    logging.info('___Retry f():[{!s}]: '
+                    logging.info('___Retry f():[%s]: '
                                  'Attempt:[%s] of [%s]',
                                  a_fn.__name__, i + 1, attempts)
                     return a_fn(*args, **kwargs)
                 except Exception as err:
                     logging.error('___Retry f():[%s]: Error code A: [%s]',
-                                  .format(a_fn.__name__, err)
+                                  a_fn.__name__, err)
                     error = err
                 except flickrapi.exceptions.FlickrError as exc:
                     logging.error('___Retry f():[%s]: Error code B: [%s]',
                                   a_fn.__name__, exc)
                 except lite.Error as err:
                     logging.error('___Retry f():[%s]: Error code C: [%s]',
-                                  .format(a_fn.__name__, err)
+                                  a_fn.__name__, err)
                     error = err
                     # Release the lock on error.
                     # CODING: Check how to handle this particular scenario.
@@ -280,7 +280,7 @@ def retry(attempts=3, waittime=5, randtime=False):
                                   a_fn.__name__)
 
                 logging.warning('___Function:[%s] Waiting:[%s] Rnd:[%s]',
-                                a_fn.__name__, waittime, randtime))
+                                a_fn.__name__, waittime, randtime)
                 if randtime:
                     rtime.sleep(random.randrange(0,
                                                  (waittime + 1)

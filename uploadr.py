@@ -48,18 +48,10 @@ from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 # Import section
 import sys
 import logging
-# Check if required httplib: Used only on exception httplib.HTTPException
-try:
-    import httplib as httplib      # Python 2
-except ImportError:
-    import http.client as httplib  # Python 3
 import argparse
-import mimetypes
 import os
 import os.path
 import time
-import sqlite3 as lite
-import hashlib
 try:
     # Use portalocker if available. Required for Windows systems
     import portalocker as FileLocker  # noqa
@@ -69,8 +61,6 @@ except ImportError:
     import fcntl as FileLocker
     FileLock = FileLocker.lockf
 import errno
-import subprocess
-import multiprocessing
 import xml
 # Avoids error on some systems:
 #    AttributeError: 'module' object has no attribute 'etree'
@@ -92,7 +82,6 @@ finally:
     sys.stderr.write(' Continuing.\n')
     sys.stderr.flush()
 import pprint
-import flickrapi
 # -----------------------------------------------------------------------------
 # Helper FlickrUploadr class to upload pics/videos into Flickr.
 import lib.FlickrUploadr as FlickrUploadr
@@ -109,9 +98,6 @@ import lib.rate_limited as rate_limited
 # -----------------------------------------------------------------------------
 # Helper class and functions to load, process and verify INI configuration.
 import lib.myconfig as myconfig
-# -----------------------------------------------------------------------------
-# Helper module function to split work accross functions in multiprocessing
-import lib.mprocessing as mp
 
 
 # =============================================================================

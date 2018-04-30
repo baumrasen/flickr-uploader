@@ -170,6 +170,7 @@ class Uploadr(object):
         """
 
         self.xCfg = axCfg
+        self.ARGS = ARGS
         # get self.token/nuflickr from Cache (getCachedToken)
         self.token = self.getCachedToken()
 

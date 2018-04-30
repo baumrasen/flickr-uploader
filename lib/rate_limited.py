@@ -151,7 +151,7 @@ def rate_limited(max_per_second):
         @wraps(func)
         def rate_limited_function(*args, **kwargs):
             """ rate_limited_function
-    
+
                 Controls the rate of execution of a function.
                 Applicable to throttle API function calls
             """
@@ -245,13 +245,13 @@ def retry(attempts=3, waittime=5, randtime=False):
     """
     def wrapper_fn(a_fn):
         """ wrapper_fn
-        
+
             Wrapper function for @retry
         """
         @wraps(a_fn)
         def new_wrapper(*args, **kwargs):
             """ new_wrapper
-            
+
                 new_wrapper function for @retry
             """
             rtime = time

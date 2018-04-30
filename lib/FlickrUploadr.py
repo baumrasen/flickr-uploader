@@ -21,14 +21,12 @@ try:
     import httplib as httplib      # Python 2
 except ImportError:
     import http.client as httplib  # Python 3
-import argparse
 import mimetypes
 import os
 import os.path
 import time
 import sqlite3 as lite
 import hashlib
-import errno
 import subprocess
 import multiprocessing
 import xml
@@ -56,7 +54,6 @@ import flickrapi
 # -----------------------------------------------------------------------------
 # Helper class and functions for UPLoaDeR Global Constants.
 from . import UPLDRConstants as UPLDRConstantsClass
-
 # -----------------------------------------------------------------------------
 # Helper class and functions to print messages.
 import lib.niceprint as niceprint
@@ -68,7 +65,25 @@ import lib.rate_limited as rate_limited
 # Helper module function to split work accross functions in multiprocessing
 import lib.mprocessing as mp
 
+# =============================================================================
+# Functions aliases
+#
+#   UPLDRConstants      = from UPLDRConstants module
+#   StrUnicodeOut       = from niceprint module
+#   isThisStringUnicode = from niceprint module
+#   niceassert          = from niceprint module
+#   reportError         = from niceprint module
+#   niceprocessedfiles  = from niceprint module
+# -----------------------------------------------------------------------------
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
+NP = niceprint.niceprint()
+StrUnicodeOut = NP.StrUnicodeOut
+isThisStringUnicode = NP.isThisStringUnicode
+niceassert = NP.niceassert
+reportError = NP.reportError
+niceprocessedfiles = NP.niceprocessedfiles
+# -----------------------------------------------------------------------------
+
 
 # -----------------------------------------------------------------------------
 # Uploadr class
@@ -77,7 +92,7 @@ UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 #
 class Uploadr(xCfg):
     """ Uploadr class
-    
+
     xCfg = Configuration (check lib.myconfig)
     """
 

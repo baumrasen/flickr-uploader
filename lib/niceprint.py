@@ -101,11 +101,8 @@ class niceprint:
         >>> np.StrUnicodeOut('Hello')
         'Hello'
         """
-        if astr is not None:
-            return astr.encode('utf-8') \
-                if self.isThisStringUnicode(astr) else astr
-        else:
-            return ''.encode('utf-8') if self.isThisStringUnicode('') else ''
+        astr = '' if astr is None else astr
+        return astr.encode('utf-8') if self.isThisStringUnicode(astr) else astr
 
     # -------------------------------------------------------------------------
     # niceprint

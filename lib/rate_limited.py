@@ -43,11 +43,11 @@ NP = niceprint.niceprint()
 class LastTime:
     """
         >>> import lib.rate_limited as rt
-        >>> a = rt.LastTime()
+        >>> arate = rt.LastTime()
         ...
-        >>> a.add_cnt()
-        >>> a.add_cnt()
-        >>> a.get_cnt()
+        >>> arate.add_cnt()
+        >>> arate.add_cnt()
+        >>> arate.get_cnt()
         2
     """
     # -------------------------------------------------------------------------
@@ -334,9 +334,6 @@ if __name__ == "__main__":
     import doctest
     doctest.testmod()
 
-    # Comment following line to allow further debugging/testing
-    # sys.exit(0)
-
     # n for n calls per second  (ex. 3 means 3 calls per second)
     # 1/n for n seconds per call (ex. 0.5 meand 4 seconds in between calls)
     @rate_limited(1)
@@ -405,3 +402,5 @@ if __name__ == "__main__":
         j.join()
         print('==={!s} (is alive: {!s}).exitcode = {!s}'
               .format(j.name, j.is_alive(), j.exitcode))
+
+    sys.exit(0)

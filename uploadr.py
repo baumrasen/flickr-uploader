@@ -330,7 +330,7 @@ def run_uploadr():
 
     # Instantiate class Uploadr
     logging.debug('Instantiating the Main class FLICK = Uploadr()')
-    FLICK = FlickrUploadr.Uploadr(xCfg)
+    FLICK = FlickrUploadr.Uploadr(xCfg, ARGS)
 
     # Setup the database
     FLICK.setupDB()

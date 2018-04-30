@@ -43,7 +43,7 @@ except AttributeError:
     try:
         import xml.etree.ElementTree
         sys.stderr.write('done. Continuing.\n')
-        sys.stderr.flush()        
+        sys.stderr.flush()
     except ImportError:
         sys.stderr.write('failed with ImportError.')
         raise

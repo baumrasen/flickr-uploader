@@ -133,7 +133,7 @@ def rate_limited(max_per_second):
     """ rate_limited
 
     Controls the rate of execution of a function.
-    Applican;e to throttle API function calls
+    Applicable to throttle API function calls
     """
 
     min_interval = 1.0 / max_per_second
@@ -150,6 +150,11 @@ def rate_limited(max_per_second):
 
         @wraps(func)
         def rate_limited_function(*args, **kwargs):
+            """ rate_limited_function
+    
+                Controls the rate of execution of a function.
+                Applicable to throttle API function calls
+            """
 
             logging.info('___Rate_limited f():[%s]: '
                          'Max_per_Second:[%s]',
@@ -239,9 +244,16 @@ def retry(attempts=3, waittime=5, randtime=False):
     NameError: ...
     """
     def wrapper_fn(a_fn):
+        """ wrapper_fn
+        
+            Wrapper function for @retry
+        """
         @wraps(a_fn)
         def new_wrapper(*args, **kwargs):
-
+            """ new_wrapper
+            
+                new_wrapper function for @retry
+            """
             rtime = time
             error = None
 
@@ -345,6 +357,10 @@ if __name__ == "__main__":
     print('-------------------------------------------------Multi Processing')
 
     def fmulti(n_cycles, prc):
+        """ fmulti
+
+            Function to iterate in multiprocessing mode.
+        """
 
         for i in range(1, n_cycles):
             rnd_sleep = random.randrange(6)

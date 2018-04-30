@@ -431,10 +431,7 @@ class Uploadr:
                                 nuflickr is None,
                                 nuflickr.token_cache.token is None))
 
-        if nuflickr.token_cache.token is None:
-            return False
-        else:
-            return True
+        return not nuflickr.token_cache.token is None
 
     # -------------------------------------------------------------------------
     # removeExcludedMedia

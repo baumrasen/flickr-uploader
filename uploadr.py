@@ -342,9 +342,9 @@ class Uploadr:
 
         # Prompt for verifier code from the user.
         verifier = unicode(raw_input(  # noqa
-                                     'Verifier code (NNN-NNN-NNN): ')) \
-                   if sys.version_info < (3, ) \
-                   else input('Verifier code (NNN-NNN-NNN): ')
+            'Verifier code (NNN-NNN-NNN): ')) \
+            if sys.version_info < (3, ) \
+            else input('Verifier code (NNN-NNN-NNN): ')
 
         logging.warning('Verifier: {!s}'.format(verifier))
 
@@ -893,7 +893,7 @@ class Uploadr:
                             CaughtPrefix='+++',
                             CaughtCode='999',
                             CaughtMsg='Error calling exiftool (!{s})!'
-                                      .format(ConvertOrCopyTags),
+                            .format(ConvertOrCopyTags),
                             NicePrint=True,
                             exceptSysInfo=True)
                 resultCmd = False
@@ -1239,8 +1239,7 @@ class Uploadr:
                                 CaughtPrefix='+++ DB',
                                 CaughtCode='030',
                                 CaughtMsg='DB error on INSERT: '
-                                          '[{!s}]'
-                                          .format(e.args[0]),
+                                          '[{!s}]'.format(e.args[0]),
                                 NicePrint=True,
                                 exceptSysInfo=True)
                 finally:
@@ -1584,7 +1583,7 @@ class Uploadr:
                                                  'Filetype was not recognised'
                                                  if (format(ex.code) == '5')
                                                  else 'Filesize was too large')
-                                         )
+                                        )
                             logging.info('Bad file:[{!s}]'.format(file))
 
                             try:
@@ -1601,7 +1600,7 @@ class Uploadr:
                                             CaughtCode='041',
                                             CaughtMsg='DB error on INSERT: '
                                                       '[{!s}]'
-                                                      .format(e.args[0]),
+                                            .format(e.args[0]),
                                             NicePrint=True)
                             finally:
                                 # Control for when running multiprocessing
@@ -1713,9 +1712,9 @@ class Uploadr:
                                       isfile_id, type(isfile_id)))
                 # C) File loaded. Recorded on DB. Manage changes & Flickr set.
                 if (isLoaded and
-                    isNoSet and
-                    (row is not None) and
-                        (str(row[1]) == str(isfile_id))):
+                        isNoSet and
+                        (row is not None) and
+                            (str(row[1]) == str(isfile_id))):
 
                     logging.info('Will UPDATE files SET set_id = null '
                                  'for pic:[{!s}] '
@@ -1729,7 +1728,7 @@ class Uploadr:
                                     CaughtPrefix='+++ DB',
                                     CaughtCode='045',
                                     CaughtMsg='DB error on UPDATE: [{!s}]'
-                                              .format(e.args[0]),
+                                    .format(e.args[0]),
                                     NicePrint=True)
                     finally:
                         con.commit()
@@ -1783,8 +1782,8 @@ class Uploadr:
                                 CaughtPrefix='+++ DB',
                                 CaughtCode='050',
                                 CaughtMsg='Error: UPDATE files '
-                                          'SET last_modified: [{!s}]'
-                                          .format(e.args[0]),
+                                'SET last_modified: [{!s}]'
+                                .format(e.args[0]),
                                 NicePrint=True)
 
                     self.useDBLock(lock, False)
@@ -1954,7 +1953,7 @@ class Uploadr:
                                 CaughtPrefix='+++',
                                 CaughtCode='060',
                                 CaughtMsg='Caught IOError, ValueError, '
-                                          'HTTP exception',
+                                'HTTP exception',
                                 NicePrint=True,
                                 exceptSysInfo=True)
                     logging.error('Sleep 10 and try to replace again.')
@@ -1997,7 +1996,7 @@ class Uploadr:
                             CaughtPrefix='+++ DB',
                             CaughtCode='070',
                             CaughtMsg='DB error on UPDATE: [{!s}]'
-                                      .format(e.args[0]),
+                            .format(e.args[0]),
                             NicePrint=True)
             finally:
                 # Release DB lock if running in multiprocessing mode
@@ -2054,8 +2053,7 @@ class Uploadr:
             reportError(Caught=True,
                         CaughtPrefix='+++ DB',
                         CaughtCode='081',
-                        CaughtMsg='DB error: [{!s}]'
-                                  .format(e.args[0]),
+                        CaughtMsg='DB error: [{!s}]'.format(e.args[0]),
                         NicePrint=True)
             # Release the lock on error.
             self.useDBLock(lock, False)
@@ -2139,8 +2137,7 @@ class Uploadr:
                                 CaughtPrefix='+++ DB',
                                 CaughtCode='087',
                                 CaughtMsg='DB error on SELECT(or)DELETE: '
-                                          '[{!s}]'
-                                          .format(e.args[0]),
+                                          '[{!s}]'.format(e.args[0]),
                                 NicePrint=True,
                                 exceptSysInfo=True)
                 except BaseException:
@@ -2277,8 +2274,8 @@ class Uploadr:
             reportError(Caught=True,
                         CaughtPrefix='+++ DB',
                         CaughtCode='095',
-                        CaughtMsg='DB error on UPDATE: [{!s}]'.format(
-                            e.args[0]),
+                        CaughtMsg='DB error on UPDATE: [{!s}]'
+                        .format(e.args[0]),
                         NicePrint=True)
         finally:
             con.commit()
@@ -2639,7 +2636,7 @@ class Uploadr:
                                 CaughtPrefix='+++ DB',
                                 CaughtCode='096',
                                 CaughtMsg='DB error on UPDATE files: [{!s}]'
-                                          .format(e.args[0]),
+                                .format(e.args[0]),
                                 NicePrint=True)
                 finally:
                     # Release DBlock if in multiprocessing mode
@@ -2681,7 +2678,7 @@ class Uploadr:
                                 CaughtPrefix='+++ DB',
                                 CaughtCode='110',
                                 CaughtMsg='DB error on UPDATE SET: [{!s}]'
-                                          .format(e.args[0]),
+                                .format(e.args[0]),
                                 NicePrint=True)
                 finally:
                     con.commit()
@@ -2698,7 +2695,7 @@ class Uploadr:
                         CaughtPrefix='+++ DB',
                         CaughtCode='120',
                         CaughtMsg='DB error on UPDATE files: [{!s}]'
-                                  .format(e.args[0]),
+                        .format(e.args[0]),
                         NicePrint=True)
         except BaseException:
             reportError(Caught=True,
@@ -2963,8 +2960,8 @@ class Uploadr:
                                 CaughtPrefix='+++ DB',
                                 CaughtCode='147',
                                 CaughtMsg='DB error on SELECT FROM '
-                                          'badfiles: [{!s}]'
-                                          .format(e.args[0]),
+                                'badfiles: [{!s}]'
+                                .format(e.args[0]),
                                 NicePrint=True)
                     raise
             else:
@@ -2978,7 +2975,7 @@ class Uploadr:
                         CaughtPrefix='+++ DB',
                         CaughtCode='148',
                         CaughtMsg='DB error on SELECT: [{!s}]'
-                                  .format(e.args[0]),
+                        .format(e.args[0]),
                         NicePrint=True)
             if con is not None:
                 con.close()
@@ -3039,7 +3036,7 @@ class Uploadr:
                             CaughtPrefix='+++ DB',
                             CaughtCode='150',
                             CaughtMsg='DB error SELECT FROM sets: [{!s}]'
-                                      .format(e.args[0]),
+                            .format(e.args[0]),
                             NicePrint=True)
             finally:
                 # Release DB lock if running in multiprocessing mode
@@ -3061,7 +3058,7 @@ class Uploadr:
                                 CaughtPrefix='+++ DB',
                                 CaughtCode='160',
                                 CaughtMsg='DB error DELETE FROM sets: [{!s}]'
-                                          .format(e.args[0]),
+                                .format(e.args[0]),
                                 NicePrint=True)
                 finally:
                     # Release DB lock if running in multiprocessing mode
@@ -3096,8 +3093,8 @@ class Uploadr:
                             CaughtPrefix='+++ DB',
                             CaughtCode='163',
                             CaughtMsg='DB error on SELECT FROM '
-                                      'sets: [{!s}]'
-                                      .format(e.args[0]),
+                            'sets: [{!s}]'
+                            .format(e.args[0]),
                             NicePrint=True)
             for row in allsets:
                 NP.niceprint('Set: [{!s}] ({!s})'.format(str(row[0]), row[1]))
@@ -3232,8 +3229,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                     CaughtPrefix='+++ DB',
                                     CaughtCode='164',
                                     CaughtMsg='DB error on SELECT FROM '
-                                              'sets: [{!s}]'
-                                              .format(e.args[0]),
+                                    'sets: [{!s}]'
+                                    .format(e.args[0]),
                                     NicePrint=True)
 
                     if foundSets is None:
@@ -3259,8 +3256,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                         CaughtPrefix='+++ DB',
                                         CaughtCode='165',
                                         CaughtMsg='DB error on INSERT INTO '
-                                                  'sets: [{!s}]'
-                                                  .format(e.args[0]),
+                                        'sets: [{!s}]'
+                                        .format(e.args[0]),
                                         NicePrint=True)
                     else:
                         logging.info('Set found on DB:[{!s}]'
@@ -4262,7 +4259,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             CaughtPrefix='+++ DB',
                             CaughtCode='220',
                             CaughtMsg='DB error on SELECT FROM files: [{!s}]'
-                                      .format(e.args[0]),
+                            .format(e.args[0]),
                             NicePrint=True)
 
         # Total Local badfiles photos count -----------------------------------
@@ -4304,8 +4301,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
             reportError(Caught=True,
                         CaughtPrefix='+++',
                         CaughtCode='400',
-                        CaughtMsg='Flickrapi exception on '
-                                  'getNotInSet',
+                        CaughtMsg='Flickrapi exception on getNotInSet',
                         exceptUse=True,
                         exceptCode=ex.code,
                         exceptMsg=ex)
@@ -4313,14 +4309,12 @@ set0 = sets.find('photosets').findall('photoset')[0]
             reportError(Caught=True,
                         CaughtPrefix='+++',
                         CaughtCode='401',
-                        CaughtMsg='Caught IO/HTTP Error in '
-                                  'getNotInSet')
+                        CaughtMsg='Caught IO/HTTP Error in getNotInSet')
         except BaseException:
             reportError(Caught=True,
                         CaughtPrefix='+++',
                         CaughtCode='402',
-                        CaughtMsg='Caught exception in '
-                                  'getNotInSet',
+                        CaughtMsg='Caught exception in getNotInSet',
                         exceptSysInfo=True)
         finally:
             logging.debug('Output for get_not_in_set:')
@@ -4778,8 +4772,7 @@ if __name__ == "__main__":
             reportError(Caught=True,
                         CaughtPrefix='+++ ',
                         CaughtCode='601',
-                        CaughtMsg='Invalid -C parameter INI file. '
-                                  'Exiting...',
+                        CaughtMsg='Invalid -C parameter INI file. Exiting...',
                         NicePrint=True)
             sys.exit(2)
     else:
@@ -4793,8 +4786,7 @@ if __name__ == "__main__":
             reportError(Caught=True,
                         CaughtPrefix='+++ ',
                         CaughtCode='602',
-                        CaughtMsg='Invalid sys.argv INI file. '
-                                  'Exiting...',
+                        CaughtMsg='Invalid sys.argv INI file. Exiting...',
                         NicePrint=True)
             sys.exit(2)
 

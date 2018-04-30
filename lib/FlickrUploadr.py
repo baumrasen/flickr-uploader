@@ -711,7 +711,9 @@ class Uploadr(object):
                               .format(file, type(file)))
                 # lock parameter not used (set to None) under single processing
                 success = self.uploadFile(lock=None, file=file)
-                if self.ARGS.drip_feed and success and i != changedMedia_count - 1:
+                if (self.ARGS.drip_feed and
+                    success and
+                        i != changedMedia_count - 1):
                     NP.niceprint('Waiting [{!s}] seconds before next upload'
                                  .format(str(self.xCfg.DRIP_TIME)))
                     nutime.sleep(self.xCfg.DRIP_TIME)
@@ -988,7 +990,8 @@ class Uploadr(object):
                                              StrUnicodeOut('/') +
                                              StrUnicodeOut(f))))
                 # Assumes xCFG.ALLOWED_EXT and xCFG.RAW_EXT are disjoint
-                elif self.xCfg.CONVERT_RAW_FILES and (ext in self.xCfg.RAW_EXT):
+                elif (self.xCfg.CONVERT_RAW_FILES and
+                        (ext in self.xCfg.RAW_EXT)):
                     if not (
                         os.path.exists(
                             os.path.join(
@@ -1145,7 +1148,8 @@ class Uploadr(object):
     #
     # uploads a file into flickr
     #   lock = parameter for multiprocessing control of access to DB.
-    #          if self.ARGS.processes = 0 then lock can be None as it is not used
+    #          (if self.ARGS.processes = 0 then lock can be None
+    #          as it is not used)
     #   file = file to be uploaded
     #
     def uploadFile(self, lock, file):
@@ -1155,7 +1159,8 @@ class Uploadr(object):
         May run in single or multiprocessing mode
 
         lock = parameter for multiprocessing control of access to DB.
-               (if self.ARGS.processes = 0 then lock may be None as it is not used)
+               (if self.ARGS.processes = 0 then lock may be None
+               as it is not used)
         file = file to be uploaded
         """
 
@@ -1214,8 +1219,8 @@ class Uploadr(object):
                                 CaughtPrefix='+++ DB',
                                 CaughtCode='031',
                                 CaughtMsg='Sleep 2 and retry SQL...'
-                                '[{!s}/{!s} attempts]' .format(x,
-                                                               self.xCfg.MAX_SQL_ATTEMPTS),
+                                '[{!s}/{!s} attempts]'
+                                .format(x, self.xCfg.MAX_SQL_ATTEMPTS),
                                 NicePrint=True)
                     nutime.sleep(2)
                 else:
@@ -1767,7 +1772,8 @@ class Uploadr(object):
     #   Should be only called from uploadFile
     #
     #   lock            = parameter for multiprocessing control of access to DB
-    #                     if self.ARGS.processes = 0 then lock can be None/not used
+    #                     (if self.ARGS.processes = 0 then lock can be None
+    #                     as it is not used)
     #   file            = file to be uploaded to replace existing file
     #   file_id         = ID of the photo being replaced
     #   oldfileMd5      = Old file MD5 (required to update checksum tag
@@ -1782,7 +1788,8 @@ class Uploadr(object):
                      oldFileMd5, fileMd5, last_modified, cur, con):
         """ replacePhoto
         lock            = parameter for multiprocessing control of access to DB
-                          if self.ARGS.processes = 0 then lock can be None/not used
+                          (if self.ARGS.processes = 0 then lock can be None
+                          as it is not used)
         file            = file to be uploaded to replace existing file
         file_id         = ID of the photo being replaced
         oldfileMd5      = Old file MD5 (required to update checksum tag
@@ -4339,9 +4346,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                  .format(row.attrib['id'],
                                          StrUnicodeOut(row.attrib['title'])))
                     logging.info('count=[{!s}]'.format(count))
-                    if (count == 500) or \
-                            (count >= (self.ARGS.list_photos_not_in_set - 1)) or \
-                            (count >= (countnotinsets - 1)):
+                    if ((count == 500) or
+                        (count >= (self.ARGS.list_photos_not_in_set - 1)) or
+                            (count >= (countnotinsets - 1))):
                         logging.info('Stopped at photo [{!s}] listing '
                                      'photos not in a set'.format(count))
                         break

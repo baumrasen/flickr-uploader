@@ -83,6 +83,7 @@ niceassert = NP.niceassert
 reportError = NP.reportError
 niceprocessedfiles = NP.niceprocessedfiles
 retry = rate_limited.retry
+nutime = time
 # -----------------------------------------------------------------------------
 
 
@@ -407,8 +408,8 @@ class Uploadr(object):
         """
         NP.niceprint('*****Removing files from Excluded Folders*****')
 
-        if not FLICK.checkToken():
-            FLICK.authenticate()
+        if not self.checkToken():
+            self.authenticate()
         con = lite.connect(self.xCfg.DB_PATH)
         con.text_factory = str
 
@@ -453,8 +454,8 @@ class Uploadr(object):
 
         NP.niceprint('*****Removing deleted files*****')
 
-        if not FLICK.checkToken():
-            FLICK.authenticate()
+        if not self.checkToken():
+            self.authenticate()
         con = lite.connect(self.xCfg.DB_PATH)
         con.text_factory = str
 
@@ -540,7 +541,7 @@ class Uploadr(object):
                      .format(str(changedMedia_count)))
 
         # Convert Raw files
-        FLICK.convertRawFiles(rawfiles, changedMedia)
+        self.convertRawFiles(rawfiles, changedMedia)
 
         if self.ARGS.bad_files:
             # Cater for bad files
@@ -1075,8 +1076,8 @@ class Uploadr(object):
             logging.info('video_date:[{!s}]'.format(video_date))
 
             try:
-                res_set_date = FLICK.photos_set_dates(xfile_id,
-                                                      str(video_date))
+                res_set_date = self.photos_set_dates(xfile_id,
+                                                     str(video_date))
                 logging.debug('Output for {!s}:'.format('res_set_date'))
                 logging.debug(xml.etree.ElementTree.tostring(
                     res_set_date,
@@ -1848,7 +1849,7 @@ class Uploadr(object):
 
                     if self.isGood(replaceResp):
                         # Update checksum tag at this time.
-                        res_add_tag = FLICK.photos_add_tags(
+                        res_add_tag = self.photos_add_tags(
                             file_id,
                             ['checksum:{}'.format(fileMd5)]
                         )
@@ -1860,7 +1861,7 @@ class Uploadr(object):
                         if self.isGood(res_add_tag):
                             # Gets Flickr file info to obtain all tags
                             # in order to update checksum tag if exists
-                            res_get_info = FLICK.photos_get_info(
+                            res_get_info = self.photos_get_info(
                                 photo_id=file_id
                             )
                             logging.debug('res_get_info: ')
@@ -2845,7 +2846,7 @@ class Uploadr(object):
                 NP.niceprint('Database version: [{!s}]'.format(row[0]))
                 # Database version 3 <=========================DB VERSION: 3===
                 NP.niceprint('Adding album tags to pics already uploaded... ')
-                if FLICK.addAlbumsMigrate():
+                if self.addAlbumsMigrate():
                     NP.niceprint('Successfully added album tags to pics '
                                  'already upload. Updating Database version.',
                                  fname='addAlbumsMigrate')

@@ -247,40 +247,40 @@ def retry(attempts=3, waittime=5, randtime=False):
 
             if logging.getLogger().getEffectiveLevel() <= logging.WARNING:
                 if args is not None:
-                    logging.info('___Retry f():[{!s}] '
-                                 'Max:[{!s}] Delay:[{!s}] Rnd[{!s}]'
-                                 .format(a_fn.__name__, attempts,
-                                         waittime, randtime))
+                    logging.info('___Retry f():[%s] '
+                                 'Max:[%s] Delay:[%s] Rnd[%s]',
+                                 a_fn.__name__, attempts,
+                                 waittime, randtime)
                     for i, arg in enumerate(args):
-                        logging.info('___Retry f():[{!s}] arg[{!s}]={!s}'
-                                     .format(a_fn.__name__, i, arg))
+                        logging.info('___Retry f():[%s] arg[%s]={%s}',
+                                     a_fn.__name__, i, arg)
             for i in range(attempts if attempts > 0 else 1):
                 try:
                     logging.info('___Retry f():[{!s}]: '
-                                 'Attempt:[{!s}] of [{!s}]'
-                                 .format(a_fn.__name__, i + 1, attempts))
+                                 'Attempt:[%s] of [%s]',
+                                 a_fn.__name__, i + 1, attempts)
                     return a_fn(*args, **kwargs)
-                except Exception as e:
-                    logging.error('___Retry f():[{!s}]: Error code A: [{!s}]'
-                                  .format(a_fn.__name__, e))
-                    error = e
-                except flickrapi.exceptions.FlickrError as ex:
-                    logging.error('___Retry f():[{!s}]: Error code B: [{!s}]'
-                                  .format(a_fn.__name__, ex))
-                except lite.Error as e:
-                    logging.error('___Retry f():[{!s}]: Error code C: [{!s}]'
-                                  .format(a_fn.__name__, e))
-                    error = e
+                except Exception as err:
+                    logging.error('___Retry f():[%s]: Error code A: [%s]',
+                                  .format(a_fn.__name__, err)
+                    error = err
+                except flickrapi.exceptions.FlickrError as exc:
+                    logging.error('___Retry f():[%s]: Error code B: [%s]',
+                                  a_fn.__name__, exc)
+                except lite.Error as err:
+                    logging.error('___Retry f():[%s]: Error code C: [%s]',
+                                  .format(a_fn.__name__, err)
+                    error = err
                     # Release the lock on error.
                     # CODING: Check how to handle this particular scenario.
                     # flick.useDBLock(nulockDB, False)
                     # self.useDBLock( lock, True)
                 except BaseException:
-                    logging.error('___Retry f():[{!s}]: Error code D: Catchall'
-                                  .format(a_fn.__name__))
+                    logging.error('___Retry f():[%s]: Error code D: Catchall',
+                                  a_fn.__name__)
 
-                logging.warning('___Function:[{!s}] Waiting:[{!s}] Rnd:[{!s}]'
-                                .format(a_fn.__name__, waittime, randtime))
+                logging.warning('___Function:[%s] Waiting:[%s] Rnd:[%s]',
+                                a_fn.__name__, waittime, randtime))
                 if randtime:
                     rtime.sleep(random.randrange(0,
                                                  (waittime + 1)
@@ -289,9 +289,8 @@ def retry(attempts=3, waittime=5, randtime=False):
                 else:
                     rtime.sleep(waittime if waittime >= 0 else 0)
             logging.error('___Retry f():[{!s}] '
-                          'Max:[{!s}] Delay:[{!s}] Rnd[{!s}]: Raising ERROR!'
-                          .format(a_fn.__name__, attempts,
-                                  waittime, randtime))
+                          'Max:[%s] Delay:[%s] Rnd[%s]: Raising ERROR!',
+                          a_fn.__name__, attempts, waittime, randtime)
             raise error
         return new_wrapper
     return wrapper_fn

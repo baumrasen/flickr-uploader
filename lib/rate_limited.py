@@ -288,7 +288,7 @@ def retry(attempts=3, waittime=5, randtime=False):
                                                  else 1))
                 else:
                     rtime.sleep(waittime if waittime >= 0 else 0)
-            logging.error('___Retry f():[{!s}] '
+            logging.error('___Retry f():[%s] '
                           'Max:[%s] Delay:[%s] Rnd[%s]: Raising ERROR!',
                           a_fn.__name__, attempts, waittime, randtime)
             raise error

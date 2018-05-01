@@ -48,6 +48,7 @@ except AttributeError:
         sys.stderr.write('failed with ImportError.')
         raise
 import pprint
+from itertools import islice
 import flickrapi
 # -----------------------------------------------------------------------------
 # Helper class and functions for UPLoaDeR Global Constants.
@@ -96,11 +97,12 @@ class FileWithCallback(object):
     # -------------------------------------------------------------------------
     # class FileWithCallback __init__
     #
-    def __init__(self, filename, callback):
+    def __init__(self, filename, callback, verbose_progress):
         """ class FileWithCallback __init__
         """
         self.file = open(filename, 'rb')
         self.callback = callback
+        self.verbose_progress = verbose_progress
         # the following attributes and methods are required
         self.len = os.path.getsize(filename)
         self.fileno = self.file.fileno
@@ -115,7 +117,7 @@ class FileWithCallback(object):
         read file to upload into Flickr with FileWithCallback
         """
         if self.callback:
-            self.callback(self.tell() * 100 // self.len)
+            self.callback(self.tell() * 100 // self.len, self.verbose_progress)
         return self.file.read(size)
 
 
@@ -124,23 +126,43 @@ class FileWithCallback(object):
 #
 # For use with flickrapi upload for showing callback progress information
 # Check function FileWithCallback definition
-# Uses global self.ARGS.verbose-progress parameter
+# Set verbose-progress True to display progress
 #
-def callback(progress):
+def callback(progress, verbose_progress):
     """ callback
 
     Print progress % while uploading into Flickr.
-    Valid only if global variable self.ARGS.verbose_progress is True
+    Valid only if global parameter verbose_progress is True
     """
     # only print rounded percentages: 0, 10, 20, 30, up to 100
     # adapt as required
     # if (progress % 10) == 0:
-    # if verbose option is set
-    # if self.ARGS.verbose_progress:
-    # if self.ARGS.verbose_progress:
-    if False:
+    # if verbose_progress option is set
+    if verbose_progress:
         if (progress % 40) == 0:
             print(progress)
+
+
+# -------------------------------------------------------------------------
+# chunk
+#
+# Divides an iterable in slices/chunks of size size
+#
+def chunk(itlist, size):
+    """
+        Divides an iterable in slices/chunks of size size
+        >>> for a in chunk([ 1, 2, 3, 4, 5, 6], 2):
+        ...     len(a)
+        2
+        2
+        2
+    """
+    itlist = iter(itlist)
+    # lambda: creates a returning expression function
+    # which returns slices
+    # iter, with the second argument () stops creating
+    # iterators when it reaches the end
+    return iter(lambda: tuple(islice(itlist, size)), ())
 
 
 # -----------------------------------------------------------------------------
@@ -576,24 +598,6 @@ class Uploadr(object):
             logger.setLevel(self.xCfg.LOGGING_LEVEL)
 
             logging.debug('===Multiprocessing=== Logging defined!')
-
-            # -------------------------------------------------------------------------
-            # chunk
-            #
-            # Divides an iterable in slices/chunks of size size
-            #
-            from itertools import islice
-
-            def chunk(it, size):
-                """
-                    Divides an iterable in slices/chunks of size size
-                """
-                it = iter(it)
-                # lambda: creates a returning expression function
-                # which returns slices
-                # iter, with the second argument () stops creating
-                # iterators when it reaches the end
-                return iter(lambda: tuple(islice(it, size)), ())
 
             uploadPool = []
             nulockDB = multiprocessing.Lock()
@@ -1417,7 +1421,10 @@ class Uploadr(object):
                     try:
                         uploadResp = nuflickr.upload(
                             filename=file,
-                            fileobj=FileWithCallback(file, callback),
+                            fileobj=FileWithCallback(
+                                file,
+                                callback,
+                                self.ARGS.verbose_progress),
                             title=title_filename
                             if self.xCfg.FLICKR["title"] == ""
                             else str(self.xCfg.FLICKR["title"]),
@@ -1834,7 +1841,8 @@ class Uploadr(object):
                     replaceResp = nuflickr.replace(
                         filename='dummy',
                         fileobj=photo,
-                        # fileobj=FileWithCallback(file, callback),
+                        # fileobj=FileWithCallback(
+                        #     file, callback, self.ARGS.verbose_progress),
                         photo_id=file_id
                     )
 

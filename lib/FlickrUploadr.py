@@ -2091,16 +2091,19 @@ class Uploadr(object):
             Run in daemon mode. runs upload every SLEEP_TIME seconds.
         """
 
-        logging.warning('Running in Daemon mode.')
+        logging.warning('Daemon mode run.')
+        NP.niceprint('Daemon mode run.')
         while (True):
-            NP.niceprint('Running in Daemon mode. Execute at [{!s}].'
+            NP.niceprint(' Daemon mode go:[{!s}]'
                          .format(nutime.strftime(UPLDRConstants.TimeFormat)))
             # run upload
             self.upload()
-            NP.niceprint('Last check: [{!s}]'
+            NP.niceprint('Daemon mode out:[{!s}]'
                          .format(str(nutime.asctime(time.localtime()))))
-            logging.warning('Running in Daemon mode. Sleep [{!s}] seconds.'
-                            .format(self.xCfg.SLEEP_TIME))
+            NP.niceprint('    Daemon wait:[{!s}] seconds.'
+                         .format(self.xCfg.SLEEP_TIME))
+            logging.warning('    Daemon wait:[%s] seconds.',
+                            self.xCfg.SLEEP_TIME)
             nutime.sleep(self.xCfg.SLEEP_TIME)
 
     # -------------------------------------------------------------------------

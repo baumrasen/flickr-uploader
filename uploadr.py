@@ -198,7 +198,8 @@ def parse_arguments():
     pgrpparser.add_argument('-d', '--daemon', action='store_true',
                             help='Run forever as a daemon.'
                                  'Uploading every SLEEP_TIME seconds. Please '
-                                 'note it only performs upload/replace.')
+                                 'note it only performs '
+                                 'upload/raw convert/replace.')
 
     # Bad files related options -----------------------------------------------
     # Cater for bad files. files in your Library that flickr does not recognize
@@ -268,7 +269,7 @@ def run_uploadr(ARGS):
     if ARGS.verbose:
         NP.niceprint('FILES_DIR: [{!s}]'.format(StrUnicodeOut(xCfg.FILES_DIR)))
 
-    logging.warning('FILES_DIR: [{!s}]'.format(StrUnicodeOut(xCfg.FILES_DIR)))
+    logging.warning('FILES_DIR: [%s]', StrUnicodeOut(xCfg.FILES_DIR))
 
     if xCfg.FILES_DIR == "":
         NP.niceprint('Please configure in the INI file [normally uploadr.ini],'
@@ -277,8 +278,8 @@ def run_uploadr(ARGS):
         sys.exit(8)
     else:
         if not os.path.isdir(xCfg.FILES_DIR):
-            logging.critical('FILES_DIR: [{!s}] is not valid.'
-                             .format(StrUnicodeOut(xCfg.FILES_DIR)))
+            logging.critical('FILES_DIR: [%s] is not valid.',
+                             StrUnicodeOut(xCfg.FILES_DIR))
             NP.niceprint('Please configure the name of an existant folder '
                          'in the INI file [normally uploadr.ini] '
                          'with media available to sync with Flickr. '
@@ -305,8 +306,8 @@ def run_uploadr(ARGS):
 
     if ARGS.daemon:
         # Will run in daemon mode every SLEEP_TIME seconds
-        logging.warning('Will run in daemon mode every {!s} seconds'
-                        .format(xCfg.SLEEP_TIME))
+        logging.warning('Will run in daemon mode every [%s] seconds',
+                        xCfg.SLEEP_TIME)
         logging.warning('Make sure you have previously authenticated!')
         FLICK.run()
     else:
@@ -375,11 +376,10 @@ def checkBaseDir_INIfile(baseDir, INIfile):
     except Exception as err:
         resultCheck = False
         logging.critical(
-            'Config folder [{!s}] and/or INI file: [{!s}] not found or '
-            'incorrect format: [{!s}]!'
-            .format(baseDir, INIfile, str(err)))
+            'Config folder [%s] and/or INI file: [%s] not found or '
+            'incorrect format: [%s]!', baseDir, INIfile, str(err))
     finally:
-        logging.debug('resultCheck=[{!s}]'.format(resultCheck))
+        logging.debug('resultCheck=[{%s]', resultCheck)
         return resultCheck
 
 
@@ -419,12 +419,11 @@ UPLDRConstants.baseDir = os.path.join(sys.prefix, 'etc')
 UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")
 
 if xCfg.LOGGING_LEVEL <= logging.DEBUG:
-    logging.debug('       baseDir:[{!s}]'.format(UPLDRConstants.baseDir))
-    logging.debug('           cwd:[{!s}]'.format(os.getcwd()))
-    logging.debug('    prefix/etc:[{!s}]'.format(os.path.join(sys.prefix,
-                                                              'etc')))
-    logging.debug('   sys.argv[0]:[{!s}]'.format(os.path.dirname(sys.argv[0])))
-    logging.debug('       INIfile:[{!s}]'.format(UPLDRConstants.INIfile))
+    logging.debug('       baseDir:[%s]', UPLDRConstants.baseDir)
+    logging.debug('           cwd:[$s]', os.getcwd())
+    logging.debug('    prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
+    logging.debug('   sys.argv[0]:[%s]', os.path.dirname(sys.argv[0]))
+    logging.debug('       INIfile:[%s]', UPLDRConstants.INIfile)
 # -----------------------------------------------------------------------------
 
 # =============================================================================
@@ -478,8 +477,8 @@ if __name__ == "__main__":
     # Argument --config-file overrides configuration filename.
     if PARSED_ARGS.config_file:
         UPLDRConstants.INIfile = PARSED_ARGS.config_file
-        logging.info('UPLDRConstants.INIfile:[{!s}]'
-                     .format(StrUnicodeOut(UPLDRConstants.INIfile)))
+        logging.info('UPLDRConstants.INIfile:[%s]',
+                     StrUnicodeOut(UPLDRConstants.INIfile))
         if not checkBaseDir_INIfile(UPLDRConstants.baseDir,
                                     UPLDRConstants.INIfile):
             reportError(Caught=True,

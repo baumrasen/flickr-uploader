@@ -527,13 +527,19 @@ class Uploadr(object):
     #
     def upload(self):
         """ upload
-        Add files to flickr and into their sets(Albums)
-        If enabled CHANGE_MEDIA, checks for file changes and updates flickr
-        """
 
-        global nulockDB
-        global numutex
-        global nurunning
+            Add files to flickr and into their sets(Albums)
+            If enabled CHANGE_MEDIA, checks for file changes and updates flickr
+        """
+        # ---------------------------------------------------------------------
+        # Local Variables
+#
+        #   nulockDB     = multiprocessing Lock for access to Database
+        #   numutex      = multiprocessing mutex for access to value srunning
+        #   nrunning    = multiprocessing Value to count processed photos
+        nulockDB = None
+        numutex = None
+        nurunning = None
 
         NP.niceprint("*****Uploading files*****")
 

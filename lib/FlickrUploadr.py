@@ -472,25 +472,36 @@ class Uploadr(object):
 
         NP.niceprint("*****Uploading files*****")
 
-        con = None
-        # Search for list of media files to load including raw files to convert
-        allMedia, rawfiles = self.grabNewFiles()
-        # If managing changes, consider all files
-        if self.xCfg.MANAGE_CHANGES:
-            logging.warning('MANAGE_CHANGES is True. Reviewing allMedia.')
-            changedMedia = allMedia
+        con = lite.connect(self.xCfg.DB_PATH)
+        con.text_factory = str
 
-        # If not, then get just the new and missing files
-        else:
-            logging.warning('MANAGE_CHANGES is False. Reviewing only '
-                            'changedMedia.')
-            con = lite.connect(self.xCfg.DB_PATH)
-            con.text_factory = str
-            with con:
+        with con:
+            # Search for  media files to load including raw files to convert
+            allMedia, rawfiles = self.grabNewFiles()
+
+            # If managing changes, consider all files
+            if self.xCfg.MANAGE_CHANGES:
+                logging.warning('MANAGE_CHANGES is True. Reviewing allMedia.')
+                changedMedia = allMedia
+
+            # If not, then get just the new and missing files
+            else:
+                logging.warning('MANAGE_CHANGES is False. Reviewing only '
+                                'changedMedia.')
                 cur = con.cursor()
-                cur.execute("SELECT path FROM files")
-                existingMedia = set(file[0] for file in cur.fetchall())
-                changedMedia = set(allMedia) - existingMedia
+                try:
+                    cur.execute("SELECT path FROM files")
+                    existingMedia = set(file[0] for file in cur.fetchall())
+                    changedMedia = set(allMedia) - existingMedia
+                except lite.Error as e:
+                    reportError(Caught=True,
+                                CaughtPrefix='+++ DB',
+                                CaughtCode='999',
+                                CaughtMsg='DB error on DB select: [{!s}]'
+                                .format(e.args[0]),
+                                NicePrint=True,
+                                exceptSysInfo=True)
+                    changedMedia = allMedia
 
         changedMedia_count = len(changedMedia)
         UPLDRConstantsClass.nuMediacount = changedMedia_count
@@ -525,7 +536,9 @@ class Uploadr(object):
             logging.debug('__name__:[{!s}] to prevent recursive calling)!'
                           .format(__name__))
 
-            cur = con.cursor()
+            con = lite.connect(self.xCfg.DB_PATH)
+            con.text_factory = str
+            cur = con.cursor
 
             # To prevent recursive calling, check if __name__ == '__main__'
             # if __name__ == '__main__':

@@ -113,7 +113,7 @@ class FileWithCallback(object):
     def read(self, size):
         """ read
 
-        read file to upload into Flickr with FileWithCallback
+            Read file to upload into Flickr with FileWithCallback
         """
         if self.callback:
             self.callback(self.tell() * 100 // self.len, self.verbose_progress)
@@ -130,8 +130,8 @@ class FileWithCallback(object):
 def callback(progress, verbose_progress):
     """ callback
 
-    Print progress % while uploading into Flickr.
-    Valid only if global parameter verbose_progress is True
+        Print progress % while uploading into Flickr.
+        Valid only if global parameter verbose_progress is True
     """
     # only print rounded percentages: 0, 10, 20, 30, up to 100
     # adapt as required
@@ -148,8 +148,10 @@ def callback(progress, verbose_progress):
 # Divides an iterable in slices/chunks of size size
 #
 def chunk(itlist, size):
-    """
+    """ chunk
+
         Divides an iterable in slices/chunks of size size
+
         >>> for a in chunk([ 1, 2, 3, 4, 5, 6], 2):
         ...     len(a)
         2
@@ -183,10 +185,11 @@ class Uploadr(object):
     def __init__(self, axCfg, ARGS):
         """ class Uploadr __init__
 
-        axCfg = Configuration (check lib.myconfig)
+            axCfg = Configuration (check lib.myconfig)
+            ARGS  = provides access to arguments values
 
-        Gets FlickrAPI cached token, if available.
-        Adds .3gp mimetime as video.
+            Gets FlickrAPI cached token, if available.
+            Adds .3gp mimetime as video.
         """
 
         self.xCfg = axCfg
@@ -288,9 +291,10 @@ class Uploadr(object):
     # Authenticates via flickrapi on flickr.com
     #
     def authenticate(self):
-        """
-        Authenticate user so we can upload files.
-        Assumes the cached token is not available or valid.
+        """ authenticate
+
+            Authenticate user so we can upload files.
+            Assumes the cached token is not available or valid.
         """
         global nuflickr
 
@@ -345,11 +349,8 @@ class Uploadr(object):
                         exceptSysInfo=True)
             sys.exit(5)
 
-        NP.niceprint('{!s} with {!s} permissions: {!s}'.format(
-            'Check Authentication',
-            'delete',
-            nuflickr.token_valid(perms='delete')))
-        # logging.critical('Token Cache: {!s}', nuflickr.token_cache.token)
+        NP.niceprint('Check Authentication with [delete] permissions: {!s}'
+                     .format(nuflickr.token_valid(perms='delete')))
 
     # -------------------------------------------------------------------------
     # getCachedToken
@@ -359,8 +360,9 @@ class Uploadr(object):
     # Saves the token on the global variable nuflickr.
     #
     def getCachedToken(self):
-        """
-        Attempts to get the flickr token from disk.
+        """ getCachedToken
+
+            Attempts to get the flickr token from disk.
         """
         global nuflickr
 
@@ -399,9 +401,10 @@ class Uploadr(object):
     #
     def checkToken(self):
         """ checkToken
-        flickr.auth.checkToken
 
-        Returns the credentials attached to an authentication token.
+            flickr.auth.checkToken
+
+            Returns the credentials attached to an authentication token.
         """
         global nuflickr
 
@@ -465,7 +468,8 @@ class Uploadr(object):
     # Remove files deleted at the local source
     #
     def removeDeletedMedia(self):
-        """
+        """ removeDeletedMedia
+
         Remove files deleted at the local source
             loop through database
             check if file exists
@@ -2988,8 +2992,7 @@ class Uploadr(object):
     #   if localDBSet is None then INSERTs flickrset into flickrdb
     #
     def getFlickrSets(self):
-        """
-            getFlickrSets
+        """ getFlickrSets
 
             Gets list of FLickr Sets (Albums) and populates
             local DB accordingly
@@ -3540,7 +3543,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #   Local Wrapper for Flickr people.getPhotos
     #
     def people_get_photos(self):
-        """
+        """ people_get_photos
         """
 
         global nuflickr
@@ -3590,8 +3593,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #   Local Wrapper for Flickr photos.getNotInSet
     #
     def photos_get_not_in_set(self, per_page):
-        """
-        Local Wrapper for Flickr photos.getNotInSet
+        """ photos_get_not_in_set
+
+            Local Wrapper for Flickr photos.getNotInSet
         """
 
         global nuflickr
@@ -3610,8 +3614,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #   Local Wrapper for Flickr photos.getInfo
     #
     def photos_get_info(self, photo_id):
-        """
-        Local Wrapper for Flickr photos.getInfo
+        """ photos_get_info
+
+            Local Wrapper for Flickr photos.getInfo
         """
 
         global nuflickr
@@ -3626,11 +3631,12 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #   Determines if tag is assigned to a pic.
     #
     def photos_find_tag(self, photo_id, intag):
-        """
-        Determines if intag is assigned to a pic.
+        """ photos_find_tag
 
-        found_tag = False or True
-        tag_id = tag_id if found
+            Determines if intag is assigned to a pic.
+
+            found_tag = False or True
+            tag_id = tag_id if found
         """
 
         global nuflickr
@@ -3703,8 +3709,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #   Local Wrapper for Flickr photos.addTags
     #
     def photos_add_tags(self, photo_id, tags):
-        """
-        Local Wrapper for Flickr photos.addTags
+        """ photos_add_tags
+
+            Local Wrapper for Flickr photos.addTags
         """
 
         global nuflickr
@@ -3723,11 +3730,12 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #   a tag id, as returned by flickr.photos.getInfo.
     #
     def photos_remove_tag(self, tag_id):
-        """
-        Local Wrapper for Flickr photos.removeTag
+        """ photos_remove_tag
 
-        The tag to remove from the photo. This parameter should contain
-        a tag id, as returned by flickr.photos.getInfo.
+            Local Wrapper for Flickr photos.removeTag
+
+            The tag to remove from the photo. This parameter should contain
+            a tag id, as returned by flickr.photos.getInfo.
         """
 
         global nuflickr
@@ -3742,8 +3750,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
     # Update Date/Time Taken on Flickr for Video files
     #
     def photos_set_dates(self, photo_id, datetxt):
-        """
-        Update Date/Time Taken on Flickr for Video files
+        """ photos_set_dates
+
+            Update Date/Time Taken on Flickr for Video files
         """
         global nuflickr
 
@@ -4061,9 +4070,13 @@ set0 = sets.find('photosets').findall('photoset')[0]
     # -------------------------------------------------------------------------
     # listBadFiles
     #
-    # Prepare for version 2.7.0 Add album info to loaded pics
+    # List badfiles recorded on Local DB from previous loads
     #
     def listBadFiles(self):
+        """ listBadFiles
+
+            List badfiles recorded on Local DB from previous loads
+        """
 
         con = lite.connect(self.xCfg.DB_PATH)
         con.text_factory = str
@@ -4118,8 +4131,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
     #
     def printStat(self, InitialFoundFiles):
         """ printStat
-        Shows Total photos and Photos Not in Sets on Flickr
-        InitialFoundFiles = shows the Found files prior to processing
+
+            Shows Total photos and Photos Not in Sets on Flickr
+            InitialFoundFiles = shows the Found files prior to processing
         """
         # Total Local photos count --------------------------------------------
         con = lite.connect(self.xCfg.DB_PATH)

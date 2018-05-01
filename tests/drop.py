@@ -121,7 +121,7 @@ if __name__ == '__main__':
     LOCALFILE = args.file
     BACKUPPATH = '/' + args.dstfolder + '/' + LOCALFILE
     # Check for an access token
-    if len(TOKEN) == 0:
+    if not TOKEN:
         sys.exit("ERROR: Looks like you didn't provide your access token "
                  "via --token argument.")
 

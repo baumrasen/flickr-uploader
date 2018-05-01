@@ -740,9 +740,6 @@ class Uploadr(object):
                               list will be sorted
         """
 
-        # CODING: To do: save RAWfiles list from grabNewFiles function...
-        # for post-processing...
-
         if not self.xCfg.CONVERT_RAW_FILES:
             return
 
@@ -1797,7 +1794,6 @@ class Uploadr(object):
         con             = current DB connection
         """
 
-        # CODING: Flickr does not allow to replace videos.
         global nuflickr
 
         if self.ARGS.dry_run is True:
@@ -2342,7 +2338,7 @@ class Uploadr(object):
         """ fn_addFilesToSets
         """
 
-        # CODING to avoid 096 try to use a differnt conn and cur
+        # CODING Use a differrnt conn and cur to avoid erro +++096
         fn_con = lite.connect(self.xCfg.DB_PATH)
         fn_con.text_factory = str
 
@@ -3896,10 +3892,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
     # -------------------------------------------------------------------------
     # searchForDuplicates
     #
-    # List Local pics, loaded pics into Flickr, pics not in sets on Flickr
+    # Pics with same checksum, on the same Album and a different filename
+    # Pics with same checksum, on different same Album and a different filename
     #
-    # CODING: to be developed. Consider making allMedia (coming from
-    # grabnewfiles from  uploadr) a global variable to pass onto this function
+    # CODING: to be developed.
+    #
     def searchForDuplicates(self):
         """ searchForDuplicates
 

@@ -940,9 +940,8 @@ class Uploadr(object):
                 reportError(Caught=True,
                             CaughtPrefix='+++',
                             CaughtCode='010',
-                            CaughtMsg='Error setting date '
-                                      'file_id:[{!s}]'
-                                      .format(xfile_id),
+                            CaughtMsg='Error setting date file_id:[{!s}]'
+                            .format(xfile_id),
                             NicePrint=True,
                             exceptSysInfo=True)
                 raise
@@ -1120,7 +1119,7 @@ class Uploadr(object):
                             CaughtPrefix='+++ DB',
                             CaughtCode='035',
                             CaughtMsg='DB error on SELECT: [{!s}]'
-                                      .format(err.args[0]),
+                            .format(err.args[0]),
                             NicePrint=True)
             finally:
                 # Release DB lock if running in multiprocessing mode
@@ -1396,7 +1395,7 @@ class Uploadr(object):
                                                  'Filetype was not recognised'
                                                  if (format(ex.code) == '5')
                                                  else 'Filesize was too large')
-                                         )
+                                        )
                             logging.info('Bad file:[{!s}]'.format(file))
 
                             try:
@@ -1567,7 +1566,7 @@ class Uploadr(object):
                                     .format(nutime.strftime(
                                         UPLDRConstants.TimeFormat,
                                         nutime.localtime(row[6])),
-                                        row[6]))
+                                            row[6]))
                     if row[6] is None:
                         # Update db the last_modified time of file
 
@@ -3135,7 +3134,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
             searchIsUploaded = None
             searchIsUploaded = R_photos_search(dict(user_id="me",
                                                     tags='checksum:{}'
-                                                         .format(xchecksum),
+                                                    .format(xchecksum),
                                                     extras='tags'))
         except flickrapi.exceptions.FlickrError as ex:
             reportError(Caught=True,
@@ -3969,13 +3968,12 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 badFiles = cur.fetchall()
                 logging.info('len(badFiles)=[{!s}]'
                              .format(len(badFiles)))
-            except lite.Error as e:
+            except lite.Error as err:
                 reportError(Caught=True,
                             CaughtPrefix='+++ DB',
                             CaughtCode='218',
-                            CaughtMsg='DB error on SELECT FROM '
-                                      'sets: [{!s}]'
-                                      .format(e.args[0]),
+                            CaughtMsg='DB error on SELECT FROM sets: [{!s}]'
+                            .format(err.args[0]),
                             NicePrint=True)
                 return False
 
@@ -4047,8 +4045,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             CaughtPrefix='+++ DB',
                             CaughtCode='230',
                             CaughtMsg='DB error on SELECT FROM '
-                                      'badfiles: [{!s}]'
-                                      .format(e.args[0]),
+                            'badfiles: [{!s}]'
+                            .format(e.args[0]),
                             NicePrint=True)
 
         # Total FLickr photos count: find('photos').attrib['total'] -----------
@@ -4149,7 +4147,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     logging.info('count=[{!s}]'.format(count))
                     if ((count == 500) or
                         (count >= (self.ARGS.list_photos_not_in_set - 1)) or
-                            (count >= (countnotinsets - 1))):
+                                (count >= (countnotinsets - 1))):
                         logging.info('Stopped at photo [{!s}] listing '
                                      'photos not in a set'.format(count))
                         break

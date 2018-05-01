@@ -1391,11 +1391,11 @@ class Uploadr(object):
                             # Add to db the file NOT uploaded
                             # Set locking for when running multiprocessing
                             NP.niceprint('   Log Bad file:[{!s}] due to [{!s}]'
-                                         .format(file,
-                                                 'Filetype was not recognised'
-                                                 if (format(ex.code) == '5')
-                                                 else 'Filesize was too large')
-                                        )
+                                         .format(
+                                            file,
+                                            'Filetype was not recognised'
+                                            if (format(ex.code) == '5')
+                                            else 'Filesize was too large'))
                             logging.info('Bad file:[{!s}]'.format(file))
 
                             try:
@@ -4147,7 +4147,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     logging.info('count=[{!s}]'.format(count))
                     if ((count == 500) or
                         (count >= (self.ARGS.list_photos_not_in_set - 1)) or
-                                (count >= (countnotinsets - 1))):
+                            (count >= (countnotinsets - 1))):
                         logging.info('Stopped at photo [{!s}] listing '
                                      'photos not in a set'.format(count))
                         break

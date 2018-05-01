@@ -28,7 +28,6 @@ import time
 import sqlite3 as lite
 import hashlib
 import subprocess
-import multiprocessing
 import xml
 # Avoids error on some systems:
 #    AttributeError: 'module' object has no attribute 'etree'
@@ -590,19 +589,19 @@ class Uploadr(object):
                           .format(self.ARGS.processes))
             logging.debug('__name__:[{!s}] to prevent recursive calling)!'
                           .format(__name__))
-            
+
             # To prevent recursive calling, check if __name__ == '__main__'
             # if __name__ == '__main__':
             mp.mprocessing(self.ARGS.verbose,
                            self.ARGS.verbose_progress,
                            self.ARGS.processes,
-                           nulockDB, #ok
-                           nurunning, #ok
-                           numutex, #ok
+                           nulockDB,
+                           nurunning,
+                           numutex,
                            changedMedia,
                            self.uploadFileX,
                            cur)
-            con.commit()            
+            con.commit()
 
         # running in single processing mode
         else:

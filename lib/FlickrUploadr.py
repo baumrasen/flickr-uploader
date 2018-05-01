@@ -131,7 +131,7 @@ def callback(progress, verbose_progress):
     """ callback
 
         Print progress % while uploading into Flickr.
-        Valid only if global parameter verbose_progress is True
+        Valid only if argument verbose_progress is True
     """
     # only print rounded percentages: 0, 10, 20, 30, up to 100
     # adapt as required
@@ -176,6 +176,8 @@ class Uploadr(object):
 
     """
 
+    # flickrapi.FlickrAPI object
+    nuflickr = None
     # Flicrk connection authentication token
     token = None
 
@@ -194,8 +196,8 @@ class Uploadr(object):
 
         self.xCfg = axCfg
         self.ARGS = ARGS
-        # get self.token/nuflickr from Cache (getCachedToken)
-        self.token = self.getCachedToken()
+        # get nuflickr/token from Cache file, if it exists
+        self.nuflickr, self.token = self.getCachedToken()
 
         # Add mimetype .3gp to allow detection of .3gp as video
         logging.info('Adding mimetype "video/3gp"/".3gp"')
@@ -211,177 +213,36 @@ class Uploadr(object):
             logging.warning('Added mimetype "video/3gp"/".3gp" correctly.')
 
     # -------------------------------------------------------------------------
-    # useDBLock
-    #
-    # Control use of DB lock. acquire/release
-    #
-    def useDBLock(self, useDBthisLock, useDBoperation):
-        """ useDBLock
-
-            useDBthisLock  = lock to be used
-            useDBoperation = True => Lock
-                           = False => Release
-        """
-
-        useDBLockReturn = False
-
-        logging.debug('Entering useDBLock with useDBoperation:[{!s}].'
-                      .format(useDBoperation))
-
-        if useDBthisLock is None:
-            logging.debug('useDBLock: useDBthisLock is [None].')
-            return useDBLockReturn
-
-        logging.debug('useDBLock: useDBthisLock is [{!s}].'
-                      .format(useDBthisLock._semlock))
-
-        if useDBoperation is None:
-            return useDBLockReturn
-
-        if (self.ARGS.processes is not None) and\
-           (self.ARGS.processes) and \
-           (self.ARGS.processes > 0):
-            if useDBoperation:
-                # Control for when running multiprocessing set locking
-                logging.debug('===Multiprocessing=== -->[ ].lock.acquire')
-                try:
-                    if useDBthisLock.acquire():
-                        useDBLockReturn = True
-                except BaseException:
-                    reportError(Caught=True,
-                                CaughtPrefix='+++ ',
-                                CaughtCode='002',
-                                CaughtMsg='Caught an exception lock.acquire',
-                                NicePrint=True,
-                                exceptSysInfo=True)
-                    raise
-                logging.info('===Multiprocessing=== --->[v].lock.acquire')
-            else:
-                # Control for when running multiprocessing release locking
-                logging.debug('===Multiprocessing=== <--[ ].lock.release')
-                try:
-                    useDBthisLock.release()
-                    useDBLockReturn = True
-                except BaseException:
-                    reportError(Caught=True,
-                                CaughtPrefix='+++ ',
-                                CaughtCode='003',
-                                CaughtMsg='Caught an exception lock.release',
-                                NicePrint=True,
-                                exceptSysInfo=True)
-                    # Raise aborts execution
-                    raise
-                logging.info('===Multiprocessing=== <--[v].lock.release')
-
-            logging.info('Exiting useDBLock with useDBoperation:[{!s}]. '
-                         'Result:[{!s}]'
-                         .format(useDBoperation, useDBLockReturn))
-        else:
-            useDBLockReturn = True
-            logging.warning('(No multiprocessing. Nothing to do) '
-                            'Exiting useDBLock with useDBoperation:[{!s}]. '
-                            'Result:[{!s}]'
-                            .format(useDBoperation, useDBLockReturn))
-
-        return useDBLockReturn
-
-    # -------------------------------------------------------------------------
-    # authenticate
-    #
-    # Authenticates via flickrapi on flickr.com
-    #
-    def authenticate(self):
-        """ authenticate
-
-            Authenticate user so we can upload files.
-            Assumes the cached token is not available or valid.
-        """
-        global nuflickr
-
-        # Instantiate nuflickr for connection to flickr via flickrapi
-        nuflickr = flickrapi.FlickrAPI(
-            self.xCfg.FLICKR["api_key"],
-            self.xCfg.FLICKR["secret"],
-            token_cache_location=self.xCfg.TOKEN_CACHE)
-        # Get request token
-        NP.niceprint('Getting new token.')
-        try:
-            nuflickr.get_request_token(oauth_callback='oob')
-        except Exception as ex:
-            reportError(Caught=True,
-                        CaughtPrefix='+++',
-                        CaughtCode='004',
-                        CaughtMsg='Exception on get_request_token. Exiting...',
-                        exceptUse=True,
-                        # exceptCode=ex.code,
-                        exceptMsg=ex,
-                        NicePrint=True,
-                        exceptSysInfo=True)
-            sys.exit(4)
-
-        # Show url. Copy and paste it in your browser
-        authorize_url = nuflickr.auth_url(perms=u'delete')
-        NP.niceprint('Copy and paste following authorizaiton URL '
-                     'in your browser to obtain Verifier Code.')
-        print(authorize_url)
-
-        # Prompt for verifier code from the user.
-        verifier = unicode(raw_input(  # noqa
-            'Verifier code (NNN-NNN-NNN): ')) \
-            if sys.version_info < (3, ) \
-            else input('Verifier code (NNN-NNN-NNN): ')
-
-        logging.warning('Verifier: {!s}'.format(verifier))
-
-        # Trade the request token for an access token
-        try:
-            nuflickr.get_access_token(verifier)
-        except flickrapi.exceptions.FlickrError as ex:
-            reportError(Caught=True,
-                        CaughtPrefix='+++',
-                        CaughtCode='005',
-                        CaughtMsg='Flickrapi exception on get_access_token. '
-                                  'Exiting...',
-                        exceptUse=True,
-                        exceptCode=ex.code,
-                        exceptMsg=ex,
-                        NicePrint=True,
-                        exceptSysInfo=True)
-            sys.exit(5)
-
-        NP.niceprint('Check Authentication with [delete] permissions: {!s}'
-                     .format(nuflickr.token_valid(perms='delete')))
-
-    # -------------------------------------------------------------------------
     # getCachedToken
     #
     # If available, obtains the flickrapi Cached Token from local file.
-    # Saves the token on the Class variable "token"
-    # Saves the token on the global variable nuflickr.
+    # Returns the flickrapi object to be saved on the Class variable "nuflickr"
+    # Returns the token to be saved on the Class variable "token"
     #
     def getCachedToken(self):
         """ getCachedToken
 
             Attempts to get the flickr token from disk.
+
+            Returns the flickrapi object, token
         """
-        global nuflickr
 
         logging.info('Obtaining Cached token')
         logging.debug('TOKEN_CACHE:[{!s}]'.format(self.xCfg.TOKEN_CACHE))
-        nuflickr = flickrapi.FlickrAPI(
+        flickrobj = flickrapi.FlickrAPI(
             self.xCfg.FLICKR["api_key"],
             self.xCfg.FLICKR["secret"],
             token_cache_location=self.xCfg.TOKEN_CACHE)
 
         try:
             # Check if token permissions are correct.
-            if nuflickr.token_valid(perms='delete'):
+            if flickrobj.token_valid(perms='delete'):
                 logging.info('Cached token obtained: {!s}'
-                             .format(nuflickr.token_cache.token))
-                return nuflickr.token_cache.token
+                             .format(flickrobj.token_cache.token))
+                return flickrobj, flickrobj.token_cache.token
             else:
                 logging.warning('Token Non-Existant.')
-                return None
+                return None, None
         except BaseException:
             reportError(Caught=True,
                         CaughtPrefix='+++',
@@ -396,8 +257,8 @@ class Uploadr(object):
     # If available, obtains the flickrapi Cached Token from local file.
     #
     # Returns
-    #   True: if global token is defined and allows flicrk 'delete' operation
-    #   False: if global token is not defined or flicrk 'delete' is not allowed
+    #   True: if self.token is defined and allows flicrk 'delete' operation
+    #   False: if self.token is not defined or flicrk 'delete' is not allowed
     #
     def checkToken(self):
         """ checkToken
@@ -406,17 +267,81 @@ class Uploadr(object):
 
             Returns the credentials attached to an authentication token.
         """
-        global nuflickr
 
-        logging.warning('checkToken:(self.token is None):[{!s}]'
-                        'checkToken:(nuflickr is None):[{!s}]'
-                        'checkToken:(nuflickr.token_cache.token is None):'
-                        '[{!s}]'
-                        .format(self.token is None,
-                                nuflickr is None,
-                                nuflickr.token_cache.token is None))
+        logging.warning('checkToken:(self.token is None):[%s]'
+                        'checkToken:(nuflickr is None):[%s]'
+                        'checkToken:(nuflickr.token_cache.token is None):[%s]',
+                        self.token is None,
+                        self.nuflickr is None,
+                        self.nuflickr.token_cache.token is None)
 
-        return nuflickr.token_cache.token is not None
+        return self.nuflickr.token_cache.token is not None
+
+    # -------------------------------------------------------------------------
+    # authenticate
+    #
+    # Authenticates via flickrapi on flickr.com
+    #
+    def authenticate(self):
+        """ authenticate
+
+            Authenticate user so we can upload files.
+            Assumes the cached token is not available or valid.
+        """
+
+        # Instantiate nuflickr for connection to flickr via flickrapi
+        self.nuflickr = flickrapi.FlickrAPI(
+            self.xCfg.FLICKR["api_key"],
+            self.xCfg.FLICKR["secret"],
+            token_cache_location=self.xCfg.TOKEN_CACHE)
+        # Get request token
+        NP.niceprint('Getting new token.')
+        try:
+            self.nuflickr.get_request_token(oauth_callback='oob')
+        except Exception as ex:
+            reportError(Caught=True,
+                        CaughtPrefix='+++',
+                        CaughtCode='004',
+                        CaughtMsg='Exception on get_request_token. Exiting...',
+                        exceptUse=True,
+                        # exceptCode=ex.code,
+                        exceptMsg=ex,
+                        NicePrint=True,
+                        exceptSysInfo=True)
+            sys.exit(4)
+
+        # Show url. Copy and paste it in your browser
+        authorize_url = self.nuflickr.auth_url(perms=u'delete')
+        NP.niceprint('Copy and paste following authorizaiton URL '
+                     'in your browser to obtain Verifier Code.')
+        print(authorize_url)
+
+        # Prompt for verifier code from the user.
+        verifier = unicode(raw_input(  # noqa
+            'Verifier code (NNN-NNN-NNN): ')) \
+            if sys.version_info < (3, ) \
+            else input('Verifier code (NNN-NNN-NNN): ')
+
+        logging.warning('Verifier: {!s}'.format(verifier))
+
+        # Trade the request token for an access token
+        try:
+            self.nuflickr.get_access_token(verifier)
+        except flickrapi.exceptions.FlickrError as ex:
+            reportError(Caught=True,
+                        CaughtPrefix='+++',
+                        CaughtCode='005',
+                        CaughtMsg='Flickrapi exception on get_access_token. '
+                                  'Exiting...',
+                        exceptUse=True,
+                        exceptCode=ex.code,
+                        exceptMsg=ex,
+                        NicePrint=True,
+                        exceptSysInfo=True)
+            sys.exit(5)
+
+        NP.niceprint('Check Authentication with [delete] permissions: {!s}'
+                     .format(self.nuflickr.token_valid(perms='delete')))
 
     # -------------------------------------------------------------------------
     # removeExcludedMedia
@@ -537,7 +462,7 @@ class Uploadr(object):
         """
         # ---------------------------------------------------------------------
         # Local Variables
-#
+        #
         #   nulockDB     = multiprocessing Lock for access to Database
         #   numutex      = multiprocessing mutex for access to value srunning
         #   nrunning    = multiprocessing Value to count processed photos
@@ -622,7 +547,7 @@ class Uploadr(object):
                 # lock parameter not used (set to None) under single processing
                 success = self.uploadFile(lock=None, file=file)
                 if (self.ARGS.drip_feed and
-                    success and
+                        success and
                         i != changedMedia_count - 1):
                     NP.niceprint('Waiting [{!s}] seconds before next upload'
                                  .format(str(self.xCfg.DRIP_TIME)))
@@ -855,20 +780,19 @@ class Uploadr(object):
             # Prevent walking thru files in the list of EXCLUDED_FOLDERS
             # Reduce time by not checking a file in an excluded folder
             logging.debug('Check for UnicodeWarning comparison '
-                          'dirpath:[{!s}] type:[{!s}]'
-                          .format(StrUnicodeOut(os.path.basename(
+                          'dirpath:[%s] type:[%s]',
+                          StrUnicodeOut(os.path.basename(
                               os.path.normpath(dirpath))),
-                              type(os.path.basename(
-                                  os.path.normpath(dirpath)))))
+                          type(os.path.basename(
+                              os.path.normpath(dirpath))))
             if os.path.basename(os.path.normpath(dirpath)) \
                     in self.xCfg.EXCLUDED_FOLDERS:
                 dirnames[:] = []
                 filenames[:] = []
-                logging.info('Folder [{!s}] on path [{!s}] excluded.'
-                             .format(
-                                 StrUnicodeOut(os.path.basename(
-                                     os.path.normpath(dirpath))),
-                                 StrUnicodeOut(os.path.normpath(dirpath))))
+                logging.info('Folder [%s] on path [%s] excluded.',
+                             StrUnicodeOut(os.path.basename(
+                                 os.path.normpath(dirpath))),
+                             StrUnicodeOut(os.path.normpath(dirpath)))
 
             for f in filenames:
                 filePath = os.path.join(StrUnicodeOut(dirpath),
@@ -898,13 +822,12 @@ class Uploadr(object):
                                              StrUnicodeOut(f))))
                 # Assumes xCFG.ALLOWED_EXT and xCFG.RAW_EXT are disjoint
                 elif (self.xCfg.CONVERT_RAW_FILES and
-                        (ext in self.xCfg.RAW_EXT)):
-                    if not (
-                        os.path.exists(
+                      (ext in self.xCfg.RAW_EXT)):
+                    if not os.path.exists(
                             os.path.join(
                                 StrUnicodeOut(dirpath),
                                 StrUnicodeOut(os.path.splitext(f)[0])) +
-                            ".JPG")):
+                            ".JPG"):
                         logging.debug('rawfiles: including:[{!s}]'
                                       .format(StrUnicodeOut(f)))
                         rawfiles.append(
@@ -1070,8 +993,6 @@ class Uploadr(object):
                as it is not used)
         file = file to be uploaded
         """
-
-        global nuflickr
 
         # ---------------------------------------------------------------------
         # dbInsertIntoFiles
@@ -1329,7 +1250,7 @@ class Uploadr(object):
                     # replace commas from tags and checksum tags
                     # to avoid tags conflicts
                     try:
-                        uploadResp = nuflickr.upload(
+                        uploadResp = self.nuflickr.upload(
                             filename=file,
                             fileobj=FileWithCallback(
                                 file,
@@ -1711,8 +1632,6 @@ class Uploadr(object):
         con             = current DB connection
         """
 
-        global nuflickr
-
         if self.ARGS.dry_run is True:
             NP.niceprint('Dry Run Replace:[{!s}]...'
                          .format(StrUnicodeOut(file)))
@@ -1748,7 +1667,7 @@ class Uploadr(object):
                                              self.xCfg.MAX_UPLOAD_ATTEMPTS))
 
                     # Use fileobj with filename='dummy'to accept unicode file.
-                    replaceResp = nuflickr.replace(
+                    replaceResp = self.nuflickr.replace(
                         filename='dummy',
                         fileobj=photo,
                         # fileobj=FileWithCallback(
@@ -1967,8 +1886,6 @@ class Uploadr(object):
         lock  = for use with useDBLock to control access to DB
         """
 
-        global nuflickr
-
         # ---------------------------------------------------------------------
         # dbDeleteRecordLocalDB
         #
@@ -2048,7 +1965,7 @@ class Uploadr(object):
 
         @retry(attempts=2, waittime=2, randtime=False)
         def R_photos_delete(kwargs):
-            return nuflickr.photos.delete(**kwargs)
+            return self.nuflickr.photos.delete(**kwargs)
 
         NP.niceprint('  Deleting file:[{!s}]'.format(StrUnicodeOut(file[1])))
 
@@ -2163,24 +2080,6 @@ class Uploadr(object):
             self.useDBLock(lock, False)
 
         return True
-
-    # -------------------------------------------------------------------------
-    # isGood
-    #
-    # Checks if res.attrib['stat'] == "ok"
-    #
-    def isGood(self, res):
-        """ isGood
-
-            If res is b=not None it will return true...
-            if res.attrib['stat'] == "ok" for a given XML object
-        """
-        if res is None:
-            return False
-        elif not res == "" and res.attrib['stat'] == "ok":
-            return True
-        else:
-            return False
 
     # -------------------------------------------------------------------------
     # run
@@ -2471,14 +2370,12 @@ class Uploadr(object):
             cur   = cursor for updating local DB
         """
 
-        global nuflickr
-
         if self.ARGS.dry_run:
             return True
 
         @retry(attempts=2, waittime=0, randtime=False)
         def R_photosets_addPhoto(kwargs):
-            return nuflickr.photosets.addPhoto(**kwargs)
+            return self.nuflickr.photosets.addPhoto(**kwargs)
 
         try:
             con = lite.connect(self.xCfg.DB_PATH)
@@ -2605,8 +2502,6 @@ class Uploadr(object):
         Calls logSetCreation to create Album on local database.
         """
 
-        global nuflickr
-
         logging.info('   Creating set:[{!s}]'
                      .format(StrUnicodeOut(setName)))
         NP.niceprint('   Creating set:[{!s}]'
@@ -2617,7 +2512,7 @@ class Uploadr(object):
 
         @retry(attempts=3, waittime=10, randtime=True)
         def R_photosets_create(kwargs):
-            return nuflickr.photosets.create(**kwargs)
+            return self.nuflickr.photosets.create(**kwargs)
 
         try:
             createResp = None
@@ -2869,23 +2764,6 @@ class Uploadr(object):
             con.close()
 
     # -------------------------------------------------------------------------
-    # md5Checksum
-    #
-    def md5Checksum(self, filePath):
-        """ md5Checksum
-
-            Calculates the MD5 checksum for filePath
-        """
-        with open(filePath, 'rb') as fh:
-            m = hashlib.md5()
-            while True:
-                data = fh.read(8192)
-                if not data:
-                    break
-                m.update(data)
-            return m.hexdigest()
-
-    # -------------------------------------------------------------------------
     # removeUselessSetsTable
     #
     # Method to clean unused sets (Sets are Albums)
@@ -2997,7 +2875,6 @@ class Uploadr(object):
             Gets list of FLickr Sets (Albums) and populates
             local DB accordingly
         """
-        global nuflickr
 
         NP.niceprint('*****Adding Flickr Sets to DB*****')
         if self.ARGS.dry_run:
@@ -3006,7 +2883,7 @@ class Uploadr(object):
         con = lite.connect(self.xCfg.DB_PATH)
         con.text_factory = str
         try:
-            sets = nuflickr.photosets_getList()
+            sets = self.nuflickr.photosets_getList()
 
             logging.debug('Output for {!s}'.format('photosets_getList:'))
             logging.debug(xml.etree.ElementTree.tostring(
@@ -3223,8 +3100,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
             D    | False                 | False               | None
         """
 
-        global nuflickr
-
         returnIsPhotoUploaded = False
         returnPhotoUploaded = 0
         returnPhotoID = None
@@ -3236,7 +3111,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         # Use a big random waitime to avoid errors in multiprocessing mode.
         @retry(attempts=3, waittime=20, randtime=True)
         def R_photos_search(kwargs):
-            return nuflickr.photos.search(**kwargs)
+            return self.nuflickr.photos.search(**kwargs)
 
         try:
             searchIsUploaded = None
@@ -3339,7 +3214,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
                 @retry(attempts=3, waittime=8, randtime=True)
                 def R_photos_getAllContexts(kwargs):
-                    return nuflickr.photos.getAllContexts(**kwargs)
+                    return self.nuflickr.photos.getAllContexts(**kwargs)
 
                 try:
                     resp = None
@@ -3522,12 +3397,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
             Searchs for image with on tag:checksum
         """
-        global nuflickr
 
         logging.info('FORMAT:[checksum:{!s}]'.format(checksum))
 
-        searchResp = nuflickr.photos.search(user_id="me",
-                                            tags='checksum:{}'
+        searchResp = self.nuflickr.photos.search(user_id="me",
+                                                 tags='checksum:{}'
                                                  .format(checksum))
         # Debug
         logging.debug('Search Results SearchResp:')
@@ -3546,11 +3420,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
         """ people_get_photos
         """
 
-        global nuflickr
-
         @retry(attempts=3, waittime=3, randtime=False)
         def R_people_getPhotos(kwargs):
-            return nuflickr.people.getPhotos(**kwargs)
+            return self.nuflickr.people.getPhotos(**kwargs)
 
         getPhotosResp = None
         try:
@@ -3598,11 +3470,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
             Local Wrapper for Flickr photos.getNotInSet
         """
 
-        global nuflickr
-
         @retry(attempts=2, waittime=12, randtime=False)
         def R_photos_getNotInSet(kwargs):
-            return nuflickr.photos.getNotInSet(**kwargs)
+            return self.nuflickr.photos.getNotInSet(**kwargs)
 
         notinsetResp = R_photos_getNotInSet(dict(per_page=per_page))
 
@@ -3619,9 +3489,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
             Local Wrapper for Flickr photos.getInfo
         """
 
-        global nuflickr
-
-        photos_get_infoResp = nuflickr.photos.getInfo(photo_id=photo_id)
+        photos_get_infoResp = self.nuflickr.photos.getInfo(photo_id=photo_id)
 
         return photos_get_infoResp
 
@@ -3639,15 +3507,13 @@ set0 = sets.find('photosets').findall('photoset')[0]
             tag_id = tag_id if found
         """
 
-        global nuflickr
-
         logging.info('find_tag: photo:[{!s}] intag:[{!s}]'
                      .format(photo_id, intag))
 
         # Use a big random waitime to avoid errors in multiprocessing mode.
         @retry(attempts=3, waittime=20, randtime=True)
         def R_tags_getListPhoto(kwargs):
-            return nuflickr.tags.getListPhoto(**kwargs)
+            return self.nuflickr.tags.getListPhoto(**kwargs)
 
         try:
             tagsResp = None
@@ -3714,12 +3580,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
             Local Wrapper for Flickr photos.addTags
         """
 
-        global nuflickr
-
         logging.info('photos_add_tags: photo_id:[{!s}] tags:[{!s}]'
                      .format(photo_id, tags))
-        photos_add_tagsResp = nuflickr.photos.addTags(photo_id=photo_id,
-                                                      tags=tags)
+        photos_add_tagsResp = self.nuflickr.photos.addTags(
+            photo_id=photo_id,
+            tags=tags)
         return photos_add_tagsResp
 
     # -------------------------------------------------------------------------
@@ -3738,9 +3603,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
             a tag id, as returned by flickr.photos.getInfo.
         """
 
-        global nuflickr
-
-        removeTagResp = nuflickr.photos.removeTag(tag_id=tag_id)
+        removeTagResp = self.nuflickr.photos.removeTag(tag_id=tag_id)
 
         return removeTagResp
 
@@ -3754,7 +3617,6 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
             Update Date/Time Taken on Flickr for Video files
         """
-        global nuflickr
 
         if self.ARGS.verbose:
             NP.niceprint('   Setting Date:[{!s}] Id=[{!s}]'
@@ -3764,7 +3626,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
         @retry(attempts=3, waittime=15, randtime=True)
         def R_photos_setdates(kwargs):
-            return nuflickr.photos.setdates(**kwargs)
+            return self.nuflickr.photos.setdates(**kwargs)
 
         try:
             respDate = None
@@ -4278,3 +4140,113 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
             NP.niceprint('*****Completed Listing Photos not in a set '
                          'in Flickr******')
+
+    # -------------------------------------------------------------------------
+    # useDBLock
+    #
+    # Control use of DB lock. acquire/release
+    #
+    def useDBLock(self, useDBthisLock, useDBoperation):
+        """ useDBLock
+
+            useDBthisLock  = lock to be used
+            useDBoperation = True => Lock
+                           = False => Release
+        """
+
+        useDBLockReturn = False
+
+        logging.debug('Entering useDBLock with useDBoperation:[{!s}].'
+                      .format(useDBoperation))
+
+        if useDBthisLock is None:
+            logging.debug('useDBLock: useDBthisLock is [None].')
+            return useDBLockReturn
+
+        logging.debug('useDBLock: useDBthisLock is [{!s}].'
+                      .format(useDBthisLock._semlock))
+
+        if useDBoperation is None:
+            return useDBLockReturn
+
+        if (self.ARGS.processes is not None) and\
+           (self.ARGS.processes) and \
+           (self.ARGS.processes > 0):
+            if useDBoperation:
+                # Control for when running multiprocessing set locking
+                logging.debug('===Multiprocessing=== -->[ ].lock.acquire')
+                try:
+                    if useDBthisLock.acquire():
+                        useDBLockReturn = True
+                except BaseException:
+                    reportError(Caught=True,
+                                CaughtPrefix='+++ ',
+                                CaughtCode='002',
+                                CaughtMsg='Caught an exception lock.acquire',
+                                NicePrint=True,
+                                exceptSysInfo=True)
+                    raise
+                logging.info('===Multiprocessing=== --->[v].lock.acquire')
+            else:
+                # Control for when running multiprocessing release locking
+                logging.debug('===Multiprocessing=== <--[ ].lock.release')
+                try:
+                    useDBthisLock.release()
+                    useDBLockReturn = True
+                except BaseException:
+                    reportError(Caught=True,
+                                CaughtPrefix='+++ ',
+                                CaughtCode='003',
+                                CaughtMsg='Caught an exception lock.release',
+                                NicePrint=True,
+                                exceptSysInfo=True)
+                    # Raise aborts execution
+                    raise
+                logging.info('===Multiprocessing=== <--[v].lock.release')
+
+            logging.info('Exiting useDBLock with useDBoperation:[{!s}]. '
+                         'Result:[{!s}]'
+                         .format(useDBoperation, useDBLockReturn))
+        else:
+            useDBLockReturn = True
+            logging.warning('(No multiprocessing. Nothing to do) '
+                            'Exiting useDBLock with useDBoperation:[{!s}]. '
+                            'Result:[{!s}]'
+                            .format(useDBoperation, useDBLockReturn))
+
+        return useDBLockReturn
+
+    # -------------------------------------------------------------------------
+    # isGood
+    #
+    # Checks if res.attrib['stat'] == "ok"
+    #
+    def isGood(self, res):
+        """ isGood
+
+            If res is b=not None it will return true...
+            if res.attrib['stat'] == "ok" for a given XML object
+        """
+        if res is None:
+            return False
+        elif not res == "" and res.attrib['stat'] == "ok":
+            return True
+        else:
+            return False
+
+    # -------------------------------------------------------------------------
+    # md5Checksum
+    #
+    def md5Checksum(self, filePath):
+        """ md5Checksum
+
+            Calculates the MD5 checksum for filePath
+        """
+        with open(filePath, 'rb') as fh:
+            m = hashlib.md5()
+            while True:
+                data = fh.read(8192)
+                if not data:
+                    break
+                m.update(data)
+            return m.hexdigest()

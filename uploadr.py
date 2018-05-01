@@ -111,10 +111,8 @@ logging.getLogger().setLevel(xCfg.LOGGING_LEVEL)
 def parse_arguments():
     """ parse_arguments
 
-        Parse arguments and save results into global ARGS
+        Parse arguments and return results.
     """
-
-    global ARGS
 
     # Parse args --------------------------------------------------------------
     parser = argparse.ArgumentParser(
@@ -131,7 +129,7 @@ def parse_arguments():
                             # default=UPLDRConstants.INIfile,
                             help='Optional configuration file. '
                                  'Default is:[{!s}]'
-                                 .format(UPLDRConstants.INIfile))
+                            .format(UPLDRConstants.INIfile))
     # cgrpparser.add_argument('-C', '--config-file', action='store',
     #                         # dest='xINIfile',
     #                         metavar='filename.ini',
@@ -243,7 +241,7 @@ def parse_arguments():
                                  'This option is *only* available to re-run '
                                  'it, should it be necessary.')
 
-    ARGS = parser.parse_args()
+    return parser.parse_args()
     # Parse args --------------------------------------------------------------
 
 
@@ -252,13 +250,15 @@ def parse_arguments():
 #
 # This is the main method
 #
-def run_uploadr():
+def run_uploadr(ARGS):
     """ run_uploadr
+
+        ARGS = parameters
     """
     # -------------------------------------------------------------------------
-
-    global FLICK
-    global ARGS
+    # Local Variables
+    #
+    #   FLICK        = Class Uploadr (created in the Main code)
 
     # Print/show arguments
     if xCfg.LOGGING_LEVEL <= logging.INFO:
@@ -388,7 +388,6 @@ def checkBaseDir_INIfile(baseDir, INIfile):
 #
 #   nutime       = for working with time module (import time)
 #   nuflickr     = object for flickr API module (import flickrapi)
-#   FLICK        = Class Uploadr (created in the Main code)
 #   nulockDB     = multiprocessing Lock for access to Database
 #   numutex      = multiprocessing mutex to control access to value nurunning
 #   nurunning    = multiprocessing Value to count processed photos
@@ -474,11 +473,11 @@ NP.niceprint('--------- (V{!s}) Start time: {!s} ---------(Log:{!s})'
                      xCfg.LOGGING_LEVEL))
 if __name__ == "__main__":
     # Parse the argumens options
-    parse_arguments()
+    PARSED_ARGS = parse_arguments()
 
     # Argument --config-file overrides configuration filename.
-    if ARGS.config_file:
-        UPLDRConstants.INIfile = ARGS.config_file
+    if PARSED_ARGS.config_file:
+        UPLDRConstants.INIfile = PARSED_ARGS.config_file
         logging.info('UPLDRConstants.INIfile:[{!s}]'
                      .format(StrUnicodeOut(UPLDRConstants.INIfile)))
         if not checkBaseDir_INIfile(UPLDRConstants.baseDir,
@@ -523,12 +522,12 @@ if __name__ == "__main__":
         pprint.pprint(xCfg.FLICKR)
 
     # Ensure that only one instance of this script is running
-    f = open(xCfg.LOCK_PATH, 'w')
+    fobj = open(xCfg.LOCK_PATH, 'w')
     try:
         # FileLocker is an alias to portalocker (if available) or fcntl
-        FileLock(f, FileLocker.LOCK_EX | FileLocker.LOCK_NB)
-    except IOError as e:
-        if e.errno == errno.EAGAIN:
+        FileLock(fobj, FileLocker.LOCK_EX | FileLocker.LOCK_NB)
+    except IOError as err:
+        if err.errno == errno.EAGAIN:
             sys.stderr.write('[{!s}] Script already running.\n'
                              .format(
                                  nutime.strftime(UPLDRConstants.TimeFormat)))
@@ -538,7 +537,7 @@ if __name__ == "__main__":
     finally:
         pass
     # Run uploader
-    run_uploadr()
+    run_uploadr(PARSED_ARGS)
 
 NP.niceprint('--------- (V{!s}) End time: {!s} -----------(Log:{!s})'
              .format(UPLDRConstants.Version,

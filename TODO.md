@@ -4,7 +4,7 @@
 
 ## Pending improvements
 -----------------------
-* Move useDBlock to mprocessing file?
+* "Check for duplicates/wrong checksum" on upload may not be working fully!
 * Consider using python module exiftool?
 * Would be nice to update ALL tags on replacePhoto and not only the
   mandatory checksum tag as FLICKR maintains the tags from the first load.

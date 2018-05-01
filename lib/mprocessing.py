@@ -17,7 +17,7 @@ from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 import logging
 import multiprocessing
 from itertools import islice
-from . import niceprint
+import lib.niceprint as niceprint
 
 # =============================================================================
 # Functions aliases
@@ -74,6 +74,12 @@ def mprocessing(args_verbose, args_verbose_progress,
     def chunk(iter_list, size):
         """
             Divides an iterable in slices/chunks of size size
+
+            >>> for a in chunk([ 1, 2, 3, 4, 5, 6], 2):
+            ...     len(a)
+            2
+            2
+            3
         """
         iter_list = iter(iter_list)
         # lambda: creates a returning expression function
@@ -189,3 +195,15 @@ def mprocessing(args_verbose, args_verbose_progress,
                           True)
 
     return True
+
+# -----------------------------------------------------------------------------
+# If called directly run doctests
+#
+if __name__ == "__main__":
+
+    logging.basicConfig(level=logging.WARNING,
+                        format='[%(asctime)s]:[%(processName)-11s]' +
+                        '[%(levelname)-8s]:[%(name)s] %(message)s')
+
+    import doctest
+    doctest.testmod()

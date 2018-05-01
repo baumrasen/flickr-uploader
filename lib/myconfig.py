@@ -29,7 +29,7 @@ try:
     import ConfigParser as ConfigParser  # Python 2
 except ImportError:
     import configparser as ConfigParser  # Python 3
-from . import niceprint
+import lib.niceprint as niceprint
 
 # =============================================================================
 # Functions aliases
@@ -348,10 +348,10 @@ class MyConfig(object):
             logging.debug('verifyconfig for [%s]', item)
             if not NP.isThisStringUnicode(self.__dict__[item]):
                 self.__dict__[item] = unicode(  # noqa
-                                          self.__dict__[item],
-                                          'utf-8') \
-                                      if sys.version_info < (3, ) \
-                                      else str(self.__dict__[item])
+                    self.__dict__[item],
+                    'utf-8') \
+                    if sys.version_info < (3, ) \
+                    else str(self.__dict__[item])
             if not os.path.isdir(self.__dict__[item]):
                 logging.critical('%s: [%s] is not a valid folder.',
                                  item,
@@ -370,10 +370,10 @@ class MyConfig(object):
             logging.debug('verifyconfig for [%s]', item)
             if not NP.isThisStringUnicode(self.__dict__[item]):
                 self.__dict__[item] = unicode(  # noqa
-                                          self.__dict__[item],
-                                          'utf-8') \
-                                      if sys.version_info < (3, ) \
-                                      else str(self.__dict__[item])
+                    self.__dict__[item],
+                    'utf-8') \
+                    if sys.version_info < (3, ) \
+                    else str(self.__dict__[item])
             if not os.path.isdir(os.path.dirname(self.__dict__[item])):
                 logging.critical('%s:[%s] is not in a valid folder:[%s].',
                                  item,
@@ -391,10 +391,10 @@ class MyConfig(object):
 
                 if not NP.isThisStringUnicode(self.__dict__[item]):
                     self.__dict__[item] = unicode(  # noqa
-                                              self.__dict__[item],
-                                              'utf-8') \
-                                          if sys.version_info < (3, ) \
-                                          else str(self.__dict__[item])
+                        self.__dict__[item],
+                        'utf-8') \
+                        if sys.version_info < (3, ) \
+                        else str(self.__dict__[item])
 
                 if not os.path.isdir(self.__dict__[item]):
                     logging.critical('%s: [%s] is not a valid folder.',
@@ -476,9 +476,9 @@ if __name__ == "__main__":
     # Comment following line to allow further debugging/testing
     # sys.exit(0)
 
-    import lib.myconfig as myconfig
+    # import lib.myconfig as myconfig
 
-    MYCFG = myconfig.MyConfig()
+    MYCFG = MyConfig()
     if MYCFG.processconfig():
         if MYCFG.verifyconfig():
             print('Test Myconfig: Ok')

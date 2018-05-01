@@ -51,7 +51,7 @@ from itertools import islice
 import flickrapi
 # -----------------------------------------------------------------------------
 # Helper class and functions for UPLoaDeR Global Constants.
-from . import UPLDRConstants as UPLDRConstantsClass
+import lib.UPLDRConstants as UPLDRConstantsClass
 # -----------------------------------------------------------------------------
 # Helper class and functions to print messages.
 import lib.niceprint as niceprint
@@ -4268,3 +4268,16 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     break
                 m.update(data)
             return m.hexdigest()
+
+
+# -----------------------------------------------------------------------------
+# If called directly run doctests
+#
+if __name__ == "__main__":
+
+    logging.basicConfig(level=logging.WARNING,
+                        format='[%(asctime)s]:[%(processName)-11s]' +
+                        '[%(levelname)-8s]:[%(name)s] %(message)s')
+
+    import doctest
+    doctest.testmod()

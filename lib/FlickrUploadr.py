@@ -3384,7 +3384,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             .format(returnPhotoUploaded, xchecksum))
             # Get title from filepath as filename without extension
             # NOTE: not compatible with use of the -i option
-            xpath_filename, xtitle_filename = os.path.split(xfile)
+            xtitle_filename = os.path.split(xfile)[1]
             xtitle_filename = os.path.splitext(xtitle_filename)[0]
             logging.info('Title:[{!s}]'.format(StrUnicodeOut(xtitle_filename)))
 

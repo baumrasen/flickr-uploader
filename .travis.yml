@@ -12,9 +12,9 @@ python:
 
 # =============================================================================
 # branches blacklist for TravisCI testing
-#branches:
-#  except:
-#    - dev-may18
+branches:
+  except:
+    - dev-may18
 
 before_install:
 # For use with wget into github account

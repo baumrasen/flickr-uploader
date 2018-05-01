@@ -50,15 +50,13 @@ def mprocessing(args_verbose, args_verbose_progress,
     #               len(itemslist)
 
     log_level = logging.getLogger().getEffectiveLevel()
-    if log_level <= logging.WARNING:
-        logging.info('===mprocessing f():[%s] nprocs:[%s]',
-                     a_fn.__name__, nprocs)
-        # if args is not None:
-        #     for i, arg in enumerate(args):
-        #         logging.info('===mprocessing f():[%s] arg[%s]={%s}',
-        #                      a_fn.__name__, i, arg)
-
-    logging.info('new_wrapper=[%s]', __name__)
+    logging.info('===mprocessing [%s] target_fn():[%s] nprocs:[%s]',
+                __name__, a_fn.__name__, nprocs)
+    # if log_level <= logging.WARNING:
+    #     if args is not None:
+    #         for i, arg in enumerate(args):
+    #             logging.info('===mprocessing f():[%s] arg[%s]={%s}',
+    #                          a_fn.__name__, i, arg)
 
     # if __name__ == '__main__':
     logging.debug('===Multiprocessing=== Setting up logger!')

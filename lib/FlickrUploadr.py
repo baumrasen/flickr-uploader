@@ -539,6 +539,7 @@ class Uploadr(object):
         NP.niceprint("*****Uploading files*****")
 
         con = None
+        # Search for list of media files to load including raw files to convert
         allMedia, rawfiles = self.grabNewFiles()
         # If managing changes, consider all files
         if self.xCfg.MANAGE_CHANGES:
@@ -589,119 +590,19 @@ class Uploadr(object):
                           .format(self.ARGS.processes))
             logging.debug('__name__:[{!s}] to prevent recursive calling)!'
                           .format(__name__))
-
+            
             # To prevent recursive calling, check if __name__ == '__main__'
             # if __name__ == '__main__':
-            logging.debug('===Multiprocessing=== Setting up logger!')
-            multiprocessing.log_to_stderr()
-            logger = multiprocessing.get_logger()
-            logger.setLevel(self.xCfg.LOGGING_LEVEL)
-
-            logging.debug('===Multiprocessing=== Logging defined!')
-
-            uploadPool = []
-            nulockDB = multiprocessing.Lock()
-            nurunning = multiprocessing.Value('i', 0)
-            numutex = multiprocessing.Lock()
-
-            sz = (len(changedMedia) // int(self.ARGS.processes)) \
-                if ((len(changedMedia) // int(self.ARGS.processes)) > 0) \
-                else 1
-
-            logging.debug('len(changedMedia):[{!s}] '
-                          'int(self.ARGS.processes):[{!s}] '
-                          'sz per process:[{!s}]'
-                          .format(len(changedMedia),
-                                  int(self.ARGS.processes),
-                                  sz))
-
-            # Split the Media in chunks to distribute accross Processes
-            for nuChangeMedia in chunk(changedMedia, sz):
-                logging.warning('===Actual/Planned Chunk size: '
-                                '[{!s}]/[{!s}]'
-                                .format(len(nuChangeMedia), sz))
-                logging.debug('===type(nuChangeMedia)=[{!s}]'
-                              .format(type(nuChangeMedia)))
-                logging.debug('===Job/Task Process: Creating...')
-                uploadTask = multiprocessing.Process(
-                    target=self.uploadFileX,
-                    args=(nulockDB,
-                          nurunning,
-                          numutex,
-                          nuChangeMedia,))
-                uploadPool.append(uploadTask)
-                logging.debug('===Job/Task Process: Starting...')
-                uploadTask.start()
-                logging.debug('===Job/Task Process: Started')
-                if self.ARGS.verbose:
-                    NP.niceprint('===Job/Task Process: [{!s}] Started '
-                                 'with pid:[{!s}]'
-                                 .format(uploadTask.name,
-                                         uploadTask.pid))
-
-            # Check status of jobs/tasks in the Process Pool
-            if self.xCfg.LOGGING_LEVEL <= logging.DEBUG:
-                logging.debug('===Checking Processes launched/status:')
-                for j in uploadPool:
-                    NP.niceprint('{!s}.is_alive = {!s}'
-                                 .format(j.name, j.is_alive()))
-
-            # Regularly print status of jobs/tasks in the Process Pool
-            # Prints status while there are processes active
-            # Exits when all jobs/tasks are done.
-            while (True):
-                if not (any(multiprocessing.active_children())):
-                    logging.debug('===No active children Processes.')
-                    break
-                for p in multiprocessing.active_children():
-                    logging.debug('==={!s}.is_alive = {!s}'
-                                  .format(p.name, p.is_alive()))
-                    uploadTaskActive = p
-                logging.info('===Will wait for 60 on {!s}.is_alive = {!s}'
-                             .format(uploadTaskActive.name,
-                                     uploadTaskActive.is_alive()))
-                if self.ARGS.verbose_progress:
-                    NP.niceprint('===Will wait for 60 on '
-                                 '{!s}.is_alive = {!s}'
-                                 .format(uploadTaskActive.name,
-                                         uploadTaskActive.is_alive()))
-
-                uploadTaskActive.join(timeout=60)
-                logging.info('===Waited for 60s on {!s}.is_alive = {!s}'
-                             .format(uploadTaskActive.name,
-                                     uploadTaskActive.is_alive()))
-                if self.ARGS.verbose:
-                    NP.niceprint('===Waited for 60s on '
-                                 '{!s}.is_alive = {!s}'
-                                 .format(uploadTaskActive.name,
-                                         uploadTaskActive.is_alive()))
-
-            # Wait for join all jobs/tasks in the Process Pool
-            # All should be done by now!
-            for j in uploadPool:
-                j.join()
-                if self.ARGS.verbose:
-                    NP.niceprint('==={!s} (is alive: {!s}).exitcode = {!s}'
-                                 .format(j.name, j.is_alive(), j.exitcode))
-
-            logging.warning('===Multiprocessing=== pool joined! '
-                            'All processes finished.')
-
-            # Will release (set to None) the nulockDB lock control
-            # this prevents subsequent calls to useDBLock(nuLockDB, False)
-            # to raise exception:
-            #    ValueError('semaphore or lock released too many times')
-            logging.info('===Multiprocessing=== pool joined! '
-                         'What happens to nulockDB is None:[{!s}]? '
-                         'It seems not, it still has a value! '
-                         'Setting it to None!'
-                         .format(nulockDB is None))
-            nulockDB = None
-
-            # Show number of total files processed
-            niceprocessedfiles(nurunning.value,
-                               UPLDRConstantsClass.nuMediacount,
-                               True)
+            mp.mprocessing(self.ARGS.verbose,
+                           self.ARGS.verbose_progress,
+                           self.ARGS.processes,
+                           nulockDB, #ok
+                           nurunning, #ok
+                           numutex, #ok
+                           changedMedia,
+                           self.uploadFileX,
+                           cur)
+            con.commit()            
 
         # running in single processing mode
         else:
@@ -1111,7 +1012,7 @@ class Uploadr(object):
     #
     # uploadFile wrapper for multiprocessing purposes
     #
-    def uploadFileX(self, lock, running, mutex, filelist):
+    def uploadFileX(self, lock, running, mutex, filelist, ctotal, cur):
         """ uploadFileX
 
             Wrapper function for multiprocessing support to call uploadFile
@@ -1121,10 +1022,10 @@ class Uploadr(object):
             mutex = for running access control in multiprocessing
         """
 
-        for i, f in enumerate(filelist):
+        for i, filepic in enumerate(filelist):
             logging.warning('===Current element of Chunk: [{!s}][{!s}]'
-                            .format(i, f))
-            self.uploadFile(lock, f)
+                            .format(i, filepic))
+            self.uploadFile(lock, filepic)
 
             # no need to check for
             # (self.ARGS.processes and self.ARGS.processes > 0):
@@ -1138,7 +1039,7 @@ class Uploadr(object):
             logging.warning('===Multiprocessing=== out.mutex.release(w)')
 
             # Show number of files processed so far
-            niceprocessedfiles(xcount, UPLDRConstantsClass.nuMediacount, False)
+            niceprocessedfiles(xcount, ctotal, False)
 
     # -------------------------------------------------------------------------
     # uploadFile

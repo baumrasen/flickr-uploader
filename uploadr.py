@@ -55,11 +55,11 @@ import time
 try:
     # Use portalocker if available. Required for Windows systems
     import portalocker as FileLocker  # noqa
-    FileLock = FileLocker.lock
+    FILELOCK = FileLocker.lock
 except ImportError:
     # Use fcntl
     import fcntl as FileLocker
-    FileLock = FileLocker.lockf
+    FILELOCK = FileLocker.lockf
 import errno
 import pprint
 # -----------------------------------------------------------------------------
@@ -71,10 +71,6 @@ import lib.UPLDRConstants as UPLDRConstantsClass
 # -----------------------------------------------------------------------------
 # Helper class and functions to print messages.
 import lib.niceprint as niceprint
-# -----------------------------------------------------------------------------
-# Helper class and functions to rate/pace limiting function calls and run a
-# function multiple attempts/times on error
-import lib.rate_limited as rate_limited
 # -----------------------------------------------------------------------------
 # Helper class and functions to load, process and verify INI configuration.
 import lib.myconfig as myconfig
@@ -378,9 +374,9 @@ def checkBaseDir_INIfile(baseDir, INIfile):
         logging.critical(
             'Config folder [%s] and/or INI file: [%s] not found or '
             'incorrect format: [%s]!', baseDir, INIfile, str(err))
-    finally:
-        logging.debug('resultCheck=[{%s]', resultCheck)
-        return resultCheck
+
+    logging.debug('resultCheck=[{%s]', resultCheck)
+    return resultCheck
 
 
 # =============================================================================
@@ -391,7 +387,6 @@ def checkBaseDir_INIfile(baseDir, INIfile):
 #   nulockDB     = multiprocessing Lock for access to Database
 #   numutex      = multiprocessing mutex to control access to value nurunning
 #   nurunning    = multiprocessing Value to count processed photos
-#   retry        = alias for rate_limited.retry
 #
 # -----------------------------------------------------------------------------
 nutime = time
@@ -399,7 +394,6 @@ nuflickr = None
 nulockDB = None
 numutex = None
 nurunning = None
-retry = rate_limited.retry
 # -----------------------------------------------------------------------------
 
 # =============================================================================
@@ -420,7 +414,7 @@ UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")
 
 if xCfg.LOGGING_LEVEL <= logging.DEBUG:
     logging.debug('       baseDir:[%s]', UPLDRConstants.baseDir)
-    logging.debug('           cwd:[$s]', os.getcwd())
+    logging.debug('           cwd:[%s]', os.getcwd())
     logging.debug('    prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
     logging.debug('   sys.argv[0]:[%s]', os.path.dirname(sys.argv[0]))
     logging.debug('       INIfile:[%s]', UPLDRConstants.INIfile)
@@ -521,20 +515,18 @@ if __name__ == "__main__":
         pprint.pprint(xCfg.FLICKR)
 
     # Ensure that only one instance of this script is running
-    fobj = open(xCfg.LOCK_PATH, 'w')
     try:
         # FileLocker is an alias to portalocker (if available) or fcntl
-        FileLock(fobj, FileLocker.LOCK_EX | FileLocker.LOCK_NB)
+        FILELOCK(open(xCfg.LOCK_PATH, 'w'),
+                 FileLocker.LOCK_EX | FileLocker.LOCK_NB)
     except IOError as err:
         if err.errno == errno.EAGAIN:
-            sys.stderr.write('[{!s}] Script already running.\n'
-                             .format(
-                                 nutime.strftime(UPLDRConstants.TimeFormat)))
-            sys.stderr.flush()
+            logging.critical('Script already running.')
             sys.exit(-1)
         raise
     finally:
         pass
+
     # Run uploader
     run_uploadr(PARSED_ARGS)
 

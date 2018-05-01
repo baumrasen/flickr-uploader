@@ -525,6 +525,8 @@ class Uploadr(object):
             logging.debug('__name__:[{!s}] to prevent recursive calling)!'
                           .format(__name__))
 
+            cur = con.cursor()
+
             # To prevent recursive calling, check if __name__ == '__main__'
             # if __name__ == '__main__':
             mp.mprocessing(self.ARGS.verbose,

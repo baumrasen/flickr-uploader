@@ -4305,11 +4305,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
                          '               Flickr:[{!s:>6s}]\n'
                          'Not in sets on Flickr:[{!s:>6s}]'
                          .format(InitialFoundFiles,
-                                 BadFilesCount),
+                                 BadFilesCount,
                                  InitialFoundFiles - BadFilesCount,
                                  countlocal,
                                  countflickr,
-                                 (countnotinsets))
+                                 countnotinsets))
 
         # List pics not in sets (if within a parameter) -----------------------
         # Maximum allowed per_page by Flickr is 500.

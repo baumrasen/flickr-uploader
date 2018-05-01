@@ -369,7 +369,7 @@ def run_uploadr():
                 FLICK.removeExcludedMedia()
 
             FLICK.createSets()
-            FLICK.printStat(UPLDRConstants.nuMediacount)
+            FLICK.printStat(UPLDRConstantsClass.nuMediacount)
     # Run Uploadr -------------------------------------------------------------
 
 

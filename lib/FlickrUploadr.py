@@ -536,7 +536,7 @@ class Uploadr(object):
                 changedMedia = set(allMedia) - existingMedia
 
         changedMedia_count = len(changedMedia)
-        UPLDRConstants.nuMediacount = changedMedia_count
+        UPLDRConstantsClass.nuMediacount = changedMedia_count
         NP.niceprint('Found [{!s:>6s}] files to upload.'
                      .format(str(changedMedia_count)))
 
@@ -696,7 +696,7 @@ class Uploadr(object):
 
             # Show number of total files processed
             niceprocessedfiles(nurunning.value,
-                               UPLDRConstants.nuMediacount,
+                               UPLDRConstantsClass.nuMediacount,
                                True)
 
         # running in single processing mode
@@ -715,11 +715,11 @@ class Uploadr(object):
                     nutime.sleep(self.xCfg.DRIP_TIME)
                 count = count + 1
                 niceprocessedfiles(count,
-                                   UPLDRConstants.nuMediacount,
+                                   UPLDRConstantsClass.nuMediacount,
                                    False)
 
             # Show number of total files processed
-            niceprocessedfiles(count, UPLDRConstants.nuMediacount, True)
+            niceprocessedfiles(count, UPLDRConstantsClass.nuMediacount, True)
 
         # Closing DB connection
         if con is not None:
@@ -965,8 +965,8 @@ class Uploadr(object):
                 # Ignore filenames wihtin IGNORED_REGEX
                 if any(ignored.search(f)
                        for ignored in self.xCfg.IGNORED_REGEX):
-                    logging.debug('File {!s} in IGNORED_REGEX:'
-                                  .format(filePath.encode('utf-8')))
+                    logging.debug('File %s in IGNORED_REGEX:',
+                                  StrUnicodeOut(filePath))
                     continue
                 ext = os.path.splitext(os.path.basename(f))[1][1:].lower()
                 if ext in self.xCfg.ALLOWED_EXT:
@@ -1137,7 +1137,7 @@ class Uploadr(object):
             logging.warning('===Multiprocessing=== out.mutex.release(w)')
 
             # Show number of files processed so far
-            niceprocessedfiles(xcount, UPLDRConstants.nuMediacount, False)
+            niceprocessedfiles(xcount, UPLDRConstantsClass.nuMediacount, False)
 
     # -------------------------------------------------------------------------
     # uploadFile
@@ -4304,12 +4304,12 @@ set0 = sets.find('photosets').findall('photoset')[0]
                          '                Local:[{!s:>6s}]\n'
                          '               Flickr:[{!s:>6s}]\n'
                          'Not in sets on Flickr:[{!s:>6s}]'
-                         .format(str(InitialFoundFiles),
-                                 str(BadFilesCount),
-                                 str(InitialFoundFiles - BadFilesCount),
-                                 str(countlocal),
-                                 str(countflickr),
-                                 str(countnotinsets)))
+                         .format(InitialFoundFiles,
+                                 BadFilesCount),
+                                 InitialFoundFiles - BadFilesCount,
+                                 countlocal,
+                                 countflickr,
+                                 (countnotinsets))
 
         # List pics not in sets (if within a parameter) -----------------------
         # Maximum allowed per_page by Flickr is 500.

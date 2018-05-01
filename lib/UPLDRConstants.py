@@ -41,9 +41,8 @@ class UPLDRConstants:
     #   Version      = Version Major.Minor.Fix
     #   Run          = Unique identifier for the execution Run of this process.
     #   nuMediacount = Counter of total files to initially upload
-    #   baseDir      = Base configuration directory for files
-    #   INIfile      = Location of INI file, normally named "uploadr.ini"
     #
+    nuMediacount = None
     TimeFormat = '%Y.%m.%d %H:%M:%S'
     Run = eval(time.strftime('int("%j")+int("%H")*100+int("%M")*10+int("%S")'))
     try:
@@ -73,9 +72,9 @@ class UPLDRConstants:
         # Instance Global Variables
         #   instance variable unique to each instance
         #
-        #   nuMediacount = counter of total files to initially upload
+        #   baseDir      = Base configuration directory for files
+        #   INIfile      = Location of INI file, normally named "uploadr.ini"
         #
-        self.nuMediacount = None
         self.baseDir = str('.')
         self.INIfile = str('uploadr.ini')
 

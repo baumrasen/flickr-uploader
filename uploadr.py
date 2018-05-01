@@ -61,24 +61,6 @@ except ImportError:
     import fcntl as FileLocker
     FileLock = FileLocker.lockf
 import errno
-import xml
-# Avoids error on some systems:
-#    AttributeError: 'module' object has no attribute 'etree'
-#    on logging.info(xml.etree.ElementTree.tostring(...
-try:
-    dummyxml = xml.etree.ElementTree.tostring(
-        xml.etree.ElementTree.Element('xml.etree'),
-        encoding='utf-8',
-        method='xml')
-except AttributeError:
-    sys.stderr.write('Importing xml.etree.ElementTree...')
-    try:
-        import xml.etree.ElementTree
-        sys.stderr.write('done. Continuing.\n')
-        sys.stderr.flush()
-    except ImportError:
-        sys.stderr.write('failed with ImportError.')
-        raise
 import pprint
 # -----------------------------------------------------------------------------
 # Helper FlickrUploadr class to upload pics/videos into Flickr.

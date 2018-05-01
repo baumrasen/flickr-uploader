@@ -1392,10 +1392,10 @@ class Uploadr(object):
                             # Set locking for when running multiprocessing
                             NP.niceprint('   Log Bad file:[{!s}] due to [{!s}]'
                                          .format(
-                                            file,
-                                            'Filetype was not recognised'
-                                            if (format(ex.code) == '5')
-                                            else 'Filesize was too large'))
+                                             file,
+                                             'Filetype was not recognised'
+                                             if (format(ex.code) == '5')
+                                             else 'Filesize was too large'))
                             logging.info('Bad file:[{!s}]'.format(file))
 
                             try:
@@ -3841,13 +3841,12 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 existingMedia = cur.fetchall()
                 logging.info('len(existingMedia)=[{!s}]'
                              .format(len(existingMedia)))
-            except lite.Error as e:
+            except lite.Error as err:
                 reportError(Caught=True,
                             CaughtPrefix='+++ DB',
                             CaughtCode='215',
-                            CaughtMsg='DB error on SELECT FROM '
-                                      'sets: [{!s}]'
-                                      .format(e.args[0]),
+                            CaughtMsg='DB error on SELECT FROM sets: [{!s}]'
+                            .format(err.args[0]),
                             NicePrint=True)
                 return False
 

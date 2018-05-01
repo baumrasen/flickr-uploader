@@ -697,7 +697,7 @@ class Uploadr(object):
 
             logging.info(command)
             try:
-                p = subprocess.call(command, shell=True)
+                p_cmd = subprocess.call(command, shell=True)
             except BaseException:
                 reportError(Caught=True,
                             CaughtPrefix='+++',
@@ -708,8 +708,8 @@ class Uploadr(object):
                             exceptSysInfo=True)
                 resultCmd = False
             finally:
-                if p is None:
-                    del p
+                if p_cmd is None:
+                    del p_cmd
                 return resultCmd
         # ---------------------------------------------------------------------
 
@@ -1043,13 +1043,13 @@ class Uploadr(object):
                         'VALUES (?, ?, ?, ?, 1)',
                         (file_id, file, file_checksum,
                          last_modified))
-                except lite.Error as e:
+                except lite.Error as err:
                     DBexception = True
                     reportError(Caught=True,
                                 CaughtPrefix='+++ DB',
                                 CaughtCode='030',
-                                CaughtMsg='DB error on INSERT: '
-                                          '[{!s}]'.format(e.args[0]),
+                                CaughtMsg='DB error on INSERT: [{!s}]'
+                                .format(err.args[0]),
                                 NicePrint=True,
                                 exceptSysInfo=True)
                 finally:
@@ -1115,12 +1115,12 @@ class Uploadr(object):
                 cur.execute('SELECT rowid, files_id, path, set_id, md5, '
                             'tagged, last_modified FROM files WHERE path = ?',
                             (file,))
-            except lite.Error as e:
+            except lite.Error as err:
                 reportError(Caught=True,
                             CaughtPrefix='+++ DB',
                             CaughtCode='035',
                             CaughtMsg='DB error on SELECT: [{!s}]'
-                                      .format(e.args[0]),
+                                      .format(err.args[0]),
                             NicePrint=True)
             finally:
                 # Release DB lock if running in multiprocessing mode
@@ -2748,13 +2748,13 @@ class Uploadr(object):
                     cur.execute('DELETE FROM SQLITE_SEQUENCE '
                                 'WHERE name="badfiles"')
                     con.commit()
-                except lite.Error as e:
+                except lite.Error as err:
                     reportError(Caught=True,
                                 CaughtPrefix='+++ DB',
                                 CaughtCode='147',
                                 CaughtMsg='DB error on SELECT FROM '
                                 'badfiles: [{!s}]'
-                                .format(e.args[0]),
+                                .format(err.args[0]),
                                 NicePrint=True)
                     raise
             else:
@@ -2763,12 +2763,12 @@ class Uploadr(object):
             # Closing DB connection
             if con is not None:
                 con.close()
-        except lite.Error as e:
+        except lite.Error as err:
             reportError(Caught=True,
                         CaughtPrefix='+++ DB',
                         CaughtCode='148',
                         CaughtMsg='DB error on SELECT: [{!s}]'
-                        .format(e.args[0]),
+                        .format(err.args[0]),
                         NicePrint=True)
             if con is not None:
                 con.close()
@@ -2829,12 +2829,12 @@ class Uploadr(object):
                     # Acquire DB lock if running in multiprocessing mode
                     # self.useDBLock( lock, True)
                     cur.execute("DELETE FROM sets WHERE set_id = ?", (row[0],))
-                except lite.Error as e:
+                except lite.Error as err:
                     reportError(Caught=True,
                                 CaughtPrefix='+++ DB',
                                 CaughtCode='160',
                                 CaughtMsg='DB error DELETE FROM sets: [{!s}]'
-                                .format(e.args[0]),
+                                .format(err.args[0]),
                                 NicePrint=True)
                 finally:
                     # Release DB lock if running in multiprocessing mode
@@ -2864,13 +2864,13 @@ class Uploadr(object):
                 cur = con.cursor()
                 cur.execute("SELECT set_id, name FROM sets")
                 allsets = cur.fetchall()
-            except lite.Error as e:
+            except lite.Error as err:
                 reportError(Caught=True,
                             CaughtPrefix='+++ DB',
                             CaughtCode='163',
                             CaughtMsg='DB error on SELECT FROM '
                             'sets: [{!s}]'
-                            .format(e.args[0]),
+                            .format(err.args[0]),
                             NicePrint=True)
             for row in allsets:
                 NP.niceprint('Set: [{!s}] ({!s})'.format(str(row[0]), row[1]))

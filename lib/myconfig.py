@@ -473,11 +473,6 @@ if __name__ == "__main__":
     import doctest
     doctest.testmod()
 
-    # Comment following line to allow further debugging/testing
-    # sys.exit(0)
-
-    # import lib.myconfig as myconfig
-
     MYCFG = MyConfig()
     if MYCFG.processconfig():
         if MYCFG.verifyconfig():

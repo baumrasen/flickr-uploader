@@ -115,11 +115,11 @@ if __name__ == '__main__':
     PARSER.add_argument('--token', default=TOKEN,
                         help='Access token '
                         '(see https://www.dropbox.com/developers/apps)')
-    args = PARSER.parse_args()
+    ARGS = PARSER.parse_args()
 
-    TOKEN = args.token
-    LOCALFILE = args.file
-    BACKUPPATH = '/' + args.dstfolder + '/' + LOCALFILE
+    TOKEN = ARGS.token
+    LOCALFILE = ARGS.file
+    BACKUPPATH = '/' + ARGS.dstfolder + '/' + LOCALFILE
     # Check for an access token
     if not TOKEN:
         sys.exit("ERROR: Looks like you didn't provide your access token "

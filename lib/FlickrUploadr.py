@@ -698,7 +698,7 @@ class Uploadr(object):
                 reportError(Caught=True,
                             CaughtPrefix='+++',
                             CaughtCode='999',
-                            CaughtMsg='Error calling exiftool (!{s})!'
+                            CaughtMsg='Error calling exiftool:[!{s}]'
                             .format(ConvertOrCopyTags),
                             NicePrint=True,
                             exceptSysInfo=True)
@@ -706,7 +706,8 @@ class Uploadr(object):
             finally:
                 if p_cmd is None:
                     del p_cmd
-                return resultCmd
+
+            return resultCmd
         # ---------------------------------------------------------------------
 
         if self.ARGS.dry_run is True:
@@ -899,7 +900,7 @@ class Uploadr(object):
     def updatedVideoDate(self, xfile_id, xfile, xlast_modified):
         """ updatedVideoDate
 
-        read file to upload into Flickr with FileWithCallback
+            Update the video date taken based on last_modified time of file
         """
         # Update Date/Time on Flickr for Video files
         # Flickr doesn't read it from the video file itself.
@@ -942,9 +943,7 @@ class Uploadr(object):
                 if not self.isGood(res_set_date):
                     raise IOError(res_set_date)
 
-            return True
-        else:
-            return True
+        return True
 
     # -------------------------------------------------------------------------
     # uploadFileX
@@ -1274,7 +1273,7 @@ class Uploadr(object):
                             is_friend=str(self.xCfg.FLICKR["is_friend"])
                         )
 
-                        logging.info('uploadResp:[%s]',
+                        logging.info('Output for uploadResp:[%s]',
                                      self.isGood(uploadResp))
                         logging.debug(xml.etree.ElementTree.tostring(
                             uploadResp,
@@ -1682,8 +1681,7 @@ class Uploadr(object):
                         replaceResp,
                         encoding='utf-8',
                         method='xml'))
-                    logging.info('replaceResp:[{!s}]'
-                                 .format(self.isGood(replaceResp)))
+                    logging.info('replaceResp:[%s]', self.isGood(replaceResp))
 
                     if self.isGood(replaceResp):
                         # Update checksum tag at this time.
@@ -1691,7 +1689,7 @@ class Uploadr(object):
                             file_id,
                             ['checksum:{}'.format(fileMd5)]
                         )
-                        logging.debug('res_add_tag: ')
+                        logging.debug('Output for res_add_tag:')
                         logging.debug(xml.etree.ElementTree.tostring(
                             res_add_tag,
                             encoding='utf-8',
@@ -1702,7 +1700,7 @@ class Uploadr(object):
                             res_get_info = self.photos_get_info(
                                 photo_id=file_id
                             )
-                            logging.debug('res_get_info: ')
+                            logging.debug('Output for res_get_info:')
                             logging.debug(xml.etree.ElementTree.tostring(
                                 res_get_info,
                                 encoding='utf-8',
@@ -1718,8 +1716,8 @@ class Uploadr(object):
                                     if (tag.attrib['raw'] ==
                                             'checksum:{}'.format(oldFileMd5)):
                                         tag_id = tag.attrib['id']
-                                        logging.info('   Found tag_id:[{!s}]'
-                                                     .format(tag_id))
+                                        logging.info('   Found tag_id:[%s]',
+                                                     tag_id)
                                         break
                                 if not tag_id:
                                     NP.niceprint(' Can\'t find tag:[{!s}]'
@@ -1729,10 +1727,10 @@ class Uploadr(object):
                                     break
                                 else:
                                     # update tag_id with new Md5
-                                    logging.info('Removing tag_id:[{!s}]'
-                                                 .format(tag_id))
+                                    logging.info('Removing tag_id:[%s]',
+                                                 tag_id)
                                     remtagResp = self.photos_remove_tag(tag_id)
-                                    logging.debug('remtagResp: ')
+                                    logging.debug('Output for remtagResp:')
                                     logging.debug(xml.etree.ElementTree
                                                   .tostring(remtagResp,
                                                             encoding='utf-8',
@@ -1826,9 +1824,9 @@ class Uploadr(object):
                 logging.error('Videos can\'t be replaced, delete/uploading...')
                 xrow = [file_id, file]
                 logging.debug('delete/uploading '
-                              'xrow[0].files_id=[{!s}]'
-                              'xrow[1].file=[{!s}]'
-                              .format(xrow[0], xrow[1]))
+                              'xrow[0].files_id=[%s]'
+                              'xrow[1].file=[%s]',
+                              xrow[0], StrUnicodeOut(xrow[1]))
                 if self.deleteFile(xrow, cur, lock):
                     NP.niceprint('..Video deleted:[{!s}]'
                                  .format(StrUnicodeOut(file)),
@@ -1927,8 +1925,8 @@ class Uploadr(object):
                                           (row[0],))
                     # Delete file record from the local db
                     logging.debug('deleteFile.dbDeleteRecordLocalDB: '
-                                  'DELETE FROM files WHERE files_id = {!s}'
-                                  .format(file[0]))
+                                  'DELETE FROM files WHERE files_id = %s',
+                                  file[0])
                     nucur.execute("DELETE FROM files WHERE files_id = ?",
                                   (file[0],))
                 except lite.Error as e:
@@ -2134,19 +2132,19 @@ class Uploadr(object):
         logging.debug('getSetNameFromFile in: '
                       'afile:[%s] aFILES_DIR=[%s] aFULL_SET_NAME:[%s]',
                       StrUnicodeOut(afile),
-                      aFILES_DIR,
-                      aFULL_SET_NAME)
+                      StrUnicodeOut(aFILES_DIR),
+                      StrUnicodeOut(aFULL_SET_NAME))
         if aFULL_SET_NAME:
             asetName = os.path.relpath(os.path.dirname(afile), aFILES_DIR)
         else:
             head, asetName = os.path.split(os.path.dirname(afile))
         logging.debug('getSetNameFromFile out: '
-                      'afile:[{!s}] aFILES_DIR=[{!s}] aFULL_SET_NAME:[{!s}]'
-                      ' asetName:[{!s}]'
-                      .format(StrUnicodeOut(afile),
-                              aFILES_DIR,
-                              aFULL_SET_NAME,
-                              StrUnicodeOut(asetName)))
+                      'afile:[%s] aFILES_DIR=[%s] aFULL_SET_NAME:[%s]'
+                      ' asetName:[%s]',
+                      StrUnicodeOut(afile),
+                      StrUnicodeOut(aFILES_DIR),
+                      StrUnicodeOut(aFULL_SET_NAME),
+                      StrUnicodeOut(asetName))
 
         return asetName
 
@@ -2308,10 +2306,10 @@ class Uploadr(object):
 
             # running in multi processing mode
             if self.ARGS.processes and self.ARGS.processes > 0:
-                logging.debug('Running Pool of [{!s}] processes...'
-                              .format(self.ARGS.processes))
-                logging.debug('__name__:[{!s}] to prevent recursive calling)!'
-                              .format(__name__))
+                logging.debug('Running [%s] processes pool.',
+                              self.ARGS.processes)
+                logging.debug('__name__:[%s] to prevent recursive calling)!',
+                              __name__)                
                 cur = con.cursor()
 
                 # To prevent recursive calling, check if __name__ == '__main__'
@@ -2387,8 +2385,8 @@ class Uploadr(object):
             bcur = con.cursor()
 
             logging.info('Calling nuflickr.photosets.addPhoto'
-                         'set_id=[{!s}] photo_id=[{!s}]'
-                         .format(setId, file[0]))
+                         'set_id=[%s] photo_id=[%s]',
+                         setId, file[0])
             # REMARK Result for Error 3 (Photo already in set)
             # is passed via exception and so it is handled there
             addPhotoResp = None
@@ -2506,10 +2504,8 @@ class Uploadr(object):
         Calls logSetCreation to create Album on local database.
         """
 
-        logging.info('   Creating set:[{!s}]'
-                     .format(StrUnicodeOut(setName)))
-        NP.niceprint('   Creating set:[{!s}]'
-                     .format(StrUnicodeOut(setName)))
+        logging.info('   Creating set:[%s]', StrUnicodeOut(setName))
+        NP.niceprint('   Creating set:[%s]', StrUnicodeOut(setName))
 
         if self.ARGS.dry_run:
             return True
@@ -2548,12 +2544,11 @@ class Uploadr(object):
                              .format(primaryPhotoId,
                                      StrUnicodeOut(setName)))
                 logging.error(
-                    'Primary photo [{!s}] for Set [{!s}] '
-                    'does not exist on Flickr. '
-                    'Probably deleted from Flickr but still on local db '
-                    'and local file.'
-                    .format(primaryPhotoId,
-                            StrUnicodeOut(setName)))
+                    'Primary photo [%s] for Set [%s] does not exist on Flickr.'
+                    ' Probably deleted from Flickr but still on local db '
+                    'and local file.',
+                    primaryPhotoId,
+                    StrUnicodeOut(setName))
 
                 return False
 
@@ -2566,9 +2561,8 @@ class Uploadr(object):
                         exceptSysInfo=True)
         finally:
             if self.isGood(createResp):
-                logging.warning('createResp["photoset"]["id"]:[{!s}]'
-                                .format(createResp.find('photoset')
-                                        .attrib['id']))
+                logging.warning('createResp["photoset"]["id"]:[%s]',
+                                createResp.find('photoset').attrib['id'])
                 self.logSetCreation(lock,
                                     createResp.find('photoset').attrib['id'],
                                     setName,
@@ -2577,10 +2571,9 @@ class Uploadr(object):
                                     con)
                 return createResp.find('photoset').attrib['id']
             else:
-                logging.warning('createResp: ')
-                if createResp is None:
-                    logging.warning('None')
-                else:
+                logging.debug('Output for createResp:[%s]',
+                              'None' if createResp is None else '...')
+                if createResp is not None:
                     logging.warning(xml.etree.ElementTree.tostring(
                         createResp,
                         encoding='utf-8',
@@ -2936,15 +2929,12 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     setName = row.find('title').text
                     primaryPhotoId = row.attrib['primary']
 
-                    logging.debug('isThisStringUnicode [{!s}]:{!s}'
-                                  .format('setId',
-                                          isThisStringUnicode(setId)))
-                    logging.debug('isThisStringUnicode [{!s}]:{!s}'
-                                  .format('setName',
-                                          isThisStringUnicode(setName)))
-                    logging.debug('isThisStringUnicode [{!s}]:{!s}'
-                                  .format('primaryPhotoId',
-                                          isThisStringUnicode(primaryPhotoId)))
+                    logging.debug('isThisStringUnicode [setId]:%s',
+                                  isThisStringUnicode(setId))
+                    logging.debug('isThisStringUnicode [setName]:%s',
+                                  isThisStringUnicode(setName))
+                    logging.debug('isThisStringUnicode [primaryPhotoId]:%s',
+                                  isThisStringUnicode(primaryPhotoId))
 
                     if self.ARGS.verbose:
                         NP.niceprint('  Add Set to DB:[{!s}] '
@@ -2960,22 +2950,21 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     # Occurred while simultaneously performing massive delete
                     # operation on flickr.
                     if setName is not None:
-                        logging.info('Searching on DB for setId:[{!s}] '
-                                     'setName:[{!s}] '
-                                     'primaryPhotoId:[{!s}]'
-                                     .format(setId,
-                                             StrUnicodeOut(setName),
-                                             primaryPhotoId))
+                        logging.info('Searching on DB for setId:[%s] '
+                                     'setName:[%s] '
+                                     'primaryPhotoId:[%s]',
+                                     setId,
+                                     StrUnicodeOut(setName),
+                                     primaryPhotoId)
                     else:
-                        logging.info('Searching on DB for setId:[{!s}] '
+                        logging.info('Searching on DB for setId:[%s] '
                                      'setName:[None] '
-                                     'primaryPhotoId:[{!s}]'
-                                     .format(setId,
-                                             primaryPhotoId))
+                                     'primaryPhotoId:[%s]',
+                                     setId,
+                                     primaryPhotoId)
 
                     logging.info('SELECT set_id FROM sets '
-                                 'WHERE set_id = "{!s}"'
-                                 .format(setId))
+                                 'WHERE set_id = "%s"', setId)
                     try:
                         cur.execute("SELECT set_id FROM sets "
                                     "WHERE set_id = '" + setId + "'")
@@ -2995,18 +2984,17 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
                     if foundSets is None:
                         if setName is None:
-                            logging.info('Adding set [{!s}] ({!s}) '
-                                         'with primary photo [{!s}].'
-                                         .format(setId,
-                                                 'None',
-                                                 primaryPhotoId))
+                            logging.info('Adding set [%s] (%s) '
+                                         'with primary photo [%s].',
+                                         setId,
+                                         'None',
+                                         primaryPhotoId)
                         else:
-                            logging.info('Adding set [{!s}] ({!s}) '
-                                         'with primary photo [{!s}].'
-                                         .format(
-                                             setId,
-                                             StrUnicodeOut(setName),
-                                             primaryPhotoId))
+                            logging.info('Adding set [%s] (%s) '
+                                         'with primary photo [%s].',
+                                         setId,
+                                         StrUnicodeOut(setName),
+                                         primaryPhotoId)
                         try:
                             cur.execute('INSERT INTO sets (set_id, name, '
                                         'primary_photo_id) VALUES (?,?,?)',
@@ -3020,8 +3008,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                         .format(e.args[0]),
                                         NicePrint=True)
                     else:
-                        logging.info('Set found on DB:[{!s}]'
-                                     .format(StrUnicodeOut(setName)))
+                        logging.info('Set found on DB:[%s]',
+                                     StrUnicodeOut(setName))
                         if self.ARGS.verbose:
                             NP.niceprint('Set found on DB:[{!s}]'
                                          .format(StrUnicodeOut(setName)))
@@ -3031,7 +3019,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 if con is not None:
                     con.close()
             else:
-                logging.warning(xml.etree.ElementTree.tostring(
+                logging.debug('Output for sets:')
+                logging.debug(xml.etree.ElementTree.tostring(
                     sets,
                     encoding='utf-8',
                     method='xml'))
@@ -3109,8 +3098,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
         returnPhotoID = None
         returnUploadedNoSet = False
 
-        logging.info('Is Already Uploaded:[checksum:{!s}] [album:{!s}]?'
-                     .format(xchecksum, xsetName))
+        logging.info('Is Already Uploaded:[checksum:%s] [album:%s]?',
+                     xchecksum, StrUnicodeOut(xsetName))
 
         # Use a big random waitime to avoid errors in multiprocessing mode.
         @retry(attempts=3, waittime=20, randtime=True)
@@ -3146,10 +3135,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         exceptSysInfo=True)
         finally:
             if searchIsUploaded is None or not self.isGood(searchIsUploaded):
-                logging.error('searchIsUploadedOK:[{!s}]'
-                              .format('None'
-                                      if searchIsUploaded is None
-                                      else self.isGood(searchIsUploaded)))
+                logging.error('searchIsUploadedOK:[%s]',
+                              'None'
+                              if searchIsUploaded is None
+                              else self.isGood(searchIsUploaded))
                 # CODING: how to indicate an error... different from False?
                 # Possibly raising an exception?
                 # raise Exception('photos_search: Max attempts exhausted.')
@@ -3162,7 +3151,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     returnPhotoID, \
                     returnUploadedNoSet
 
-        logging.debug('searchIsUploaded:')
+        logging.debug('Output for searchIsUploaded:')
         logging.debug(xml.etree.ElementTree.tostring(searchIsUploaded,
                                                      encoding='utf-8',
                                                      method='xml'))
@@ -3176,44 +3165,44 @@ set0 = sets.find('photosets').findall('photoset')[0]
             returnIsPhotoUploaded = False
         elif returnPhotoUploaded >= 1:
             logging.warning('+++#190: '
-                            'Found [{!s}] images with checksum:[{!s}]'
-                            .format(returnPhotoUploaded, xchecksum))
+                            'Found [%s] images with checksum:[%s]',
+                            returnPhotoUploaded, xchecksum)
             # Get title from filepath as filename without extension
             # NOTE: not compatible with use of the -i option
             xtitle_filename = os.path.split(xfile)[1]
             xtitle_filename = os.path.splitext(xtitle_filename)[0]
-            logging.info('Title:[{!s}]'.format(StrUnicodeOut(xtitle_filename)))
+            logging.info('Title:[%s]', StrUnicodeOut(xtitle_filename))
 
             # For each pic found on Flickr 1st check title and then Sets
             freturnPhotoUploaded = 0
             for pic in searchIsUploaded.find('photos').findall('photo'):
                 freturnPhotoUploaded += 1
-                logging.debug('idx=[{!s}] pic.id=[{!s}] '
-                              'pic.title=[{!s}] pic.tags=[{!s}]'
-                              .format(freturnPhotoUploaded,
-                                      pic.attrib['id'],
-                                      StrUnicodeOut(pic.attrib['title']),
-                                      StrUnicodeOut(pic.attrib['tags'])))
+                logging.debug('idx=[%s] pic.id=[%s] '
+                              'pic.title=[%s] pic.tags=[%s]',
+                              freturnPhotoUploaded,
+                              pic.attrib['id'],
+                              StrUnicodeOut(pic.attrib['title']),
+                              StrUnicodeOut(pic.attrib['tags']))
 
                 # Use StrUnicodeOut in comparison to avoid warning:
                 #   "UnicodeWarning: Unicode equal comparison failed to
                 #    convert both arguments to Unicode"
-                logging.debug('xtitle_filename/type=[{!s}]/[{!s}] '
-                              'pic.attrib[title]/type=[{!s}]/[{!s}]'
-                              .format(StrUnicodeOut(xtitle_filename),
-                                      type(xtitle_filename),
-                                      StrUnicodeOut(pic.attrib['title']),
-                                      type(pic.attrib['title'])))
-                logging.info('Compare Titles=[{!s}]'
-                             .format((StrUnicodeOut(xtitle_filename) ==
-                                      StrUnicodeOut(pic.attrib['title']))))
+                logging.debug('xtitle_filename/type=[%s]/[%s] '
+                              'pic.attrib[title]/type=[%s]/[%s]',
+                              StrUnicodeOut(xtitle_filename),
+                              type(xtitle_filename),
+                              StrUnicodeOut(pic.attrib['title']),
+                              type(pic.attrib['title']))
+                logging.info('Compare Titles=[%s]',
+                             (StrUnicodeOut(xtitle_filename) ==
+                              StrUnicodeOut(pic.attrib['title'])))
 
                 # if pic with checksum has a different title, continue
                 if not (StrUnicodeOut(xtitle_filename) ==
                         StrUnicodeOut(pic.attrib['title'])):
-                    logging.info('Different titles: File:[{!s}] Flickr:[{!s}]'
-                                 .format(StrUnicodeOut(xtitle_filename),
-                                         StrUnicodeOut(pic.attrib['title'])))
+                    logging.info('Different titles: File:[%s] Flickr:[%s]',
+                                 StrUnicodeOut(xtitle_filename),
+                                 StrUnicodeOut(pic.attrib['title']))
                     continue
 
                 @retry(attempts=3, waittime=8, randtime=True)
@@ -3248,10 +3237,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                 exceptSysInfo=True)
                 finally:
                     if resp is None or not self.isGood(resp):
-                        logging.error('resp.getAllContextsOK:[{!s}]'
-                                      .format('None'
-                                              if resp is None
-                                              else self.isGood(resp)))
+                        logging.error('resp.getAllContextsOK:[%s]',
+                                      'None'
+                                      if resp is None
+                                      else self.isGood(resp))
                         # CODING: how to indicate an error?
                         # Possibly raising an exception?
                         # raise Exception('photos_getAllContexts: '
@@ -3264,14 +3253,14 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             returnPhotoUploaded, \
                             returnPhotoID, \
                             returnUploadedNoSet
-                    logging.debug('resp.getAllContextsOK:')
+                    logging.debug('Output for resp.getAllContextsOK:')
                     logging.debug(xml.etree.ElementTree.tostring(
                         resp,
                         encoding='utf-8',
                         method='xml'))
 
-                logging.info('len(resp.findall(''set'')):[{!s}]'
-                             .format(len(resp.findall('set'))))
+                logging.info('len(resp.findall(''set'')):[%s]',
+                             len(resp.findall('set')))
 
                 # B) checksum, title, empty setName,       Count=1
                 #                 THEN EXISTS, ASSIGN SET IF tag album IS FOUND
@@ -3307,29 +3296,28 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                         ' SET WITHOUT ALBUM TAG]')
 
                 for setinlist in resp.findall('set'):
-                    logging.warning('setinlist:')
+                    logging.warning('Output for setinlist:')
                     logging.warning(xml.etree.ElementTree.tostring(
                         setinlist,
                         encoding='utf-8',
                         method='xml'))
 
                     logging.warning(
-                        '\nCheck : id=[{!s}] File=[{!s}]\n'
-                        'Check : Title:[{!s}] Set:[{!s}]\n'
-                        'Flickr: Title:[{!s}] Set:[{!s}] Tags:[{!s}]\n'
-                        .format(pic.attrib['id'],
-                                StrUnicodeOut(xfile),
-                                StrUnicodeOut(xtitle_filename),
-                                StrUnicodeOut(xsetName),
-                                StrUnicodeOut(pic.attrib['title']),
-                                StrUnicodeOut(setinlist.attrib['title']),
-                                StrUnicodeOut(pic.attrib['tags'])))
+                        '\nCheck : id=[%s] File=[%s]\n'
+                        'Check : Title:[%s] Set:[%s]\n'
+                        'Flickr: Title:[%s] Set:[%s] Tags:[%s]\n',
+                        pic.attrib['id'],
+                        StrUnicodeOut(xfile),
+                        StrUnicodeOut(xtitle_filename),
+                        StrUnicodeOut(xsetName),
+                        StrUnicodeOut(pic.attrib['title']),
+                        StrUnicodeOut(setinlist.attrib['title']),
+                        StrUnicodeOut(pic.attrib['tags']))
 
                     logging.warning(
-                        'Compare Sets=[{!s}]'
-                        .format((StrUnicodeOut(xsetName) ==
-                                 StrUnicodeOut(setinlist
-                                               .attrib['title']))))
+                        'Compare Sets=[%s]'
+                        (StrUnicodeOut(xsetName) ==
+                         StrUnicodeOut(setinlist.attrib['title'])))
 
                     # C) checksum, title, setName (1 or more), Count>=1
                     #                                               THEN EXISTS
@@ -3402,13 +3390,13 @@ set0 = sets.find('photosets').findall('photoset')[0]
             Searchs for image with on tag:checksum
         """
 
-        logging.info('FORMAT:[checksum:{!s}]'.format(checksum))
+        logging.info('FORMAT:[checksum:%s]', checksum)
 
         searchResp = self.nuflickr.photos.search(user_id="me",
                                                  tags='checksum:{}'
                                                  .format(checksum))
         # Debug
-        logging.debug('Search Results SearchResp:')
+        logging.debug('Output for SearchResp:')
         logging.debug(xml.etree.ElementTree.tostring(searchResp,
                                                      encoding='utf-8',
                                                      method='xml'))
@@ -3456,10 +3444,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         exceptSysInfo=True)
         finally:
             if getPhotosResp is None or not self.isGood(getPhotosResp):
-                logging.error('getPhotosResp:[{!s}]'
-                              .format('None'
-                                      if getPhotosResp is None
-                                      else self.isGood(getPhotosResp)))
+                logging.error('getPhotosResp:[%s]',
+                              'None'
+                              if getPhotosResp is None
+                              else self.isGood(getPhotosResp))
 
         return getPhotosResp
 
@@ -3511,8 +3499,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
             tag_id = tag_id if found
         """
 
-        logging.info('find_tag: photo:[{!s}] intag:[{!s}]'
-                     .format(photo_id, intag))
+        logging.info('find_tag: photo:[%s] intag:[%s]', photo_id, intag)
 
         # Use a big random waitime to avoid errors in multiprocessing mode.
         @retry(attempts=3, waittime=20, randtime=True)
@@ -3533,9 +3520,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
         except flickrapi.exceptions.FlickrError as ex:
             if format(ex.code) == '1':
                 logging.warning('+++206: '
-                                'Photo_id:[{!s}] Flickr: Photo not found '
-                                'on getListPhoto.'
-                                .format(photo_id))
+                                'Photo_id:[%s] Flickr: Photo not found '
+                                'on getListPhoto.', photo_id)
                 NP.niceprint('+++206: '
                              'Photo_id:[{!s}] Flickr: Photo not found '
                              'on getListPhoto.'
@@ -3567,8 +3553,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
             if (StrUnicodeOut(tag.attrib['raw']) ==
                     StrUnicodeOut(intag)):
                 tag_id = tag.attrib['id']
-                logging.info('Found tag_id:[{!s}] for intag:[{!s}]'
-                             .format(tag_id, intag))
+                logging.info('Found tag_id:[%s] for intag:[%s]',
+                             tag_id, intag)
                 return True, tag_id
 
         return False, ''
@@ -3584,8 +3570,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
             Local Wrapper for Flickr photos.addTags
         """
 
-        logging.info('photos_add_tags: photo_id:[{!s}] tags:[{!s}]'
-                     .format(photo_id, tags))
+        logging.info('photos_add_tags: photo_id:[%s] tags:[%s]',
+                     photo_id, tags)
         photos_add_tagsResp = self.nuflickr.photos.addTags(
             photo_id=photo_id,
             tags=tags)
@@ -3625,8 +3611,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         if self.ARGS.verbose:
             NP.niceprint('   Setting Date:[{!s}] Id=[{!s}]'
                          .format(datetxt, photo_id))
-        logging.warning('   Setting Date:[{!s}] Id=[{!s}]'
-                        .format(datetxt, photo_id))
+        logging.warning('   Setting Date:[%s] Id=[%s]', datetxt, photo_id)
 
         @retry(attempts=3, waittime=15, randtime=True)
         def R_photos_setdates(kwargs):
@@ -3705,8 +3690,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
     def rate4maddAlbumsMigrate(self):
         """ rate4maddAlbumsMigrate
         """
-        logging.debug('rate_limit timestamp:[{!s}]'
-                      .format(time.strftime('%T')))
+        logging.debug('rate_limit timestamp:[%s]', time.strftime('%T'))
 
     # -------------------------------------------------------------------------
     # maddAlbumsMigrate
@@ -3726,8 +3710,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
         """
 
         for i, f in enumerate(filelist):
-            logging.warning('===Current element of Chunk: [{!s}][{!s}]'
-                            .format(i, f))
+            logging.warning('===Current element of Chunk: [%s][%s]', i, f)
 
             # f[0] = files_id
             # f[1] = path
@@ -3761,9 +3744,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             NicePrint=False,
                             exceptSysInfo=True)
 
-                logging.warning('Error processing Photo_id:[{!s}]. '
-                                'Continuing...'
-                                .format(str(f[0])))
+                logging.warning('Error processing Photo_id:[%s]. '
+                                'Continuing...', f[0])
                 NP.niceprint('Error processing Photo_id:[{!s}]. Continuing...'
                              .format(str(f[0])),
                              fname='addAlbumMigrate')
@@ -3777,7 +3759,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                          if f[2] is not None
                                          else setName)]
                 )
-                logging.debug('res_add_tag: ')
+                logging.debug('Output for res_add_tag:')
                 logging.debug(xml.etree.ElementTree.tostring(
                     res_add_tag,
                     encoding='utf-8',
@@ -3826,8 +3808,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             'FROM files LEFT OUTER JOIN sets ON '
                             'files.set_id = sets.set_id')
                 existingMedia = cur.fetchall()
-                logging.info('len(existingMedia)=[{!s}]'
-                             .format(len(existingMedia)))
+                logging.info('len(existingMedia)=[%s]',
+                             len(existingMedia))
             except lite.Error as err:
                 reportError(Caught=True,
                             CaughtPrefix='+++ DB',
@@ -3840,10 +3822,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
             countTotal = len(existingMedia)
             # running in multi processing mode
             if self.ARGS.processes and self.ARGS.processes > 0:
-                logging.debug('Running Pool of [{!s}] processes...'
-                              .format(self.ARGS.processes))
-                logging.debug('__name__:[{!s}] to prevent recursive calling)!'
-                              .format(__name__))
+                logging.debug('Running [%s] processes pool.',
+                              self.ARGS.processes)
+                logging.debug('__name__:[%s] to prevent recursive calling)!',
+                              __name__)                
                 cur = con.cursor()
 
                 # To prevent recursive calling, check if __name__ == '__main__'
@@ -3900,9 +3882,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                     NicePrint=False,
                                     exceptSysInfo=True)
 
-                        logging.warning('Error processing Photo_id:[{!s}]. '
-                                        'Continuing...'
-                                        .format(str(row[0])))
+                        logging.warning('Error processing Photo_id:[%s]. '
+                                        'Continuing...',
+                                        str(row[0]))
                         NP.niceprint('Error processing Photo_id:[{!s}]. '
                                      'Continuing...'
                                      .format(str(row[0])),
@@ -3921,7 +3903,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                                  if row[2] is not None
                                                  else setName)]
                         )
-                        logging.debug('res_add_tag: ')
+                        logging.debug('Output for res_add_tag:')
                         logging.debug(xml.etree.ElementTree.tostring(
                             res_add_tag,
                             encoding='utf-8',
@@ -3952,8 +3934,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             'last_modified '
                             'FROM badfiles ORDER BY path')
                 badFiles = cur.fetchall()
-                logging.info('len(badFiles)=[{!s}]'
-                             .format(len(badFiles)))
+                logging.info('len(badFiles)=[%s]', len(badFiles))
             except lite.Error as err:
                 reportError(Caught=True,
                             CaughtPrefix='+++ DB',
@@ -4008,7 +3989,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 cur = con.cursor()
                 cur.execute("SELECT Count(*) FROM files")
                 countlocal = cur.fetchone()[0]
-                logging.info('Total photos on local: {}'.format(countlocal))
+                logging.info('Total photos on local: %s', countlocal)
             except lite.Error as e:
                 reportError(Caught=True,
                             CaughtPrefix='+++ DB',
@@ -4024,8 +4005,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 cur = con.cursor()
                 cur.execute("SELECT Count(*) FROM badfiles")
                 BadFilesCount = cur.fetchone()[0]
-                logging.info('Total badfiles count on local: {}'
-                             .format(BadFilesCount))
+                logging.info('Total badfiles count on local: %s',
+                             BadFilesCount)
             except lite.Error as e:
                 reportError(Caught=True,
                             CaughtPrefix='+++ DB',
@@ -4044,7 +4025,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                                      method='xml'))
         if self.isGood(res):
             countflickr = format(res.find('photos').attrib['total'])
-            logging.debug('Total photos on flickr: {!s}'.format(countflickr))
+            logging.debug('Total photos on flickr: %s', countflickr)
 
         # Total photos not on Sets/Albums on FLickr ---------------------------
         # (per_page=1 as only the header is required to obtain total):
@@ -4081,8 +4062,8 @@ set0 = sets.find('photosets').findall('photoset')[0]
             if self.isGood(res):
                 countnotinsets = int(format(
                     res.find('photos').attrib['total']))
-                logging.debug('Photos not in sets on flickr: {!s}'
-                              .format(countnotinsets))
+                logging.debug('Photos not in sets on flickr: %s',
+                              countnotinsets)
 
             # Print total stats counters --------------------------------------
             NP.niceprint('\n  Initial Found Files:[{!s:>6s}]\n'
@@ -4120,9 +4101,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
             if self.isGood(res):
                 for count, row in enumerate(res.find('photos')
                                             .findall('photo')):
-                    logging.info('Photo Not in Set: id:[{!s}] title:[{!s}]'
-                                 .format(row.attrib['id'],
-                                         StrUnicodeOut(row.attrib['title'])))
+                    logging.info('Photo Not in Set: id:[%s] title:[%s]',
+                                 row.attrib['id'],
+                                 StrUnicodeOut(row.attrib['title']))
+                    logging.debug('Output for photos_get_not_in_set:')
                     logging.debug(xml.etree.ElementTree.tostring(
                         row,
                         encoding='utf-8',
@@ -4130,12 +4112,12 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     NP.niceprint('Photo get_not_in_set: id:[{!s}] title:[{!s}]'
                                  .format(row.attrib['id'],
                                          StrUnicodeOut(row.attrib['title'])))
-                    logging.info('count=[{!s}]'.format(count))
+                    logging.info('count=[%s]', count)
                     if ((count == 500) or
                         (count >= (self.ARGS.list_photos_not_in_set - 1)) or
                             (count >= (countnotinsets - 1))):
-                        logging.info('Stopped at photo [{!s}] listing '
-                                     'photos not in a set'.format(count))
+                        logging.info('Stopped at photo [%s] listing '
+                                     'photos not in a set', count)
                         break
             else:
                 NP.niceprint('Error in list get_not_in_set. No output.')
@@ -4158,15 +4140,15 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
         useDBLockReturn = False
 
-        logging.debug('Entering useDBLock with useDBoperation:[{!s}].'
-                      .format(useDBoperation))
+        logging.debug('Entering useDBLock with useDBoperation:[%s].',
+                      useDBoperation)
 
         if useDBthisLock is None:
             logging.debug('useDBLock: useDBthisLock is [None].')
             return useDBLockReturn
 
-        logging.debug('useDBLock: useDBthisLock is [{!s}].'
-                      .format(useDBthisLock._semlock))
+        logging.debug('useDBLock: useDBthisLock.semlock:[%s].',
+                      useDBthisLock._semlock)
 
         if useDBoperation is None:
             return useDBLockReturn
@@ -4206,15 +4188,15 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     raise
                 logging.info('===Multiprocessing=== <--[v].lock.release')
 
-            logging.info('Exiting useDBLock with useDBoperation:[{!s}]. '
-                         'Result:[{!s}]'
-                         .format(useDBoperation, useDBLockReturn))
+            logging.info('Exiting useDBLock with useDBoperation:[%s]. '
+                         'Result:[%s]',
+                         useDBoperation, useDBLockReturn)
         else:
             useDBLockReturn = True
             logging.warning('(No multiprocessing. Nothing to do) '
-                            'Exiting useDBLock with useDBoperation:[{!s}]. '
-                            'Result:[{!s}]'
-                            .format(useDBoperation, useDBLockReturn))
+                            'Exiting useDBLock with useDBoperation:[%s]. '
+                            'Result:[%s]',
+                            useDBoperation, useDBLockReturn)
 
         return useDBLockReturn
 

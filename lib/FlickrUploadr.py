@@ -3315,7 +3315,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         StrUnicodeOut(pic.attrib['tags']))
 
                     logging.warning(
-                        'Compare Sets=[%s]'
+                        'Compare Sets=[%s]',
                         (StrUnicodeOut(xsetName) ==
                          StrUnicodeOut(setinlist.attrib['title'])))
 

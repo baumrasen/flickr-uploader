@@ -139,12 +139,12 @@ class InstallCfg(Command):
     ]
 
     @staticmethod
-    def bstatus(s):
+    def bstatus(astr):
         """Prints things in bold."""
         print('\033[1m{0}\033[0m'.format(astr))
 
     @staticmethod
-    def status(s):
+    def status(astr):
         """Prints things."""
         print('{0}'.format(astr))
 
@@ -181,7 +181,7 @@ class InstallCfg(Command):
                 self.status("Copying [%s] into folder [%s]"
                             % (str(f), str(dst)))
                 if sys.version_info < (3, ):
-                    copy(f, dst) 
+                    copy(f, dst)
                 else:
                     copy(f, dst, follow_symlinks=True)
 

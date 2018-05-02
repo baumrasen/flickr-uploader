@@ -2041,7 +2041,7 @@ class Uploadr(object):
         """
 
         logging.warning('  Add set to DB:[%s]', StrUnicodeOut(setName))
-       if self.ARGS.verbose:
+        if self.ARGS.verbose:
             NP.niceprint('  Add set to DB:[{!s}]'
                          .format(StrUnicodeOut(setName)))
 

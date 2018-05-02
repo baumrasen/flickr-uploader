@@ -26,8 +26,8 @@ class UPLDRConstants:
 
         >>> import lib.UPLDRConstants as UPLDRConstantsClass
         >>> UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
-        >>> UPLDRConstants.nuMediacount = 999
-        >>> print(UPLDRConstants.nuMediacount)
+        >>> UPLDRConstants.media_count = 999
+        >>> print(UPLDRConstants.media_count)
         999
         >>> print(0 < UPLDRConstants.Run < 10000 )
         True
@@ -40,9 +40,9 @@ class UPLDRConstants:
     #   TimeFormat   = Format to display date and time. Used with strftime
     #   Version      = Version Major.Minor.Fix
     #   Run          = Unique identifier for the execution Run of this process.
-    #   nuMediacount = Counter of total files to initially upload
+    #   media_count = Counter of total files to initially upload
     #
-    nuMediacount = None
+    media_count = None
     TimeFormat = '%Y.%m.%d %H:%M:%S'
     Run = eval(time.strftime('int("%j")+int("%H")*100+int("%M")*10+int("%S")'))
     try:
@@ -72,11 +72,11 @@ class UPLDRConstants:
         # Instance Global Variables
         #   instance variable unique to each instance
         #
-        #   baseDir      = Base configuration directory for files
-        #   INIfile      = Location of INI file, normally named "uploadr.ini"
+        #   base_dir      = Base configuration directory for files
+        #   ini_file      = Location of INI file, normally named "uploadr.ini"
         #
-        self.baseDir = str('.')
-        self.INIfile = str('uploadr.ini')
+        self.base_dir = str('.')
+        self.ini_file = str('uploadr.ini')
 
 
 # -----------------------------------------------------------------------------

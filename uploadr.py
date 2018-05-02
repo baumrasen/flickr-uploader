@@ -122,10 +122,10 @@ def parse_arguments():
                             # dest='xINIfile',
                             metavar='filename.ini',
                             type=str,
-                            # default=UPLDRConstants.INIfile,
+                            # default=UPLDRConstants.ini_file,
                             help='Optional configuration file. '
                                  'Default is:[{!s}]'
-                            .format(UPLDRConstants.INIfile))
+                            .format(UPLDRConstants.ini_file))
     # cgrpparser.add_argument('-C', '--config-file', action='store',
     #                         # dest='xINIfile',
     #                         metavar='filename.ini',
@@ -348,32 +348,32 @@ def run_uploadr(ARGS):
                 FLICK.removeExcludedMedia()
 
             FLICK.createSets()
-            FLICK.printStat(UPLDRConstantsClass.nuMediacount)
+            FLICK.printStat(UPLDRConstantsClass.media_count)
     # Run Uploadr -------------------------------------------------------------
 
 
 # -----------------------------------------------------------------------------
 # checkBaseDir_INIfile
 #
-# Check if baseDir folder exists and INIfile exists and is a file
+# Check if base_dir folder exists and ini_file exists and is a file
 #
-def checkBaseDir_INIfile(baseDir, INIfile):
+def checkBaseDir_INIfile(base_dir, ini_file):
     """checkBaseDir_INIfile
 
-    baseDir = Folder
-    INIfile = INI File path
+    base_dir = Folder
+    ini_file = INI File path
     """
 
     resultCheck = True
     try:
-        if not ((baseDir == '' or os.path.isdir(baseDir)) and
-                os.path.isfile(INIfile)):
+        if not ((base_dir == '' or os.path.isdir(base_dir)) and
+                os.path.isfile(ini_file)):
             raise OSError('[Errno 2] No such file or directory')
     except Exception as err:
         resultCheck = False
         logging.critical(
             'Config folder [%s] and/or INI file: [%s] not found or '
-            'incorrect format: [%s]!', baseDir, INIfile, str(err))
+            'incorrect format: [%s]!', base_dir, ini_file, str(err))
 
     logging.debug('resultCheck=[{%s]', resultCheck)
     return resultCheck
@@ -399,25 +399,25 @@ nurunning = None
 # =============================================================================
 # Class UPLDRConstants
 #
-#   nuMediacount = Counter of total files to initially upload
-#   baseDir      = Base configuration directory location
-#   INIfile      = Configuration file
+#   media_count = Counter of total files to initially upload
+#   base_dir      = Base configuration directory location
+#   ini_file      = Configuration file
 # -----------------------------------------------------------------------------
 # UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
-UPLDRConstants.nuMediacount = 0
+UPLDRConstants.media_count = 0
 # Base dir for config and support files.
 #   Will use --config-file argument option
 #   If not, first try sys.prefix/etc folder
 #   If not, then try Current Working Directory
-UPLDRConstants.baseDir = os.path.join(sys.prefix, 'etc')
-UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir, "uploadr.ini")
+UPLDRConstants.base_dir = os.path.join(sys.prefix, 'etc')
+UPLDRConstants.ini_file = os.path.join(UPLDRConstants.base_dir, "uploadr.ini")
 
 if xCfg.LOGGING_LEVEL <= logging.DEBUG:
-    logging.debug('       baseDir:[%s]', UPLDRConstants.baseDir)
+    logging.debug('      base_dir:[%s]', UPLDRConstants.base_dir)
     logging.debug('           cwd:[%s]', os.getcwd())
     logging.debug('    prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
     logging.debug('   sys.argv[0]:[%s]', os.path.dirname(sys.argv[0]))
-    logging.debug('       INIfile:[%s]', UPLDRConstants.INIfile)
+    logging.debug('      ini_file:[%s]', UPLDRConstants.ini_file)
 # -----------------------------------------------------------------------------
 
 # =============================================================================
@@ -470,11 +470,11 @@ if __name__ == "__main__":
 
     # Argument --config-file overrides configuration filename.
     if PARSED_ARGS.config_file:
-        UPLDRConstants.INIfile = PARSED_ARGS.config_file
-        logging.info('UPLDRConstants.INIfile:[%s]',
-                     StrUnicodeOut(UPLDRConstants.INIfile))
-        if not checkBaseDir_INIfile(UPLDRConstants.baseDir,
-                                    UPLDRConstants.INIfile):
+        UPLDRConstants.ini_file = PARSED_ARGS.config_file
+        logging.info('UPLDRConstants.ini_file:[%s]',
+                     StrUnicodeOut(UPLDRConstants.ini_file))
+        if not checkBaseDir_INIfile(UPLDRConstants.base_dir,
+                                    UPLDRConstants.ini_file):
             reportError(Caught=True,
                         CaughtPrefix='+++ ',
                         CaughtCode='601',
@@ -483,12 +483,12 @@ if __name__ == "__main__":
             sys.exit(2)
     else:
         # sys.argv[0]
-        UPLDRConstants.baseDir = os.path.dirname(sys.argv[0])
-        UPLDRConstants.INIfile = os.path.join(UPLDRConstants.baseDir,
+        UPLDRConstants.base_dir = os.path.dirname(sys.argv[0])
+        UPLDRConstants.ini_file = os.path.join(UPLDRConstants.base_dir,
                                               "uploadr.ini")
 
-        if not checkBaseDir_INIfile(UPLDRConstants.baseDir,
-                                    UPLDRConstants.INIfile):
+        if not checkBaseDir_INIfile(UPLDRConstants.base_dir,
+                                    UPLDRConstants.ini_file):
             reportError(Caught=True,
                         CaughtPrefix='+++ ',
                         CaughtCode='602',
@@ -496,8 +496,8 @@ if __name__ == "__main__":
                         NicePrint=True)
             sys.exit(2)
 
-    # Source configuration from INIfile
-    xCfg.readconfig(UPLDRConstants.INIfile, ['Config'])
+    # Source configuration from ini_file
+    xCfg.readconfig(UPLDRConstants.ini_file, ['Config'])
     if xCfg.processconfig():
         if xCfg.verifyconfig():
             pass

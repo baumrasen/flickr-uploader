@@ -228,7 +228,7 @@ class Uploadr(object):
         """
 
         logging.info('Obtaining Cached token')
-        logging.debug('TOKEN_CACHE:[{!s}]'.format(self.xCfg.TOKEN_CACHE))
+        logging.debug('TOKEN_CACHE:[%s]', self.xCfg.TOKEN_CACHE)
         flickrobj = flickrapi.FlickrAPI(
             self.xCfg.FLICKR["api_key"],
             self.xCfg.FLICKR["secret"],
@@ -237,8 +237,8 @@ class Uploadr(object):
         try:
             # Check if token permissions are correct.
             if flickrobj.token_valid(perms='delete'):
-                logging.info('Cached token obtained: {!s}'
-                             .format(flickrobj.token_cache.token))
+                logging.info('Cached token obtained: [%s]',
+                             flickrobj.token_cache.token)
                 return flickrobj, flickrobj.token_cache.token
             else:
                 logging.warning('Token Non-Existant.')
@@ -322,7 +322,7 @@ class Uploadr(object):
             if sys.version_info < (3, ) \
             else input('Verifier code (NNN-NNN-NNN): ')
 
-        logging.warning('Verifier: {!s}'.format(verifier))
+        logging.warning('Verifier: %s', verifier)
 
         # Trade the request token for an access token
         try:
@@ -368,11 +368,11 @@ class Uploadr(object):
             rows = cur.fetchall()
 
             for row in rows:
-                logging.debug('Checking file_id:[{!s}] file:[{!s}] '
-                              'isFileExcluded?'
-                              .format(StrUnicodeOut(row[0]),
-                                      StrUnicodeOut(row[1])))
-                logging.debug('type(row[1]):[{!s}]'.format(type(row[1])))
+                logging.debug('Checking file_id:[%s] file:[%s] '
+                              'isFileExcluded?',
+                              StrUnicodeOut(row[0]),
+                              StrUnicodeOut(row[1]))
+                logging.debug('type(row[1]):[%s]', type(row[1]))
                 # row[0] is photo_id
                 # row[1] is filename
                 if (self.isFileExcluded(unicode(row[1], 'utf-8')  # noqa
@@ -434,7 +434,7 @@ class Uploadr(object):
                                        else row[1])):
                     # Running in single processing mode, no need for lock
                     success = self.deleteFile(row, cur)
-                    logging.warning('deleteFile result: {!s}'.format(success))
+                    logging.warning('deleteFile result: [%s]', success)
                     count = count + 1
                     if count % 3 == 0:
                         NP.niceprint('[{!s:>6s}] files removed...'
@@ -504,7 +504,7 @@ class Uploadr(object):
                     changedMedia = allMedia
 
         changedMedia_count = len(changedMedia)
-        UPLDRConstantsClass.nuMediacount = changedMedia_count
+        UPLDRConstantsClass.media_count = changedMedia_count
         NP.niceprint('Found [{!s:>6s}] files to upload.'
                      .format(str(changedMedia_count)))
 
@@ -520,21 +520,18 @@ class Uploadr(object):
                 cur.execute("SELECT path FROM badfiles")
                 badMedia = set(file[0] for file in cur.fetchall())
                 changedMedia = set(changedMedia) - badMedia
-                logging.debug('len(badMedia)'.format(len(badMedia)))
+                logging.debug('len(badMedia)=[%s]', len(badMedia))
 
             changedMedia_count = len(changedMedia)
-            # Careful with control on "i != changedMedia_count - 1"
-            # UPLDRConstants.nuMediacount = changedMedia_count
             NP.niceprint('Removing {!s} badfiles. Found {!s} files to upload.'
                          .format(len(badMedia),
                                  changedMedia_count))
 
         # running in multi processing mode
         if self.ARGS.processes and self.ARGS.processes > 0:
-            logging.debug('Running Pool of [{!s}] processes...'
-                          .format(self.ARGS.processes))
-            logging.debug('__name__:[{!s}] to prevent recursive calling)!'
-                          .format(__name__))
+            logging.debug('Running [%s] processes pool.', self.ARGS.processes)
+            logging.debug('__name__:[%s] to prevent recursive calling)!',
+                          __name__)
 
             con = lite.connect(self.xCfg.DB_PATH)
             con.text_factory = str
@@ -557,8 +554,8 @@ class Uploadr(object):
         else:
             count = 0
             for i, file in enumerate(changedMedia):
-                logging.debug('file:[{!s}] type(file):[{!s}]'
-                              .format(file, type(file)))
+                logging.debug('file:[%s] type(file):[%s]',
+                              file, type(file))
                 # lock parameter not used (set to None) under single processing
                 success = self.uploadFile(lock=None, file=file)
                 if (self.ARGS.drip_feed and
@@ -569,11 +566,11 @@ class Uploadr(object):
                     nutime.sleep(self.xCfg.DRIP_TIME)
                 count = count + 1
                 niceprocessedfiles(count,
-                                   UPLDRConstantsClass.nuMediacount,
+                                   UPLDRConstantsClass.media_count,
                                    False)
 
             # Show number of total files processed
-            niceprocessedfiles(count, UPLDRConstantsClass.nuMediacount, True)
+            niceprocessedfiles(count, UPLDRConstantsClass.media_count, True)
 
         # Closing DB connection
         if con is not None:
@@ -608,8 +605,7 @@ class Uploadr(object):
                     fileSize = os.path.getsize(
                         os.path.join(StrUnicodeOut(dirpath),
                                      StrUnicodeOut(fnameonly) + '.JPG'))
-                    logging.debug('Converted .JPG file size=[{!s}]'
-                                  .format(fileSize))
+                    logging.debug('Converted .JPG file size=[%s]', fileSize)
                 except Exception:
                     okfileSize = False
                     reportError(Caught=True,
@@ -721,8 +717,8 @@ class Uploadr(object):
 
         NP.niceprint(' Converting raw:[{!s}]'
                      .format(StrUnicodeOut(os.path.join(Ddirpath, Ffname))))
-        logging.info(' Converting raw:[{!s}]'
-                     .format(StrUnicodeOut(os.path.join(Ddirpath, Ffname))))
+        logging.info(' Converting raw:[%s]',
+                     StrUnicodeOut(os.path.join(Ddirpath, Ffname)))
         success = False
 
         # fileExt = FFname's extension (without the ".")
@@ -733,10 +729,10 @@ class Uploadr(object):
                                StrUnicodeOut(fileExt)))
 
         if not os.path.exists(os.path.join(Ddirpath, Ffnameonly) + ".JPG"):
-            logging.info('.....Create JPG:[{!s}] jpg:[{!s}] ext:[{!s}]'
-                         .format(StrUnicodeOut(Ffname),
-                                 StrUnicodeOut(Ffnameonly),
-                                 StrUnicodeOut(fileExt)))
+            logging.info('.....Create JPG:[%s] jpg:[%s] ext:[%s]',
+                         StrUnicodeOut(Ffname),
+                         StrUnicodeOut(Ffnameonly),
+                         StrUnicodeOut(fileExt))
             if convertRawFileCommand('Convert'):
                 NP.niceprint('....Created JPG:[{!s}]'
                              .format(StrUnicodeOut(Ffnameonly) + ".JPG"))
@@ -746,8 +742,8 @@ class Uploadr(object):
         else:
             NP.niceprint('raw: JPG exists:[{!s}]'
                          .format(StrUnicodeOut(Ffnameonly) + ".JPG"))
-            logging.warning('raw: JPG exists:[{!s}]'
-                            .format(StrUnicodeOut(Ffnameonly) + ".JPG"))
+            logging.warning('raw: JPG exists:[%s]',
+                            StrUnicodeOut(Ffnameonly) + ".JPG")
             return success
 
         if os.path.exists(StrUnicodeOut(os.path.join(Ddirpath, Ffnameonly)) +
@@ -763,12 +759,12 @@ class Uploadr(object):
                 return success
         else:
             NP.niceprint('.....raw failed:[{!s}]'.format(Ffname))
-            logging.warning('.....raw failed:[{!s}]'.format(Ffname))
+            logging.warning('.....raw failed:[%s]', Ffname)
             return success
 
         success = True
         NP.niceprint('  Converted raw:[{!s}]'.format(StrUnicodeOut(Ffname)))
-        logging.info('  Converted raw:[{!s}]'.format(StrUnicodeOut(Ffname)))
+        logging.info('  Converted raw:[%s]', StrUnicodeOut(Ffname))
 
         return success
 
@@ -843,8 +839,8 @@ class Uploadr(object):
                                 StrUnicodeOut(dirpath),
                                 StrUnicodeOut(os.path.splitext(f)[0])) +
                             ".JPG"):
-                        logging.debug('rawfiles: including:[{!s}]'
-                                      .format(StrUnicodeOut(f)))
+                        logging.debug('rawfiles: including:[%s]',
+                                      StrUnicodeOut(f))
                         rawfiles.append(
                             os.path.normpath(
                                 StrUnicodeOut(dirpath) +
@@ -852,8 +848,8 @@ class Uploadr(object):
                                 StrUnicodeOut(f).replace("'", "\'")))
                     else:
                         logging.warning('rawfiles: JPG exists. '
-                                        'Not including:[{!s}]'
-                                        .format(StrUnicodeOut(f)))
+                                        'Not including:[%s]',
+                                        StrUnicodeOut(f))
         rawfiles.sort()
         files.sort()
         if self.xCfg.LOGGING_LEVEL <= logging.DEBUG:
@@ -876,20 +872,17 @@ class Uploadr(object):
         Returns True if a file is within an EXCLUDED_FOLDERS directory/folder
         """
         for excluded_dir in self.xCfg.EXCLUDED_FOLDERS:
-            logging.debug('type(excluded_dir):[{!s}]'
-                          .format(type(excluded_dir)))
-            logging.debug('is excluded_dir unicode?[{!s}]'
-                          .format(isThisStringUnicode(excluded_dir)))
-            logging.debug('type(filename):[{!s}]'
-                          .format(type(filename)))
-            logging.debug('is filename unicode?[{!s}]'
-                          .format(isThisStringUnicode(filename)))
-            logging.debug('is os.path.dirname(filename) unicode?[{!s}]'
-                          .format(isThisStringUnicode(
-                              os.path.dirname(filename))))
-            logging.debug('excluded_dir:[{!s}] filename:[{!s}]'
-                          .format(StrUnicodeOut(excluded_dir),
-                                  StrUnicodeOut(filename)))
+            logging.debug('type(excluded_dir):[%s]', type(excluded_dir))
+            logging.debug('is excluded_dir unicode?[%s]',
+                          isThisStringUnicode(excluded_dir))
+            logging.debug('type(filename):[%s]', type(filename))
+            logging.debug('is filename unicode?[{%s]',
+                          isThisStringUnicode(filename))
+            logging.debug('is os.path.dirname(filename) unicode?[%s]',
+                          isThisStringUnicode(os.path.dirname(filename)))
+            logging.debug('excluded_dir:[%s] filename:[%s]',
+                          StrUnicodeOut(excluded_dir),
+                          StrUnicodeOut(filename))
             # Now everything should be in Unicode
             if excluded_dir in os.path.dirname(filename):
                 logging.debug('Returning isFileExcluded:[True]')
@@ -911,9 +904,9 @@ class Uploadr(object):
         # Update Date/Time on Flickr for Video files
         # Flickr doesn't read it from the video file itself.
         filetype = mimetypes.guess_type(xfile)
-        logging.info('filetype is:[{!s}]'.format('None'
-                                                 if filetype is None
-                                                 else filetype[0]))
+        logging.info('filetype is:[%s]', 'None'
+                                          if filetype is None
+                                          else filetype[0])
 
         # update video date/time TAKEN.
         # Flickr doesn't read it from the video file itself.
@@ -921,12 +914,12 @@ class Uploadr(object):
             res_set_date = None
             video_date = nutime.strftime('%Y-%m-%d %H:%M:%S',
                                          nutime.localtime(xlast_modified))
-            logging.info('video_date:[{!s}]'.format(video_date))
+            logging.info('video_date:[%s]', video_date)
 
             try:
                 res_set_date = self.photos_set_dates(xfile_id,
                                                      str(video_date))
-                logging.debug('Output for {!s}:'.format('res_set_date'))
+                logging.debug('Output for res_set_date:')
                 logging.debug(xml.etree.ElementTree.tostring(
                     res_set_date,
                     encoding='utf-8',
@@ -969,8 +962,8 @@ class Uploadr(object):
         """
 
         for i, filepic in enumerate(filelist):
-            logging.warning('===Current element of Chunk: [{!s}][{!s}]'
-                            .format(i, filepic))
+            logging.warning('===Current element of Chunk: [%s][%s]',
+                            i, filepic)
             self.uploadFile(lock, filepic)
 
             # no need to check for
@@ -1027,10 +1020,10 @@ class Uploadr(object):
             # Database Locked is returned often on this INSERT
             # Will try MAX_SQL_ATTEMPTS...
             for x in range(0, self.xCfg.MAX_SQL_ATTEMPTS):
-                logging.info('BEGIN SQL:[{!s}]...[{!s}/{!s} attempts].'
-                             .format('INSERT INTO files',
-                                     x,
-                                     self.xCfg.MAX_SQL_ATTEMPTS))
+                logging.info('BEGIN SQL:[%s]...[%s}/%s attempts].',
+                             'INSERT INTO files',
+                             x,
+                             self.xCfg.MAX_SQL_ATTEMPTS)
                 DBexception = False
                 try:
                     # Acquire DBlock if in multiprocessing mode
@@ -1075,10 +1068,10 @@ class Uploadr(object):
                                     .format(x, self.xCfg.MAX_SQL_ATTEMPTS),
                                     NicePrint=True)
                     logging.info(
-                        'END SQL:[{!s}]...[{!s}/{!s} attempts].'
-                        .format('INSERT INTO files',
-                                x,
-                                self.xCfg.MAX_SQL_ATTEMPTS))
+                        'END SQL:[%s]...[%s/%s attempts].'
+                        'INSERT INTO files',
+                        x,
+                        self.xCfg.MAX_SQL_ATTEMPTS)
                     # Break the cycle of SQL_ATTEMPTS and continue
                     break
         # ---------------------------------------------------------------------
@@ -1101,12 +1094,12 @@ class Uploadr(object):
         con.text_factory = str
         with con:
             cur = con.cursor()
-            logging.debug('uploadFILE SELECT: {!s}: {!s}'
-                          .format('SELECT rowid,files_id,path,'
-                                  'set_id,md5,tagged,'
-                                  'last_modified FROM '
-                                  'files WHERE path = ?',
-                                  file))
+            logging.debug('uploadFILE SELECT: {%s}: {%s}',
+                          'SELECT rowid, files_id, path, '
+                          'set_id, md5, tagged, '
+                          'last_modified FROM '
+                          'files WHERE path = ?',
+                          file)
 
             try:
                 # Acquire DB lock if running in multiprocessing mode
@@ -1126,7 +1119,7 @@ class Uploadr(object):
                 self.useDBLock(lock, False)
 
             row = cur.fetchone()
-            logging.debug('row {!s}:'.format(row))
+            logging.debug('row: %s', row)
 
             # use file modified timestamp to check for changes
             last_modified = os.stat(file).st_mtime
@@ -1137,21 +1130,21 @@ class Uploadr(object):
                 isLoaded = False
                 isfile_id = None
                 isNoSet = None
-                logging.info('not_is_already_uploaded:[{!s}] '
-                             .format(isLoaded))
+                logging.info('not_is_already_uploaded:[%s]', isLoaded)
             else:
                 file_checksum = self.md5Checksum(file)
                 isLoaded, isCount, isfile_id, isNoSet = \
                     self.is_already_uploaded(file,
                                              file_checksum,
                                              setName)
-                logging.info('is_already_uploaded:[{!s}] '
-                             'count:[{!s}] pic:[{!s}] '
-                             'row is None == [{!s}] '
-                             'isNoSet:[{!s}]'
-                             .format(isLoaded, isCount,
-                                     isfile_id, row is None,
-                                     isNoSet))
+                logging.info('is_already_uploaded:[%s] '
+                             'count:[%s] pic:[%s] '
+                             'row is None == [%s] '
+                             'isNoSet:[%s]',
+                             isLoaded,
+                             isCount, isfile_id,
+                             row is None,
+                             isNoSet)
             # CODING: REUPLOAD deleted files from Flickr...
             # A) File loaded. Not recorded on DB. Update local DB.
             # B) Not loaded. Not recorded on DB. Upload file to FLickr.
@@ -1167,10 +1160,10 @@ class Uploadr(object):
                     file_checksum = self.md5Checksum(file)
 
                 # Insert into DB files
-                logging.warning(' Already loaded:[{!s}]...'
-                                'On Album:[{!s}]... UPDATING LOCAL DATABASE.'
-                                .format(StrUnicodeOut(file),
-                                        StrUnicodeOut(setName)))
+                logging.warning(' Already loaded:[%s]...'
+                                'On Album:[%s]... UPDATING LOCAL DATABASE.',
+                                StrUnicodeOut(file),
+                                StrUnicodeOut(setName))
                 NP.niceprint(' Already loaded:[{!s}]...'
                              'On Album:[{!s}]... UPDATING LOCAL DATABASE.'
                              .format(StrUnicodeOut(file),
@@ -1191,10 +1184,8 @@ class Uploadr(object):
                                  .format(StrUnicodeOut(file),
                                          StrUnicodeOut(setName)))
 
-                logging.warning(' Uploading file:[{!s}]... '
-                                'On Album:[{!s}]...'
-                                .format(StrUnicodeOut(file),
-                                        StrUnicodeOut(setName)))
+                logging.warning(' Uploading file:[%s]... On Album:[%s]...',
+                                StrUnicodeOut(file), StrUnicodeOut(setName))
 
                 if file_checksum is None:
                     file_checksum = self.md5Checksum(file)
@@ -1226,18 +1217,15 @@ class Uploadr(object):
                 # Worked around it by forcing the title to filename
                 if self.xCfg.FLICKR["title"] == "":
                     path_filename, title_filename = os.path.split(file)
-                    logging.info('path:[{!s}] '
-                                 'filename:[{!s}] '
-                                 'ext=[{!s}]'.format(
-                                     path_filename,
-                                     title_filename,
-                                     os.path.splitext(title_filename)[1]))
+                    logging.info('path:[%s] filename:[%s] ext=[%s]',
+                                 path_filename,
+                                 title_filename,
+                                 os.path.splitext(title_filename)[1])
                     title_filename = os.path.splitext(title_filename)[0]
-                    logging.info('title_name:[{!s}]'.format(title_filename))
+                    logging.info('title_name:[%s]', title_filename)
                 else:
                     title_filename = self.xCfg.FLICKR["title"]
-                    logging.info('title from INI file:[{!s}]'
-                                 .format(title_filename))
+                    logging.info('title from INI file:[%s]', title_filename)
 
                 # CODING: Check MAX_UPLOAD_ATTEMPTS. Replace with @retry?
                 uploadResp = None
@@ -1252,8 +1240,8 @@ class Uploadr(object):
                     ZuploadOK = False
                     ZbadFile = False
                     ZuploadError = False
-                    logging.warning('Up/Reuploading:[{!s}/{!s} attempts].'
-                                    .format(x, self.xCfg.MAX_UPLOAD_ATTEMPTS))
+                    logging.warning('Up/Reuploading:[%s/%s attempts].',
+                                    x, self.xCfg.MAX_UPLOAD_ATTEMPTS)
                     if x > 0:
                         NP.niceprint('    Reuploading:[{!s}] '
                                      '[{!s}/{!s} attempts].'
@@ -1286,8 +1274,8 @@ class Uploadr(object):
                             is_friend=str(self.xCfg.FLICKR["is_friend"])
                         )
 
-                        logging.info('uploadResp:[{!s}]'
-                                     .format(self.isGood(uploadResp)))
+                        logging.info('uploadResp:[%s]',
+                                     self.isGood(uploadResp))
                         logging.debug(xml.etree.ElementTree.tostring(
                             uploadResp,
                             encoding='utf-8',
@@ -1297,11 +1285,11 @@ class Uploadr(object):
                             ZuploadOK = True
                             # Save photo_id returned from Flickr upload
                             photo_id = uploadResp.findall('photoid')[0].text
-                            logging.info('  Uploaded file:[{!s}] '
-                                         'Id=[{!s}]. Check for '
-                                         'duplicates/wrong checksum...'
-                                         .format(StrUnicodeOut(file),
-                                                 photo_id))
+                            logging.info('  Uploaded file:[%s] '
+                                         'Id=[%s]. Check for '
+                                         'duplicates/wrong checksum...',
+                                         StrUnicodeOut(file),
+                                         photo_id)
                             if self.ARGS.verbose:
                                 NP.niceprint('  Uploaded file:[{!s}] '
                                              'ID=[{!s}]. Check for '
@@ -1336,11 +1324,12 @@ class Uploadr(object):
                                 file,
                                 file_checksum,
                                 setName)
-                        logging.warning('is_already_uploaded:[{!s}] '
-                                        'Zcount:[{!s}] Zpic:[{!s}] '
-                                        'ZisNoSet:[{!s}]'
-                                        .format(ZisLoaded, ZisCount,
-                                                photo_id, ZisNoSet))
+                        logging.warning('is_already_uploaded:[%s] '
+                                        'Zcount:[%s] Zpic:[%s] '
+                                        'ZisNoSet:[%s]',
+                                        ZisLoaded,
+                                        ZisCount, photo_id,
+                                        ZisNoSet)
 
                         if ZisCount == 0:
                             ZuploadError = True
@@ -1361,8 +1350,8 @@ class Uploadr(object):
                                          .format(StrUnicodeOut(file)))
                             logging.error('More than one file with same '
                                           'checksum/album tag! '
-                                          'Any collisions? File: [{!s}]'
-                                          .format(StrUnicodeOut(file)))
+                                          'Any collisions? File: [%s]',
+                                          StrUnicodeOut(file))
                             break
 
                     except flickrapi.exceptions.FlickrError as ex:
@@ -1396,7 +1385,7 @@ class Uploadr(object):
                                              'Filetype was not recognised'
                                              if (format(ex.code) == '5')
                                              else 'Filesize was too large'))
-                            logging.info('Bad file:[{!s}]'.format(file))
+                            logging.info('Bad file:[%s]', StrUnicodeOut(file))
 
                             try:
                                 self.useDBLock(lock, True)
@@ -1436,11 +1425,12 @@ class Uploadr(object):
                                     file,
                                     file_checksum,
                                     setName)
-                            logging.warning('is_already_uploaded:[{!s}] '
-                                            'Zcount:[{!s}] Zpic:[{!s}] '
-                                            'ZisNoSet:[{!s}]'
-                                            .format(ZisLoaded, ZisCount,
-                                                    photo_id, ZisNoSet))
+                            logging.warning('is_already_uploaded:[%s] '
+                                            'Zcount:[%s] Zpic:[%s] '
+                                            'ZisNoSet:[%s]',
+                                            ZisLoaded,
+                                            ZisCount, photo_id,
+                                            ZisNoSet)                            
 
                             if ZisCount == 0:
                                 ZuploadError = True
@@ -1461,16 +1451,16 @@ class Uploadr(object):
                                              .format(StrUnicodeOut(file)))
                                 logging.error('More than one file with same '
                                               'checksum/album tag! '
-                                              'Any collisions? File: [{!s}]'
-                                              .format(StrUnicodeOut(file)))
+                                              'Any collisions? File: [%s]',
+                                              StrUnicodeOut(file))
                                 break
 
                     finally:
                         con.commit()
 
                 logging.debug('After CYCLE '
-                              'Up/Reuploading:[{!s}/{!s} attempts].'
-                              .format(x, self.xCfg.MAX_UPLOAD_ATTEMPTS))
+                              'Up/Reuploading:[%s/%s attempts].',
+                              x, self.xCfg.MAX_UPLOAD_ATTEMPTS)
 
                 # Max attempts reached
                 if (not ZuploadOK) and (
@@ -1478,15 +1468,15 @@ class Uploadr(object):
                     NP.niceprint('Reached max attempts to upload. Skipping '
                                  'file: [{!s}]'.format(StrUnicodeOut(file)))
                     logging.error('Reached max attempts to upload. Skipping '
-                                  'file: [{!s}]'.format(StrUnicodeOut(file)))
+                                  'file: [%s]', StrUnicodeOut(file))
                 # Error
                 elif (not ZuploadOK) and ZuploadError:
                     NP.niceprint('Error occurred while uploading. Skipping '
                                  'file:[{!s}]'
                                  .format(StrUnicodeOut(file)))
                     logging.error('Error occurred while uploading. Skipping '
-                                  'file:[{!s}]'
-                                  .format(StrUnicodeOut(file)))
+                                  'file:[%s]',
+                                  StrUnicodeOut(file))
                 # Bad file
                 elif (not ZuploadOK) and ZbadFile:
                     NP.niceprint('       Bad file:[{!s}]'
@@ -1517,12 +1507,12 @@ class Uploadr(object):
                 # and is also on flickr but its set on flickr is not defined.
                 # So we need to reset the local datbase set_id so that it will
                 # be later assigned once we run createSets()
-                logging.debug('str(row[1]) == str(isfile_id:[{!s}])'
-                              'row[1]:[{!s}]=>type:[{!s}] '
-                              'isfile_id:[{!s}]=>type:[{!s}]'
-                              .format(str(row[1]) == str(isfile_id),
-                                      row[1], type(row[1]),
-                                      isfile_id, type(isfile_id)))
+                logging.debug('str(row[1]) == str(isfile_id:[%s])'
+                              'row[1]:[%s]=>type:[%s] '
+                              'isfile_id:[%s]=>type:[%s]',
+                              str(row[1]) == str(isfile_id),
+                              row[1], type(row[1]),
+                              isfile_id, type(isfile_id))
                 # C) File loaded. Recorded on DB. Manage changes & Flickr set.
                 if (isLoaded and
                         isNoSet and
@@ -1530,8 +1520,7 @@ class Uploadr(object):
                         (str(row[1]) == str(isfile_id))):
 
                     logging.info('Will UPDATE files SET set_id = null '
-                                 'for pic:[{!s}] '
-                                 .format(row[1]))
+                                 'for pic:[%s] ', row[1])
                     try:
                         self.useDBLock(lock, True)
                         cur.execute('UPDATE files SET set_id = null '
@@ -1548,8 +1537,8 @@ class Uploadr(object):
                         self.useDBLock(lock, False)
 
                     logging.info('Did UPDATE files SET set_id = null '
-                                 'for pic:[{!s}] '
-                                 .format(row[1]))
+                                 'for pic:[%s]',
+                                 row[1])
 
                 # we have a file from disk which is found on the database also
                 # row[6] is last_modified date/timestamp
@@ -1562,11 +1551,11 @@ class Uploadr(object):
                 #   then: if md5 has changed then perform replacePhoto
                 #   operation on Flickr
                 try:
-                    logging.warning('CHANGES row[6]=[{!s}-({!s})]'
-                                    .format(nutime.strftime(
+                    logging.warning('CHANGES row[6]=[%s-(%s)]',
+                                    nutime.strftime(
                                         UPLDRConstants.TimeFormat,
                                         nutime.localtime(row[6])),
-                                            row[6]))
+                                    row[6])
                     if row[6] is None:
                         # Update db the last_modified time of file
 
@@ -1578,8 +1567,8 @@ class Uploadr(object):
                         con.commit()
                         self.useDBLock(lock, False)
 
-                    logging.warning('CHANGES row[6]!=last_modified: [{!s}]'
-                                    .format((row[6] != last_modified)))
+                    logging.warning('CHANGES row[6]!=last_modified: [%s]',
+                                    row[6] != last_modified)
                     if row[6] != last_modified:
                         # Update db both the new file/md5 and the
                         # last_modified time of file by by calling replacePhoto
@@ -1664,8 +1653,7 @@ class Uploadr(object):
             photo = open(file.encode('utf-8'), 'rb')\
                 if isThisStringUnicode(file)\
                 else open(file, 'rb')
-            logging.debug('photo:[{!s}] type(photo):[{!s}]'
-                          .format(photo, type(photo)))
+            logging.debug('photo:[%s] type(photo):[%s]', photo, type(photo))
 
             for x in range(0, self.xCfg.MAX_UPLOAD_ATTEMPTS):
                 res_add_tag = None
@@ -1689,7 +1677,7 @@ class Uploadr(object):
                         photo_id=file_id
                     )
 
-                    logging.debug('replaceResp: ')
+                    logging.debug('Output for replaceResp:')
                     logging.debug(xml.etree.ElementTree.tostring(
                         replaceResp,
                         encoding='utf-8',
@@ -1989,7 +1977,7 @@ class Uploadr(object):
             deleteResp = None
             deleteResp = R_photos_delete(dict(photo_id=str(file[0])))
 
-            logging.debug('Output for {!s}:'.format('deleteResp'))
+            logging.debug('Output for deleteResp:')
             logging.debug(xml.etree.ElementTree.tostring(
                 deleteResp,
                 encoding='utf-8',
@@ -2052,8 +2040,7 @@ class Uploadr(object):
         Also updates photo DB entry with its set_id
         """
 
-        logging.warning('  Add set to DB:[{!s}]'
-                        .format(StrUnicodeOut(setName)))
+        logging.warning('  Add set to DB:[%s]', StrUnicodeOut(setName))
         if self.ARGS.verbose:
             NP.niceprint('  Add set to DB:[{!s}]'
                          .format(StrUnicodeOut(setName)))
@@ -2145,10 +2132,10 @@ class Uploadr(object):
                                           .format(afile))
 
         logging.debug('getSetNameFromFile in: '
-                      'afile:[{!s}] aFILES_DIR=[{!s}] aFULL_SET_NAME:[{!s}]'
-                      .format(StrUnicodeOut(afile),
-                              aFILES_DIR,
-                              aFULL_SET_NAME))
+                      'afile:[%s] aFILES_DIR=[%s] aFULL_SET_NAME:[%s]'
+                      StrUnicodeOut(afile),
+                      aFILES_DIR,
+                      aFULL_SET_NAME)
         if aFULL_SET_NAME:
             asetName = os.path.relpath(os.path.dirname(afile), aFILES_DIR)
         else:
@@ -2902,7 +2889,7 @@ class Uploadr(object):
         try:
             sets = self.nuflickr.photosets_getList()
 
-            logging.debug('Output for {!s}'.format('photosets_getList:'))
+            logging.debug('Output for photosets_getList:')
             logging.debug(xml.etree.ElementTree.tostring(
                 sets,
                 encoding='utf-8',
@@ -2939,7 +2926,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 cur = con.cursor()
 
                 for row in sets.find('photosets').findall('photoset'):
-                    logging.debug('Output for {!s}:'.format('row'))
+                    logging.debug('Output for row:')
                     logging.debug(xml.etree.ElementTree.tostring(
                         row,
                         encoding='utf-8',
@@ -2993,10 +2980,10 @@ set0 = sets.find('photosets').findall('photoset')[0]
                         cur.execute("SELECT set_id FROM sets "
                                     "WHERE set_id = '" + setId + "'")
                         foundSets = cur.fetchone()
-                        logging.info('Output for foundSets is [{!s}]'
-                                     .format('None'
-                                             if foundSets is None
-                                             else foundSets))
+                        logging.info('Output for foundSets is [%s]',
+                                     'None'
+                                     if foundSets is None
+                                     else foundSets)
                     except lite.Error as e:
                         reportError(Caught=True,
                                     CaughtPrefix='+++ DB',
@@ -3652,7 +3639,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                      date_taken='{!s}'.format(datetxt),
                      date_taken_granularity=0))
 
-            logging.debug('Output for {!s}:'.format('respDate'))
+            logging.debug('Output for respDate:')
             logging.debug(xml.etree.ElementTree.tostring(
                 respDate,
                 encoding='utf-8',

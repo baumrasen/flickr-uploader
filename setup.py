@@ -72,7 +72,7 @@ class UploadCommand(Command):
     @staticmethod
     def bstatus(astr):
         """Prints things in bold."""
-        print('\033[1m{0}\033[0m'.format(str))
+        print('\033[1m{0}\033[0m'.format(astr))
 
     @staticmethod
     def status(astr):
@@ -177,22 +177,22 @@ class InstallCfg(Command):
                 for cfgfile in atuple[1]:
                     src.append(resource_filename(Requirement.parse(NAME),
                                                  cfgfile))
-            for f in src:
+            for f_to_copy in src:
                 self.status("Copying [%s] into folder [%s]"
-                            % (str(f), str(dst)))
+                            % (str(f_to_copy), str(dst)))
                 if sys.version_info < (3, ):
-                    copy(f, dst)
+                    copy(f_to_copy, dst)
                 else:
-                    copy(f, dst, follow_symlinks=True)
+                    copy(f_to_copy, dst, follow_symlinks=True)
 
         if self.folder:
             assert os.path.exists(self.folder), (
                 'flickr-uploadr config folder {!s} does not exist.'
                 .format(str(self.folder)))
-            for f in src:
-                assert os.path.exists(f), (
+            for f_to_check in src:
+                assert os.path.exists(f_to_check), (
                     'flickr-uploadr config file {!s} does not exist.'
-                    .format(str(f)))
+                    .format(str(f_to_check)))
             self.bstatus('Installed config files into folder [%s]'
                          % str(self.folder))
 

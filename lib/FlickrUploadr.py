@@ -96,11 +96,11 @@ class FileWithCallback(object):
     # -------------------------------------------------------------------------
     # class FileWithCallback __init__
     #
-    def __init__(self, filename, callback, verbose_progress):
+    def __init__(self, filename, fn_callback, verbose_progress):
         """ class FileWithCallback __init__
         """
         self.file = open(filename, 'rb')
-        self.callback = callback
+        self.callback = fn_callback
         self.verbose_progress = verbose_progress
         # the following attributes and methods are required
         self.len = os.path.getsize(filename)

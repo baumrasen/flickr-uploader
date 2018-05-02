@@ -115,7 +115,8 @@ class InstallCfg(Command):
     DATA_FILES   = list of configuration options files (.ini, .cron, etc)
     """
 
-    # Show files to be coopied =under 'python setup.py installcfg --help'
+    folder = None
+    # Show files to be coopied under 'python setup.py installcfg --help'
     str_user_options = ''
     dcnt = 0
     for atuple in DATA_FILES:

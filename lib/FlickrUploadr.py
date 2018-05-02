@@ -1067,7 +1067,7 @@ class Uploadr(object):
                                     .format(x, self.xCfg.MAX_SQL_ATTEMPTS),
                                     NicePrint=True)
                     logging.info(
-                        'END SQL:[%s]...[%s/%s attempts].'
+                        'END SQL:[%s]...[%s/%s attempts].',
                         'INSERT INTO files',
                         x,
                         self.xCfg.MAX_SQL_ATTEMPTS)
@@ -2169,14 +2169,14 @@ class Uploadr(object):
                 setName = self.getSetNameFromFile(filepic[1],
                                                   self.xCfg.FILES_DIR,
                                                   self.xCfg.FULL_SET_NAME)
-                set = None
+                aset = None
                 try:
                     # Acquire DBlock if in multiprocessing mode
                     self.useDBLock(lockDB, True)
                     acur.execute('SELECT set_id, name '
                                  'FROM sets WHERE name = ?',
                                  (setName,))
-                    set = acur.fetchone()
+                    aset = acur.fetchone()
                 except lite.Error as e:
                     reportError(Caught=True,
                                 CaughtPrefix='+++ DB',
@@ -2189,8 +2189,8 @@ class Uploadr(object):
                     # Release DBlock if in multiprocessing mode
                     self.useDBLock(lockDB, False)
 
-                if set is not None:
-                    setId = set[0]
+                if aset is not None:
+                    setId = aset[0]
 
                     NP.niceprint('Add file to set:[{!s}] '
                                  'set:[{!s}] setId=[{!s}]'
@@ -2274,10 +2274,10 @@ class Uploadr(object):
                             exceptSysInfo=True)
                 raise
 
-            for set in setsToCreate:
-                # set[0] = setName
+            for aset in setsToCreate:
+                # aset[0] = setName
                 # Find Primary photo
-                setName = StrUnicodeOut(set[0])
+                setName = StrUnicodeOut(aset[0])
                 cur.execute('SELECT MIN(files_id), path '
                             'FROM files '
                             'WHERE set_id is NULL '
@@ -2339,9 +2339,9 @@ class Uploadr(object):
                     cur.execute('SELECT set_id, name '
                                 'FROM sets WHERE name = ?',
                                 (setName,))
-                    set = cur.fetchone()
-                    if set is not None:
-                        setId = set[0]
+                    aset = cur.fetchone()
+                    if aset is not None:
+                        setId = aset[0]
 
                         NP.niceprint('Add file to set:[{!s}] '
                                      'set:[{!s}] setId=[{!s}]'

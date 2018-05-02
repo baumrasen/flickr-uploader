@@ -2309,7 +2309,7 @@ class Uploadr(object):
                 logging.debug('Running [%s] processes pool.',
                               self.ARGS.processes)
                 logging.debug('__name__:[%s] to prevent recursive calling)!',
-                              __name__)                
+                              __name__)
                 cur = con.cursor()
 
                 # To prevent recursive calling, check if __name__ == '__main__'
@@ -3825,7 +3825,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                 logging.debug('Running [%s] processes pool.',
                               self.ARGS.processes)
                 logging.debug('__name__:[%s] to prevent recursive calling)!',
-                              __name__)                
+                              __name__)
                 cur = con.cursor()
 
                 # To prevent recursive calling, check if __name__ == '__main__'

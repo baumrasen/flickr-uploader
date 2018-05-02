@@ -1,9 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Note: To use the 'upload' functionality of this file, you must:
-#   $ pip install twine
+"""
+    by oPromessa, 2017, 2018
+    Published on https://github.com/oPromessa/flickr-uploader/
 
+    setup.py utility for flickr-uploader
+
+    Note: To use the 'upload' functionality of this file, you must:
+    $ pip install twine
+"""
+
+# =============================================================================
+# Import section
 import io
 import os
 import sys
@@ -18,7 +27,7 @@ from pkg_resources import Requirement, resource_filename
 NAME = 'flickr-uploader'
 DESCRIPTION = 'Upload a directory of media to Flickr to use as a backup to '
 'your local storage. flickr-uploader designed primarly for Synology Devices.'
-URL = 'https://github.com/oPromessa/flickr-uploader/',
+URL = 'https://github.com/oPromessa/flickr-uploader/'
 
 EMAIL = 'oPromessa@github.com'
 AUTHOR = 'oPromessa'
@@ -61,14 +70,14 @@ class UploadCommand(Command):
     user_options = []
 
     @staticmethod
-    def bstatus(s):
+    def bstatus(astr):
         """Prints things in bold."""
-        print('\033[1m{0}\033[0m'.format(s))
+        print('\033[1m{0}\033[0m'.format(str))
 
     @staticmethod
-    def status(s):
+    def status(astr):
         """Prints things."""
-        print('{0}'.format(s))
+        print('{0}'.format(astr))
 
     def initialize_options(self):
         pass
@@ -109,13 +118,13 @@ class InstallCfg(Command):
     # Show files to be coopied =under 'python setup.py installcfg --help'
     str_user_options = ''
     dcnt = 0
-    for tuple in DATA_FILES:
+    for atuple in DATA_FILES:
         dcnt += 1
         if dcnt > 1:
             str_user_options = str_user_options + ', '
-        cfgdir = tuple[0]
+        cfgdir = atuple[0]
         cnt = 0
-        for cfgfile in tuple[1]:
+        for cfgfile in atuple[1]:
             cnt += 1
             if cnt > 1:
                 str_user_options = str_user_options + ', '
@@ -125,19 +134,19 @@ class InstallCfg(Command):
     description = 'Custom install flickr-uploader configuration files'
     user_options = [
         ('folder=',
-            None,
-            'Folder location for ' + str_user_options + ' files.'),
+         None,
+         'Folder location for ' + str_user_options + ' files.'),
     ]
 
     @staticmethod
     def bstatus(s):
         """Prints things in bold."""
-        print('\033[1m{0}\033[0m'.format(s))
+        print('\033[1m{0}\033[0m'.format(astr))
 
     @staticmethod
     def status(s):
         """Prints things."""
-        print('{0}'.format(s))
+        print('{0}'.format(astr))
 
     def initialize_options(self):
         self.folder = os.path.join(sys.prefix, 'etc')
@@ -164,23 +173,25 @@ class InstallCfg(Command):
             # Save file list to be copied within the run method.
             # Note: Does not account for files wihtin folders of the package!
             src = []
-            for tuple in DATA_FILES:
-                for cfgfile in tuple[1]:
+            for atuple in DATA_FILES:
+                for cfgfile in atuple[1]:
                     src.append(resource_filename(Requirement.parse(NAME),
                                                  cfgfile))
             for f in src:
                 self.status("Copying [%s] into folder [%s]"
                             % (str(f), str(dst)))
-                copy(f, dst) if sys.version_info < (3, ) \
-                    else copy(f, dst, follow_symlinks=True)
+                if sys.version_info < (3, ):
+                    copy(f, dst) 
+                else:
+                    copy(f, dst, follow_symlinks=True)
 
         if self.folder:
             assert os.path.exists(self.folder), (
-                'flickr-uploadr config folder %s does not exist.'
+                'flickr-uploadr config folder {!s} does not exist.'
                 .format(str(self.folder)))
             for f in src:
                 assert os.path.exists(f), (
-                    'flickr-uploadr config file %s does not exist.'
+                    'flickr-uploadr config file {!s} does not exist.'
                     .format(str(f)))
             self.bstatus('Installed config files into folder [%s]'
                          % str(self.folder))

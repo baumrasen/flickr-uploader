@@ -485,7 +485,7 @@ if __name__ == "__main__":
         # sys.argv[0]
         UPLDRConstants.base_dir = os.path.dirname(sys.argv[0])
         UPLDRConstants.ini_file = os.path.join(UPLDRConstants.base_dir,
-                                              "uploadr.ini")
+                                               'uploadr.ini')
 
         if not checkBaseDir_INIfile(UPLDRConstants.base_dir,
                                     UPLDRConstants.ini_file):

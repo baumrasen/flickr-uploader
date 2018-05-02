@@ -905,8 +905,8 @@ class Uploadr(object):
         # Flickr doesn't read it from the video file itself.
         filetype = mimetypes.guess_type(xfile)
         logging.info('filetype is:[%s]', 'None'
-                                          if filetype is None
-                                          else filetype[0])
+                                         if filetype is None
+                                         else filetype[0])
 
         # update video date/time TAKEN.
         # Flickr doesn't read it from the video file itself.
@@ -1430,7 +1430,7 @@ class Uploadr(object):
                                             'ZisNoSet:[%s]',
                                             ZisLoaded,
                                             ZisCount, photo_id,
-                                            ZisNoSet)                            
+                                            ZisNoSet)
 
                             if ZisCount == 0:
                                 ZuploadError = True
@@ -2041,7 +2041,7 @@ class Uploadr(object):
         """
 
         logging.warning('  Add set to DB:[%s]', StrUnicodeOut(setName))
-        if self.ARGS.verbose:
+       if self.ARGS.verbose:
             NP.niceprint('  Add set to DB:[{!s}]'
                          .format(StrUnicodeOut(setName)))
 
@@ -2132,7 +2132,7 @@ class Uploadr(object):
                                           .format(afile))
 
         logging.debug('getSetNameFromFile in: '
-                      'afile:[%s] aFILES_DIR=[%s] aFULL_SET_NAME:[%s]'
+                      'afile:[%s] aFILES_DIR=[%s] aFULL_SET_NAME:[%s]',
                       StrUnicodeOut(afile),
                       aFILES_DIR,
                       aFULL_SET_NAME)

@@ -698,7 +698,7 @@ class Uploadr(object):
                 reportError(Caught=True,
                             CaughtPrefix='+++',
                             CaughtCode='999',
-                            CaughtMsg='Error calling exiftool:[!{s}]'
+                            CaughtMsg='Error calling exiftool:[{!s}]'
                             .format(ConvertOrCopyTags),
                             NicePrint=True,
                             exceptSysInfo=True)
@@ -906,8 +906,8 @@ class Uploadr(object):
         # Flickr doesn't read it from the video file itself.
         filetype = mimetypes.guess_type(xfile)
         logging.info('filetype is:[%s]', 'None'
-                                         if filetype is None
-                                         else filetype[0])
+                     if filetype is None
+                     else filetype[0])
 
         # update video date/time TAKEN.
         # Flickr doesn't read it from the video file itself.
@@ -2137,7 +2137,7 @@ class Uploadr(object):
         if aFULL_SET_NAME:
             asetName = os.path.relpath(os.path.dirname(afile), aFILES_DIR)
         else:
-            head, asetName = os.path.split(os.path.dirname(afile))
+            _, asetName = os.path.split(os.path.dirname(afile))
         logging.debug('getSetNameFromFile out: '
                       'afile:[%s] aFILES_DIR=[%s] aFULL_SET_NAME:[%s]'
                       ' asetName:[%s]',

@@ -68,7 +68,7 @@ class TestMethods(unittest.TestCase):
                 if i < 127:
                     self.assertFalse(np.isThisStringUnicode(chr(i)))
                     self.assertTrue(np.isThisStringUnicode(
-                                      unicode(chr(i).decode('utf-8'))))  # noqa
+                        unicode(chr(i).decode('utf-8'))))  # noqa
             else:
                 self.assertFalse(np.isThisStringUnicode(chr(i)))
 

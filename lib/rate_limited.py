@@ -19,7 +19,6 @@ from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 # -----------------------------------------------------------------------------
 # Import section
 #
-import sys
 import logging
 import multiprocessing
 import time
@@ -32,9 +31,9 @@ import lib.niceprint as niceprint
 # =============================================================================
 # Functions aliases
 #
-#   NP.niceprint = from niceprint module
+#   NPR.niceprint = from niceprint module
 # -----------------------------------------------------------------------------
-NP = niceprint.niceprint()
+NPR = niceprint.niceprint()
 
 
 # -----------------------------------------------------------------------------
@@ -135,16 +134,16 @@ def rate_limited(max_per_second):
     """
 
     min_interval = 1.0 / max_per_second
-    LT = LastTime('rate_limited')
+    last_time = LastTime('rate_limited')
 
     def decorate(func):
         """ decorate
         """
-        LT.acquire()
-        if LT.get_last_time_called() == 0:
-            LT.set_last_time_called()
-        # LT.debug('DECORATE')
-        LT.release()
+        last_time.acquire()
+        if last_time.get_last_time_called() == 0:
+            last_time.set_last_time_called()
+        # last_time.debug('DECORATE')
+        last_time.release()
 
         @wraps(func)
         def rate_limited_function(*args, **kwargs):
@@ -159,11 +158,11 @@ def rate_limited(max_per_second):
                          func.__name__, max_per_second)
 
             try:
-                LT.acquire()
-                LT.add_cnt()
+                last_time.acquire()
+                last_time.add_cnt()
                 xfrom = time.time()
 
-                elapsed = xfrom - LT.get_last_time_called()
+                elapsed = xfrom - last_time.get_last_time_called()
                 left_to_wait = min_interval - elapsed
                 logging.debug('___Rate f():[%s] '
                               'cnt:[%s] '
@@ -173,11 +172,11 @@ def rate_limited(max_per_second):
                               'min:%s '
                               'to_wait:%6.2f',
                               func.__name__,
-                              LT.get_cnt(),
+                              last_time.get_cnt(),
                               time.strftime(
                                   '%T',
                                   time.localtime(
-                                      LT.get_last_time_called())),
+                                      last_time.get_last_time_called())),
                               time.strftime('%T',
                                             time.localtime(xfrom)),
                               elapsed,
@@ -188,23 +187,23 @@ def rate_limited(max_per_second):
 
                 ret = func(*args, **kwargs)
 
-                LT.debug('OVER')
-                LT.set_last_time_called()
-                LT.debug('NEXT')
+                last_time.debug('OVER')
+                last_time.set_last_time_called()
+                last_time.debug('NEXT')
 
             except Exception as ex:
-                NP.reportError(Caught=True,
-                               CaughtPrefix='+++',
-                               CaughtCode='000',
-                               CaughtMsg='Exception on rate_limited_function',
-                               exceptUse=True,
-                               # exceptCode=ex.code,
-                               exceptMsg=ex,
-                               NicePrint=False,
-                               exceptSysInfo=True)
+                NPR.reportError(Caught=True,
+                                CaughtPrefix='+++',
+                                CaughtCode='000',
+                                CaughtMsg='Exception on rate_limited_function',
+                                exceptUse=True,
+                                # exceptCode=ex.code,
+                                exceptMsg=ex,
+                                NicePrint=False,
+                                exceptSysInfo=True)
                 raise
             finally:
-                LT.release()
+                last_time.release()
             return ret
 
         return rate_limited_function
@@ -369,36 +368,44 @@ if __name__ == "__main__":
             print('\t\t[prc:{!s}] [{!s}]<-- After rate_limited-----[{!s}]'
                   .format(prc, i, time.strftime('%T')))
 
-    task_pool = []
+    def launch_multiprocessing(fn_tolaunch, n_prc):
+        """ launch_multiprocessing
 
-    for j in range(1, 4):
-        Task = multiprocessing.Process(target=fmulti, args=(5, j))
-        task_pool.append(Task)
-        Task.start()
+            Test Launches a function in multiprocessing mode
 
-    for j in task_pool:
-        print('{!s}.is_alive = {!s}'.format(j.name, j.is_alive()))
+            fn_launch= function to launch accepting two args: n_cycles, prcid)
+            n_prc     = number of processes to launch
+        """
 
-    while True:
-        if not any(multiprocessing.active_children()):
-            print('===No active children Processes.')
-            break
-        for p in multiprocessing.active_children():
-            print('==={!s}.is_alive = {!s}'.format(p.name, p.is_alive()))
-            uploadTaskActive = p
-        print('===Will wait for 60 on {!s}.is_alive = {!s}'
-              .format(uploadTaskActive.name,
-                      uploadTaskActive.is_alive()))
-        uploadTaskActive.join(timeout=60)
-        print('===Waited for 60s on {!s}.is_alive = {!s}'
-              .format(uploadTaskActive.name,
-                      uploadTaskActive.is_alive()))
+        task_pool = []
+        for prcid in range(1, n_prc):
+            task = multiprocessing.Process(target=fn_tolaunch, args=(5, prcid))
+            task_pool.append(task)
+            task.start()
 
-    # Wait for join all jobs/tasks in the Process Pool
-    # All should be done by now!
-    for j in task_pool:
-        j.join()
-        print('==={!s} (is alive: {!s}).exitcode = {!s}'
-              .format(j.name, j.is_alive(), j.exitcode))
+        for prc in task_pool:
+            print('{!s}.is_alive = {!s}'.format(prc.name, prc.is_alive()))
 
-    sys.exit(0)
+        while True:
+            if not any(multiprocessing.active_children()):
+                print('===No active children Processes.')
+                break
+            for prc in multiprocessing.active_children():
+                print('==={!s}.is_alive = {!s}'
+                      .format(prc.name, prc.is_alive()))
+                active_task = prc
+            print('===Will wait for 60 on {!s}.is_alive = {!s}'
+                  .format(active_task.name, active_task.is_alive()))
+            active_task.join(timeout=60)
+            print('===Waited for 60s on {!s}.is_alive = {!s}'
+                  .format(active_task.name, active_task.is_alive()))
+
+        # Wait for join all jobs/tasks in the Process Pool
+        # All should be done by now!
+        for prc in task_pool:
+            prc.join()
+            print('==={!s} (is alive: {!s}).exitcode = {!s}'
+                  .format(prc.name, prc.is_alive(), prc.exitcode))
+
+    # launch 4 processes for function fmulti
+    launch_multiprocessing(fmulti, 4)

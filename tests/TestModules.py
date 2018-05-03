@@ -16,6 +16,10 @@ import lib.UPLDRConstants as UPLDRConstantsClass
 
 
 class TestNicePrintMethods(unittest.TestCase):
+    """ TestNicePrintMethods
+
+        Unit test class for module niceprint
+    """
 
     def test_niceprint(self):
         """ test_niceprint
@@ -27,18 +31,35 @@ class TestNicePrintMethods(unittest.TestCase):
         # with captured_stdout() as astr:
         #     print "hello"
         # assert astr.getvalue() == "hello\n", 'not ok'
-        NP = niceprint.niceprint()
+        npr = niceprint.niceprint()
 
         with test.support.captured_stdout() as astr:
-            NP.niceprint('hello')
+            npr.niceprint('hello')
 
         print(astr.getvalue())
         print('type:{}'.format(type(astr)))
         npre = '\[[0-9. :]+\].+hello$'
         self.assertRegexpMatches(astr.getvalue(), npre)
 
+    def test_unicode(self):
+        """ test_unicode
+        """
+        npr = niceprint.niceprint()
+        for i in range(1, 500):
+            if sys.version_info < (3, ):
+                if i < 127:
+                    self.assertFalse(npr.isThisStringUnicode(chr(i)))
+                    self.assertTrue(npr.isThisStringUnicode(
+                        unicode(chr(i).decode('utf-8'))))  # noqa
+            else:
+                self.assertFalse(npr.isThisStringUnicode(chr(i)))
+
 
 class TestMethods(unittest.TestCase):
+    """ TestMethods
+
+        Unit test class for generic tests
+    """
 
     def test_upper(self):
         """ test_upper
@@ -86,17 +107,6 @@ class TestMethods(unittest.TestCase):
                     for s_secs in range(60):
                         self.assertTrue(1 <=
                                         j+h_hour*100+m_min*10+s_secs <= 3415)
-
-    def test_unicode(self):
-        NP = niceprint.niceprint()
-        for i in range(1, 500):
-            if sys.version_info < (3, ):
-                if i < 127:
-                    self.assertFalse(NP.isThisStringUnicode(chr(i)))
-                    self.assertTrue(NP.isThisStringUnicode(
-                        unicode(chr(i).decode('utf-8'))))  # noqa
-            else:
-                self.assertFalse(NP.isThisStringUnicode(chr(i)))
 
 
 class TestUPLDRConstantsMethods(unittest.TestCase):

@@ -137,7 +137,7 @@ script:
 # flake8
   - flake8
 # unittests
-  - python tests/test_Modules.py
+  - python tests/TestModules.py
 
 # DELETE RUN: DeleteAllFromFlickr ==1 -----------------------------------------
 # Comaptiblw with Python 2.7 only!

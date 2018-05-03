@@ -42,7 +42,7 @@ class TestMethods(unittest.TestCase):
 
     def test_upper(self):
         """ test_upper
-        
+
             Simple unit test example for reference: uppercase a string
         """
 
@@ -50,17 +50,17 @@ class TestMethods(unittest.TestCase):
 
     def test_isupper(self):
         """ test_isupper
-        
+
             Simple unit test example for reference: is string uppercase
-        """        
+        """
         self.assertTrue('FOO'.isupper())
         self.assertFalse('Foo'.isupper())
 
     def test_split(self):
         """ test_split
-        
+
             Simple unit test example for reference: split a string
-        """        
+        """
         astr = 'hello world'
         self.assertEqual(astr.split(), ['hello', 'world'])
         # check that astr.split fails when the separator is not a string
@@ -69,13 +69,13 @@ class TestMethods(unittest.TestCase):
 
     def test_run(self):
         """ test_run
-        
+
             Unit tests for UPLDRConstantsClass.Run formula
-            
-        """        
+
+        """
         print(eval(time.strftime('int("%j")+int("%H")*100'
                                  '+int("%M")*10+int("%S")')))
-        
+
         self.assertTrue(
             1 <= eval(
                 time.strftime('int("%j")+int("%H")*100'
@@ -108,7 +108,7 @@ class TestUPLDRConstantsMethods(unittest.TestCase):
         UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 
         for j in range(1, 20):
-            UPLDRConstants.media_count= j
+            UPLDRConstants.media_count = j
             self.assertEqual(UPLDRConstants.media_count, j)
 
 

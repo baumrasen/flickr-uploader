@@ -85,7 +85,6 @@ class UPLDRConstants:
 if __name__ == "__main__":
 
     import logging
-    import sys
 
     logging.basicConfig(level=logging.DEBUG,
                         format='[%(asctime)s]:[%(processName)-11s]' +

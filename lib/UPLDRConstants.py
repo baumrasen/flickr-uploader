@@ -15,7 +15,7 @@ from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 # Import section
 #
 import time
-from . import __version__
+import lib.__version__ as __version__
 
 
 # -----------------------------------------------------------------------------

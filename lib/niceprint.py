@@ -18,7 +18,7 @@ import sys
 import os
 import logging
 import time
-from . import UPLDRConstants as UPLDRConstantsClass
+import lib.UPLDRConstants as UPLDRConstantsClass
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 
 

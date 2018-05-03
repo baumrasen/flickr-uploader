@@ -27,7 +27,7 @@ import random
 import sqlite3 as lite
 from functools import wraps
 import flickrapi
-from . import niceprint
+import lib.niceprint as niceprint
 
 # =============================================================================
 # Functions aliases

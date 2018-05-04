@@ -464,11 +464,11 @@ if __name__ == "__main__":
                      strunicodeout(UPLDRConstants.ini_file))
         if not checkBaseDir_INIfile(UPLDRConstants.base_dir,
                                     UPLDRConstants.ini_file):
-            niceerrror(caught=True,
-                       caughtprefix='+++ ',
-                       caughtcode='601',
-                       caughtmsg='Invalid -C parameter INI file. Exiting...',
-                       useniceprint=True)
+            niceerror(caught=True,
+                      caughtprefix='+++ ',
+                      caughtcode='601',
+                      caughtmsg='Invalid -C parameter INI file. Exiting...',
+                      useniceprint=True)
             sys.exit(2)
     else:
         # sys.argv[0]
@@ -478,11 +478,11 @@ if __name__ == "__main__":
 
         if not checkBaseDir_INIfile(UPLDRConstants.base_dir,
                                     UPLDRConstants.ini_file):
-            reportError(caught=True,
-                        caughtprefix='+++ ',
-                        caughtcode='602',
-                        caughtmsg='Invalid sys.argv INI file. Exiting...',
-                        useniceprint=True)
+            niceerror(caught=True,
+                      caughtprefix='+++ ',
+                      caughtcode='602',
+                      caughtmsg='Invalid sys.argv INI file. Exiting...',
+                      useniceprint=True)
             sys.exit(2)
 
     # Source configuration from ini_file

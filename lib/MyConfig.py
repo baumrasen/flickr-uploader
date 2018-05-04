@@ -29,7 +29,7 @@ try:
     import ConfigParser as ConfigParser  # Python 2
 except ImportError:
     import configparser as ConfigParser  # Python 3
-import lib.niceprint as niceprint
+import lib.NicePrint as NicePrint
 
 
 # -----------------------------------------------------------------------------
@@ -72,12 +72,12 @@ class MyConfig(object):
     # =====================================================================
     # Functions aliases
     #
-    #   StrUnicodeOut       = from niceprint module
+    #   strunicodeout = from niceprint module
     # ---------------------------------------------------------------------
-    npr = niceprint.niceprint()
-    str_unicode_out = npr.StrUnicodeOut
-    report_error = npr.reportError
-    is_str_unicode = npr.isThisStringUnicode
+    npr = NicePrint.NicePrint()
+    strunicodeout = npr.strunicodeout
+    niceerror = npr.niceerror
+    is_str_unicode = npr.is_str_unicode
 
     # Config section ----------------------------------------------------------
     INISections = ['Config']
@@ -181,7 +181,7 @@ class MyConfig(object):
                 logging.debug('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                               .format(item,
                                       type(self.__dict__[item]),
-                                      self.str_unicode_out(
+                                      self.strunicodeout(
                                           self.__dict__[item])))
 
     # -------------------------------------------------------------------------
@@ -236,7 +236,7 @@ class MyConfig(object):
                 logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                              .format(item,
                                      type(self.__dict__[item]),
-                                     self.str_unicode_out(
+                                     self.strunicodeout(
                                          self.__dict__[item])))
 
     # -------------------------------------------------------------------------
@@ -275,13 +275,13 @@ class MyConfig(object):
                 logging.debug('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                               .format(item,
                                       type(INIcheck[item]),
-                                      self.str_unicode_out(INIcheck[item])))
+                                      self.strunicodeout(INIcheck[item])))
         # Evaluate values
         for item in sorted(self.__dict__):
             logging.debug('Eval for : [{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                           .format(item,
                                   type(self.__dict__[item]),
-                                  self.str_unicode_out(self.__dict__[item])))
+                                  self.strunicodeout(self.__dict__[item])))
 
             try:
                 if INIcheck[item] in ('list', 'int', 'bool', 'str', 'dict'):
@@ -294,7 +294,7 @@ class MyConfig(object):
                 else:
                     raise
             except BaseException:
-                self.report_error(Caught=True,
+                self.niceerror(Caught=True,
                                   CaughtPrefix='+++ ',
                                   CaughtCode='999',
                                   CaughtMsg='Caught an exception INIcheck',
@@ -314,7 +314,7 @@ class MyConfig(object):
                               '= [{!s:10s}]'
                               .format(item,
                                       type(self.__dict__[item]),
-                                      self.str_unicode_out(
+                                      self.strunicodeout(
                                           self.__dict__[item])))
 
         if logging.getLogger().getEffectiveLevel() <= logging.INFO:
@@ -323,7 +323,7 @@ class MyConfig(object):
                 logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                              .format(item,
                                      type(self.__dict__[item]),
-                                     self.str_unicode_out(
+                                     self.strunicodeout(
                                          self.__dict__[item])))
 
         return True
@@ -371,7 +371,7 @@ class MyConfig(object):
                 if not os.path.isdir(self.__dict__[item]):
                     logging.critical('%s: [%s] is not a valid folder.',
                                      item,
-                                     self.str_unicode_out(self.__dict__[item]))
+                                     self.strunicodeout(self.__dict__[item]))
                     result = False
             return result
 
@@ -399,8 +399,8 @@ class MyConfig(object):
                 if not os.path.isdir(os.path.dirname(self.__dict__[item])):
                     logging.critical('%s:[%s] is not in a valid folder:[%s].',
                                      item,
-                                     self.str_unicode_out(self.__dict__[item]),
-                                     self.str_unicode_out(os.path.dirname(
+                                     self.strunicodeout(self.__dict__[item]),
+                                     self.strunicodeout(os.path.dirname(
                                          self.__dict__[item])))
                     result = False
             return result
@@ -429,7 +429,7 @@ class MyConfig(object):
                     if not os.path.isdir(self.__dict__[item]):
                         logging.critical('%s: [%s] is not a valid folder.',
                                          item,
-                                         self.str_unicode_out(
+                                         self.strunicodeout(
                                              self.__dict__[item]))
                         result = False
                     elif not (
@@ -470,7 +470,7 @@ class MyConfig(object):
                     out_excluded_folders.append(str(folder))
                 logging.debug('folder from EXCLUDED_FOLDERS:[%s] '
                               'type:[%s]\n',
-                              self.str_unicode_out(out_excluded_folders[
+                              self.strunicodeout(out_excluded_folders[
                                   len(out_excluded_folders) - 1]),
                               type(out_excluded_folders[
                                   len(out_excluded_folders) - 1]))
@@ -518,7 +518,7 @@ class MyConfig(object):
                 logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                              .format(item,
                                      type(self.__dict__[item]),
-                                     self.str_unicode_out(
+                                     self.strunicodeout(
                                          self.__dict__[item])))
 
         return returnverify

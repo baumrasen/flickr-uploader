@@ -498,7 +498,6 @@ if __name__ == "__main__":
     # Update logging level as per LOGGING_LEVEL from INI file
     logging.getLogger().setLevel(my_cfg.LOGGING_LEVEL)
 
-    # CODING: Remove
     if my_cfg.LOGGING_LEVEL <= logging.INFO:
         NPR.niceprint('Output for FLICKR Configuration:')
         pprint.pprint(my_cfg.FLICKR)

@@ -45,9 +45,9 @@ def mprocessing(args_verbose, args_verbose_progress,
     # =========================================================================
     # Functions aliases
     #
-    #   NPR.NicePrint = from NicePrint module
+    #   npr.NicePrint = from NicePrint module
     # -------------------------------------------------------------------------
-    NPR = NicePrint.NicePrint()
+    npr = NicePrint.NicePrint()
 
     log_level = logging.getLogger().getEffectiveLevel()
     logging.info('===mprocessing [%s] target_fn():[%s] nprocs:[%s]',
@@ -124,7 +124,7 @@ def mprocessing(args_verbose, args_verbose_progress,
         proc_task.start()
         logging.debug('===Job/Task Process: Started')
         if args_verbose:
-            NPR.niceprint('===Job/Task Process: [{!s}] Started '
+            npr.niceprint('===Job/Task Process: [{!s}] Started '
                           'with pid:[{!s}]'
                           .format(proc_task.name,
                                   proc_task.pid))
@@ -133,7 +133,7 @@ def mprocessing(args_verbose, args_verbose_progress,
     if log_level <= logging.DEBUG:
         logging.debug('===Checking Processes launched/status:')
         for j in proc_pool:
-            NPR.niceprint('{!s}.is_alive = {!s}'.format(j.name, j.is_alive()))
+            npr.niceprint('{!s}.is_alive = {!s}'.format(j.name, j.is_alive()))
 
     # Regularly print status of jobs/tasks in the Process Pool
     # Prints status while there are processes active
@@ -149,7 +149,7 @@ def mprocessing(args_verbose, args_verbose_progress,
                      proc_task_active.name,
                      proc_task_active.is_alive())
         if args_verbose_progress:
-            NPR.niceprint('===Will wait for 60 on '
+            npr.niceprint('===Will wait for 60 on '
                           '{!s}.is_alive = {!s}'
                           .format(proc_task_active.name,
                                   proc_task_active.is_alive()))
@@ -159,7 +159,7 @@ def mprocessing(args_verbose, args_verbose_progress,
                      proc_task_active.name,
                      proc_task_active.is_alive())
         if args_verbose:
-            NPR.niceprint('===Waited for 60s on '
+            npr.niceprint('===Waited for 60s on '
                           '{!s}.is_alive = {!s}'
                           .format(proc_task_active.name,
                                   proc_task_active.is_alive()))
@@ -169,7 +169,7 @@ def mprocessing(args_verbose, args_verbose_progress,
     for j in proc_pool:
         j.join()
         if args_verbose_progress:
-            NPR.niceprint('==={!s} (is alive: {!s}).exitcode = {!s}'
+            npr.niceprint('==={!s} (is alive: {!s}).exitcode = {!s}'
                           .format(j.name, j.is_alive(), j.exitcode))
 
     logging.warning('===Multiprocessing=== pool joined! '
@@ -186,7 +186,7 @@ def mprocessing(args_verbose, args_verbose_progress,
     lockDB = None
 
     # Show number of total files processed
-    NPR.niceprocessedfiles(running.value, count_total, True)
+    npr.niceprocessedfiles(running.value, count_total, True)
 
     return True
 

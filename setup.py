@@ -80,12 +80,15 @@ class UploadCommand(Command):
         print('{0}'.format(astr))
 
     def initialize_options(self):
+        """initialize_options"""
         pass
 
     def finalize_options(self):
+        """finalize_options"""
         pass
 
     def run(self):
+        """run"""
         try:
             self.bstatus('Removing previous builds…')
             rmtree(os.path.join(here, 'dist'))
@@ -150,13 +153,15 @@ class InstallCfg(Command):
         print('{0}'.format(astr))
 
     def initialize_options(self):
+        """initialize_options"""        
         self.folder = os.path.join(sys.prefix, 'etc')
 
     def finalize_options(self):
+        """finalize_options"""                
         pass
 
     def run(self):
-
+        """run"""
         self.bstatus('Installing config files into folder [%s]'
                      % str(self.folder))
 

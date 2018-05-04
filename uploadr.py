@@ -247,10 +247,10 @@ def parse_arguments():
 #
 # This is the main method
 #
-def run_uploadr(ARGS):
+def run_uploadr(args):
     """ run_uploadr
 
-        ARGS = parameters
+        args = parameters
     """
     # -------------------------------------------------------------------------
     # Local Variables
@@ -259,10 +259,10 @@ def run_uploadr(ARGS):
 
     # Print/show arguments
     if my_cfg.LOGGING_LEVEL <= logging.INFO:
-        NPR.niceprint('Output for arguments(ARGS):')
-        pprint.pprint(ARGS)
+        NPR.niceprint('Output for arguments(args):')
+        pprint.pprint(args)
 
-    if ARGS.verbose:
+    if args.verbose:
         NPR.niceprint('FILES_DIR: [{!s}]'
                       .format(strunicodeout(my_cfg.FILES_DIR)))
 
@@ -294,14 +294,14 @@ def run_uploadr(ARGS):
 
     # Instantiate class Uploadr
     logging.debug('Instantiating the Main class FLICK = Uploadr()')
-    FLICK = FlickrUploadr.Uploadr(my_cfg, ARGS)
+    FLICK = FlickrUploadr.Uploadr(my_cfg, args)
 
     # Setup the database
     FLICK.setupDB()
-    if ARGS.clean_bad_files:
+    if args.clean_bad_files:
         FLICK.cleanDBbadfiles()
 
-    if ARGS.daemon:
+    if args.daemon:
         # Will run in daemon mode every SLEEP_TIME seconds
         logging.warning('Will run in daemon mode every [%s] seconds',
                         my_cfg.SLEEP_TIME)
@@ -313,7 +313,7 @@ def run_uploadr(ARGS):
         if not FLICK.checkToken():
             FLICK.authenticate()
 
-        if ARGS.add_albums_migrate:
+        if args.add_albums_migrate:
             NPR.niceprint('Performing preparation for migration to 2.7.0',
                           fname='addAlbumsMigrate')
 
@@ -330,7 +330,7 @@ def run_uploadr(ARGS):
                               'Please check logs, correct, and retry.',
                               fname='addAlbumsMigrate')
                 sys.exit(10)
-        elif ARGS.list_bad_files:
+        elif args.list_bad_files:
             NPR.niceprint('Listing badfiles: Start.',
                           fname='listBadFiles')
             FLICK.listBadFiles()
@@ -342,10 +342,10 @@ def run_uploadr(ARGS):
             FLICK.upload()
             FLICK.removeDeletedMedia()
 
-            if ARGS.search_for_duplicates:
+            if args.search_for_duplicates:
                 FLICK.searchForDuplicates()
 
-            if ARGS.remove_excluded:
+            if args.remove_excluded:
                 FLICK.removeExcludedMedia()
 
             FLICK.createSets()

@@ -10,7 +10,7 @@ import time
 import unittest
 import test.support
 # -----------------------------------------------------------------------------
-import lib.niceprint as niceprint
+import lib.NicePrint as NicePrint
 import lib.UPLDRConstants as UPLDRConstantsClass
 # -----------------------------------------------------------------------------
 
@@ -18,7 +18,7 @@ import lib.UPLDRConstants as UPLDRConstantsClass
 class TestNicePrintMethods(unittest.TestCase):
     """ TestNicePrintMethods
 
-        Unit test class for module niceprint
+        Unit test class for module NicePrint
     """
 
     def test_niceprint(self):
@@ -31,10 +31,10 @@ class TestNicePrintMethods(unittest.TestCase):
         # with captured_stdout() as astr:
         #     print "hello"
         # assert astr.getvalue() == "hello\n", 'not ok'
-        npr = niceprint.niceprint()
+        npr = NicePrint.NicePrint()
 
         with test.support.captured_stdout() as astr:
-            npr.niceprint('hello')
+            npr.NicePrint('hello')
 
         print(astr.getvalue())
         print('type:{}'.format(type(astr)))
@@ -44,15 +44,15 @@ class TestNicePrintMethods(unittest.TestCase):
     def test_unicode(self):
         """ test_unicode
         """
-        npr = niceprint.niceprint()
+        npr = NicePrint.NicePrint()
         for i in range(1, 500):
             if sys.version_info < (3, ):
                 if i < 127:
-                    self.assertFalse(npr.isThisStringUnicode(chr(i)))
-                    self.assertTrue(npr.isThisStringUnicode(
+                    self.assertFalse(npr.is_str_unicode(chr(i)))
+                    self.assertTrue(npr.is_str_unicode(
                         unicode(chr(i).decode('utf-8'))))  # noqa
             else:
-                self.assertFalse(npr.isThisStringUnicode(chr(i)))
+                self.assertFalse(npr.is_str_unicode(chr(i)))
 
 
 class TestMethods(unittest.TestCase):

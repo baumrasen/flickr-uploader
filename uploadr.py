@@ -417,12 +417,12 @@ if my_cfg.LOGGING_LEVEL <= logging.DEBUG:
 # Functions aliases
 #
 #   strunicodeout       = from niceprint module
-#   reportError         = from niceprint module
+#   niceerror           = from niceprint module
 #   niceprocessedfiles  = from niceprint module
 # -----------------------------------------------------------------------------
 NPR = NicePrint.NicePrint()
 strunicodeout = NPR.strunicodeout
-reportError = NPR.reportError
+niceerror = NPR.nicerrror
 niceprocessedfiles = NPR.niceprocessedfiles
 # -----------------------------------------------------------------------------
 
@@ -464,11 +464,11 @@ if __name__ == "__main__":
                      strunicodeout(UPLDRConstants.ini_file))
         if not checkBaseDir_INIfile(UPLDRConstants.base_dir,
                                     UPLDRConstants.ini_file):
-            reportError(caught=True,
-                        caughtprefix='+++ ',
-                        caughtcode='601',
-                        caughtmsg='Invalid -C parameter INI file. Exiting...',
-                        useniceprint=True)
+            niceerrror(caught=True,
+                       caughtprefix='+++ ',
+                       caughtcode='601',
+                       caughtmsg='Invalid -C parameter INI file. Exiting...',
+                       useniceprint=True)
             sys.exit(2)
     else:
         # sys.argv[0]

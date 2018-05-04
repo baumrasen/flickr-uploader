@@ -53,8 +53,8 @@ class MyConfig(object):
         Loads default configuration files. Overwrites with any specific values
         found on INI config file.
 
-        >>> import lib.myconfig as myconfig
-        >>> CFG = myconfig.MyConfig()
+        >>> import lib.MyConfig as MyConfig
+        >>> CFG = MyConfig.MyConfig()
         >>> CFG.processconfig()
         True
         >>> ELog = CFG.LOGGING_LEVEL
@@ -69,6 +69,16 @@ class MyConfig(object):
         True
 
     """
+    # =====================================================================
+    # Functions aliases
+    #
+    #   StrUnicodeOut       = from niceprint module
+    # ---------------------------------------------------------------------
+    npr = niceprint.niceprint()
+    str_unicode_out = npr.StrUnicodeOut
+    report_error = npr.reportError
+    is_str_unicode = npr.isThisStringUnicode
+
     # Config section ----------------------------------------------------------
     INISections = ['Config']
     # Default configuration keys/values pairs ---------------------------------
@@ -161,15 +171,6 @@ class MyConfig(object):
     def __init__(self):
         """__init__
         """
-
-        # =====================================================================
-        # Functions aliases
-        #
-        #   StrUnicodeOut       = from niceprint module
-        # ---------------------------------------------------------------------
-        self.npr = niceprint.niceprint()
-        self.str_unicode_out = self.npr.StrUnicodeOut
-        self.report_error = self.npr.reportError
 
         # Assume default values into class dictionary of values ---------------
         self.__dict__ = dict(zip(self.INIkeys, self.INIvalues))
@@ -361,7 +362,7 @@ class MyConfig(object):
             # Further specific processing... FILES_DIR
             for item in ['FILES_DIR']:  # Check if dir exists. Unicode Support
                 logging.debug('verifyconfig for [%s]', item)
-                if not self.npr.isThisStringUnicode(self.__dict__[item]):
+                if not self.is_str_unicode(self.__dict__[item]):
                     self.__dict__[item] = unicode(  # noqa
                         self.__dict__[item],
                         'utf-8') \
@@ -389,7 +390,7 @@ class MyConfig(object):
                          'TOKEN_CACHE',
                          'TOKEN_PATH']:
                 logging.debug('verifyconfig for [%s]', item)
-                if not self.npr.isThisStringUnicode(self.__dict__[item]):
+                if not self.is_str_unicode(self.__dict__[item]):
                     self.__dict__[item] = unicode(  # noqa
                         self.__dict__[item],
                         'utf-8') \
@@ -418,7 +419,7 @@ class MyConfig(object):
                                   os.path.join(self.__dict__[item],
                                                'exiftool'))
 
-                    if not self.npr.isThisStringUnicode(self.__dict__[item]):
+                    if not self.is_str_unicode(self.__dict__[item]):
                         self.__dict__[item] = unicode(  # noqa
                             self.__dict__[item],
                             'utf-8') \
@@ -460,7 +461,7 @@ class MyConfig(object):
             logging.debug('inEXCLUDED_FOLDERS=[%s]', in_excluded_folders)
             out_excluded_folders = []
             for folder in in_excluded_folders:
-                if not self.npr.isThisStringUnicode(folder):
+                if not self.is_str_unicode(folder):
                     out_excluded_folders.append(
                         unicode(folder, 'utf-8')  # noqa
                         if sys.version_info < (3, )

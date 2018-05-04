@@ -153,11 +153,11 @@ class InstallCfg(Command):
         print('{0}'.format(astr))
 
     def initialize_options(self):
-        """initialize_options"""        
+        """initialize_options"""
         self.folder = os.path.join(sys.prefix, 'etc')
 
     def finalize_options(self):
-        """finalize_options"""                
+        """finalize_options"""
         pass
 
     def run(self):

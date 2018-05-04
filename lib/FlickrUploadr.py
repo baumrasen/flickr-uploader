@@ -94,9 +94,9 @@ NUTIME = time
 #
 class FileWithCallback(object):
     """ FileWithCallback
-    
+
         For use with flickrapi upload for showing callback progress information
-        Check function callback definition    
+        Check function callback definition
     """
 
     def __init__(self, filename, fn_callback, verbose_progress):

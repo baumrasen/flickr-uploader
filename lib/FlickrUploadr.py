@@ -33,7 +33,7 @@ import xml
 #    AttributeError: 'module' object has no attribute 'etree'
 #    on logging.info(xml.etree.ElementTree.tostring(...
 try:
-    dummyxml = xml.etree.ElementTree.tostring(
+    DUMMYXML = xml.etree.ElementTree.tostring(
         xml.etree.ElementTree.Element('xml.etree'),
         encoding='utf-8',
         method='xml')
@@ -67,21 +67,8 @@ import lib.mprocessing as mp
 # =============================================================================
 # Functions aliases
 #
-#   UPLDRConstants      = from UPLDRConstants module
-#   strunicodeout       = from niceprint module
-#   is_str_unicode      = from niceprint module
-#   niceassert          = from niceprint module
-#   niceerror         = from niceprint module
-#   niceprocessedfiles  = from niceprint module
+#   NUTIME              = time
 # -----------------------------------------------------------------------------
-UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
-NP = NicePrint.NicePrint()
-strunicodeout = NP.strunicodeout
-is_str_unicode = NP.is_str_unicode
-niceassert = NP.niceassert
-niceerror = NP.niceerror
-niceprocessedfiles = NP.niceprocessedfiles
-retry = rate_limited.retry
 NUTIME = time
 # -----------------------------------------------------------------------------
 
@@ -178,6 +165,25 @@ class Uploadr(object):
     """ Uploadr class
 
     """
+
+    # =========================================================================
+    # Functions aliases
+    #
+    #   UPLDRConstants      = from UPLDRConstants module
+    #   strunicodeout       = from niceprint module
+    #   is_str_unicode      = from niceprint module
+    #   niceassert          = from niceprint module
+    #   niceerror           = from niceprint module
+    #   niceprocessedfiles  = from niceprint module
+    # -------------------------------------------------------------------------
+    UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
+    NP = NicePrint.NicePrint()
+    strunicodeout = NP.strunicodeout
+    is_str_unicode = NP.is_str_unicode
+    niceassert = NP.niceassert
+    niceerror = NP.niceerror
+    niceprocessedfiles = NP.niceprocessedfiles
+    retry = rate_limited.retry
 
     # flickrapi.FlickrAPI object
     nuflickr = None

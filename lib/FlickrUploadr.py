@@ -2885,32 +2885,28 @@ class Uploadr(object):
                 encoding='utf-8',
                 method='xml'))
 
-            """
-
-sets = flickr.photosets.getList(user_id='73509078@N00')
-
-sets.attrib['stat'] => 'ok'
-sets.find('photosets').attrib['cancreate'] => '1'
-
-set0 = sets.find('photosets').findall('photoset')[0]
-
-+-------------------------------+-----------+
-| variable                      | value     |
-+-------------------------------+-----------+
-| set0.attrib['id']             | u'5'      |
-| set0.attrib['primary']        | u'2483'   |
-| set0.attrib['secret']         | u'abcdef' |
-| set0.attrib['server']         | u'8'      |
-| set0.attrib['photos']         | u'4'      |
-| set0.title[0].text            | u'Test'   |
-| set0.description[0].text      | u'foo'    |
-| set0.find('title').text       | 'Test'    |
-| set0.find('description').text | 'foo'     |
-+-------------------------------+-----------+
-
-... and similar for set1 ...
-
-            """
+            # Output format of photosets_getList:
+            #
+            # sets = flickr.photosets.getList(user_id='73509078@N00')
+            # if (self.isGoodsets.attrib['stat'] => 'ok'
+            # sets.find('photosets').attrib['cancreate'] => '1'
+            # 
+            # set0 = sets.find('photosets').findall('photoset')[0]
+            # +-------------------------------+-----------+
+            # | variable                      | value     |
+            # +-------------------------------+-----------+
+            # | set0.attrib['id']             | u'5'      |
+            # | set0.attrib['primary']        | u'2483'   |
+            # | set0.attrib['secret']         | u'abcdef' |
+            # | set0.attrib['server']         | u'8'      |
+            # | set0.attrib['photos']         | u'4'      |
+            # | set0.title[0].text            | u'Test'   |
+            # | set0.description[0].text      | u'foo'    |
+            # | set0.find('title').text       | 'Test'    |
+            # | set0.find('description').text | 'foo'     |
+            # +-------------------------------+-----------+
+            # 
+            # ... and similar for set1 ...
 
             if self.isGood(sets):
                 cur = con.cursor()

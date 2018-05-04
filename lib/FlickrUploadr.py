@@ -67,8 +67,21 @@ import lib.mprocessing as mp
 # =============================================================================
 # Functions aliases
 #
-#   NUTIME              = time
+#   UPLDRConstants      = from UPLDRConstants module
+#   strunicodeout       = from niceprint module
+#   is_str_unicode      = from niceprint module
+#   niceassert          = from niceprint module
+#   niceerror         = from niceprint module
+#   niceprocessedfiles  = from niceprint module
 # -----------------------------------------------------------------------------
+UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
+NP = NicePrint.NicePrint()
+strunicodeout = NP.strunicodeout
+is_str_unicode = NP.is_str_unicode
+niceassert = NP.niceassert
+niceerror = NP.niceerror
+niceprocessedfiles = NP.niceprocessedfiles
+retry = rate_limited.retry
 NUTIME = time
 # -----------------------------------------------------------------------------
 
@@ -165,25 +178,6 @@ class Uploadr(object):
     """ Uploadr class
 
     """
-
-    # =========================================================================
-    # Functions aliases
-    #
-    #   UPLDRConstants      = from UPLDRConstants module
-    #   strunicodeout       = from niceprint module
-    #   is_str_unicode      = from niceprint module
-    #   niceassert          = from niceprint module
-    #   niceerror           = from niceprint module
-    #   niceprocessedfiles  = from niceprint module
-    # -------------------------------------------------------------------------
-    UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
-    NP = NicePrint.NicePrint()
-    strunicodeout = NP.strunicodeout
-    is_str_unicode = NP.is_str_unicode
-    niceassert = NP.niceassert
-    niceerror = NP.niceerror
-    niceprocessedfiles = NP.niceprocessedfiles
-    retry = rate_limited.retry
 
     # flickrapi.FlickrAPI object
     nuflickr = None

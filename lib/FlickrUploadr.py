@@ -2890,7 +2890,7 @@ class Uploadr(object):
             # sets = flickr.photosets.getList(user_id='73509078@N00')
             # if (self.isGoodsets.attrib['stat'] => 'ok'
             # sets.find('photosets').attrib['cancreate'] => '1'
-            # 
+            #
             # set0 = sets.find('photosets').findall('photoset')[0]
             # +-------------------------------+-----------+
             # | variable                      | value     |
@@ -2905,7 +2905,7 @@ class Uploadr(object):
             # | set0.find('title').text       | 'Test'    |
             # | set0.find('description').text | 'foo'     |
             # +-------------------------------+-----------+
-            # 
+            #
             # ... and similar for set1 ...
 
             if self.isGood(sets):

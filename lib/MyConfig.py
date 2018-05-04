@@ -167,7 +167,7 @@ class MyConfig(object):
         #
         #   StrUnicodeOut       = from niceprint module
         # ---------------------------------------------------------------------
-        npr = niceprint.niceprint()
+        self.npr = niceprint.niceprint()
         self.str_unicode_out = npr.StrUnicodeOut
         self.report_error = npr.reportError
 
@@ -361,7 +361,7 @@ class MyConfig(object):
             # Further specific processing... FILES_DIR
             for item in ['FILES_DIR']:  # Check if dir exists. Unicode Support
                 logging.debug('verifyconfig for [%s]', item)
-                if not NP.isThisStringUnicode(self.__dict__[item]):
+                if not self.npr.isThisStringUnicode(self.__dict__[item]):
                     self.__dict__[item] = unicode(  # noqa
                         self.__dict__[item],
                         'utf-8') \
@@ -389,7 +389,7 @@ class MyConfig(object):
                          'TOKEN_CACHE',
                          'TOKEN_PATH']:
                 logging.debug('verifyconfig for [%s]', item)
-                if not NP.isThisStringUnicode(self.__dict__[item]):
+                if not self.npr.isThisStringUnicode(self.__dict__[item]):
                     self.__dict__[item] = unicode(  # noqa
                         self.__dict__[item],
                         'utf-8') \
@@ -418,7 +418,7 @@ class MyConfig(object):
                                   os.path.join(self.__dict__[item],
                                                'exiftool'))
 
-                    if not NP.isThisStringUnicode(self.__dict__[item]):
+                    if not self.npr.isThisStringUnicode(self.__dict__[item]):
                         self.__dict__[item] = unicode(  # noqa
                             self.__dict__[item],
                             'utf-8') \
@@ -460,7 +460,7 @@ class MyConfig(object):
             logging.debug('inEXCLUDED_FOLDERS=[%s]', in_excluded_folders)
             out_excluded_folders = []
             for folder in in_excluded_folders:
-                if not NP.isThisStringUnicode(folder):
+                if not self.npr.isThisStringUnicode(folder):
                     out_excluded_folders.append(
                         unicode(folder, 'utf-8')  # noqa
                         if sys.version_info < (3, )

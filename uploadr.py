@@ -264,9 +264,9 @@ def run_uploadr(args):
 
     if args.verbose:
         NPR.niceprint('FILES_DIR: [{!s}]'
-                      .format(strunicodeout(my_cfg.FILES_DIR)))
+                      .format(NPR.strunicodeout(my_cfg.FILES_DIR)))
 
-    logging.warning('FILES_DIR: [%s]', strunicodeout(my_cfg.FILES_DIR))
+    logging.warning('FILES_DIR: [%s]', NPR.strunicodeout(my_cfg.FILES_DIR))
 
     if my_cfg.FILES_DIR == "":
         NPR.niceprint('Please configure in the INI file [normally uploadr.ini]'
@@ -276,12 +276,12 @@ def run_uploadr(args):
     else:
         if not os.path.isdir(my_cfg.FILES_DIR):
             logging.critical('FILES_DIR: [%s] is not valid.',
-                             strunicodeout(my_cfg.FILES_DIR))
+                             NPR.strunicodeout(my_cfg.FILES_DIR))
             NPR.niceprint('Please configure the name of an existant folder '
                           'in the INI file [normally uploadr.ini] '
                           'with media available to sync with Flickr. '
                           'FILES_DIR: [{!s}] is not valid.'
-                          .format(strunicodeout(my_cfg.FILES_DIR)))
+                          .format(NPR.strunicodeout(my_cfg.FILES_DIR)))
             sys.exit(8)
 
     if my_cfg.FLICKR["api_key"] == "" or my_cfg.FLICKR["secret"] == "":
@@ -365,19 +365,19 @@ def checkBaseDir_INIfile(base_dir, ini_file):
     ini_file = INI File path
     """
 
-    resultCheck = True
+    result_check = True
     try:
         if not ((base_dir == '' or os.path.isdir(base_dir)) and
                 os.path.isfile(ini_file)):
             raise OSError('[Errno 2] No such file or directory')
     except Exception as err:
-        resultCheck = False
+        result_check = False
         logging.critical(
             'Config folder [%s] and/or INI file: [%s] not found or '
             'incorrect format: [%s]!', base_dir, ini_file, str(err))
 
-    logging.debug('resultCheck=[{%s]', resultCheck)
-    return resultCheck
+    logging.debug('result_check=[{%s]', result_check)
+    return result_check
 
 
 # =============================================================================
@@ -416,14 +416,9 @@ if my_cfg.LOGGING_LEVEL <= logging.DEBUG:
 # =============================================================================
 # Functions aliases
 #
-#   strunicodeout       = from niceprint module
-#   niceerror           = from niceprint module
-#   niceprocessedfiles  = from niceprint module
+#   NPR  = NicePrint.NicePrint
 # -----------------------------------------------------------------------------
 NPR = NicePrint.NicePrint()
-strunicodeout = NPR.strunicodeout
-niceerror = NPR.nicerrror
-niceprocessedfiles = NPR.niceprocessedfiles
 # -----------------------------------------------------------------------------
 
 # =============================================================================
@@ -461,14 +456,15 @@ if __name__ == "__main__":
     if PARSED_ARGS.config_file:
         UPLDRConstants.ini_file = PARSED_ARGS.config_file
         logging.info('UPLDRConstants.ini_file:[%s]',
-                     strunicodeout(UPLDRConstants.ini_file))
+                     NPR.strunicodeout(UPLDRConstants.ini_file))
         if not checkBaseDir_INIfile(UPLDRConstants.base_dir,
                                     UPLDRConstants.ini_file):
-            niceerror(caught=True,
-                      caughtprefix='+++ ',
-                      caughtcode='601',
-                      caughtmsg='Invalid -C parameter INI file. Exiting...',
-                      useniceprint=True)
+            NPR.niceerror(caught=True,
+                          caughtprefix='+++ ',
+                          caughtcode='601',
+                          caughtmsg='Invalid -C parameter INI file. '
+                          'Exiting...',
+                          useniceprint=True)
             sys.exit(2)
     else:
         # sys.argv[0]
@@ -478,11 +474,11 @@ if __name__ == "__main__":
 
         if not checkBaseDir_INIfile(UPLDRConstants.base_dir,
                                     UPLDRConstants.ini_file):
-            niceerror(caught=True,
-                      caughtprefix='+++ ',
-                      caughtcode='602',
-                      caughtmsg='Invalid sys.argv INI file. Exiting...',
-                      useniceprint=True)
+            NPR.niceerror(caught=True,
+                          caughtprefix='+++ ',
+                          caughtcode='602',
+                          caughtmsg='Invalid sys.argv INI file. Exiting...',
+                          useniceprint=True)
             sys.exit(2)
 
     # Source configuration from ini_file

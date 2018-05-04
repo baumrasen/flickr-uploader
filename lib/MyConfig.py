@@ -31,15 +31,6 @@ except ImportError:
     import configparser as ConfigParser  # Python 3
 import lib.niceprint as niceprint
 
-# =============================================================================
-# Functions aliases
-#
-#   StrUnicodeOut       = from niceprint module
-# -----------------------------------------------------------------------------
-NP = niceprint.niceprint()
-StrUnicodeOut = NP.StrUnicodeOut
-reportError = NP.reportError
-
 
 # -----------------------------------------------------------------------------
 # class MyConfiguration to hangle Config file uploadr.ini for flickr-uploadr.
@@ -171,6 +162,15 @@ class MyConfig(object):
         """__init__
         """
 
+        # =====================================================================
+        # Functions aliases
+        #
+        #   StrUnicodeOut       = from niceprint module
+        # ---------------------------------------------------------------------
+        npr = niceprint.niceprint()
+        self.str_unicode_out = npr.StrUnicodeOut
+        self.report_error = npr.reportError
+
         # Assume default values into class dictionary of values ---------------
         self.__dict__ = dict(zip(self.INIkeys, self.INIvalues))
 
@@ -180,7 +180,7 @@ class MyConfig(object):
                 logging.debug('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                               .format(item,
                                       type(self.__dict__[item]),
-                                      StrUnicodeOut(self.__dict__[item])))
+                                      str_unicode_out(self.__dict__[item])))
 
     # -------------------------------------------------------------------------
     # MyConfig.readconfig
@@ -234,7 +234,7 @@ class MyConfig(object):
                 logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                              .format(item,
                                      type(self.__dict__[item]),
-                                     StrUnicodeOut(self.__dict__[item])))
+                                     str_unicode_out(self.__dict__[item])))
 
     # -------------------------------------------------------------------------
     # MyConfig.processconfig
@@ -272,13 +272,13 @@ class MyConfig(object):
                 logging.debug('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                               .format(item,
                                       type(INIcheck[item]),
-                                      StrUnicodeOut(INIcheck[item])))
+                                      str_unicode_out(INIcheck[item])))
         # Evaluate values
         for item in sorted(self.__dict__):
             logging.debug('Eval for : [{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                           .format(item,
                                   type(self.__dict__[item]),
-                                  StrUnicodeOut(self.__dict__[item])))
+                                  str_unicode_out(self.__dict__[item])))
 
             try:
                 if INIcheck[item] in ('list', 'int', 'bool', 'str', 'dict'):
@@ -291,11 +291,11 @@ class MyConfig(object):
                 else:
                     raise
             except BaseException:
-                reportError(Caught=True,
-                            CaughtPrefix='+++ ',
-                            CaughtCode='999',
-                            CaughtMsg='Caught an exception INIcheck',
-                            exceptSysInfo=True)
+                self.report_error(Caught=True,
+                                  CaughtPrefix='+++ ',
+                                  CaughtCode='999',
+                                  CaughtMsg='Caught an exception INIcheck',
+                                  exceptSysInfo=True)
                 logging.critical('Invalid INI value for:[%s] '
                                  'Using default value:[%s]',
                                  item,
@@ -311,7 +311,7 @@ class MyConfig(object):
                               '= [{!s:10s}]'
                               .format(item,
                                       type(self.__dict__[item]),
-                                      StrUnicodeOut(self.__dict__[item])))
+                                      str_unicode_out(self.__dict__[item])))
 
         if logging.getLogger().getEffectiveLevel() <= logging.INFO:
             logging.info('\t\t\t\tProcessed INI key/values pairs...')
@@ -319,7 +319,7 @@ class MyConfig(object):
                 logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                              .format(item,
                                      type(self.__dict__[item]),
-                                     StrUnicodeOut(self.__dict__[item])))
+                                     str_unicode_out(self.__dict__[item])))
 
         return True
 
@@ -366,7 +366,7 @@ class MyConfig(object):
                 if not os.path.isdir(self.__dict__[item]):
                     logging.critical('%s: [%s] is not a valid folder.',
                                      item,
-                                     StrUnicodeOut(self.__dict__[item]))
+                                     str_unicode_out(self.__dict__[item]))
                     result = False
             return result
 
@@ -394,8 +394,8 @@ class MyConfig(object):
                 if not os.path.isdir(os.path.dirname(self.__dict__[item])):
                     logging.critical('%s:[%s] is not in a valid folder:[%s].',
                                      item,
-                                     StrUnicodeOut(self.__dict__[item]),
-                                     StrUnicodeOut(os.path.dirname(
+                                     str_unicode_out(self.__dict__[item]),
+                                     str_unicode_out(os.path.dirname(
                                          self.__dict__[item])))
                     result = False
             return result
@@ -424,7 +424,7 @@ class MyConfig(object):
                     if not os.path.isdir(self.__dict__[item]):
                         logging.critical('%s: [%s] is not a valid folder.',
                                          item,
-                                         StrUnicodeOut(self.__dict__[item]))
+                                         str_unicode_out(self.__dict__[item]))
                         result = False
                     elif not (
                             os.path.isfile(os.path.join(self.__dict__[item],
@@ -464,7 +464,7 @@ class MyConfig(object):
                     out_excluded_folders.append(str(folder))
                 logging.debug('folder from EXCLUDED_FOLDERS:[%s] '
                               'type:[%s]\n',
-                              StrUnicodeOut(out_excluded_folders[
+                              str_unicode_out(out_excluded_folders[
                                   len(out_excluded_folders) - 1]),
                               type(out_excluded_folders[
                                   len(out_excluded_folders) - 1]))
@@ -512,7 +512,7 @@ class MyConfig(object):
                 logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                              .format(item,
                                      type(self.__dict__[item]),
-                                     StrUnicodeOut(self.__dict__[item])))
+                                     str_unicode_out(self.__dict__[item])))
 
         return returnverify
 

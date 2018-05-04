@@ -300,7 +300,8 @@ class MyConfig(object):
                                  'Using default value:[%s]',
                                  item,
                                  self.INIvalues[self.INIkeys.index(str(item))])
-                # Use default value or exit...
+                # Using default value to avoid exiting.
+                # Use verifyconfig  to confirm valid values.
                 self.__dict__.update(dict(zip(
                     [item],
                     [self.INIvalues[self.INIkeys.index(str(item))]])))
@@ -329,127 +330,180 @@ class MyConfig(object):
         """ verifyconfig
         """
 
-        returnverify = True
-        # Further specific processing... LOGGING_LEVEL
-        if self.__dict__['LOGGING_LEVEL'] not in\
-                [logging.NOTSET,
-                 logging.DEBUG,
-                 logging.INFO,
-                 logging.WARNING,
-                 logging.ERROR,
-                 logging.CRITICAL]:
-            self.__dict__['LOGGING_LEVEL'] = logging.ERROR
-        # Convert LOGGING_LEVEL into int() for later use in conditionals
-        self.__dict__['LOGGING_LEVEL'] = int(str(
-            self.__dict__['LOGGING_LEVEL']))
+        def verify_logging_level():
+            """ verify_logging_level
+            """
 
-        # Further specific processing... FILES_DIR
-        for item in ['FILES_DIR']:  # Check if dir exists. Unicode Support
-            logging.debug('verifyconfig for [%s]', item)
-            if not NP.isThisStringUnicode(self.__dict__[item]):
-                self.__dict__[item] = unicode(  # noqa
-                    self.__dict__[item],
-                    'utf-8') \
-                    if sys.version_info < (3, ) \
-                    else str(self.__dict__[item])
-            if not os.path.isdir(self.__dict__[item]):
-                logging.critical('%s: [%s] is not a valid folder.',
-                                 item,
-                                 StrUnicodeOut(self.__dict__[item]))
-                returnverify = False
+            # Further specific processing... LOGGING_LEVEL
+            if self.__dict__['LOGGING_LEVEL'] not in\
+                    [logging.NOTSET,
+                     logging.DEBUG,
+                     logging.INFO,
+                     logging.WARNING,
+                     logging.ERROR,
+                     logging.CRITICAL]:
+                self.__dict__['LOGGING_LEVEL'] = logging.ERROR
+            # Convert LOGGING_LEVEL into int() for later use in conditionals
+            self.__dict__['LOGGING_LEVEL'] = int(str(
+                self.__dict__['LOGGING_LEVEL']))
 
-        # Further specific processing...
-        #       DB_PATH
-        #       LOCK_PATH
-        #       TOKEN_CACHE
-        #       TOKEN_PATH
-        for item in ['DB_PATH',  # Check if basedir exists. Unicode Support
-                     'LOCK_PATH',
-                     'TOKEN_CACHE',
-                     'TOKEN_PATH']:
-            logging.debug('verifyconfig for [%s]', item)
-            if not NP.isThisStringUnicode(self.__dict__[item]):
-                self.__dict__[item] = unicode(  # noqa
-                    self.__dict__[item],
-                    'utf-8') \
-                    if sys.version_info < (3, ) \
-                    else str(self.__dict__[item])
-            if not os.path.isdir(os.path.dirname(self.__dict__[item])):
-                logging.critical('%s:[%s] is not in a valid folder:[%s].',
-                                 item,
-                                 StrUnicodeOut(self.__dict__[item]),
-                                 StrUnicodeOut(os.path.dirname(
-                                     self.__dict__[item])))
-                returnverify = False
+            return True
 
-        if self.__dict__['CONVERT_RAW_FILES']:
-            for item in ['RAW_TOOL_PATH']:
+        def verify_files_dir():
+            """ verify_files_dir
+            """
+
+            result = True
+            # Further specific processing... FILES_DIR
+            for item in ['FILES_DIR']:  # Check if dir exists. Unicode Support
                 logging.debug('verifyconfig for [%s]', item)
-                logging.debug('RAW_TOOL_PATH/exiftool=[%s]',
-                              os.path.join(self.__dict__[item],
-                                           'exiftool'))
-
                 if not NP.isThisStringUnicode(self.__dict__[item]):
                     self.__dict__[item] = unicode(  # noqa
                         self.__dict__[item],
                         'utf-8') \
                         if sys.version_info < (3, ) \
                         else str(self.__dict__[item])
-
                 if not os.path.isdir(self.__dict__[item]):
                     logging.critical('%s: [%s] is not a valid folder.',
                                      item,
                                      StrUnicodeOut(self.__dict__[item]))
-                    returnverify = False
-                elif not (
-                        os.path.isfile(os.path.join(self.__dict__[item],
-                                                    'exiftool')) and
-                        os.access(os.path.join(self.__dict__[item],
-                                               'exiftool'),
-                                  os.X_OK)):
-                    logging.critical('%s: [%s] is not a valid executable.',
+                    result = False
+            return result
+
+        def verify_paths():
+            """ verify_paths
+
+                Further specific verification processing...
+                      DB_PATH
+                      LOCK_PATH
+                      TOKEN_CACHE
+                      TOKEN_PATH
+            """
+            result = True
+            for item in ['DB_PATH',  # Check if basedir exists. Unicode Support
+                         'LOCK_PATH',
+                         'TOKEN_CACHE',
+                         'TOKEN_PATH']:
+                logging.debug('verifyconfig for [%s]', item)
+                if not NP.isThisStringUnicode(self.__dict__[item]):
+                    self.__dict__[item] = unicode(  # noqa
+                        self.__dict__[item],
+                        'utf-8') \
+                        if sys.version_info < (3, ) \
+                        else str(self.__dict__[item])
+                if not os.path.isdir(os.path.dirname(self.__dict__[item])):
+                    logging.critical('%s:[%s] is not in a valid folder:[%s].',
                                      item,
-                                     os.path.join(self.__dict__[item],
-                                                  'exiftool'))
-                    returnverify = False
-        else:
-            logging.debug('verifyconfig: [%s] is False: bypass for [%s]',
-                          'CONVERT_RAW_FILES', 'RAW_TOOL_PATH')
+                                     StrUnicodeOut(self.__dict__[item]),
+                                     StrUnicodeOut(os.path.dirname(
+                                         self.__dict__[item])))
+                    result = False
+            return result
 
-        # Further specific processing... EXCLUDED_FOLDERS
-        #     Read EXCLUDED_FOLDERS and convert them into Unicode folders
-        logging.debug('verifyconfig for [%s]', 'EXCLUDED_FOLDERS')
-        in_excluded_folders = self.__dict__['EXCLUDED_FOLDERS']
-        logging.debug('inEXCLUDED_FOLDERS=[%s]', in_excluded_folders)
-        out_excluded_folders = []
-        for folder in in_excluded_folders:
-            if not NP.isThisStringUnicode(folder):
-                out_excluded_folders.append(unicode(folder, 'utf-8')  # noqa
-                                            if sys.version_info < (3, )
-                                            else str(folder))
+        def verify_raw_files():
+            """ verify_raw_files
+
+                Verify raw realted configuration.
+            """
+
+            result = True
+            if self.__dict__['CONVERT_RAW_FILES']:
+                for item in ['RAW_TOOL_PATH']:
+                    logging.debug('verifyconfig for [%s]', item)
+                    logging.debug('RAW_TOOL_PATH/exiftool=[%s]',
+                                  os.path.join(self.__dict__[item],
+                                               'exiftool'))
+
+                    if not NP.isThisStringUnicode(self.__dict__[item]):
+                        self.__dict__[item] = unicode(  # noqa
+                            self.__dict__[item],
+                            'utf-8') \
+                            if sys.version_info < (3, ) \
+                            else str(self.__dict__[item])
+
+                    if not os.path.isdir(self.__dict__[item]):
+                        logging.critical('%s: [%s] is not a valid folder.',
+                                         item,
+                                         StrUnicodeOut(self.__dict__[item]))
+                        result = False
+                    elif not (
+                            os.path.isfile(os.path.join(self.__dict__[item],
+                                                        'exiftool')) and
+                            os.access(os.path.join(self.__dict__[item],
+                                                   'exiftool'),
+                                      os.X_OK)):
+                        logging.critical('%s: [%s] is not a valid executable.',
+                                         item,
+                                         os.path.join(self.__dict__[item],
+                                                      'exiftool'))
+                        result = False
             else:
-                out_excluded_folders.append(str(folder))
-            logging.debug('folder from EXCLUDED_FOLDERS:[%s] '
-                          'type:[%s]\n',
-                          StrUnicodeOut(out_excluded_folders[
-                              len(out_excluded_folders) - 1]),
-                          type(out_excluded_folders[
-                              len(out_excluded_folders) - 1]))
-        logging.info('outEXCLUDED_FOLDERS=[%s]', out_excluded_folders)
-        self.__dict__.update(dict(zip(
-            ['EXCLUDED_FOLDERS'],
-            [out_excluded_folders])))
+                logging.debug('verifyconfig: [%s] is False: bypass for [%s]',
+                              'CONVERT_RAW_FILES', 'RAW_TOOL_PATH')
 
-        # Further specific processing... IGNORED_REGEX
-        # Consider Unicode Regular expressions
-        for item in ['IGNORED_REGEX']:
-            logging.debug('verifyconfig for [%s]', item)
-            self.__dict__[item] = [re.compile(regex, re.UNICODE)
-                                   for regex in self.__dict__[item]]
-            logging.info('Number of IGNORED_REGEX entries:[%s]\n',
-                         len(self.__dict__[item]))
+            return result
+
+        def verify_excluded_folders():
+            """ verify_excluded_folders
+
+                Further specific processing... EXCLUDED_FOLDERS
+                    Read EXCLUDED_FOLDERS and convert them into Unicode folders
+            """
+
+            logging.debug('verifyconfig for [%s]', 'EXCLUDED_FOLDERS')
+            in_excluded_folders = self.__dict__['EXCLUDED_FOLDERS']
+            logging.debug('inEXCLUDED_FOLDERS=[%s]', in_excluded_folders)
+            out_excluded_folders = []
+            for folder in in_excluded_folders:
+                if not NP.isThisStringUnicode(folder):
+                    out_excluded_folders.append(
+                        unicode(folder, 'utf-8')  # noqa
+                        if sys.version_info < (3, )
+                        else str(folder))
+                else:
+                    out_excluded_folders.append(str(folder))
+                logging.debug('folder from EXCLUDED_FOLDERS:[%s] '
+                              'type:[%s]\n',
+                              StrUnicodeOut(out_excluded_folders[
+                                  len(out_excluded_folders) - 1]),
+                              type(out_excluded_folders[
+                                  len(out_excluded_folders) - 1]))
+            logging.info('outEXCLUDED_FOLDERS=[%s]', out_excluded_folders)
+            self.__dict__.update(dict(zip(
+                ['EXCLUDED_FOLDERS'],
+                [out_excluded_folders])))
+
+            return True
+
+        def verify_ignored_files():
+            """ verify_excluded_folders
+
+                Further specific processing... IGNORED_REGEX
+                Consider Unicode Regular expressions
+            """
+
+            for item in ['IGNORED_REGEX']:
+                logging.debug('verifyconfig for [%s]', item)
+                self.__dict__[item] = [re.compile(regex, re.UNICODE)
+                                       for regex in self.__dict__[item]]
+                logging.info('Number of IGNORED_REGEX entries:[%s]\n',
+                             len(self.__dict__[item]))
+
+            return True
 
         # ---------------------------------------------------------------------
+        returnverify = True
+        if not verify_logging_level():
+            returnverify = False
+        elif not verify_files_dir():
+            returnverify = False
+        elif not verify_paths():
+            returnverify = False
+        elif not verify_excluded_folders():
+            returnverify = False
+        elif not verify_ignored_files():
+            returnverify = False
+
         if logging.getLogger().getEffectiveLevel() <= logging.INFO:
             logging.info('\t\t\t\tVerified INI key/values pairs...')
             for item in sorted(self.__dict__):
@@ -473,9 +527,18 @@ if __name__ == "__main__":
     import doctest
     doctest.testmod()
 
-    MYCFG = MyConfig()
-    if MYCFG.processconfig():
-        if MYCFG.verifyconfig():
-            print('Test Myconfig: Ok')
-        else:
-            print('Test Myconfig: Not Ok')
+    def launch_myconfig_test():
+        """ launch_myconfig_test():
+
+            myconfig test function
+        """
+
+        mycfg = MyConfig()
+        if mycfg.processconfig():
+            if mycfg.verifyconfig():
+                print('Test Myconfig: Ok')
+            else:
+                print('Test Myconfig: Not Ok')
+
+    # launch test function
+    launch_myconfig_test()

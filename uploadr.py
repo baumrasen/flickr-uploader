@@ -73,7 +73,7 @@ import lib.UPLDRConstants as UPLDRConstantsClass
 import lib.niceprint as niceprint
 # -----------------------------------------------------------------------------
 # Helper class and functions to load, process and verify INI configuration.
-import lib.myconfig as myconfig
+import lib.MyConfig as MyConfig
 
 
 # =============================================================================
@@ -91,11 +91,11 @@ logging.basicConfig(stream=sys.stderr,
                     UPLDRConstants.W +
                     '[%(levelname)-8s]:[%(name)s] %(message)s')
 # Inits with default configuration values.
-xCfg = myconfig.MyConfig()
+my_cfg = MyConfig.MyConfig()
 # Get LOGGING_LEVEL defaul configuration
-xCfg.LOGGING_LEVEL = int(str(xCfg.LOGGING_LEVEL))
+my_cfg.LOGGING_LEVEL = int(str(my_cfg.LOGGING_LEVEL))
 # Update logging level as per LOGGING_LEVEL from default config
-logging.getLogger().setLevel(xCfg.LOGGING_LEVEL)
+logging.getLogger().setLevel(my_cfg.LOGGING_LEVEL)
 # -----------------------------------------------------------------------------
 
 
@@ -258,32 +258,33 @@ def run_uploadr(ARGS):
     #   FLICK        = Class Uploadr (created in the Main code)
 
     # Print/show arguments
-    if xCfg.LOGGING_LEVEL <= logging.INFO:
+    if my_cfg.LOGGING_LEVEL <= logging.INFO:
         NP.niceprint('Output for arguments(ARGS):')
         pprint.pprint(ARGS)
 
     if ARGS.verbose:
-        NP.niceprint('FILES_DIR: [{!s}]'.format(StrUnicodeOut(xCfg.FILES_DIR)))
+        NP.niceprint('FILES_DIR: [{!s}]'
+                     .format(StrUnicodeOut(my_cfg.FILES_DIR)))
 
-    logging.warning('FILES_DIR: [%s]', StrUnicodeOut(xCfg.FILES_DIR))
+    logging.warning('FILES_DIR: [%s]', StrUnicodeOut(my_cfg.FILES_DIR))
 
-    if xCfg.FILES_DIR == "":
+    if my_cfg.FILES_DIR == "":
         NP.niceprint('Please configure in the INI file [normally uploadr.ini],'
                      ' the name of the folder [FILES_DIR] '
                      'with media available to sync with Flickr.')
         sys.exit(8)
     else:
-        if not os.path.isdir(xCfg.FILES_DIR):
+        if not os.path.isdir(my_cfg.FILES_DIR):
             logging.critical('FILES_DIR: [%s] is not valid.',
-                             StrUnicodeOut(xCfg.FILES_DIR))
+                             StrUnicodeOut(my_cfg.FILES_DIR))
             NP.niceprint('Please configure the name of an existant folder '
                          'in the INI file [normally uploadr.ini] '
                          'with media available to sync with Flickr. '
                          'FILES_DIR: [{!s}] is not valid.'
-                         .format(StrUnicodeOut(xCfg.FILES_DIR)))
+                         .format(StrUnicodeOut(my_cfg.FILES_DIR)))
             sys.exit(8)
 
-    if xCfg.FLICKR["api_key"] == "" or xCfg.FLICKR["secret"] == "":
+    if my_cfg.FLICKR["api_key"] == "" or my_cfg.FLICKR["secret"] == "":
         logging.critical('Please enter an API key and secret in the '
                          'configuration '
                          'script file, normaly uploadr.ini (see README).')
@@ -293,7 +294,7 @@ def run_uploadr(ARGS):
 
     # Instantiate class Uploadr
     logging.debug('Instantiating the Main class FLICK = Uploadr()')
-    FLICK = FlickrUploadr.Uploadr(xCfg, ARGS)
+    FLICK = FlickrUploadr.Uploadr(my_cfg, ARGS)
 
     # Setup the database
     FLICK.setupDB()
@@ -303,7 +304,7 @@ def run_uploadr(ARGS):
     if ARGS.daemon:
         # Will run in daemon mode every SLEEP_TIME seconds
         logging.warning('Will run in daemon mode every [%s] seconds',
-                        xCfg.SLEEP_TIME)
+                        my_cfg.SLEEP_TIME)
         logging.warning('Make sure you have previously authenticated!')
         FLICK.run()
     else:
@@ -404,7 +405,7 @@ UPLDRConstants.media_count = 0
 UPLDRConstants.base_dir = os.path.join(sys.prefix, 'etc')
 UPLDRConstants.ini_file = os.path.join(UPLDRConstants.base_dir, "uploadr.ini")
 
-if xCfg.LOGGING_LEVEL <= logging.DEBUG:
+if my_cfg.LOGGING_LEVEL <= logging.DEBUG:
     logging.debug('      base_dir:[%s]', UPLDRConstants.base_dir)
     logging.debug('           cwd:[%s]', os.getcwd())
     logging.debug('    prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
@@ -455,7 +456,7 @@ else:
 NP.niceprint('--------- (V{!s}) Start time: {!s} ---------(Log:{!s})'
              .format(UPLDRConstants.Version,
                      nutime.strftime(UPLDRConstants.TimeFormat),
-                     xCfg.LOGGING_LEVEL))
+                     my_cfg.LOGGING_LEVEL))
 if __name__ == "__main__":
     # Parse the argumens options
     PARSED_ARGS = parse_arguments()
@@ -489,9 +490,9 @@ if __name__ == "__main__":
             sys.exit(2)
 
     # Source configuration from ini_file
-    xCfg.readconfig(UPLDRConstants.ini_file, ['Config'])
-    if xCfg.processconfig():
-        if xCfg.verifyconfig():
+    my_cfg.readconfig(UPLDRConstants.ini_file, ['Config'])
+    if my_cfg.processconfig():
+        if my_cfg.verifyconfig():
             pass
         else:
             raise ValueError('No config file found or incorrect config!')
@@ -499,17 +500,17 @@ if __name__ == "__main__":
         raise ValueError('No config file found or incorrect config!')
 
     # Update logging level as per LOGGING_LEVEL from INI file
-    logging.getLogger().setLevel(xCfg.LOGGING_LEVEL)
+    logging.getLogger().setLevel(my_cfg.LOGGING_LEVEL)
 
     # CODING: Remove
-    if xCfg.LOGGING_LEVEL <= logging.INFO:
+    if my_cfg.LOGGING_LEVEL <= logging.INFO:
         NP.niceprint('Output for FLICKR Configuration:')
-        pprint.pprint(xCfg.FLICKR)
+        pprint.pprint(my_cfg.FLICKR)
 
     # Ensure that only one instance of this script is running
     try:
         # FileLocker is an alias to portalocker (if available) or fcntl
-        FILELOCK(open(xCfg.LOCK_PATH, 'w'),
+        FILELOCK(open(my_cfg.LOCK_PATH, 'w'),
                  FileLocker.LOCK_EX | FileLocker.LOCK_NB)
     except IOError as err:
         if err.errno == errno.EAGAIN:
@@ -525,6 +526,6 @@ if __name__ == "__main__":
 NP.niceprint('--------- (V{!s}) End time: {!s} -----------(Log:{!s})'
              .format(UPLDRConstants.Version,
                      nutime.strftime(UPLDRConstants.TimeFormat),
-                     xCfg.LOGGING_LEVEL))
+                     my_cfg.LOGGING_LEVEL))
 sys.stderr.write('--------- ' + 'End: ' + ' ---------\n')
 sys.stderr.flush()

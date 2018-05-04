@@ -17,14 +17,7 @@ from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 import logging
 import multiprocessing
 from itertools import islice
-import lib.niceprint as niceprint
-
-# =============================================================================
-# Functions aliases
-#
-#   NP.niceprint = from niceprint module
-# -----------------------------------------------------------------------------
-NP = niceprint.niceprint()
+import lib.NicePrint as NicePrint
 
 
 # -----------------------------------------------------------------------------
@@ -34,20 +27,27 @@ def mprocessing(args_verbose, args_verbose_progress,
                 nprocs, lockDB, running, mutex, itemslist, a_fn, cur):
     """ mprocessing Function
 
-    verbose    = verbose info
+    verbose          = verbose info
     verbose_progress = further verbose
-    nprocs     = Number of processes to launch
-    lockDB     = lock for access to Database
-    running    = Value to count processed items
-    mutex      = mutex for access to value running
-    itemslist  = list of items to be processed
-    a_fn       = a function which is the target of the multiprocessing
-    cur        = cursor variable for DB access
+    nprocs           = Number of processes to launch
+    lockDB           = lock for access to Database
+    running          = Value to count processed items
+    mutex            = mutex for access to value running
+    itemslist        = list of items to be processed
+    a_fn             = a function which is the target of the multiprocessing
+    cur              = cursor variable for DB access
     """
     # proc_pool   = Local variable proc_pool for Pool of processes
     # log_level   = log_level
     # count_total = Total counter of items to distribute/play/indicate progress
     #               len(itemslist)
+
+    # =========================================================================
+    # Functions aliases
+    #
+    #   NPR.NicePrint = from NicePrint module
+    # -------------------------------------------------------------------------
+    NPR = NicePrint.NicePrint()
 
     log_level = logging.getLogger().getEffectiveLevel()
     logging.info('===mprocessing [%s] target_fn():[%s] nprocs:[%s]',

@@ -26,14 +26,14 @@ import random
 import sqlite3 as lite
 from functools import wraps
 import flickrapi
-import lib.niceprint as niceprint
+import lib.NicePrint as NicePrint
 
 # =============================================================================
 # Functions aliases
 #
 #   NPR.niceprint = from niceprint module
 # -----------------------------------------------------------------------------
-NPR = niceprint.niceprint()
+NPR = NicePrint.NicePrint()
 
 
 # -----------------------------------------------------------------------------
@@ -192,15 +192,15 @@ def rate_limited(max_per_second):
                 last_time.debug('NEXT')
 
             except Exception as ex:
-                NPR.reportError(Caught=True,
-                                CaughtPrefix='+++',
-                                CaughtCode='000',
-                                CaughtMsg='Exception on rate_limited_function',
-                                exceptUse=True,
-                                # exceptCode=ex.code,
-                                exceptMsg=ex,
-                                NicePrint=False,
-                                exceptSysInfo=True)
+                NPR.niceerror(caught=True,
+                              caughtprefix='+++',
+                              caughtcode='000',
+                              caughtmsg='Exception on rate_limited_function',
+                              exceptuse=True,
+                              # exceptCode=ex.code,
+                              exceptMsg=ex,
+                              useniceprint=False,
+                              exceptsysinfo=True)
                 raise
             finally:
                 last_time.release()

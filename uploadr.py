@@ -383,10 +383,10 @@ def checkBaseDir_INIfile(base_dir, ini_file):
 # =============================================================================
 # Global Variables
 #
-#   nutime       = for working with time module (import time)
+#   NUTIME = for working with time module (import time)
 #
 # -----------------------------------------------------------------------------
-nutime = time
+NUTIME = time
 # -----------------------------------------------------------------------------
 
 # =============================================================================
@@ -450,9 +450,9 @@ else:
 # Main code
 #
 NPR.niceprint('--------- (V{!s}) Start time: {!s} ---------(Log:{!s})'
-             .format(UPLDRConstants.Version,
-                     nutime.strftime(UPLDRConstants.TimeFormat),
-                     my_cfg.LOGGING_LEVEL))
+              .format(UPLDRConstants.Version,
+                      NUTIME.strftime(UPLDRConstants.TimeFormat),
+                      my_cfg.LOGGING_LEVEL))
 if __name__ == "__main__":
     # Parse the argumens options
     PARSED_ARGS = parse_arguments()
@@ -521,7 +521,7 @@ if __name__ == "__main__":
 
 NPR.niceprint('--------- (V{!s}) End time: {!s} -----------(Log:{!s})'
               .format(UPLDRConstants.Version,
-                      nutime.strftime(UPLDRConstants.TimeFormat),
+                      NUTIME.strftime(UPLDRConstants.TimeFormat),
                       my_cfg.LOGGING_LEVEL))
 sys.stderr.write('--------- ' + 'End: ' + ' ---------\n')
 sys.stderr.flush()

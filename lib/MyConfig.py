@@ -294,11 +294,11 @@ class MyConfig(object):
                 else:
                     raise
             except BaseException:
-                self.niceerror(Caught=True,
-                                  CaughtPrefix='+++ ',
-                                  CaughtCode='999',
-                                  CaughtMsg='Caught an exception INIcheck',
-                                  exceptSysInfo=True)
+                self.niceerror(caught=True,
+                               caughtprefix='+++ ',
+                               caughtcode='999',
+                               caughtmsg='Caught an exception INIcheck',
+                               exceptsysinfo=True)
                 logging.critical('Invalid INI value for:[%s] '
                                  'Using default value:[%s]',
                                  item,
@@ -384,6 +384,7 @@ class MyConfig(object):
                       TOKEN_CACHE
                       TOKEN_PATH
             """
+
             result = True
             for item in ['DB_PATH',  # Check if basedir exists. Unicode Support
                          'LOCK_PATH',

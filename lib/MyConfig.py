@@ -499,6 +499,8 @@ class MyConfig(object):
             returnverify = False
         elif not verify_paths():
             returnverify = False
+        elif not verify_raw_files():
+            returnverify = False
         elif not verify_excluded_folders():
             returnverify = False
         elif not verify_ignored_files():

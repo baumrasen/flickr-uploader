@@ -140,7 +140,7 @@ def callback(progress, verbose_progress):
             print(progress)
 
 
-# -------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # chunk
 #
 # Divides an iterable in slices/chunks of size size
@@ -162,6 +162,42 @@ def chunk(itlist, size):
     # iter, with the second argument () stops creating
     # iterators when it reaches the end
     return iter(lambda: tuple(islice(itlist, size)), ())
+
+
+# -----------------------------------------------------------------------------
+# isGood
+#
+# Checks if res.attrib['stat'] == "ok"
+#
+def isGood(res):
+    """ isGood
+
+        Check res is not None and res.attrib['stat'] == "ok" for XML object
+    """
+    if res is None:
+        return False
+    elif not res == "" and res.attrib['stat'] == "ok":
+        return True
+    else:
+        return False
+
+
+# -----------------------------------------------------------------------------
+# md5checksum
+#
+def md5checksum(filePath):
+    """ md5checksum
+
+        Calculates the MD5 checksum for filePath
+    """
+    with open(filePath, 'rb') as fh:
+        m = hashlib.md5()
+        while True:
+            data = fh.read(8192)
+            if not data:
+                break
+            m.update(data)
+        return m.hexdigest()
 
 
 # -----------------------------------------------------------------------------
@@ -923,7 +959,7 @@ class Uploadr(object):
                     res_set_date,
                     encoding='utf-8',
                     method='xml'))
-                if self.isGood(res_set_date):
+                if isGood(res_set_date):
                     NP.niceprint('Successful date:[{!s}] '
                                  'for file:[{!s}]'
                                  .format(strunicodeout(video_date),
@@ -938,7 +974,7 @@ class Uploadr(object):
                           exceptsysinfo=True)
                 raise
             finally:
-                if not self.isGood(res_set_date):
+                if not isGood(res_set_date):
                     raise IOError(res_set_date)
 
         return True
@@ -1129,7 +1165,7 @@ class Uploadr(object):
                 isNoSet = None
                 logging.info('not_is_already_uploaded:[%s]', isLoaded)
             else:
-                file_checksum = self.md5Checksum(file)
+                file_checksum = md5checksum(file)
                 isLoaded, isCount, isfile_id, isNoSet = \
                     self.is_already_uploaded(file,
                                              file_checksum,
@@ -1154,7 +1190,7 @@ class Uploadr(object):
             # A) File loaded. Not recorded on DB. Update local DB.
             if isLoaded and row is None:
                 if file_checksum is None:
-                    file_checksum = self.md5Checksum(file)
+                    file_checksum = md5checksum(file)
 
                 # Insert into DB files
                 logging.warning(' Already loaded:[%s]...'
@@ -1185,7 +1221,7 @@ class Uploadr(object):
                                 strunicodeout(file), strunicodeout(setName))
 
                 if file_checksum is None:
-                    file_checksum = self.md5Checksum(file)
+                    file_checksum = md5checksum(file)
 
                 # Title Handling
                 if self.ARGS.title:
@@ -1272,13 +1308,13 @@ class Uploadr(object):
                         )
 
                         logging.info('Output for uploadResp:[%s]',
-                                     self.isGood(uploadResp))
+                                     isGood(uploadResp))
                         logging.debug(xml.etree.ElementTree.tostring(
                             uploadResp,
                             encoding='utf-8',
                             method='xml'))
 
-                        if self.isGood(uploadResp):
+                        if isGood(uploadResp):
                             ZuploadOK = True
                             # Save photo_id returned from Flickr upload
                             photo_id = uploadResp.findall('photoid')[0].text
@@ -1570,7 +1606,7 @@ class Uploadr(object):
                         # last_modified time of file by by calling replacePhoto
 
                         if file_checksum is None:
-                            file_checksum = self.md5Checksum(file)
+                            file_checksum = md5checksum(file)
                         if file_checksum != str(row[4]):
                             self.replacePhoto(lock, file, row[1], row[4],
                                               file_checksum, last_modified,
@@ -1678,9 +1714,9 @@ class Uploadr(object):
                         replaceResp,
                         encoding='utf-8',
                         method='xml'))
-                    logging.info('replaceResp:[%s]', self.isGood(replaceResp))
+                    logging.info('replaceResp:[%s]', isGood(replaceResp))
 
-                    if self.isGood(replaceResp):
+                    if isGood(replaceResp):
                         # Update checksum tag at this time.
                         res_add_tag = self.photos_add_tags(
                             file_id,
@@ -1691,7 +1727,7 @@ class Uploadr(object):
                             res_add_tag,
                             encoding='utf-8',
                             method='xml'))
-                        if self.isGood(res_add_tag):
+                        if isGood(res_add_tag):
                             # Gets Flickr file info to obtain all tags
                             # in order to update checksum tag if exists
                             res_get_info = self.photos_get_info(
@@ -1704,7 +1740,7 @@ class Uploadr(object):
                                 method='xml'))
                             # find tag checksum with oldFileMd5
                             # later use such tag_id to delete it
-                            if self.isGood(res_get_info):
+                            if isGood(res_get_info):
                                 tag_id = None
                                 for tag in res_get_info\
                                     .find('photo')\
@@ -1732,7 +1768,7 @@ class Uploadr(object):
                                                   .tostring(remtagResp,
                                                             encoding='utf-8',
                                                             method='xml'))
-                                    if self.isGood(remtagResp):
+                                    if isGood(remtagResp):
                                         NP.niceprint('    Tag removed:[{!s}]'
                                                      .format(
                                                          strunicodeout(file)))
@@ -1761,19 +1797,19 @@ class Uploadr(object):
                                          'to replace, skipping')
                     continue
 
-            if (not self.isGood(replaceResp)) or \
-                (not self.isGood(res_add_tag)) or \
-                    (not self.isGood(res_get_info)):
+            if (not isGood(replaceResp)) or \
+                (not isGood(res_add_tag)) or \
+                    (not isGood(res_get_info)):
                 NP.niceprint('Issue replacing:[{!s}]'
                              .format(strunicodeout(file)))
 
-            if not self.isGood(replaceResp):
+            if not isGood(replaceResp):
                 raise IOError(replaceResp)
 
-            if not self.isGood(res_add_tag):
+            if not isGood(res_add_tag):
                 raise IOError(res_add_tag)
 
-            if not self.isGood(res_get_info):
+            if not isGood(res_get_info):
                 raise IOError(res_get_info)
 
             NP.niceprint('  Replaced file:[{!s}].'
@@ -1977,7 +2013,7 @@ class Uploadr(object):
                 deleteResp,
                 encoding='utf-8',
                 method='xml'))
-            if self.isGood(deleteResp):
+            if isGood(deleteResp):
 
                 dbDeleteRecordLocalDB(lock, file)
 
@@ -2397,7 +2433,7 @@ class Uploadr(object):
                 encoding='utf-8',
                 method='xml'))
 
-            if self.isGood(addPhotoResp):
+            if isGood(addPhotoResp):
                 NP.niceprint(' Added file/set:[{!s}] setId:[{!s}]'
                              .format(strunicodeout(file[1]),
                                      strunicodeout(setId)))
@@ -2558,7 +2594,7 @@ class Uploadr(object):
                       useniceprint=True,
                       exceptsysinfo=True)
         finally:
-            if self.isGood(createResp):
+            if isGood(createResp):
                 logging.warning('createResp["photoset"]["id"]:[%s]',
                                 createResp.find('photoset').attrib['id'])
                 self.logSetCreation(lock,
@@ -2908,7 +2944,7 @@ class Uploadr(object):
             #
             # ... and similar for set1 ...
 
-            if self.isGood(sets):
+            if isGood(sets):
                 cur = con.cursor()
 
                 for row in sets.find('photosets').findall('photoset'):
@@ -3127,11 +3163,11 @@ class Uploadr(object):
                       caughtmsg='Caught exception in photos.search',
                       exceptsysinfo=True)
         finally:
-            if searchIsUploaded is None or not self.isGood(searchIsUploaded):
+            if searchIsUploaded is None or not isGood(searchIsUploaded):
                 logging.error('searchIsUploadedOK:[%s]',
                               'None'
                               if searchIsUploaded is None
-                              else self.isGood(searchIsUploaded))
+                              else isGood(searchIsUploaded))
                 # CODING: how to indicate an error... different from False?
                 # Possibly raising an exception?
                 # raise Exception('photos_search: Max attempts exhausted.')
@@ -3228,11 +3264,11 @@ class Uploadr(object):
                               caughtmsg='Caught exception in getAllContexts',
                               exceptsysinfo=True)
                 finally:
-                    if resp is None or not self.isGood(resp):
+                    if resp is None or not isGood(resp):
                         logging.error('resp.getAllContextsOK:[%s]',
                                       'None'
                                       if resp is None
-                                      else self.isGood(resp))
+                                      else isGood(resp))
                         # CODING: how to indicate an error?
                         # Possibly raising an exception?
                         # raise Exception('photos_getAllContexts: '
@@ -3435,11 +3471,11 @@ class Uploadr(object):
                       caughtmsg='Caught exception in people.getPhotos',
                       exceptsysinfo=True)
         finally:
-            if getPhotosResp is None or not self.isGood(getPhotosResp):
+            if getPhotosResp is None or not isGood(getPhotosResp):
                 logging.error('getPhotosResp:[%s]',
                               'None'
                               if getPhotosResp is None
-                              else self.isGood(getPhotosResp))
+                              else isGood(getPhotosResp))
 
         return getPhotosResp
 
@@ -3531,7 +3567,7 @@ class Uploadr(object):
                           exceptsysinfo=True)
             raise
 
-        if not self.isGood(tagsResp):
+        if not isGood(tagsResp):
             raise IOError(tagsResp)
 
         logging.debug('Output for photo_find_tag:')
@@ -3624,7 +3660,7 @@ class Uploadr(object):
 
             if self.ARGS.verbose:
                 NP.niceprint(' Set Date Reply:[{!s}]'
-                             .format(self.isGood(respDate)))
+                             .format(isGood(respDate)))
 
         except flickrapi.exceptions.FlickrError as ex:
             niceerror(caught=True,
@@ -3650,7 +3686,7 @@ class Uploadr(object):
                       useniceprint=True,
                       exceptsysinfo=True)
         finally:
-            if (respDate is not None) and self.isGood(respDate):
+            if (respDate is not None) and isGood(respDate):
                 logging.debug('Set Date Response: OK!')
 
         return respDate
@@ -4015,7 +4051,7 @@ class Uploadr(object):
         logging.debug(xml.etree.ElementTree.tostring(res,
                                                      encoding='utf-8',
                                                      method='xml'))
-        if self.isGood(res):
+        if isGood(res):
             countflickr = format(res.find('photos').attrib['total'])
             logging.debug('Total photos on flickr: %s', countflickr)
 
@@ -4051,7 +4087,7 @@ class Uploadr(object):
                 encoding='utf-8',
                 method='xml'))
             countnotinsets = 0
-            if self.isGood(res):
+            if isGood(res):
                 countnotinsets = int(format(
                     res.find('photos').attrib['total']))
                 logging.debug('Photos not in sets on flickr: %s',
@@ -4090,7 +4126,7 @@ class Uploadr(object):
                                                          encoding='utf-8',
                                                          method='xml'))
 
-            if self.isGood(res):
+            if isGood(res):
                 for count, row in enumerate(res.find('photos')
                                             .findall('photo')):
                     logging.info('Photo Not in Set: id:[%s] title:[%s]',
@@ -4191,41 +4227,6 @@ class Uploadr(object):
                             useDBoperation, useDBLockReturn)
 
         return useDBLockReturn
-
-    # -------------------------------------------------------------------------
-    # isGood
-    #
-    # Checks if res.attrib['stat'] == "ok"
-    #
-    def isGood(self, res):
-        """ isGood
-
-            If res is b=not None it will return true...
-            if res.attrib['stat'] == "ok" for a given XML object
-        """
-        if res is None:
-            return False
-        elif not res == "" and res.attrib['stat'] == "ok":
-            return True
-        else:
-            return False
-
-    # -------------------------------------------------------------------------
-    # md5Checksum
-    #
-    def md5Checksum(self, filePath):
-        """ md5Checksum
-
-            Calculates the MD5 checksum for filePath
-        """
-        with open(filePath, 'rb') as fh:
-            m = hashlib.md5()
-            while True:
-                data = fh.read(8192)
-                if not data:
-                    break
-                m.update(data)
-            return m.hexdigest()
 
 
 # -----------------------------------------------------------------------------

@@ -70,7 +70,7 @@ import lib.FlickrUploadr as FlickrUploadr
 import lib.UPLDRConstants as UPLDRConstantsClass
 # -----------------------------------------------------------------------------
 # Helper class and functions to print messages.
-import lib.niceprint as niceprint
+import lib.NicePrint as NicePrint
 # -----------------------------------------------------------------------------
 # Helper class and functions to load, process and verify INI configuration.
 import lib.MyConfig as MyConfig
@@ -259,37 +259,37 @@ def run_uploadr(ARGS):
 
     # Print/show arguments
     if my_cfg.LOGGING_LEVEL <= logging.INFO:
-        NP.niceprint('Output for arguments(ARGS):')
+        NPR.niceprint('Output for arguments(ARGS):')
         pprint.pprint(ARGS)
 
     if ARGS.verbose:
-        NP.niceprint('FILES_DIR: [{!s}]'
-                     .format(StrUnicodeOut(my_cfg.FILES_DIR)))
+        NPR.niceprint('FILES_DIR: [{!s}]'
+                      .format(strunicodeout(my_cfg.FILES_DIR)))
 
-    logging.warning('FILES_DIR: [%s]', StrUnicodeOut(my_cfg.FILES_DIR))
+    logging.warning('FILES_DIR: [%s]', strunicodeout(my_cfg.FILES_DIR))
 
     if my_cfg.FILES_DIR == "":
-        NP.niceprint('Please configure in the INI file [normally uploadr.ini],'
-                     ' the name of the folder [FILES_DIR] '
-                     'with media available to sync with Flickr.')
+        NPR.niceprint('Please configure in the INI file [normally uploadr.ini]'
+                      ' the name of the folder [FILES_DIR] '
+                      'with media available to sync with Flickr.')
         sys.exit(8)
     else:
         if not os.path.isdir(my_cfg.FILES_DIR):
             logging.critical('FILES_DIR: [%s] is not valid.',
-                             StrUnicodeOut(my_cfg.FILES_DIR))
-            NP.niceprint('Please configure the name of an existant folder '
-                         'in the INI file [normally uploadr.ini] '
-                         'with media available to sync with Flickr. '
-                         'FILES_DIR: [{!s}] is not valid.'
-                         .format(StrUnicodeOut(my_cfg.FILES_DIR)))
+                             strunicodeout(my_cfg.FILES_DIR))
+            NPR.niceprint('Please configure the name of an existant folder '
+                          'in the INI file [normally uploadr.ini] '
+                          'with media available to sync with Flickr. '
+                          'FILES_DIR: [{!s}] is not valid.'
+                          .format(strunicodeout(my_cfg.FILES_DIR)))
             sys.exit(8)
 
     if my_cfg.FLICKR["api_key"] == "" or my_cfg.FLICKR["secret"] == "":
         logging.critical('Please enter an API key and secret in the '
                          'configuration '
                          'script file, normaly uploadr.ini (see README).')
-        NP.niceprint('Please enter an API key and secret in the configuration '
-                     'script file, normaly uploadr.ini (see README).')
+        NPR.niceprint('Please enter an API key and secret in the configuration'
+                      ' script file, normaly uploadr.ini (see README).')
         sys.exit(9)
 
     # Instantiate class Uploadr
@@ -308,34 +308,34 @@ def run_uploadr(ARGS):
         logging.warning('Make sure you have previously authenticated!')
         FLICK.run()
     else:
-        NP.niceprint('Checking if token is available... '
-                     'if not will authenticate')
+        NPR.niceprint('Checking if token is available... '
+                      'if not will authenticate')
         if not FLICK.checkToken():
             FLICK.authenticate()
 
         if ARGS.add_albums_migrate:
-            NP.niceprint('Performing preparation for migration to 2.7.0',
-                         fname='addAlbumsMigrate')
+            NPR.niceprint('Performing preparation for migration to 2.7.0',
+                          fname='addAlbumsMigrate')
 
             if FLICK.addAlbumsMigrate():
-                NP.niceprint('Successfully added album tags to pics '
-                             'on upload.',
-                             fname='addAlbumsMigrate')
+                NPR.niceprint('Successfully added album tags to pics '
+                              'on upload.',
+                              fname='addAlbumsMigrate')
             else:
                 logging.warning('Failed adding album tags to pics '
                                 'on upload. '
                                 'Please check logs, correct, and retry.')
-                NP.niceprint('Failed adding album tags to pics '
-                             'on upload. '
-                             'Please check logs, correct, and retry.',
-                             fname='addAlbumsMigrate')
+                NPR.niceprint('Failed adding album tags to pics '
+                              'on upload. '
+                              'Please check logs, correct, and retry.',
+                              fname='addAlbumsMigrate')
                 sys.exit(10)
         elif ARGS.list_bad_files:
-            NP.niceprint('Listing badfiles: Start.',
-                         fname='listBadFiles')
+            NPR.niceprint('Listing badfiles: Start.',
+                          fname='listBadFiles')
             FLICK.listBadFiles()
-            NP.niceprint('Listing badfiles: End. No more options will run.',
-                         fname='listBadFiles')
+            NPR.niceprint('Listing badfiles: End. No more options will run.',
+                          fname='listBadFiles')
         else:
             FLICK.removeUselessSetsTable()
             FLICK.getFlickrSets()
@@ -416,18 +416,14 @@ if my_cfg.LOGGING_LEVEL <= logging.DEBUG:
 # =============================================================================
 # Functions aliases
 #
-#   StrUnicodeOut       = from niceprint module
-#   isThisStringUnicode = from niceprint module
-#   niceassert          = from niceprint module
+#   strunicodeout       = from niceprint module
 #   reportError         = from niceprint module
 #   niceprocessedfiles  = from niceprint module
 # -----------------------------------------------------------------------------
-NP = niceprint.niceprint()
-StrUnicodeOut = NP.StrUnicodeOut
-isThisStringUnicode = NP.isThisStringUnicode
-niceassert = NP.niceassert
-reportError = NP.reportError
-niceprocessedfiles = NP.niceprocessedfiles
+NPR = NicePrint.NicePrint()
+strunicodeout = NPR.strunicodeout
+reportError = NPR.reportError
+niceprocessedfiles = NPR.niceprocessedfiles
 # -----------------------------------------------------------------------------
 
 # =============================================================================
@@ -453,7 +449,7 @@ else:
 # =============================================================================
 # Main code
 #
-NP.niceprint('--------- (V{!s}) Start time: {!s} ---------(Log:{!s})'
+NPR.niceprint('--------- (V{!s}) Start time: {!s} ---------(Log:{!s})'
              .format(UPLDRConstants.Version,
                      nutime.strftime(UPLDRConstants.TimeFormat),
                      my_cfg.LOGGING_LEVEL))
@@ -465,14 +461,14 @@ if __name__ == "__main__":
     if PARSED_ARGS.config_file:
         UPLDRConstants.ini_file = PARSED_ARGS.config_file
         logging.info('UPLDRConstants.ini_file:[%s]',
-                     StrUnicodeOut(UPLDRConstants.ini_file))
+                     strunicodeout(UPLDRConstants.ini_file))
         if not checkBaseDir_INIfile(UPLDRConstants.base_dir,
                                     UPLDRConstants.ini_file):
-            reportError(Caught=True,
-                        CaughtPrefix='+++ ',
-                        CaughtCode='601',
-                        CaughtMsg='Invalid -C parameter INI file. Exiting...',
-                        NicePrint=True)
+            reportError(caught=True,
+                        caughtprefix='+++ ',
+                        caughtcode='601',
+                        caughtmsg='Invalid -C parameter INI file. Exiting...',
+                        useniceprint=True)
             sys.exit(2)
     else:
         # sys.argv[0]
@@ -482,11 +478,11 @@ if __name__ == "__main__":
 
         if not checkBaseDir_INIfile(UPLDRConstants.base_dir,
                                     UPLDRConstants.ini_file):
-            reportError(Caught=True,
-                        CaughtPrefix='+++ ',
-                        CaughtCode='602',
-                        CaughtMsg='Invalid sys.argv INI file. Exiting...',
-                        NicePrint=True)
+            reportError(caught=True,
+                        caughtprefix='+++ ',
+                        caughtcode='602',
+                        caughtmsg='Invalid sys.argv INI file. Exiting...',
+                        useniceprint=True)
             sys.exit(2)
 
     # Source configuration from ini_file
@@ -504,7 +500,7 @@ if __name__ == "__main__":
 
     # CODING: Remove
     if my_cfg.LOGGING_LEVEL <= logging.INFO:
-        NP.niceprint('Output for FLICKR Configuration:')
+        NPR.niceprint('Output for FLICKR Configuration:')
         pprint.pprint(my_cfg.FLICKR)
 
     # Ensure that only one instance of this script is running
@@ -523,9 +519,9 @@ if __name__ == "__main__":
     # Run uploader
     run_uploadr(PARSED_ARGS)
 
-NP.niceprint('--------- (V{!s}) End time: {!s} -----------(Log:{!s})'
-             .format(UPLDRConstants.Version,
-                     nutime.strftime(UPLDRConstants.TimeFormat),
-                     my_cfg.LOGGING_LEVEL))
+NPR.niceprint('--------- (V{!s}) End time: {!s} -----------(Log:{!s})'
+              .format(UPLDRConstants.Version,
+                      nutime.strftime(UPLDRConstants.TimeFormat),
+                      my_cfg.LOGGING_LEVEL))
 sys.stderr.write('--------- ' + 'End: ' + ' ---------\n')
 sys.stderr.flush()

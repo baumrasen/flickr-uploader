@@ -23,56 +23,56 @@ UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 
 
 # -----------------------------------------------------------------------------
-# class niceprint to be used to print messages.
+# class NicePrint to be used to print messages.
 #
-class niceprint:
+class NicePrint:
     """
         >>> import sys
-        >>> import lib.niceprint as npc
-        >>> np = npc.niceprint()
+        >>> import lib.NicePrint as npc
+        >>> np = npc.NicePrint()
         >>> if sys.version_info < (3, ):
-        ...     np.isThisStringUnicode('Something') == False
+        ...     np.is_str_unicode('Something') == False
         ... else:
-        ...     np.isThisStringUnicode('Something') == False
+        ...     np.is_str_unicode('Something') == False
         True
         >>> if sys.version_info < (3, ):
-        ...     np.isThisStringUnicode(u'With u prefix') == True
+        ...     np.is_str_unicode(u'With u prefix') == True
         ... else:
-        ...     np.isThisStringUnicode(u'With u prefix') == False
+        ...     np.is_str_unicode(u'With u prefix') == False
         True
-        >>> np.isThisStringUnicode(245)
+        >>> np.is_str_unicode(245)
         False
     """
 
     # -------------------------------------------------------------------------
-    # class niceprint __init__
+    # class NicePrint __init__
     #
     def __init__(self):
-        """ class niceprint __init__
+        """ class NicePrint __init__
         """
         pass
 
     # -------------------------------------------------------------------------
-    # isThisStringUnicode
+    # is_str_unicode
     #
     # Returns true if String is Unicode
     #
-    def isThisStringUnicode(self, astr):
+    def is_str_unicode(self, astr):
         """
         Determines if a string is Unicode (return True) or not (returns False)
         to allow correct print operations.
 
-        Used by StrUnicodeOut function.
+        Used by strunicodeout function.
         Example:
-            niceprint('Checking file:[{!s}]...'.format(
+            NicePrint('Checking file:[{!s}]...'.format(
                                      file.encode('utf-8') \
-                                     if isThisStringUnicode(file) \
+                                     if is_str_unicode(file) \
                                      else file))
         """
         # CODING: Python 2 and 3 compatibility
         # CODING: On Python 3 should always return False to return s
         # in the example
-        #    s.encode('utf-8') if isThisStringUnicode(s) else s
+        #    s.encode('utf-8') if is_str_unicode(s) else s
         if sys.version_info < (3, ):
             if isinstance(astr, unicode):  # noqa
                 result = True
@@ -87,22 +87,22 @@ class niceprint:
         return result
 
     # -------------------------------------------------------------------------
-    # StrUnicodeOut
+    # strunicodeout
     #
     # Returns true if String is Unicode
     #
-    def StrUnicodeOut(self, astr):
+    def strunicodeout(self, astr):
         """
-        Outputs s.encode('utf-8') if isThisStringUnicode(s) else s
-            niceprint('Checking file:[{!s}]...'.format(StrUnicodeOut(file))
+        Outputs s.encode('utf-8') if is_str_unicode(s) else s
+            NicePrint('Checking file:[{!s}]...'.format(strunicodeout(file))
 
-        >>> import lib.niceprint as npc
-        >>> np = npc.niceprint()
-        >>> np.StrUnicodeOut('Hello')
+        >>> import lib.NicePrint as npc
+        >>> np = npc.NicePrint()
+        >>> np.strunicodeout('Hello')
         'Hello'
         """
         astr = '' if astr is None else astr
-        return astr.encode('utf-8') if self.isThisStringUnicode(astr) else astr
+        return astr.encode('utf-8') if self.is_str_unicode(astr) else astr
 
     # -------------------------------------------------------------------------
     # niceprint
@@ -124,8 +124,8 @@ class niceprint:
                       os.getpid(),
                       UPLDRConstants.W,
                       'PRINT',
-                      self.StrUnicodeOut(fname),
-                      self.StrUnicodeOut(astr)))
+                      self.strunicodeout(fname),
+                      self.strunicodeout(astr)))
 
     # -------------------------------------------------------------------------
     # niceassert
@@ -148,86 +148,86 @@ class niceprint:
                        UPLDRConstants.W,
                        'ASSERT',
                        'uploadr',
-                       self.StrUnicodeOut(astr)))
+                       self.strunicodeout(astr)))
 
     # -------------------------------------------------------------------------
-    # reportError
+    # niceerror
     #
     # Provides a messaging wrapper for logging.error, niceprint and
     # str(sys.exc_info() functions.
     #
-    # Examples of use of reportError:
+    # Examples of use of niceerror:
     # except flickrapi.exceptions.FlickrError as ex:
-    #     reportError(Caught=True,
-    #                 CaughtPrefix='+++',
-    #                 CaughtCode='990',
-    #                 CaughtMsg='Flickrapi exception on photos.setdates',
-    #                 exceptUse=True,
-    #                 exceptCode=ex.code,
-    #                 exceptMsg=ex,
-    #                 NicePrint=True,
-    #                 exceptSysInfo=True)
+    #     niceerror(caught=True,
+    #               caughtprefix='+++',
+    #               caughtcode='990',
+    #               caughtmsg='Flickrapi exception on photos.setdates',
+    #               exceptuse=True,
+    #               exceptcode=ex.code,
+    #               exceptmsg=ex,
+    #               useniceprint=True,
+    #               exceptsysinfo=True)
     # except lite.Error as e:
-    #     reportError(Caught=True,
-    #                 CaughtPrefix='+++ DB',
-    #                 CaughtCode='991',
-    #                 CaughtMsg='DB error on INSERT: [{!s}]'
-    #                           .format(e.args[0]),
-    #                 NicePrint=True)
+    #     niceerror(caught=True,
+    #               caughtprefix='+++ DB',
+    #               caughtcode='991',
+    #               caughtmsg='DB error on INSERT: [{!s}]'
+    #                         .format(e.args[0]),
+    #               useniceprint=True)
     #     # Release the lock on error.
     #     self.useDBLock(lock, False)
     #     success = False
     # except:
-    #     reportError(Caught=True,
-    #                 CaughtPrefix='+++',
-    #                 CaughtCode='992',
-    #                 CaughtMsg='Caught exception in XXXX',
-    #                 exceptSysInfo=True)
+    #     niceerror(caught=True,
+    #               caughtprefix='+++',
+    #               caughtcode='992',
+    #               caughtmsg='Caught exception in XXXX',
+    #               exceptsysinfo=True)
     #
-    def reportError(self,
-                    Caught=False, CaughtPrefix='', CaughtCode=0, CaughtMsg='',
-                    NicePrint=False,
-                    exceptUse=False, exceptCode=0, exceptMsg='',
-                    exceptSysInfo=''):
-        """ reportError
+    def niceerror(self,
+                  caught=False, caughtprefix='', caughtcode=0, caughtmsg='',
+                  useniceprint=False,
+                  exceptuse=False, exceptcode=0, exceptmsg='',
+                  exceptsysinfo=''):
+        """ niceerror
 
-          Caught = True/False
-          CaughtPrefix
+          caught = True/False
+          caughtprefix
             ===     Multiprocessing related
             +++     Exceptions handling related
             +++ DB  Database Exceptions handling related
             xxx     Error related
-          CaughtCode = '010'
-          CaughtMsg = 'Flickrapi exception on...'/'DB Error on INSERT'
-          NicePrint = True/False
-          exceptUse = True/False
-          exceptCode = ex.code
-          exceptMsg = ex
-          exceptSysInfo = True/False
+          caughtcode = '010'
+          caughtmsg = 'Flickrapi exception on...'/'DB Error on INSERT'
+          useniceprint = True/False
+          exceptuse = True/False
+          exceptcode = ex.code
+          exceptmsg = ex
+          exceptsysinfo = True/False
         """
 
-        if Caught is not None and Caught:
+        if caught is not None and caught:
             logging.error('%s#%s: %s',
-                          CaughtPrefix,
-                          CaughtCode,
-                          CaughtMsg)
-            if NicePrint is not None and NicePrint:
-                self.niceprint('{!s}#{!s}: {!s}'.format(CaughtPrefix,
-                                                        CaughtCode,
-                                                        CaughtMsg))
-        if exceptUse is not None and exceptUse:
-            logging.error('Error code: [%s]', exceptCode)
-            logging.error('Error code: [%s]', exceptMsg)
-            if NicePrint is not None and NicePrint:
-                self.niceprint('Error code: [{!s}]'.format(exceptCode))
-                self.niceprint('Error code: [{!s}]'.format(exceptMsg))
-        if exceptSysInfo is not None and exceptSysInfo:
+                          caughtprefix,
+                          caughtcode,
+                          caughtmsg)
+            if useniceprint is not None and useniceprint:
+                self.niceprint('{!s}#{!s}: {!s}'.format(caughtprefix,
+                                                        caughtcode,
+                                                        caughtmsg))
+        if exceptuse is not None and exceptuse:
+            logging.error('Error code: [%s]', exceptcode)
+            logging.error('Error code: [%s]', exceptmsg)
+            if useniceprint is not None and useniceprint:
+                self.niceprint('Error code: [{!s}]'.format(exceptcode))
+                self.niceprint('Error code: [{!s}]'.format(exceptmsg))
+        if exceptsysinfo is not None and exceptsysinfo:
             logging.error(str(sys.exc_info()))
-            if NicePrint is not None and NicePrint:
+            if useniceprint is not None and useniceprint:
                 self.niceprint(str(sys.exc_info()))
 
         sys.stderr.flush()
-        if NicePrint is not None and NicePrint:
+        if useniceprint is not None and useniceprint:
             sys.stdout.flush()
 
     # -------------------------------------------------------------------------
@@ -267,6 +267,3 @@ if __name__ == "__main__":
 
     import doctest
     doctest.testmod()
-
-    # Comment following line to allow further debugging/testing
-    sys.exit(0)

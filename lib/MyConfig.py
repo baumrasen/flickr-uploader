@@ -168,8 +168,8 @@ class MyConfig(object):
         #   StrUnicodeOut       = from niceprint module
         # ---------------------------------------------------------------------
         self.npr = niceprint.niceprint()
-        self.str_unicode_out = npr.StrUnicodeOut
-        self.report_error = npr.reportError
+        self.str_unicode_out = self.npr.StrUnicodeOut
+        self.report_error = self.npr.reportError
 
         # Assume default values into class dictionary of values ---------------
         self.__dict__ = dict(zip(self.INIkeys, self.INIvalues))

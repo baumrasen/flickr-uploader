@@ -180,7 +180,8 @@ class MyConfig(object):
                 logging.debug('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                               .format(item,
                                       type(self.__dict__[item]),
-                                      str_unicode_out(self.__dict__[item])))
+                                      self.str_unicode_out(
+                                          self.__dict__[item])))
 
     # -------------------------------------------------------------------------
     # MyConfig.readconfig
@@ -234,7 +235,8 @@ class MyConfig(object):
                 logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                              .format(item,
                                      type(self.__dict__[item]),
-                                     str_unicode_out(self.__dict__[item])))
+                                     self.str_unicode_out(
+                                         self.__dict__[item])))
 
     # -------------------------------------------------------------------------
     # MyConfig.processconfig
@@ -272,13 +274,13 @@ class MyConfig(object):
                 logging.debug('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                               .format(item,
                                       type(INIcheck[item]),
-                                      str_unicode_out(INIcheck[item])))
+                                      self.str_unicode_out(INIcheck[item])))
         # Evaluate values
         for item in sorted(self.__dict__):
             logging.debug('Eval for : [{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                           .format(item,
                                   type(self.__dict__[item]),
-                                  str_unicode_out(self.__dict__[item])))
+                                  self.str_unicode_out(self.__dict__[item])))
 
             try:
                 if INIcheck[item] in ('list', 'int', 'bool', 'str', 'dict'):
@@ -311,7 +313,8 @@ class MyConfig(object):
                               '= [{!s:10s}]'
                               .format(item,
                                       type(self.__dict__[item]),
-                                      str_unicode_out(self.__dict__[item])))
+                                      self.str_unicode_out(
+                                          self.__dict__[item])))
 
         if logging.getLogger().getEffectiveLevel() <= logging.INFO:
             logging.info('\t\t\t\tProcessed INI key/values pairs...')
@@ -319,7 +322,8 @@ class MyConfig(object):
                 logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                              .format(item,
                                      type(self.__dict__[item]),
-                                     str_unicode_out(self.__dict__[item])))
+                                     self.str_unicode_out(
+                                         self.__dict__[item])))
 
         return True
 
@@ -366,7 +370,7 @@ class MyConfig(object):
                 if not os.path.isdir(self.__dict__[item]):
                     logging.critical('%s: [%s] is not a valid folder.',
                                      item,
-                                     str_unicode_out(self.__dict__[item]))
+                                     self.str_unicode_out(self.__dict__[item]))
                     result = False
             return result
 
@@ -394,8 +398,8 @@ class MyConfig(object):
                 if not os.path.isdir(os.path.dirname(self.__dict__[item])):
                     logging.critical('%s:[%s] is not in a valid folder:[%s].',
                                      item,
-                                     str_unicode_out(self.__dict__[item]),
-                                     str_unicode_out(os.path.dirname(
+                                     self.str_unicode_out(self.__dict__[item]),
+                                     self.str_unicode_out(os.path.dirname(
                                          self.__dict__[item])))
                     result = False
             return result
@@ -424,7 +428,8 @@ class MyConfig(object):
                     if not os.path.isdir(self.__dict__[item]):
                         logging.critical('%s: [%s] is not a valid folder.',
                                          item,
-                                         str_unicode_out(self.__dict__[item]))
+                                         self.str_unicode_out(
+                                             self.__dict__[item]))
                         result = False
                     elif not (
                             os.path.isfile(os.path.join(self.__dict__[item],
@@ -464,7 +469,7 @@ class MyConfig(object):
                     out_excluded_folders.append(str(folder))
                 logging.debug('folder from EXCLUDED_FOLDERS:[%s] '
                               'type:[%s]\n',
-                              str_unicode_out(out_excluded_folders[
+                              self.str_unicode_out(out_excluded_folders[
                                   len(out_excluded_folders) - 1]),
                               type(out_excluded_folders[
                                   len(out_excluded_folders) - 1]))
@@ -512,7 +517,8 @@ class MyConfig(object):
                 logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                              .format(item,
                                      type(self.__dict__[item]),
-                                     str_unicode_out(self.__dict__[item])))
+                                     self.str_unicode_out(
+                                         self.__dict__[item])))
 
         return returnverify
 

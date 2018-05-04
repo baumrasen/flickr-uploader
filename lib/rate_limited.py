@@ -198,7 +198,7 @@ def rate_limited(max_per_second):
                               caughtmsg='Exception on rate_limited_function',
                               exceptuse=True,
                               # exceptCode=ex.code,
-                              exceptMsg=ex,
+                              exceptmsg=ex,
                               useniceprint=False,
                               exceptsysinfo=True)
                 raise

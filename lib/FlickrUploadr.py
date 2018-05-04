@@ -67,21 +67,16 @@ import lib.mprocessing as mp
 # =============================================================================
 # Functions aliases
 #
-#   UPLDRConstants      = from UPLDRConstants module
-#   strunicodeout       = from niceprint module
-#   is_str_unicode      = from niceprint module
-#   niceassert          = from niceprint module
-#   niceerror         = from niceprint module
-#   niceprocessedfiles  = from niceprint module
+#   strunicodeout       = from NicePrint module
+#   niceerror           = from NicePrint module
+#   retry               = from rate_limited
 # -----------------------------------------------------------------------------
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 NP = NicePrint.NicePrint()
 strunicodeout = NP.strunicodeout
-is_str_unicode = NP.is_str_unicode
-niceassert = NP.niceassert
 niceerror = NP.niceerror
-niceprocessedfiles = NP.niceprocessedfiles
 retry = rate_limited.retry
+
 NUTIME = time
 # -----------------------------------------------------------------------------
 
@@ -433,7 +428,7 @@ class Uploadr(object):
             count = 0
             for row in rows:
                 if (not os.path.isfile(row[1].decode('utf-8')
-                                       if is_str_unicode(row[1])
+                                       if NP.is_str_unicode(row[1])
                                        else row[1])):
                     # Running in single processing mode, no need for lock
                     success = self.deleteFile(row, cur)
@@ -568,12 +563,12 @@ class Uploadr(object):
                                  .format(str(self.xCfg.DRIP_TIME)))
                     NUTIME.sleep(self.xCfg.DRIP_TIME)
                 count = count + 1
-                niceprocessedfiles(count,
-                                   UPLDRConstantsClass.media_count,
-                                   False)
+                NP.niceprocessedfiles(count,
+                                      UPLDRConstantsClass.media_count,
+                                      False)
 
             # Show number of total files processed
-            niceprocessedfiles(count, UPLDRConstantsClass.media_count, True)
+            NP.niceprocessedfiles(count, UPLDRConstantsClass.media_count, True)
 
         # Closing DB connection
         if con is not None:
@@ -669,8 +664,8 @@ class Uploadr(object):
             """
 
             assert ConvertOrCopyTags in ['Convert', 'CopyTags'],\
-                niceassert('convertRawFileCommand: wrong argument:[{!s}]'
-                           .format(ConvertOrCopyTags))
+                NP.niceassert('convertRawFileCommand: wrong argument:[{!s}]'
+                              .format(ConvertOrCopyTags))
 
             resultCmd = True
             if ConvertOrCopyTags == 'Convert':
@@ -728,9 +723,9 @@ class Uploadr(object):
         # fileExt = FFname's extension (without the ".")
         fileExt = os.path.splitext(Ffname)[-1][1:].lower()
         assert strunicodeout(Fext) == strunicodeout(fileExt),\
-            niceassert('File extensions differ:[{!s}]!=[{!s}]'
-                       .format(strunicodeout(Fext),
-                               strunicodeout(fileExt)))
+            NP.niceassert('File extensions differ:[{!s}]!=[{!s}]'
+                          .format(strunicodeout(Fext),
+                                  strunicodeout(fileExt)))
 
         if not os.path.exists(os.path.join(Ddirpath, Ffnameonly) + ".JPG"):
             logging.info('.....Create JPG:[%s] jpg:[%s] ext:[%s]',
@@ -878,12 +873,12 @@ class Uploadr(object):
         for excluded_dir in self.xCfg.EXCLUDED_FOLDERS:
             logging.debug('type(excluded_dir):[%s]', type(excluded_dir))
             logging.debug('is excluded_dir unicode?[%s]',
-                          is_str_unicode(excluded_dir))
+                          NP.is_str_unicode(excluded_dir))
             logging.debug('type(filename):[%s]', type(filename))
             logging.debug('is filename unicode?[{%s]',
-                          is_str_unicode(filename))
+                          NP.is_str_unicode(filename))
             logging.debug('is os.path.dirname(filename) unicode?[%s]',
-                          is_str_unicode(os.path.dirname(filename)))
+                          NP.is_str_unicode(os.path.dirname(filename)))
             logging.debug('excluded_dir:[%s] filename:[%s]',
                           strunicodeout(excluded_dir),
                           strunicodeout(filename))
@@ -980,7 +975,7 @@ class Uploadr(object):
             logging.warning('===Multiprocessing=== out.mutex.release(w)')
 
             # Show number of files processed so far
-            niceprocessedfiles(xcount, ctotal, False)
+            NP.niceprocessedfiles(xcount, ctotal, False)
 
     # -------------------------------------------------------------------------
     # uploadFile
@@ -1487,7 +1482,7 @@ class Uploadr(object):
                     NP.niceprint('Successful file:[{!s}]'
                                  .format(strunicodeout(file)))
 
-                    assert photo_id is not None, niceassert(
+                    assert photo_id is not None, NP.niceassert(
                         'photo_id None:[{!s}]'
                         .format(strunicodeout(file)))
                     # Save file_id: from uploadResp or is_already_uploaded
@@ -1652,7 +1647,7 @@ class Uploadr(object):
             #    - the flickrapi seems to fail with filename
             # so I've used photo FileObj and filename='dummy'
             photo = open(file.encode('utf-8'), 'rb')\
-                if is_str_unicode(file)\
+                if NP.is_str_unicode(file)\
                 else open(file, 'rb')
             logging.debug('photo:[%s] type(photo):[%s]', photo, type(photo))
 
@@ -2096,7 +2091,8 @@ class Uploadr(object):
         NP.niceprint('Daemon mode run.')
         while True:
             NP.niceprint(' Daemon mode go:[{!s}]'
-                         .format(NUTIME.strftime(UPLDRConstants.TimeFormat)))
+                         .format(NUTIME.strftime(
+                             UPLDRConstants.TimeFormat)))
             # run upload
             self.upload()
             NP.niceprint('Daemon mode out:[{!s}]'
@@ -2128,8 +2124,8 @@ class Uploadr(object):
               True: 2014/05/05
         """
 
-        assert len(afile) > 0, niceassert('len(afile) is not > 0:'
-                                          .format(afile))
+        assert len(afile) > 0, NP.niceassert('len({!s}) is not > 0:'
+                                             .format(strunicodeout(afile)))
 
         logging.debug('getSetNameFromFile in: '
                       'afile:[%s] aFILES_DIR=[%s] aFULL_SET_NAME:[%s]',
@@ -2212,7 +2208,7 @@ class Uploadr(object):
                 logging.info('===Multiprocessing=== out.mutex.release(w)')
 
                 # Show number of files processed so far
-                niceprocessedfiles(xcount, cTotal, False)
+                NP.niceprocessedfiles(xcount, cTotal, False)
 
         # Closing DB connection
         if fn_con is not None:
@@ -2580,7 +2576,7 @@ class Uploadr(object):
                         createResp,
                         encoding='utf-8',
                         method='xml'))
-                    niceerror(exceptUse=False,
+                    niceerror(exceptuse=False,
                               exceptcode=createResp['code']
                               if 'code' in createResp
                               else createResp,
@@ -2931,11 +2927,11 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     primaryPhotoId = row.attrib['primary']
 
                     logging.debug('is_str_unicode [setId]:%s',
-                                  is_str_unicode(setId))
+                                  NP.is_str_unicode(setId))
                     logging.debug('is_str_unicode [setName]:%s',
-                                  is_str_unicode(setName))
+                                  NP.is_str_unicode(setName))
                     logging.debug('is_str_unicode [primaryPhotoId]:%s',
-                                  is_str_unicode(primaryPhotoId))
+                                  NP.is_str_unicode(primaryPhotoId))
 
                     if self.ARGS.verbose:
                         NP.niceprint('  Add Set to DB:[{!s}] '
@@ -3025,7 +3021,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                     sets,
                     encoding='utf-8',
                     method='xml'))
-                niceerror(exceptUse=True,
+                niceerror(exceptuse=True,
                           exceptcode=sets['code']
                           if 'code' in sets
                           else sets,
@@ -3739,7 +3735,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                           caughtcode='216',
                           caughtmsg='Exception on photos_find_tag',
                           exceptuse=True,
-                          exceptcode=ex.code,
+                          # exceptcode=ex.code,
                           exceptmsg=ex,
                           useniceprint=False,
                           exceptsysinfo=True)
@@ -3773,7 +3769,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
             logging.info('===Multiprocessing=== out.mutex.release(w)')
 
             # Show number of files processed so far
-            niceprocessedfiles(xcount, cTotal, False)
+            NP.niceprocessedfiles(xcount, cTotal, False)
 
             # Control pace (rate limit) of each proceess
             self.rate4maddAlbumsMigrate()
@@ -3877,7 +3873,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                   caughtcode='216',
                                   caughtmsg='Exception on photos_find_tag',
                                   exceptuse=True,
-                                  exceptcode=ex.code,
+                                  # exceptcode=ex.code,
                                   exceptmsg=ex,
                                   useniceprint=False,
                                   exceptsysinfo=True)
@@ -3892,7 +3888,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
 
                         terr = True
 
-                        niceprocessedfiles(count, countTotal, False)
+                        NP.niceprocessedfiles(count, countTotal, False)
 
                         continue
 
@@ -3908,9 +3904,9 @@ set0 = sets.find('photosets').findall('photoset')[0]
                             res_add_tag,
                             encoding='utf-8',
                             method='xml'))
-                    niceprocessedfiles(count, countTotal, False)
+                    NP.niceprocessedfiles(count, countTotal, False)
 
-                niceprocessedfiles(count, countTotal, True)
+                NP.niceprocessedfiles(count, countTotal, True)
 
         return True
 
@@ -3965,7 +3961,7 @@ set0 = sets.find('photosets').findall('photoset')[0]
                                               NUTIME.localtime(row[5]))))
                 sys.stdout.flush()
 
-            niceprocessedfiles(count, countTotal, True)
+            NP.niceprocessedfiles(count, countTotal, True)
 
         return True
 

@@ -47,20 +47,20 @@ DATA_FILES = [('', ['uploadr.ini', 'uploadr.cron'])]
 # Except, perhaps the License and Trove Classifiers!
 # If you change the License, remember to change the Trove Classifier for that!
 
-here = os.path.abspath(os.path.dirname(__file__))
+HERE = os.path.abspath(os.path.dirname(__file__))
 
 # Import the README and use it as the long-description.
 # Note: this only works if 'README.rst' is present in your MANIFEST.in file!
-with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
-    long_description = '\n' + f.read()
+with io.open(os.path.join(HERE, 'README.md'), encoding='utf-8') as f:
+    LONG_DESCRIPTION = '\n' + f.read()
 
 # Load the package's __version__.py module as a dictionary.
-about = {}
+ABOUT = {}
 if not VERSION:
-    with open(os.path.join(here, LIB, '__version__.py')) as f:
-        exec(f.read(), about)
+    with open(os.path.join(HERE, LIB, '__version__.py')) as f:
+        exec(f.read(), ABOUT)
 else:
-    about['__version__'] = VERSION
+    ABOUT['__version__'] = VERSION
 
 
 class UploadCommand(Command):
@@ -91,7 +91,7 @@ class UploadCommand(Command):
         """run"""
         try:
             self.bstatus('Removing previous builds…')
-            rmtree(os.path.join(here, 'dist'))
+            rmtree(os.path.join(HERE, 'dist'))
         except OSError:
             pass
 
@@ -103,9 +103,9 @@ class UploadCommand(Command):
         # self.bstatus('Uploading the package to PyPi via Twine...')
         # os.system('twine upload dist/*')
 
-        # upload to GitHub disbled for now
+        # upload to GitHub disabled for now
         # self.bstatus('Pushing git tags...')
-        # os.system('git tag v{0}'.format(about['__version__']))
+        # os.system('git tag v{0}'.format(ABOUT['__version__']))
         # os.system('git push --tags')
 
         sys.exit()
@@ -208,9 +208,9 @@ class InstallCfg(Command):
 # Where the magic happens:
 setup(
     name=NAME,
-    version=about['__version__'],
+    version=ABOUT['__version__'],
     description=DESCRIPTION,
-    long_description=long_description,
+    long_description=LONG_DESCRIPTION,
     author=AUTHOR,
     author_email=EMAIL,
     # Support for this feature is relatively recent.

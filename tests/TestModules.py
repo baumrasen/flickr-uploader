@@ -34,7 +34,7 @@ class TestNicePrintMethods(unittest.TestCase):
         npr = NicePrint.NicePrint()
 
         with test.support.captured_stdout() as astr:
-            npr.NicePrint('hello')
+            npr.niceprint('hello')
 
         print(astr.getvalue())
         print('type:{}'.format(type(astr)))

@@ -30,7 +30,7 @@ before_install:
 # =============================================================================
 # command to install dependencies
 install:
-# Install requirements  
+# Install requirements
   - pip install -r requirements.txt
 # Get deletr to delete all pics Flickr prior to a run
   - wget https://github.com/oPromessa/flickr-deletr/archive/master.tar.gz -O flickr-deletr-master.tar.gz
@@ -67,7 +67,7 @@ env:
   # ---------------------------------------------------------------------------
   # Matrix of Test Scenarios
   #   Help
-  #   DryRun (disabled for now)
+  #   DryRunNoToken
   #   Badfiles (disabled for now)
   #   Multiprocessing
   #   addAlbumsMigrate
@@ -77,11 +77,11 @@ env:
   #   NoVerbose
 
   matrix:
-# TestScenario: Help, Delete DryRun, BadFiles, MultiProcessing, Remove, Replace, RemoveReplace, Old273INI
+# TestScenario: Help, Delete, DryRunNoToken, BadFiles, MultiProcessing, Remove, Replace, RemoveReplace, Old273INI
 # Help
     - TestScenario=Help UploadrOptions="$VerboseVar --help" DeleteAllFromFlickr=1
-# DryRun + no token
-    - TestScenario=DryRun UploadrOptions="$VerboseVar -n -p 10"
+# DryRunNoToken
+    - TestScenario=DryRunNoToken UploadrOptions="$VerboseVar -n -p 10"
 # Badfiles
     #- TestScenario=BadFiles UploadrOptions="$VerboseVar $BadFilesVar"
 # Multiprocessing
@@ -98,7 +98,7 @@ env:
     - TestScenario=Old273INI UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -p 10"
 # NoVerbose
     - TestScenario=NoVerbose UploadrOptions="-p 25"
-    
+
 # =============================================================================
 # before_script
 #    - Get database token ready
@@ -165,12 +165,12 @@ script:
   - echo DBRUN1------------------------------Start DB sets check
   - diff <(sed -r 's/^[0-9]{17}\|/REPLACE\|/' dbrun1.log) <(sed -r 's/^[0-9]{17}\|/REPLACE\|/' tests/dbrunok.log) || echo ok
   - echo DBRUN1--------------------------------End DB sets check
-  
+
 # WAIT TIME BEFORE SECOND RUN -------------------------------------------------
   - sleep $WAIT_TIME
 
 # Second RUN ------------------------------------------------------------------
-  - if [[ $TestScenario == DryRun ]]; then rm -fr token; fi
+  - if [[ $TestScenario == DryRunNoToken ]]; then rm -fr token; fi
 
   - if [[ $TestScenario == addAlbumsMigrate ]]; then sqlite3 flickrdb 'PRAGMA user_version="2"'; fi
   - if [[ $TestScenario == addAlbumsMigrate ]]; then export UploadrOptions="$UploadrOptions --add-albums-migrate"; echo $UploadrOptions; fi
@@ -184,12 +184,13 @@ script:
   - if [[ $TestScenario == ExcludedFolders ]]; then cp ./tests/uploadr_excluded.ini ./uploadr.ini; cp ./tests/uploadr_excluded.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini; fi
 
   - if [[ $TestScenario == Old273INI ]]; then cp ./tests/uploadr_excluded_2.7.3.ini ./uploadr.ini; cp ./tests/uploadr_excluded_2.7.3.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini; fi
-  
+
   - if [[ $TestScenario == NoVerbose ]]; then cp ./tests/uploadr_NoVerbose.ini ./uploadr.ini; cp ./tests/uploadr_NoVerbose.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini; fi
 
 # Run coverage uploadr.ini
-  - if [[ $TestScenario == Old273INI ]]; then coverage run -a --concurrency multiprocessing ./uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst < /home/travis/build/oPromessa/flickr-uploader/verifiercode.txt ; fi
-  - if [[ $TestScenario != Old273INI ]]; then coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst < /home/travis/build/oPromessa/flickr-uploader/verifiercode.txt; fi
+  - if [[ $TestScenario == Old273INI ]]; then coverage run -a --concurrency multiprocessing ./uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst; fi
+  - if [[ $TestScenario == DryRunNoToken ]]; then coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst < /home/travis/build/oPromessa/flickr-uploader/verifiercode.txt || echo ok; fi
+  - if [[ $TestScenario != Old273INI && $TestScenario != DryRunNoToken ]]; then coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst; fi
 
   #- coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
@@ -219,7 +220,7 @@ after_failure:
   - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   - python tests/drop.py --token $DROPBOX_TOKEN dbrun1.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   - python tests/drop.py --token $DROPBOX_TOKEN dbrun2.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
-  
+
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst
 

@@ -392,6 +392,7 @@ class Uploadr(object):
         NP.niceprint('*****Removing files from Excluded Folders*****')
 
         if not self.checkToken():
+            # authenticate sys.exits in case of failure
             self.authenticate()
         con = lite.connect(self.xCfg.DB_PATH)
         con.text_factory = str
@@ -439,6 +440,7 @@ class Uploadr(object):
         NP.niceprint('*****Removing deleted files*****')
 
         if not self.checkToken():
+            # authenticate sys.exits in case of failure
             self.authenticate()
         con = lite.connect(self.xCfg.DB_PATH)
         con.text_factory = str
@@ -3761,10 +3763,10 @@ class Uploadr(object):
                                             else setName))
                 NP.niceprint('Found:[{!s}] TagId:[{!s}]'
                              .format(tfind, tid))
-            except Exception as ex:
+            except (flickrapi.exceptions.FlickrError, Exception) as ex:
                 niceerror(caught=True,
                           caughtprefix='+++',
-                          caughtcode='216',
+                          caughtcode='214',
                           caughtmsg='Exception on photos_find_tag',
                           exceptuse=True,
                           # exceptcode=ex.code,
@@ -3827,6 +3829,9 @@ class Uploadr(object):
         mmutex = None
         mrunning = None
 
+        if not self.checkToken():
+            # authenticate sys.exits in case of failure
+            self.authenticate()
         con = lite.connect(self.xCfg.DB_PATH)
         con.text_factory = str
         with con:
@@ -3899,7 +3904,7 @@ class Uploadr(object):
                                                     else setName))
                         NP.niceprint('Found:[{!s}] TagId:[{!s}]'
                                      .format(tfind, tid))
-                    except Exception as ex:
+                    except (flickrapi.exceptions.FlickrError, Exception) as ex:
                         niceerror(caught=True,
                                   caughtprefix='+++',
                                   caughtcode='217',

@@ -303,10 +303,19 @@ def run_uploadr(args):
 
     if args.daemon:
         # Will run in daemon mode every SLEEP_TIME seconds
-        logging.warning('Will run in daemon mode every [%s] seconds',
-                        my_cfg.SLEEP_TIME)
-        logging.warning('Make sure you have previously authenticated!')
-        FLICK.run()
+        if FLICK.checkToken():
+            logging.warning('Will run in daemon mode every [%s] seconds',
+                            my_cfg.SLEEP_TIME)
+            logging.warning('Make sure you have previously authenticated!')
+            NPR.niceprint('Will run in daemon mode every [{!s}] seconds'
+                          .format(my_cfg.SLEEP_TIME))
+            FLICK.run()
+        else:
+            logging.warning('Not able to connect to Flickr.'
+                            'Make sure you have previously authenticated!')
+            NPR.niceprint('Not able to connect to Flickr.'
+                          'Make sure you have previously authenticated!')
+            sys.exit(8)
     else:
         NPR.niceprint('Checking if token is available... '
                       'if not will authenticate')

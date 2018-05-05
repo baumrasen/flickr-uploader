@@ -123,6 +123,7 @@ before_script:
   - touch /home/travis/build/oPromessa/flickr-uploader/nohup.lst
   - touch /home/travis/build/oPromessa/flickr-uploader/dbrun1.log
   - touch /home/travis/build/oPromessa/flickr-uploader/dbrun2.log
+  - echo 123-456-789 > /home/travis/build/oPromessa/flickr-uploader/verifiercode.txt
 # INI File for deletr... to bypass erro "pytest --doctest-modules" exited with 2.
   - cp flickr-deletr-master/tests/deletr.ini /home/travis/virtualenv/python$pythonVersion/bin/deletr.ini || cp flickr-deletr-master/tests/deletr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/deletr.ini
 # =============================================================================
@@ -187,8 +188,8 @@ script:
   - if [[ $TestScenario == NoVerbose ]]; then cp ./tests/uploadr_NoVerbose.ini ./uploadr.ini; cp ./tests/uploadr_NoVerbose.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini; fi
 
 # Run coverage uploadr.ini
-  - if [[ $TestScenario == Old273INI ]]; then coverage run -a --concurrency multiprocessing ./uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst; fi
-  - if [[ $TestScenario != Old273INI ]]; then coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst; fi
+  - if [[ $TestScenario == Old273INI ]]; then coverage run -a --concurrency multiprocessing ./uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst < /home/travis/build/oPromessa/flickr-uploader/verifiercode.txt ; fi
+  - if [[ $TestScenario != Old273INI ]]; then coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst < /home/travis/build/oPromessa/flickr-uploader/verifiercode.txt; fi
 
   #- coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log

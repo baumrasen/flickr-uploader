@@ -129,7 +129,7 @@ class MyConfig(object):
         # TOKEN_CACHE
         "os.path.join(os.path.dirname(sys.argv[0]), 'token')",
         # TOKEN_PATH
-        "os.path.join(os.path.dirname(sys.argv[0]), '.flickrToken')"
+        "os.path.join(os.path.dirname(sys.argv[0]), '.flickrToken')",
         # EXCLUDED_FOLDERS (need to process for unicode support)
         "['@eaDir','#recycle','.picasaoriginals','_ExcludeSync',\
           'Corel Auto-Preserve','Originals',\
@@ -397,7 +397,9 @@ class MyConfig(object):
                         'utf-8') \
                         if sys.version_info < (3, ) \
                         else str(self.__dict__[item])
-                if not os.path.isdir(os.path.dirname(self.__dict__[item])):
+                if (len(os.path.dirname(self.__dict__[item])) > 0 and
+                        not os.path.isdir(
+                            os.path.dirname(self.__dict__[item]))):
                     logging.critical('%s:[%s] is not in a valid folder:[%s].',
                                      item,
                                      self.strunicodeout(self.__dict__[item]),

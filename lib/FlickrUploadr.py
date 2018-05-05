@@ -307,7 +307,9 @@ class Uploadr(object):
                         'checkToken:(nuflickr.token_cache.token is None):[%s]',
                         self.token is None,
                         self.nuflickr is None,
-                        self.nuflickr.token_cache.token is None)
+                        self.nuflickr.token_cache.token is None
+                        if self.nuflickr is not None
+                        else 'Not valid as nuflickr is None')
 
         return self.nuflickr.token_cache.token is not None
 
@@ -2732,7 +2734,8 @@ class Uploadr(object):
             # Closing DB connection
             if con is not None:
                 con.close()
-            NP.niceprint('Completed database setup')
+
+        NP.niceprint('Completed database setup')
 
     # -------------------------------------------------------------------------
     # cleanDBbadfiles

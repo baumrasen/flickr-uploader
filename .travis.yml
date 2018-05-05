@@ -62,7 +62,7 @@ env:
     - ListPhotosNotInSet="-l 100"
     - TAIL_LINES=20    # Tail $TAIL_LINES for output logging. Default: 20
     - WAIT_TIME=1      # Sleep time between first and second run
-# To ensure an empty Flickr database. Set DeleteAllFromFlickr=1. 0 otherwise.
+# To ensure an empty Flickr. Set DeleteAllFromFlickr=1. 0 otherwise.
     - DeleteAllFromFlickr=0
   # ---------------------------------------------------------------------------
   # Matrix of Test Scenarios
@@ -80,8 +80,8 @@ env:
 # TestScenario: Help, Delete DryRun, BadFiles, MultiProcessing, Remove, Replace, RemoveReplace, Old273INI
 # Help
     - TestScenario=Help UploadrOptions="$VerboseVar --help" DeleteAllFromFlickr=1
-# DryRun
-    #- TestScenario=DryRun UploadrOptions="$VerboseVar -n"
+# DryRun + no token
+    - TestScenario=DryRun UploadrOptions="$VerboseVar -n -p 10"
 # Badfiles
     #- TestScenario=BadFiles UploadrOptions="$VerboseVar $BadFilesVar"
 # Multiprocessing
@@ -140,7 +140,7 @@ script:
   - python tests/TestModules.py
 
 # DELETE RUN: DeleteAllFromFlickr ==1 -----------------------------------------
-# Comaptiblw with Python 2.7 only!
+# Comaptible with Python 2.7 only!
   - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then cp flickr-deletr-master/tests/deletr.ini flickr-deletr-master/deletr.ini; fi
   - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then cp token/oauth-tokens.sqlite flickr-deletr-master/token/oauth-tokens.sqlite; fi
   - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then coverage run -a --concurrency multiprocessing ./flickr-deletr-master/delete.py; fi
@@ -154,21 +154,23 @@ script:
   - coverage combine
   - coverage report -m uploadr.py
 
-# DB OUTPUT for REFERENCE RUN#1------------------------------------------------
+# DB OUTPUT for REFERENCE RUN#1
   - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb "SELECT *, datetime( last_modified, 'unixepoch', 'localtime') FROM files ORDER BY path;"; fi
   - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT * FROM badfiles ORDER BY path;'; fi
   - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT * FROM sets ORDER BY name;'; fi
   - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;'; fi
   - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;' > dbrun1.log; fi
   - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT sets.set_id, sets.name, files_id, path FROM sets, files WHERE sets.set_id = files.set_id ORDER BY sets.name, path;'; fi
-  - echo DBRUN1-----Start DB sets check
+  - echo DBRUN1------------------------------Start DB sets check
   - diff <(sed -r 's/^[0-9]{17}\|/REPLACE\|/' dbrun1.log) <(sed -r 's/^[0-9]{17}\|/REPLACE\|/' tests/dbrunok.log) || echo ok
-  - echo DBRUN1-------End DB sets check
+  - echo DBRUN1--------------------------------End DB sets check
   
 # WAIT TIME BEFORE SECOND RUN -------------------------------------------------
   - sleep $WAIT_TIME
 
 # Second RUN ------------------------------------------------------------------
+  - if [[ $TestScenario == DryRun ]]; then rm -fr token; fi
+
   - if [[ $TestScenario == addAlbumsMigrate ]]; then sqlite3 flickrdb 'PRAGMA user_version="2"'; fi
   - if [[ $TestScenario == addAlbumsMigrate ]]; then export UploadrOptions="$UploadrOptions --add-albums-migrate"; echo $UploadrOptions; fi
 

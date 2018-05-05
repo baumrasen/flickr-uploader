@@ -286,7 +286,7 @@ class Uploadr(object):
             raise
 
     # -------------------------------------------------------------------------
-    # checkToken
+    # check_token
     #
     # If available, obtains the flickrapi Cached Token from local file.
     #
@@ -294,24 +294,28 @@ class Uploadr(object):
     #   True: if self.token is defined and allows flicrk 'delete' operation
     #   False: if self.token is not defined or flicrk 'delete' is not allowed
     #
-    def checkToken(self):
-        """ checkToken
+    def check_token(self):
+        """ check_token
 
             flickr.auth.checkToken
 
             Returns the credentials attached to an authentication token.
         """
+        result = False
+        logging.warning(
+            'check_token:(self.token is None):[%s]'
+            'check_token:(nuflickr is None):[%s]'
+            'check_token:(nuflickr.token_cache.token is None):[%s]',
+            self.token is None,
+            self.nuflickr is None,
+            self.nuflickr.token_cache.token is None
+            if self.nuflickr is not None
+            else 'Not valid as nuflickr is None')
 
-        logging.warning('checkToken:(self.token is None):[%s]'
-                        'checkToken:(nuflickr is None):[%s]'
-                        'checkToken:(nuflickr.token_cache.token is None):[%s]',
-                        self.token is None,
-                        self.nuflickr is None,
-                        self.nuflickr.token_cache.token is None
-                        if self.nuflickr is not None
-                        else 'Not valid as nuflickr is None')
+        if self.nuflickr is not None:
+            result = self.nuflickr.token_cache.token is not None
 
-        return self.nuflickr.token_cache.token is not None
+        return result
 
     # -------------------------------------------------------------------------
     # authenticate
@@ -393,7 +397,7 @@ class Uploadr(object):
         """
         NP.niceprint('*****Removing files from Excluded Folders*****')
 
-        if not self.checkToken():
+        if not self.check_token():
             # authenticate sys.exits in case of failure
             self.authenticate()
         con = lite.connect(self.xCfg.DB_PATH)
@@ -441,7 +445,7 @@ class Uploadr(object):
 
         NP.niceprint('*****Removing deleted files*****')
 
-        if not self.checkToken():
+        if not self.check_token():
             # authenticate sys.exits in case of failure
             self.authenticate()
         con = lite.connect(self.xCfg.DB_PATH)
@@ -3832,7 +3836,7 @@ class Uploadr(object):
         mmutex = None
         mrunning = None
 
-        if not self.checkToken():
+        if not self.check_token():
             # authenticate sys.exits in case of failure
             self.authenticate()
         con = lite.connect(self.xCfg.DB_PATH)

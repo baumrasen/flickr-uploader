@@ -292,7 +292,7 @@ def run_uploadr(args):
                       ' script file, normaly uploadr.ini (see README).')
         sys.exit(9)
 
-    # Instantiate class Uploadr
+    # Instantiate class Uploadr. getCachedToken is called on __init__
     logging.debug('Instantiating the Main class FLICK = Uploadr()')
     FLICK = FlickrUploadr.Uploadr(my_cfg, args)
 
@@ -303,7 +303,7 @@ def run_uploadr(args):
 
     if args.daemon:
         # Will run in daemon mode every SLEEP_TIME seconds
-        if FLICK.checkToken():
+        if FLICK.check_token():
             logging.warning('Will run in daemon mode every [%s] seconds',
                             my_cfg.SLEEP_TIME)
             logging.warning('Make sure you have previously authenticated!')
@@ -319,7 +319,8 @@ def run_uploadr(args):
     else:
         NPR.niceprint('Checking if token is available... '
                       'if not will authenticate')
-        if not FLICK.checkToken():
+        if not FLICK.check_token():
+            # authenticate sys.exits in case of failure
             FLICK.authenticate()
 
         if args.add_albums_migrate:

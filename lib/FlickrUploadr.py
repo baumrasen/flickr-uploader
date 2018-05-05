@@ -530,7 +530,7 @@ class Uploadr(object):
                 except lite.Error as e:
                     niceerror(caught=True,
                               caughtprefix='+++ DB',
-                              caughtcode='999',
+                              caughtcode='015',
                               caughtmsg='DB error on DB select: [{!s}]'
                               .format(e.args[0]),
                               useniceprint=True,
@@ -731,7 +731,7 @@ class Uploadr(object):
             except BaseException:
                 niceerror(caught=True,
                           caughtprefix='+++',
-                          caughtcode='999',
+                          caughtcode='016',
                           caughtmsg='Error calling exiftool:[{!s}]'
                           .format(ConvertOrCopyTags),
                           useniceprint=True,
@@ -2214,7 +2214,7 @@ class Uploadr(object):
                 except lite.Error as e:
                     niceerror(caught=True,
                               caughtprefix='+++ DB',
-                              caughtcode='999',
+                              caughtcode='098',
                               caughtmsg='DB error on DB create: [{!s}]'
                               .format(e.args[0]),
                               useniceprint=True,
@@ -3902,7 +3902,7 @@ class Uploadr(object):
                     except Exception as ex:
                         niceerror(caught=True,
                                   caughtprefix='+++',
-                                  caughtcode='216',
+                                  caughtcode='217',
                                   caughtmsg='Exception on photos_find_tag',
                                   exceptuse=True,
                                   # exceptcode=ex.code,

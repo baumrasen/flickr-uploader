@@ -296,7 +296,7 @@ class MyConfig(object):
             except BaseException:
                 self.niceerror(caught=True,
                                caughtprefix='+++ ',
-                               caughtcode='999',
+                               caughtcode='800',
                                caughtmsg='Caught an exception INIcheck',
                                exceptsysinfo=True)
                 logging.critical('Invalid INI value for:[%s] '

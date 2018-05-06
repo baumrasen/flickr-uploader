@@ -4,12 +4,13 @@
 
 ## Pending improvements
 -----------------------
-* Move useDBlock to mprocessing file?
+* "Check for duplicates/wrong checksum" on upload may not be working fully!
 * Consider using python module exiftool?
 * Would be nice to update ALL tags on replacePhoto and not only the
   mandatory checksum tag as FLICKR maintains the tags from the first load.
 * Change code to insert on database prior to upload and then update result.
-* Test if it Re-uploads or not pictures removed/deleted from flickr Web
+* CODING: REUPLOAD deleted files from Flickr...                
+  Test if it Re-uploads or not pictures removed/deleted from flickr Web
   interface; while they still exist on local filesystem and local DB.
   (without the -u option, it should find the file and update database).
   This should avoid errors on creating sets with invalid primarykey (photo id
@@ -25,9 +26,6 @@
   which allows to run upload.py form the --prefix/bin folder as it is
   installed wiht "python setup.py install". Note that uploadr.ini definition
   for DB_PATH, LOCK_PATH, TOKEN_CACHE and TOKEN_PATH as to be changed.
-* updatedVideoDate fails on three attempts (is it 'cause Flickr is processing
-  the video? and raises error caught on #210! Next run does not update video
-  date. V2.7.5 testing with 15 seconds.
 * When QPS (Queries per second) are very high during a certain period, Flickr
   does not provide back reliable information. For instance, photos.search
   may return X pics but not actually list them.

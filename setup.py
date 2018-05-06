@@ -1,9 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Note: To use the 'upload' functionality of this file, you must:
-#   $ pip install twine
+"""
+    by oPromessa, 2017, 2018
+    Published on https://github.com/oPromessa/flickr-uploader/
 
+    setup.py utility for flickr-uploader
+
+    Note: To use the 'upload' functionality of this file, you must:
+    $ pip install twine
+"""
+
+# =============================================================================
+# Import section
 import io
 import os
 import sys
@@ -18,7 +27,7 @@ from pkg_resources import Requirement, resource_filename
 NAME = 'flickr-uploader'
 DESCRIPTION = 'Upload a directory of media to Flickr to use as a backup to '
 'your local storage. flickr-uploader designed primarly for Synology Devices.'
-URL = 'https://github.com/oPromessa/flickr-uploader/',
+URL = 'https://github.com/oPromessa/flickr-uploader/'
 
 EMAIL = 'oPromessa@github.com'
 AUTHOR = 'oPromessa'
@@ -38,20 +47,20 @@ DATA_FILES = [('', ['uploadr.ini', 'uploadr.cron'])]
 # Except, perhaps the License and Trove Classifiers!
 # If you change the License, remember to change the Trove Classifier for that!
 
-here = os.path.abspath(os.path.dirname(__file__))
+HERE = os.path.abspath(os.path.dirname(__file__))
 
 # Import the README and use it as the long-description.
 # Note: this only works if 'README.rst' is present in your MANIFEST.in file!
-with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
-    long_description = '\n' + f.read()
+with io.open(os.path.join(HERE, 'README.md'), encoding='utf-8') as f:
+    LONG_DESCRIPTION = '\n' + f.read()
 
 # Load the package's __version__.py module as a dictionary.
-about = {}
+ABOUT = {}
 if not VERSION:
-    with open(os.path.join(here, LIB, '__version__.py')) as f:
-        exec(f.read(), about)
+    with open(os.path.join(HERE, LIB, '__version__.py')) as f:
+        exec(f.read(), ABOUT)
 else:
-    about['__version__'] = VERSION
+    ABOUT['__version__'] = VERSION
 
 
 class UploadCommand(Command):
@@ -61,25 +70,28 @@ class UploadCommand(Command):
     user_options = []
 
     @staticmethod
-    def bstatus(s):
+    def bstatus(astr):
         """Prints things in bold."""
-        print('\033[1m{0}\033[0m'.format(s))
+        print('\033[1m{0}\033[0m'.format(astr))
 
     @staticmethod
-    def status(s):
+    def status(astr):
         """Prints things."""
-        print('{0}'.format(s))
+        print('{0}'.format(astr))
 
     def initialize_options(self):
+        """initialize_options"""
         pass
 
     def finalize_options(self):
+        """finalize_options"""
         pass
 
     def run(self):
+        """run"""
         try:
             self.bstatus('Removing previous builds…')
-            rmtree(os.path.join(here, 'dist'))
+            rmtree(os.path.join(HERE, 'dist'))
         except OSError:
             pass
 
@@ -91,9 +103,9 @@ class UploadCommand(Command):
         # self.bstatus('Uploading the package to PyPi via Twine...')
         # os.system('twine upload dist/*')
 
-        # upload to GitHub disbled for now
+        # upload to GitHub disabled for now
         # self.bstatus('Pushing git tags...')
-        # os.system('git tag v{0}'.format(about['__version__']))
+        # os.system('git tag v{0}'.format(ABOUT['__version__']))
         # os.system('git push --tags')
 
         sys.exit()
@@ -106,16 +118,17 @@ class InstallCfg(Command):
     DATA_FILES   = list of configuration options files (.ini, .cron, etc)
     """
 
-    # Show files to be coopied =under 'python setup.py installcfg --help'
+    folder = None
+    # Show files to be coopied under 'python setup.py installcfg --help'
     str_user_options = ''
     dcnt = 0
-    for tuple in DATA_FILES:
+    for atuple in DATA_FILES:
         dcnt += 1
         if dcnt > 1:
             str_user_options = str_user_options + ', '
-        cfgdir = tuple[0]
+        cfgdir = atuple[0]
         cnt = 0
-        for cfgfile in tuple[1]:
+        for cfgfile in atuple[1]:
             cnt += 1
             if cnt > 1:
                 str_user_options = str_user_options + ', '
@@ -125,28 +138,30 @@ class InstallCfg(Command):
     description = 'Custom install flickr-uploader configuration files'
     user_options = [
         ('folder=',
-            None,
-            'Folder location for ' + str_user_options + ' files.'),
+         None,
+         'Folder location for ' + str_user_options + ' files.'),
     ]
 
     @staticmethod
-    def bstatus(s):
+    def bstatus(astr):
         """Prints things in bold."""
-        print('\033[1m{0}\033[0m'.format(s))
+        print('\033[1m{0}\033[0m'.format(astr))
 
     @staticmethod
-    def status(s):
+    def status(astr):
         """Prints things."""
-        print('{0}'.format(s))
+        print('{0}'.format(astr))
 
     def initialize_options(self):
+        """initialize_options"""
         self.folder = os.path.join(sys.prefix, 'etc')
 
     def finalize_options(self):
+        """finalize_options"""
         pass
 
     def run(self):
-
+        """run"""
         self.bstatus('Installing config files into folder [%s]'
                      % str(self.folder))
 
@@ -164,24 +179,26 @@ class InstallCfg(Command):
             # Save file list to be copied within the run method.
             # Note: Does not account for files wihtin folders of the package!
             src = []
-            for tuple in DATA_FILES:
-                for cfgfile in tuple[1]:
+            for atuple in DATA_FILES:
+                for cfgfile in atuple[1]:
                     src.append(resource_filename(Requirement.parse(NAME),
                                                  cfgfile))
-            for f in src:
+            for f_to_copy in src:
                 self.status("Copying [%s] into folder [%s]"
-                            % (str(f), str(dst)))
-                copy(f, dst) if sys.version_info < (3, ) \
-                    else copy(f, dst, follow_symlinks=True)
+                            % (str(f_to_copy), str(dst)))
+                if sys.version_info < (3, ):
+                    copy(f_to_copy, dst)
+                else:
+                    copy(f_to_copy, dst, follow_symlinks=True)
 
         if self.folder:
             assert os.path.exists(self.folder), (
-                'flickr-uploadr config folder %s does not exist.'
+                'flickr-uploadr config folder {!s} does not exist.'
                 .format(str(self.folder)))
-            for f in src:
-                assert os.path.exists(f), (
-                    'flickr-uploadr config file %s does not exist.'
-                    .format(str(f)))
+            for f_to_check in src:
+                assert os.path.exists(f_to_check), (
+                    'flickr-uploadr config file {!s} does not exist.'
+                    .format(str(f_to_check)))
             self.bstatus('Installed config files into folder [%s]'
                          % str(self.folder))
 
@@ -191,9 +208,9 @@ class InstallCfg(Command):
 # Where the magic happens:
 setup(
     name=NAME,
-    version=about['__version__'],
+    version=ABOUT['__version__'],
     description=DESCRIPTION,
-    long_description=long_description,
+    long_description=LONG_DESCRIPTION,
     author=AUTHOR,
     author_email=EMAIL,
     # Support for this feature is relatively recent.

@@ -1,32 +1,32 @@
 >>> import sys
->>> import lib.niceprint as npc
->>> StrUni = npc.niceprint()
+>>> import lib.NicePrint as npc
+>>> StrUni = npc.NicePrint()
 >>> if sys.version_info < (3, ):
-...     StrUni.isThisStringUnicode(u'Something') == True
+...     StrUni.is_str_unicode(u'Something') == True
 ... else:
-...     StrUni.isThisStringUnicode(u'Something') == False
+...     StrUni.is_str_unicode(u'Something') == False
 True
 >>> if sys.version_info < (3, ):
-...     StrUni.isThisStringUnicode('Something') == False
+...     StrUni.is_str_unicode('Something') == False
 ... else:
-...     StrUni.isThisStringUnicode('Something') == False
+...     StrUni.is_str_unicode('Something') == False
 True
->>> StrUni.isThisStringUnicode(245)
+>>> StrUni.is_str_unicode(245)
 False
->>> StrUni.StrUnicodeOut(str(2)+u'some text')
+>>> StrUni.strunicodeout(str(2)+u'some text')
 '2some text'
 >>> if sys.version_info < (3, ):
 ...     a = unicode('hello')
 ... else:
 ...     a = u'hello'
 >>> if sys.version_info < (3, ):
-...     StrUni.isThisStringUnicode(a) == True
+...     StrUni.is_str_unicode(a) == True
 ... else:
-...     StrUni.isThisStringUnicode(a) == False
+...     StrUni.is_str_unicode(a) == False
 True
 >>> b = u'Árvore'
->>> print('a:[{!s}] b:[{!s}]'.format(StrUni.StrUnicodeOut(a), StrUni.StrUnicodeOut(b)))
+>>> print('a:[{!s}] b:[{!s}]'.format(StrUni.strunicodeout(a), StrUni.strunicodeout(b)))
 a:[hello] b:[Árvore]
 >>> c = unicode('Árvore'.decode('utf-8')) if sys.version_info < (2, 7) else b
->>> print('c:[{!s}]'.format(StrUni.StrUnicodeOut(c)))
+>>> print('c:[{!s}]'.format(StrUni.strunicodeout(c)))
 c:[Árvore]

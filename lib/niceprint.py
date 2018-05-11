@@ -207,20 +207,19 @@ class NicePrint:
         """
 
         if caught is not None and caught:
-            logging.error('%s#%s: %s',
-                          caughtprefix,
-                          caughtcode,
-                          caughtmsg)
+            logging.error('%s#%s: %s', caughtprefix, caughtcode, caughtmsg)
             if useniceprint is not None and useniceprint:
-                self.niceprint('{!s}#{!s}: {!s}'.format(caughtprefix,
-                                                        caughtcode,
-                                                        caughtmsg))
+                self.niceprint('{!s}#{!s}: {!s}'
+                               .format(caughtprefix, caughtcode, caughtmsg))
+
         if exceptuse is not None and exceptuse:
-            logging.error('Error code: [%s]', exceptcode)
-            logging.error('Error code: [%s]', exceptmsg)
+            logging.error('Error code:[%s] message:[%s]',
+                          exceptcode,
+                          exceptmsg)
             if useniceprint is not None and useniceprint:
-                self.niceprint('Error code: [{!s}]'.format(exceptcode))
-                self.niceprint('Error code: [{!s}]'.format(exceptmsg))
+                self.niceprint('Error code:[{!s}] message:[{!s}]'
+                               .format(exceptcode, exceptmsg))
+
         if exceptsysinfo is not None and exceptsysinfo:
             logging.error(str(sys.exc_info()))
             if useniceprint is not None and useniceprint:

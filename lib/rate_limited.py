@@ -254,15 +254,15 @@ def retry(attempts=3, waittime=5, randtime=False):
             rtime = time
             error = None
 
-            if logging.getLogger().getEffectiveLevel() <= logging.WARNING:
+            if logging.getLogger().getEffectiveLevel() <= logging.INFO:
                 if args is not None:
                     logging.info('___Retry f():[%s] '
                                  'Max:[%s] Delay:[%s] Rnd[%s]',
                                  a_fn.__name__, attempts,
                                  waittime, randtime)
                     for i, arg in enumerate(args):
-                        logging.info('___Retry f():[%s] arg[%s]={%s}',
-                                     a_fn.__name__, i, arg)
+                        logging.debug('___Retry f():[%s] arg[%s]={%s}',
+                                      a_fn.__name__, i, arg)
             for i in range(attempts if attempts > 0 else 1):
                 try:
                     logging.info('___Retry f():[%s]: '

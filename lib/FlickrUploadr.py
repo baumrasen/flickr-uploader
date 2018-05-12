@@ -3194,9 +3194,17 @@ class Uploadr(object):
                                                      encoding='utf-8',
                                                      method='xml'))
 
-        # Number of pics with specified checksum
-        returnPhotoUploaded = int(searchIsUploaded
-                                  .find('photos').attrib['total'])
+        # CODING: Protect issue #66. Flickr returns attrib == '' instead of 0
+        # Set 'Number of pics with specified checksum' to 0 and return.
+        if len(searchIsUploaded.find('photos').attrib['total']) == 0:
+            returnPhotoUploaded = 0
+            logging.error(' IS_UPLOADED:[ERROR#3]: len.photos.total == 0')
+            NP.niceprint(' IS_UPLOADED:[ERROR#3]: len.photos.total == 0',
+                         fname='isuploaded')
+        else:
+            # Number of pics with specified checksum
+            returnPhotoUploaded = int(searchIsUploaded
+                                      .find('photos').attrib['total'])
 
         if returnPhotoUploaded == 0:
             # A) checksum,                             Count=0  THEN NOT EXISTS

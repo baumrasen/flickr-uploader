@@ -4059,7 +4059,7 @@ class Uploadr(object):
                           useniceprint=True)
 
         get_success, get_result, get_errcode = faw.nu_flickrapi_fn(
-            nuflickr.people.getPhotos,
+            self.nuflickr.people.getPhotos,
             (),
             dict(user_id="me", per_page=1),
             3, 3, False)

@@ -21,6 +21,20 @@ from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 # Import section
 #
 import logging
+import xml
+# Avoids error on some systems:
+#    AttributeError: 'module' object has no attribute 'etree'
+#    on logging.info(xml.etree.ElementTree.tostring(...
+try:
+    DUMMYXML = xml.etree.ElementTree.tostring(
+        xml.etree.ElementTree.Element('xml.etree'),
+        encoding='utf-8',
+        method='xml')
+except AttributeError:
+    try:
+        import xml.etree.ElementTree
+    except ImportError:
+        raise
 import flickrapi
 # -----------------------------------------------------------------------------
 # Helper class and functions to print messages.
@@ -39,6 +53,24 @@ import lib.rate_limited as rate_limited
 NPR = NicePrint.NicePrint()
 niceerror = NPR.niceerror
 retry = rate_limited.retry
+
+
+# -----------------------------------------------------------------------------
+# isGood
+#
+# Checks if res.attrib['stat'] == "ok"
+#
+def isGood(res):
+    """ isGood
+
+        Check res is not None and res.attrib['stat'] == "ok" for XML object
+    """
+    if res is None:
+        return False
+    elif not res == "" and res.attrib['stat'] == "ok":
+        return True
+    else:
+        return False
 
 
 # -----------------------------------------------------------------------------

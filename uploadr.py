@@ -53,7 +53,6 @@ import logging.handlers
 import argparse
 import os
 import os.path
-import time
 try:
     # Use portalocker if available. Required for Windows systems
     import portalocker as FileLocker  # noqa
@@ -527,10 +526,10 @@ if __name__ == "__main__":
         logging.getLogger().addHandler(rotating_logging)
 
         logging.warning('----------- (V%s) Init Rotating -----------(Log:%s)'
-                'Python version on this system: [%s]',
-                UPLDRConstants.Version,
-                my_cfg.LOGGING_LEVEL,
-                sys.version)
+                        'Python version on this system: [%s]',
+                        UPLDRConstants.Version,
+                        my_cfg.LOGGING_LEVEL,
+                        sys.version)
         logging.info('rotating_logging.setLevel=[%s]',
                      logging.getLogger().getEffectiveLevel() if
                      logging.getLogger().getEffectiveLevel() <= logging.DEBUG

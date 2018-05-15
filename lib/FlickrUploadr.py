@@ -2533,7 +2533,7 @@ class Uploadr(object):
         """
 
         logging.info('   Creating set:[%s]', strunicodeout(setName))
-        NP.niceprint('   Creating set:[%s]', strunicodeout(setName))
+        NP.niceprint('   Creating set:[%s]'.format(strunicodeout(setName)))
 
         if self.ARGS.dry_run:
             return True

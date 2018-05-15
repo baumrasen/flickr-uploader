@@ -60,7 +60,7 @@ import lib.rate_limited as rate_limited
 import lib.mprocessing as mp
 # -----------------------------------------------------------------------------
 # Helper module functions to wrap FlickrAPI with retry/try/exception/debug
-import lib.FlickrApiWrapper as Wrap
+import lib.FlickrApiWrapper as faw
 
 
 # =============================================================================
@@ -4058,7 +4058,7 @@ class Uploadr(object):
                           .format(e.args[0]),
                           useniceprint=True)
 
-        get_success, get_result, get_errcode = nu_flickrapi_fn(
+        get_success, get_result, get_errcode = faw.nu_flickrapi_fn(
             nuflickr.people.getPhotos,
             (),
             dict(user_id="me", per_page=1),

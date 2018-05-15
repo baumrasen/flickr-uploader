@@ -509,6 +509,7 @@ if __name__ == "__main__":
             sys.exit(2)
 
     # Write DEBUG messages or higher to err_file
+    flogging = None
     if not (UPLDRConstants.base_dir == ''
             or os.path.isdir(UPLDRConstants.base_dir)):
         NPR.niceerror(caught=True,
@@ -546,6 +547,8 @@ if __name__ == "__main__":
 
     # Update logging level as per LOGGING_LEVEL from INI file
     logging.getLogger().setLevel(my_cfg.LOGGING_LEVEL)
+    if flogging is not None:
+        flogging.setLevel(logging.DEBUG)
 
     if my_cfg.LOGGING_LEVEL <= logging.INFO:
         NPR.niceprint('Output for FLICKR Configuration:')

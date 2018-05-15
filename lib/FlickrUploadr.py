@@ -69,12 +69,14 @@ import lib.FlickrApiWrapper as faw
 #   strunicodeout       = from NicePrint module
 #   niceerror           = from NicePrint module
 #   retry               = from rate_limited
+#   isGood              = from FlickrApiWrapper
 # -----------------------------------------------------------------------------
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 NP = NicePrint.NicePrint()
 strunicodeout = NP.strunicodeout
 niceerror = NP.niceerror
 retry = rate_limited.retry
+isGood = faw.isGood
 
 NUTIME = time
 # -----------------------------------------------------------------------------
@@ -161,24 +163,6 @@ def chunk(itlist, size):
     # iter, with the second argument () stops creating
     # iterators when it reaches the end
     return iter(lambda: tuple(islice(itlist, size)), ())
-
-
-# -----------------------------------------------------------------------------
-# isGood
-#
-# Checks if res.attrib['stat'] == "ok"
-#
-def isGood(res):
-    """ isGood
-
-        Check res is not None and res.attrib['stat'] == "ok" for XML object
-    """
-    if res is None:
-        return False
-    elif not res == "" and res.attrib['stat'] == "ok":
-        return True
-    else:
-        return False
 
 
 # -----------------------------------------------------------------------------
@@ -2201,7 +2185,7 @@ class Uploadr(object):
         """ fn_addFilesToSets
         """
 
-        # CODING Use a differrnt conn and cur to avoid erro +++096
+        # CODING Use a different conn and cur to avoid erro +++096
         fn_con = lite.connect(self.xCfg.DB_PATH)
         fn_con.text_factory = str
 
@@ -4014,7 +3998,7 @@ class Uploadr(object):
 
         if get_success and get_errcode == 0:
             countnotinsets = int(format(
-                get_result.find('photos').attrib['total']))            
+                get_result.find('photos').attrib['total']))
         else:
             countnotinsets = 0
 

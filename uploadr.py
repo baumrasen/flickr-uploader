@@ -133,9 +133,8 @@ def my_excepthook(exc_class, exc_value, exc_tb):
         Exception handler to be installed over sys.excepthook to allow
         traceback reporting information to be reported back to logging file
     """
-    logging.critical('Uncaught exception: {0}: {1}'
-                     .format(exc_class, exc_value))
-    logging.critical(''.join(traceback.format_tb(exc_tb)))
+    logging.critical('Uncaught exception: %s: %s', exc_class, exc_value)
+    logging.critical('%s', ''.join(traceback.format_tb(exc_tb)))
 
 
 # -----------------------------------------------------------------------------

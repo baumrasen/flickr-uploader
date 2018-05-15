@@ -84,7 +84,7 @@ def nu_flickrapi_fn(fn_name,
                     attempts=3,
                     waittime=5,
                     randtime=False,
-                    caughtcode='001'):
+                    caughtcode='000'):
     """ nu_flickrapi_fn
 
         Runs flickrapi fn_name function handing over **fn_kwargs.
@@ -124,7 +124,7 @@ def nu_flickrapi_fn(fn_name,
                   caughtprefix='+++Api',
                   caughtcode=caughtcode,
                   caughtmsg='Flickrapi exception on [{!s}]'
-                            .format(fn_name.__name__),
+                  .format(fn_name.__name__),
                   exceptuse=True,
                   exceptcode=flickr_ex.code,
                   exceptmsg=flickr_ex,
@@ -135,7 +135,7 @@ def nu_flickrapi_fn(fn_name,
                   caughtprefix='+++Api',
                   caughtcode=caughtcode,
                   caughtmsg='Caught IO/HTTP Error on [{!s}]'
-                            .format(fn_name.__name__))
+                  .format(fn_name.__name__))
     except Exception as exc:
         niceerror(caught=True,
                   caughtprefix='+++Api',
@@ -184,10 +184,7 @@ def nu_flickrapi_fn(fn_name,
 #
 def nu_authenticate(api_key,
                     secret,
-                    token_cache_location,
-                    attempts=3,
-                    waittime=5,
-                    randtime=False):
+                    token_cache_location):
     """ nu_authenticate
     Authenticate user so we can upload files.
     Assumes the cached token is not available or valid.
@@ -209,7 +206,7 @@ def nu_authenticate(api_key,
     except flickrapi.exceptions.FlickrError as ex:
         niceerror(caught=True,
                   caughtprefix='+++Api',
-                  caughtcode='000',
+                  caughtcode='001',
                   caughtmsg='Error in flickrapi.FlickrAPI',
                   exceptuse=True,
                   exceptcode=ex.code,
@@ -229,7 +226,7 @@ def nu_authenticate(api_key,
     except flickrapi.exceptions.FlickrError as ex:
         niceerror(caught=True,
                   caughtprefix='+++Api',
-                  caughtcode='000',
+                  caughtcode='002',
                   caughtmsg='Error in flickrapi.FlickrAPI',
                   exceptuse=True,
                   exceptcode=ex.code,
@@ -241,7 +238,7 @@ def nu_authenticate(api_key,
     except Exception as ex:
         niceerror(caught=True,
                   caughtprefix='+++Api',
-                  caughtcode='001',
+                  caughtcode='003',
                   caughtmsg='Unexpected error in token_valid',
                   useniceprint=True,
                   exceptsysinfo=True)
@@ -259,9 +256,9 @@ def nu_authenticate(api_key,
     # Python 2.7 and 3.6
     # use "# noqa" to bypass flake8 error notifications
     verifier = unicode(raw_input(  # noqa
-                                 'Verifier code (NNN-NNN-NNN): ')) \
-               if sys.version_info < (3, ) \
-               else input('Verifier code (NNN-NNN-NNN): ')
+        'Verifier code (NNN-NNN-NNN): ')) \
+        if sys.version_info < (3, ) \
+        else input('Verifier code (NNN-NNN-NNN): ')
 
     print('Verifier: {!s}'.format(verifier))
 
@@ -271,7 +268,7 @@ def nu_authenticate(api_key,
     except flickrapi.exceptions.FlickrError as ex:
         niceerror(caught=True,
                   caughtprefix='+++Api',
-                  caughtcode='030',
+                  caughtcode='004',
                   caughtmsg='Error in flickrapi.get_access_token',
                   exceptuse=True,
                   exceptcode=ex.code,
@@ -318,7 +315,7 @@ def nu_get_cached_token(api_key,
     except flickrapi.exceptions.FlickrError as ex:
         niceerror(caught=True,
                   caughtprefix='+++Api',
-                  caughtcode='000',
+                  caughtcode='010',
                   caughtmsg='Error in flickrapi.FlickrAPI',
                   exceptuse=True,
                   exceptcode=ex.code,
@@ -345,7 +342,7 @@ def nu_get_cached_token(api_key,
     except flickrapi.exceptions.FlickrError as ex:
         niceerror(caught=True,
                   caughtprefix='+++Api',
-                  caughtcode='000',
+                  caughtcode='011',
                   caughtmsg='Error in flickrapi.token_valid',
                   exceptuse=True,
                   exceptcode=ex.code,
@@ -356,7 +353,7 @@ def nu_get_cached_token(api_key,
     except BaseException:
         niceerror(caught=True,
                   caughtprefix='+++Api',
-                  caughtcode='001',
+                  caughtcode='012',
                   caughtmsg='Unexpected error in token_valid',
                   useniceprint=True,
                   exceptsysinfo=True)

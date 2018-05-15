@@ -3442,7 +3442,6 @@ class Uploadr(object):
 
         return searchResp
 
-
     # -------------------------------------------------------------------------
     # photos_get_info
     #
@@ -4045,7 +4044,7 @@ class Uploadr(object):
             # List pics not in sets (if within a parameter, default 10)
             # (per_page=min(self.ARGS.list_photos_not_in_set, 500):
             #       find('photos').attrib['total']
-            
+
             get_success, get_result, get_errcode = faw.nu_flickrapi_fn(
                 self.nuflickr.photos.getNotInSet,
                 (),

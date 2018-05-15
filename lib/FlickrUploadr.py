@@ -1992,7 +1992,7 @@ class Uploadr(object):
 
         NP.niceprint('  Deleting file:[{!s}]'.format(strunicodeout(file[1])))
 
-        get_success, get_result, get_errcode = nu_flickrapi_fn(
+        get_success, get_result, get_errcode = faw.nu_flickrapi_fn(
             self.nuflickr.photos.delete,
             (),
             dict(photo_id=str(file[0])),

@@ -138,21 +138,11 @@ def parse_arguments():
     # Configuration related options -------------------------------------------
     cgrpparser = parser.add_argument_group('Configuration related options')
     cgrpparser.add_argument('-C', '--config-file', action='store',
-                            # dest='xINIfile',
                             metavar='filename.ini',
                             type=str,
-                            # default=UPLDRConstants.ini_file,
                             help='Optional configuration file. '
                                  'Default is:[{!s}]'
                             .format(UPLDRConstants.ini_file))
-    # cgrpparser.add_argument('-C', '--config-file', action='store',
-    #                         # dest='xINIfile',
-    #                         metavar='filename.ini',
-    #                         type=argparse.FileType('r'),
-    #                         default=UPLDRConstants.INIfile,
-    #                         help='Optional configuration file.'
-    #                              'default is [{!s}]'
-    #                              .format(UPLDRConstants.INIfile))
 
     # Verbose related options -------------------------------------------------
     vgrpparser = parser.add_argument_group('Verbose and dry-run options')
@@ -429,19 +419,20 @@ NUTIME = time
 UPLDRConstants.media_count = 0
 # Base dir for config and support files.
 #   Will use --config-file argument option
-#   If not, first try sys.prefix/etc folder
+#   If not, first try sys.prefix/etc folder (not operational)
 #   If not, then try Current Working Directory
-UPLDRConstants.base_dir = os.path.join(sys.prefix, 'etc')
+# UPLDRConstants.base_dir = os.path.join(sys.prefix, 'etc')
+UPLDRConstants.base_dir = os.path.dirname(sys.argv[0])
 UPLDRConstants.ini_file = os.path.join(UPLDRConstants.base_dir, "uploadr.ini")
 UPLDRConstants.err_file = os.path.join(UPLDRConstants.base_dir, "uploadr.err")
 
-if my_cfg.LOGGING_LEVEL <= logging.DEBUG:
-    logging.debug('      base_dir:[%s]', UPLDRConstants.base_dir)
-    logging.debug('           cwd:[%s]', os.getcwd())
-    logging.debug('    prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
-    logging.debug('   sys.argv[0]:[%s]', os.path.dirname(sys.argv[0]))
-    logging.debug('      ini_file:[%s]', UPLDRConstants.ini_file)
-    logging.debug('      ini_file:[%s]', UPLDRConstants.err_file)
+# CODING: Debug a series of control values 
+logging.info('      base_dir:[%s]', UPLDRConstants.base_dir)
+logging.info('           cwd:[%s]', os.getcwd())
+logging.info('    prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
+logging.info('   sys.argv[0]:[%s]', os.path.dirname(sys.argv[0]))
+logging.info('      ini_file:[%s]', UPLDRConstants.ini_file)
+logging.info('      err_file:[%s]', UPLDRConstants.err_file)
 # -----------------------------------------------------------------------------
 
 # =============================================================================
@@ -505,11 +496,6 @@ if __name__ == "__main__":
                           useniceprint=True)
             sys.exit(2)
     else:
-        # sys.argv[0]
-        UPLDRConstants.base_dir = os.path.dirname(sys.argv[0])
-        UPLDRConstants.ini_file = os.path.join(UPLDRConstants.base_dir,
-                                               'uploadr.ini')
-
         if not checkBaseDir_INIfile(UPLDRConstants.base_dir,
                                     UPLDRConstants.ini_file):
             NPR.niceerror(caught=True,

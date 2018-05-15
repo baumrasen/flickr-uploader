@@ -475,6 +475,10 @@ else:
 # =============================================================================
 # Main code
 #
+logging.warning('--------- (V%s) Start time: %s ---------(Log:%s)',
+                UPLDRConstants.Version,
+                NUTIME.strftime(UPLDRConstants.TimeFormat),
+                my_cfg.LOGGING_LEVEL)
 NPR.niceprint('--------- (V{!s}) Start time: {!s} ---------(Log:{!s})'
               .format(UPLDRConstants.Version,
                       NUTIME.strftime(UPLDRConstants.TimeFormat),
@@ -585,5 +589,9 @@ NPR.niceprint('--------- (V{!s}) End time: {!s} -----------(Log:{!s})'
               .format(UPLDRConstants.Version,
                       NUTIME.strftime(UPLDRConstants.TimeFormat),
                       my_cfg.LOGGING_LEVEL))
+logging.warning('--------- (V%s) End time: %s -----------(Log:%s)',
+                UPLDRConstants.Version,
+                NUTIME.strftime(UPLDRConstants.TimeFormat),
+                my_cfg.LOGGING_LEVEL)
 sys.stderr.write('--------- ' + 'End: ' + ' ---------\n')
 sys.stderr.flush()

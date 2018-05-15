@@ -641,6 +641,12 @@ class Uploadr(object):
             dirpath, f = os.path.split(fullpath)
             fnameonly = os.path.splitext(f)[0]
             ext = os.path.splitext(f)[1][1:].lower()
+
+            if self.ARGS.dry_run:
+                NP.niceprint('Dry Run rawfile:[{!s}]...'
+                             .format(strunicodeout(fullpath)))
+                continue            
+
             if self.convertRawFile(dirpath, f, ext, fnameonly):
                 try:
                     okfileSize = True
@@ -752,10 +758,7 @@ class Uploadr(object):
             return resultCmd
         # ---------------------------------------------------------------------
 
-        if self.ARGS.dry_run is True:
-            NP.niceprint('Dry Run rawfile:[{!s}]...'
-                         .format(strunicodeout(os.path.join(Ddirpath,
-                                                            Ffname))))
+        if self.ARGS.dry_run:
             return True
 
         NP.niceprint(' Converting raw:[{!s}]'
@@ -1117,7 +1120,7 @@ class Uploadr(object):
                     break
         # ---------------------------------------------------------------------
 
-        if self.ARGS.dry_run is True:
+        if self.ARGS.dry_run:
             NP.niceprint('   Dry Run file:[{!s}]...'
                          .format(strunicodeout(file)))
             return True
@@ -1675,7 +1678,7 @@ class Uploadr(object):
         con             = current DB connection
         """
 
-        if self.ARGS.dry_run is True:
+        if self.ARGS.dry_run:
             NP.niceprint('Dry Run Replace:[{!s}]...'
                          .format(strunicodeout(file)))
             return True
@@ -1999,7 +2002,7 @@ class Uploadr(object):
                 con.close()
         # ---------------------------------------------------------------------
 
-        if self.ARGS.dry_run is True:
+        if self.ARGS.dry_run:
             NP.niceprint('Dry Run Deleting file:[{!s}]'
                          .format(strunicodeout(file[1])))
             return True

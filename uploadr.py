@@ -84,20 +84,25 @@ import lib.MyConfig as MyConfig
 # Getting definitions from UPLDRConstants
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 # Sets LOGGING_LEVEL to allow logging even if everything else is wrong!
-logging.basicConfig(stream=sys.stderr,
-                    level=int(str(logging.WARNING)),  # logging.DEBUG
-                    datefmt=UPLDRConstants.TimeFormat,
-                    format=UPLDRConstants.P + '[' +
-                    str(UPLDRConstants.Run) + ']' +
-                    '[%(asctime)s]:[%(processName)-11s]' +
-                    UPLDRConstants.W +
-                    '[%(levelname)-8s]:[%(name)s] %(message)s')
+# Parent logger is set to Maximum (DEBUG) so that suns will log as appropriate
+logging.getLogger().setLevel(logging.DEBUG)
+# define a Handler which writes WARNING messages or higher to the sys.stderr
+console_logging = logging.StreamHandler()
+console_logging.setLevel(logging.WARNING)
+console_logging.setFormatter(logging.Formatter(
+    fmt=UPLDRConstants.P + '[' + str(UPLDRConstants.Run) + ']' +
+    '[%(asctime)s]:[%(processName)-11s]' + UPLDRConstants.W +
+    '[%(levelname)-8s]:[%(name)s] %(message)s',
+    datefmt=UPLDRConstants.TimeFormat))
+# add the handler to the root logger
+logging.getLogger().addHandler(console_logging)
 # Inits with default configuration values.
 my_cfg = MyConfig.MyConfig()
 # Get LOGGING_LEVEL defaul configuration
 my_cfg.LOGGING_LEVEL = int(str(my_cfg.LOGGING_LEVEL))
-# Update logging level as per LOGGING_LEVEL from default config
-logging.getLogger().setLevel(my_cfg.LOGGING_LEVEL)
+# Update console logging level as per LOGGING_LEVEL from default config
+# logging.getLogger().setLevel(my_cfg.LOGGING_LEVEL)
+console_logging.setLevel(my_cfg.LOGGING_LEVEL)
 # -----------------------------------------------------------------------------
 
 
@@ -509,7 +514,7 @@ if __name__ == "__main__":
             sys.exit(2)
 
     # Write DEBUG messages or higher to err_file
-    flogging = None
+    rotating_logging = None
     if not (UPLDRConstants.base_dir == ''
             or os.path.isdir(UPLDRConstants.base_dir)):
         NPR.niceerror(caught=True,
@@ -519,21 +524,23 @@ if __name__ == "__main__":
                       'prevents output to file.',
                       useniceprint=True)
     else:
-        # Define a Handler which writes DEBUG messages or higher to err_file
-        flogging = logging.handlers.RotatingFileHandler(
+        # Define a rotating file Handler which writes DEBUG messages
+        # or higher to err_file
+        rotating_logging = logging.handlers.RotatingFileHandler(
             UPLDRConstants.err_file,
-            maxBytes=25*1024*1024,  # 25 MBytes
-            backupCount=3)
-        # Define the Logging level logging.DEBUG
-        flogging.setLevel(logging.DEBUG)
-        # Tell the handler to use this format
-        flogging.setFormatter(
-            logging.Formatter(fmt='[' + str(UPLDRConstants.Run) + ']' +
-                              '[%(asctime)s]:[%(processName)-11s]' +
-                              '[%(levelname)-8s]:[%(name)s] %(message)s',
-                              datefmt=UPLDRConstants.TimeFormat))
+            maxBytes=25*1024*1024,  # Mas 25 MBytes per file size
+            backupCount=3)  # 3 rotating files
+        rotating_logging.setLevel(
+            logging.getLogger().getEffectiveLevel() if
+            logging.getLogger().getEffectiveLevel() <= logging.DEBUG
+            else logging.getLogger().getEffectiveLevel() - 10)
+        rotating_logging.setFormatter(logging.Formatter(
+            fmt=UPLDRConstants.P + '[' + str(UPLDRConstants.Run) + ']' +
+            '[%(asctime)s]:[%(processName)-11s]' + UPLDRConstants.W +
+            '[%(levelname)-8s]:[%(name)s] %(message)s',
+            datefmt=UPLDRConstants.TimeFormat))
         # add the handler to the root logger
-        logging.getLogger().addHandler(flogging)
+        logging.getLogger().addHandler(rotating_logging)
 
     # Source configuration from ini_file
     my_cfg.readconfig(UPLDRConstants.ini_file, ['Config'])
@@ -546,23 +553,7 @@ if __name__ == "__main__":
         raise ValueError('No config file found or incorrect config!')
 
     # Update logging level as per LOGGING_LEVEL from INI file
-    logging.getLogger().setLevel(my_cfg.LOGGING_LEVEL)
-    if flogging is not None:
-        logging.removeHandler(flogging)
-        flogging = logging.handlers.RotatingFileHandler(
-            UPLDRConstants.err_file,
-            maxBytes=25*1024*1024,  # 25 MBytes
-            backupCount=3)
-        # Define the Logging level logging.DEBUG
-        flogging.setLevel(logging.DEBUG)
-        # Tell the handler to use this format
-        flogging.setFormatter(
-            logging.Formatter(fmt='[' + str(UPLDRConstants.Run) + ']' +
-                              '[%(asctime)s]:[%(processName)-11s]' +
-                              '[%(levelname)-8s]:[%(name)s] %(message)s',
-                              datefmt=UPLDRConstants.TimeFormat))
-        # add the handler to the root logger
-        logging.getLogger().addHandler(flogging)
+    console_logging.setLevel(my_cfg.LOGGING_LEVEL)
         
     if my_cfg.LOGGING_LEVEL <= logging.INFO:
         NPR.niceprint('Output for FLICKR Configuration:')

@@ -24,8 +24,6 @@ import logging
 import multiprocessing
 import time
 import random
-import sqlite3 as lite
-from functools import wraps
 import flickrapi
 # -----------------------------------------------------------------------------
 # Helper class and functions to print messages.
@@ -52,16 +50,20 @@ def nu_flickrapi_fn(fn_name,
                     fn_kwargs=dict(),
                     attempts=3,
                     waittime=5,
-                    randtime=False):
+                    randtime=False,
+                    caughtcode='001'):
     """ nu_flickrapi_fn
 
         Runs flickrapi fn_name function handing over **fn_kwargs.
         It retries attempts, waittime, randtime with @retry
         Checks results isGood and provides feedback accordingly.
         Captures flicrkapi or BasicException error situations.
+        caughtcode to report on exception error.
 
-        Need to return ex.code for error handling
-
+        Returns:
+            fn_success = True/False
+            fn_result  = Actual flickrapi function call result
+            fn_errcode = error reported by flickrapi exception
     """
 
     @retry(attempts=attempts, waittime=waittime, randtime=randtime)
@@ -82,31 +84,22 @@ def nu_flickrapi_fn(fn_name,
     fn_errcode = 0
     try:
         fn_result = retry_flickrapi_fn(fn_kwargs)
-    except flickrapi.exceptions.FlickrError as ex:
+    except flickrapi.exceptions.FlickrError as flickr_ex:
+        fn_errcode = flickr_ex.code
         niceerror(caught=True,
                   caughtprefix='+++Api',
-                  caughtcode='000',
+                  caughtcode=caughtcode,
                   caughtmsg='Flickrapi exception on [{!s}]'
                             .format(fn_name.__name__),
                   exceptuse=True,
-                  exceptcode=ex.code,
-                  exceptmsg=ex,
-                  useniceprint=True,
-                  exceptsysinfo=True)
-    except flickrapi.exceptions.FlickrError as fex:
-        fn_errcode = fex.code
-        niceerror(caught=True,
-                  caughtprefix='+++Api',
-                  caughtcode='001',
-                  exceptuse=True,
-                  exceptcode=fex.code,
-                  exceptmsg=fex,
+                  exceptcode=flickr_ex.code,
+                  exceptmsg=flickr_ex,
                   useniceprint=True,
                   exceptsysinfo=True)
     except Exception as exc:
         niceerror(caught=True,
                   caughtprefix='+++Api',
-                  caughtcode='002',
+                  caughtcode=caughtcode,
                   caughtmsg='Exception on [{!s}]'.format(fn_name.__name__),
                   exceptuse=True,
                   exceptmsg=exc,
@@ -115,7 +108,7 @@ def nu_flickrapi_fn(fn_name,
     except BaseException:
         niceerror(caught=True,
                   caughtprefix='+++Api',
-                  caughtcode='003',
+                  caughtcode=caughtcode,
                   caughtmsg='BaseException on [{!s}]'.format(fn_name.__name__),
                   exceptsysinfo=True)
     finally:

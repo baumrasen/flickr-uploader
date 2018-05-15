@@ -47,7 +47,9 @@ from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 # =============================================================================
 # Import section
 import sys
+import traceback
 import logging
+import logging.handlers
 import argparse
 import os
 import os.path
@@ -97,6 +99,17 @@ my_cfg.LOGGING_LEVEL = int(str(my_cfg.LOGGING_LEVEL))
 # Update logging level as per LOGGING_LEVEL from default config
 logging.getLogger().setLevel(my_cfg.LOGGING_LEVEL)
 # -----------------------------------------------------------------------------
+
+
+# -----------------------------------------------------------------------------
+def my_excepthook(exc_class, exc_value, exc_tb):
+    """ my_excepthook
+
+        Exception handler to be installed over sys.excepthook to allow
+        traceback reporting information to be reported back to logging file
+    """
+    logging.critical('Uncaught exception: {0}: {1}'.format(exc_class, exc_value))
+    logging.critical(''.join(traceback.format_tb(exc_tb)))
 
 
 # -----------------------------------------------------------------------------
@@ -458,6 +471,9 @@ NPR.niceprint('--------- (V{!s}) Start time: {!s} ---------(Log:{!s})'
               .format(UPLDRConstants.Version,
                       NUTIME.strftime(UPLDRConstants.TimeFormat),
                       my_cfg.LOGGING_LEVEL))
+# Install exception handler
+sys.excepthook = my_excepthook
+
 if __name__ == "__main__":
     # Parse the argumens options
     PARSED_ARGS = parse_arguments()
@@ -490,6 +506,32 @@ if __name__ == "__main__":
                           caughtmsg='Invalid sys.argv INI file. Exiting...',
                           useniceprint=True)
             sys.exit(2)
+
+    # Write DEBUG messages or higher to err_file
+    if not checkBaseDir_INIfile(UPLDRConstants.base_dir,
+                                UPLDRConstants.err_file):
+        NPR.niceerror(caught=True,
+                      caughtprefix='+++ ',
+                      caughtcode='603',
+                      caughtmsg='Invalid sys.argv ERR file '
+                      'prevents output to file.',
+                      useniceprint=True)
+    else:
+        # Define a Handler which writes DEBUG messages or higher to err_file
+        flogging = logging.handlers.RotatingFileHandler(
+            UPLDRConstants.err_file,
+            maxBytes=25*1024*1024,  # 25 MBytes
+            backupCount=3)
+        # Define the Logging level logging.DEBUG
+        flogging.setLevel(logging.DEBUG)
+        # Tell the handler to use this format
+        flogging.setFormatter(
+            flogging.Formatter(fmt='[' + str(UPLDRConstants.Run) + ']' +
+                               '[%(asctime)s]:[%(processName)-11s]' +
+                               '[%(levelname)-8s]:[%(name)s] %(message)s',
+                               datefmt=UPLDRConstants.TimeFormat))
+        # add the handler to the root logger
+        logging.getLogger().addHandler(flogging)
 
     # Source configuration from ini_file
     my_cfg.readconfig(UPLDRConstants.ini_file, ['Config'])

@@ -6,9 +6,6 @@
 -----------------------
 * Reconfirm the uploading sequence when -u option is set which
   affects isLoaded = False control variable
-* Weird... 3 pics from an Album are reported by Flickr as being on the set
-  but they are not. Run 861 and 862 on version 2.8.1/my private user.
-  I'm deleting P5280109 to test out...
 * "Check for duplicates/wrong checksum" on upload may not be working fully!
 * Consider using python module exiftool?
 * Would be nice to update ALL tags on replacePhoto and not only the

@@ -12,9 +12,9 @@ python:
 
 # =============================================================================
 # branches blacklist for TravisCI testing
-branches:
-  except:
-    - dev-may18-issue64
+#branches:
+#  except:
+#    - dev-may18-issue64
 
 before_install:
 # For use with wget into github account
@@ -119,6 +119,7 @@ before_script:
 #  - remote_syslog/remote_syslog -c ~/syslog2.yml
 # Prevent errors in case log and err files are not generated
   - touch build.txt
+  - touch /home/travis/build/oPromessa/flickr-uploader/uploadr.err
   - touch /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - touch /home/travis/build/oPromessa/flickr-uploader/nohup.lst
   - touch /home/travis/build/oPromessa/flickr-uploader/dbrun1.log
@@ -220,6 +221,7 @@ after_failure:
   - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   - python tests/drop.py --token $DROPBOX_TOKEN dbrun1.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   - python tests/drop.py --token $DROPBOX_TOKEN dbrun2.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN uploadr.err $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
 
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst
@@ -248,6 +250,7 @@ after_script:
   - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   - python tests/drop.py --token $DROPBOX_TOKEN dbrun1.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   - python tests/drop.py --token $DROPBOX_TOKEN dbrun2.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN uploadr.err $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
 
 # =============================================================================
 # Deploy to Heroku

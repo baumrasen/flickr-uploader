@@ -74,9 +74,11 @@ class UPLDRConstants:
         #
         #   base_dir      = Base configuration directory for files
         #   ini_file      = Location of INI file, normally named "uploadr.ini"
+        #   err_file      = Location of ERR file, normally named "uploadr.err"
         #
         self.base_dir = str('.')
         self.ini_file = str('uploadr.ini')
+        self.err_file = str('uploadr.err')
 
 
 # -----------------------------------------------------------------------------

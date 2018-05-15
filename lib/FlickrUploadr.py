@@ -1990,62 +1990,29 @@ class Uploadr(object):
                          .format(strunicodeout(file[1])))
             return True
 
-        @retry(attempts=2, waittime=2, randtime=False)
-        def R_photos_delete(kwargs):
-            return self.nuflickr.photos.delete(**kwargs)
-
         NP.niceprint('  Deleting file:[{!s}]'.format(strunicodeout(file[1])))
 
+        get_success, get_result, get_errcode = nu_flickrapi_fn(
+            self.nuflickr.photos.delete,
+            (),
+            dict(photo_id=str(file[0])),
+            2, 2, False)
+
         success = False
-
-        try:
-            deleteResp = None
-            deleteResp = R_photos_delete(dict(photo_id=str(file[0])))
-
-            logging.debug('Output for deleteResp:')
-            logging.debug(xml.etree.ElementTree.tostring(
-                deleteResp,
-                encoding='utf-8',
-                method='xml'))
-            if isGood(deleteResp):
-
-                dbDeleteRecordLocalDB(lock, file)
-
-                NP.niceprint('   Deleted file:[{!s}]'
-                             .format(strunicodeout(file[1])))
-                success = True
-            else:
-                niceerror(caught=True,
-                          caughtprefix='xxx',
-                          caughtcode='089',
-                          caughtmsg='Failed delete photo (deleteFile)',
-                          useniceprint=True)
-        except flickrapi.exceptions.FlickrError as ex:
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='090',
-                      caughtmsg='Flickrapi exception on photos.delete',
-                      exceptuse=True,
-                      exceptcode=ex.code,
-                      exceptmsg=ex,
-                      useniceprint=True)
+        if ((get_success and get_errcode == 0) or
+            (not get_success and get_errcode == 1)):
             # Error: 1: File already removed from Flickr
-            if ex.code == 1:
-                dbDeleteRecordLocalDB(lock, file)
-            else:
-                niceerror(caught=True,
-                          caughtprefix='xxx',
-                          caughtcode='092',
-                          caughtmsg='Failed to delete photo (deleteFile)',
-                          useniceprint=True)
-        except BaseException:
-            # If you get 'attempt to write a readonly database', set 'admin'
-            # as owner of the DB file (fickerdb) and 'users' as group
+
+            dbDeleteRecordLocalDB(lock, file)
+            NP.niceprint('   Deleted file:[{!s}]'
+                         .format(strunicodeout(file[1])))
+            success = True
+        else:
             niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='093',
-                      caughtmsg='Caught exception in deleteFile',
-                      exceptsysinfo=True)
+                      caughtprefix='xxx',
+                      caughtcode='089',
+                      caughtmsg='Failed to delete photo (deleteFile)',
+                      useniceprint=True)
 
         return success
 

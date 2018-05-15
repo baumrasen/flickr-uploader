@@ -433,6 +433,7 @@ UPLDRConstants.media_count = 0
 #   If not, then try Current Working Directory
 UPLDRConstants.base_dir = os.path.join(sys.prefix, 'etc')
 UPLDRConstants.ini_file = os.path.join(UPLDRConstants.base_dir, "uploadr.ini")
+UPLDRConstants.err_file = os.path.join(UPLDRConstants.base_dir, "uploadr.err")
 
 if my_cfg.LOGGING_LEVEL <= logging.DEBUG:
     logging.debug('      base_dir:[%s]', UPLDRConstants.base_dir)
@@ -440,6 +441,7 @@ if my_cfg.LOGGING_LEVEL <= logging.DEBUG:
     logging.debug('    prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
     logging.debug('   sys.argv[0]:[%s]', os.path.dirname(sys.argv[0]))
     logging.debug('      ini_file:[%s]', UPLDRConstants.ini_file)
+    logging.debug('      ini_file:[%s]', UPLDRConstants.err_file)
 # -----------------------------------------------------------------------------
 
 # =============================================================================
@@ -530,6 +532,10 @@ if __name__ == "__main__":
             UPLDRConstants.err_file,
             maxBytes=25*1024*1024,  # Mas 25 MBytes per file size
             backupCount=3)  # 3 rotating files
+        logging.info('rotating_logging.setLevel=[%s]',
+                     logging.getLogger().getEffectiveLevel() if
+                     logging.getLogger().getEffectiveLevel() <= logging.DEBUG
+                     else logging.getLogger().getEffectiveLevel() - 10)
         rotating_logging.setLevel(
             logging.getLogger().getEffectiveLevel() if
             logging.getLogger().getEffectiveLevel() <= logging.DEBUG
@@ -554,7 +560,7 @@ if __name__ == "__main__":
 
     # Update logging level as per LOGGING_LEVEL from INI file
     console_logging.setLevel(my_cfg.LOGGING_LEVEL)
-        
+
     if my_cfg.LOGGING_LEVEL <= logging.INFO:
         NPR.niceprint('Output for FLICKR Configuration:')
         pprint.pprint(my_cfg.FLICKR)

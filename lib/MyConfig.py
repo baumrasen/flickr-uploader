@@ -159,8 +159,8 @@ class MyConfig(object):
         "3",
         # MAX_UPLOAD_ATTEMPTS
         "10",
-        # LOGGING_LEVEL (40 = logging.ERROR)
-        "40"
+        # LOGGING_LEVEL (30 = logging.WARNING)
+        "30"
     ]
 
     # -------------------------------------------------------------------------

@@ -21,9 +21,6 @@ from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 # Import section
 #
 import logging
-import multiprocessing
-import time
-import random
 import flickrapi
 # -----------------------------------------------------------------------------
 # Helper class and functions to print messages.
@@ -71,7 +68,7 @@ def nu_flickrapi_fn(fn_name,
         return fn_name(**kwargs)
 
     logging.info('fn:[%s] attempts:[%s] waittime:[%s] randtime:[%s]',
-                  fn_name.__name__, attempts, waittime, randtime)
+                 fn_name.__name__, attempts, waittime, randtime)
 
     if logging.getLogger().getEffectiveLevel() <= logging.INFO:
         for i, arg in enumerate(fn_args):

@@ -645,7 +645,7 @@ class Uploadr(object):
             if self.ARGS.dry_run:
                 NP.niceprint('Dry Run rawfile:[{!s}]...'
                              .format(strunicodeout(fullpath)))
-                continue            
+                continue
 
             if self.convertRawFile(dirpath, f, ext, fnameonly):
                 try:

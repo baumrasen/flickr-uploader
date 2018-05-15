@@ -94,15 +94,38 @@ console_logging.setFormatter(logging.Formatter(
     '[%(asctime)s]:[%(processName)-11s]' + UPLDRConstants.W +
     '[%(levelname)-8s]:[%(name)s] %(message)s',
     datefmt=UPLDRConstants.TimeFormat))
-# add the handler to the root logger
 logging.getLogger().addHandler(console_logging)
-# Inits with default configuration values.
+
+# Inits with default configuration value, namely LOGGING_LEVEL
 my_cfg = MyConfig.MyConfig()
-# Get LOGGING_LEVEL defaul configuration
 my_cfg.LOGGING_LEVEL = int(str(my_cfg.LOGGING_LEVEL))
 # Update console logging level as per LOGGING_LEVEL from default config
-# logging.getLogger().setLevel(my_cfg.LOGGING_LEVEL)
 console_logging.setLevel(my_cfg.LOGGING_LEVEL)
+# CODING: Debug for now
+console_logging.setLevel(logging.DEBUG)
+# -----------------------------------------------------------------------------
+
+
+# =============================================================================
+# Init code
+#
+# Python version must be greater than 2.7 for this script to run
+#
+if sys.version_info < (2, 7):
+    logging.critical('----------- (V%s) Error Init -----------(Log:%s)'
+                     'This script requires Python 2.7 or newer.'
+                     'Current Python version: [%s] '
+                     'Exiting...',
+                     UPLDRConstants.Version,
+                     my_cfg.LOGGING_LEVEL,
+                     sys.version)
+    sys.exit(1)
+else:
+    logging.warning('----------- (V%s) Init -----------(Log:%s)'
+                    'Python version on this system: [%s]',
+                    UPLDRConstants.Version,
+                    my_cfg.LOGGING_LEVEL,
+                    sys.version)
 # -----------------------------------------------------------------------------
 
 
@@ -402,13 +425,7 @@ def checkBaseDir_INIfile(base_dir, ini_file):
 # =============================================================================
 # Global Variables
 #
-#   NUTIME = for working with time module (import time)
-#
 # -----------------------------------------------------------------------------
-NUTIME = time
-# -----------------------------------------------------------------------------
-
-# =============================================================================
 # Class UPLDReConstants
 #
 #   media_count = Counter of total files to initially upload
@@ -426,7 +443,7 @@ UPLDRConstants.base_dir = os.path.dirname(sys.argv[0])
 UPLDRConstants.ini_file = os.path.join(UPLDRConstants.base_dir, "uploadr.ini")
 UPLDRConstants.err_file = os.path.join(UPLDRConstants.base_dir, "uploadr.err")
 
-# CODING: Debug a series of control values 
+# CODING: Debug a series of control values
 logging.info('      base_dir:[%s]', UPLDRConstants.base_dir)
 logging.info('           cwd:[%s]', os.getcwd())
 logging.info('    prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
@@ -443,36 +460,12 @@ logging.info('      err_file:[%s]', UPLDRConstants.err_file)
 NPR = NicePrint.NicePrint()
 # -----------------------------------------------------------------------------
 
-# =============================================================================
-# Init code
-#
-# Python version must be greater than 2.7 for this script to run
-#
-if sys.version_info < (2, 7):
-    sys.stderr.write('--------- (V' + UPLDRConstants.Version +
-                     ') Error Init: ' + ' ---------\n')
-    sys.stderr.write("This script requires Python 2.7 or newer.\n")
-    sys.stderr.write("Current version: " + sys.version + "\n")
-    sys.stderr.flush()
-    sys.exit(1)
-else:
-    sys.stderr.write('--------- (V' + UPLDRConstants.Version +
-                     ') Init: ' + ' ---------\n')
-    sys.stderr.write('Python version on this system: ' + sys.version + '\n')
-    sys.stderr.flush()
-# -----------------------------------------------------------------------------
-
 
 # =============================================================================
 # Main code
 #
-logging.warning('--------- (V%s) Start time: %s ---------(Log:%s)',
-                UPLDRConstants.Version,
-                NUTIME.strftime(UPLDRConstants.TimeFormat),
-                my_cfg.LOGGING_LEVEL)
-NPR.niceprint('--------- (V{!s}) Start time: {!s} ---------(Log:{!s})'
+NPR.niceprint('----------- (V{!s}) Start -----------(Log:{!s})'
               .format(UPLDRConstants.Version,
-                      NUTIME.strftime(UPLDRConstants.TimeFormat),
                       my_cfg.LOGGING_LEVEL))
 # Install exception handler
 sys.excepthook = my_excepthook
@@ -505,7 +498,7 @@ if __name__ == "__main__":
                           useniceprint=True)
             sys.exit(2)
 
-    # Write DEBUG messages or higher to err_file
+    # Write one level more than console LOGGING level to err_file
     rotating_logging = None
     if not (UPLDRConstants.base_dir == ''
             or os.path.isdir(UPLDRConstants.base_dir)):
@@ -522,10 +515,6 @@ if __name__ == "__main__":
             UPLDRConstants.err_file,
             maxBytes=25*1024*1024,  # Mas 25 MBytes per file size
             backupCount=3)  # 3 rotating files
-        logging.info('rotating_logging.setLevel=[%s]',
-                     logging.getLogger().getEffectiveLevel() if
-                     logging.getLogger().getEffectiveLevel() <= logging.DEBUG
-                     else logging.getLogger().getEffectiveLevel() - 10)
         rotating_logging.setLevel(
             logging.getLogger().getEffectiveLevel() if
             logging.getLogger().getEffectiveLevel() <= logging.DEBUG
@@ -535,8 +524,17 @@ if __name__ == "__main__":
             '[%(asctime)s]:[%(processName)-11s]' + UPLDRConstants.W +
             '[%(levelname)-8s]:[%(name)s] %(message)s',
             datefmt=UPLDRConstants.TimeFormat))
-        # add the handler to the root logger
         logging.getLogger().addHandler(rotating_logging)
+
+        logging.warning('----------- (V%s) Init Rotating -----------(Log:%s)'
+                'Python version on this system: [%s]',
+                UPLDRConstants.Version,
+                my_cfg.LOGGING_LEVEL,
+                sys.version)
+        logging.info('rotating_logging.setLevel=[%s]',
+                     logging.getLogger().getEffectiveLevel() if
+                     logging.getLogger().getEffectiveLevel() <= logging.DEBUG
+                     else logging.getLogger().getEffectiveLevel() - 10)
 
     # Source configuration from ini_file
     my_cfg.readconfig(UPLDRConstants.ini_file, ['Config'])
@@ -571,13 +569,9 @@ if __name__ == "__main__":
     # Run uploader
     run_uploadr(PARSED_ARGS)
 
-NPR.niceprint('--------- (V{!s}) End time: {!s} -----------(Log:{!s})'
+NPR.niceprint('----------- (V{!s}) End -----------(Log:{!s})'
               .format(UPLDRConstants.Version,
-                      NUTIME.strftime(UPLDRConstants.TimeFormat),
                       my_cfg.LOGGING_LEVEL))
-logging.warning('--------- (V%s) End time: %s -----------(Log:%s)',
+logging.warning('----------- (V%s) End -----------(Log:%s)',
                 UPLDRConstants.Version,
-                NUTIME.strftime(UPLDRConstants.TimeFormat),
                 my_cfg.LOGGING_LEVEL)
-sys.stderr.write('--------- ' + 'End: ' + ' ---------\n')
-sys.stderr.flush()

@@ -261,7 +261,7 @@ def retry(attempts=3, waittime=5, randtime=False):
                                  a_fn.__name__, attempts,
                                  waittime, randtime)
                     for i, arg in enumerate(args):
-                        logging.debug('___Retry f():[%s] arg[%s]={%s}',
+                        logging.debug('___Retry f():[%s] arg[%s]=[%s]',
                                       a_fn.__name__, i, arg)
             for i in range(attempts if attempts > 0 else 1):
                 try:

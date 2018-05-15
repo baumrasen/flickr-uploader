@@ -21,6 +21,10 @@ from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 # Import section
 #
 import logging
+try:
+    import httplib as httplib      # Python 2
+except ImportError:
+    import http.client as httplib  # Python 3
 import xml
 # Avoids error on some systems:
 #    AttributeError: 'module' object has no attribute 'etree'
@@ -126,6 +130,12 @@ def nu_flickrapi_fn(fn_name,
                   exceptmsg=flickr_ex,
                   useniceprint=True,
                   exceptsysinfo=True)
+    except (IOError, httplib.HTTPException):
+        niceerror(caught=True,
+                  caughtprefix='+++Api',
+                  caughtcode=caughtcode,
+                  caughtmsg='Caught IO/HTTP Error on [{!s}]'
+                            .format(fn_name.__name__))
     except Exception as exc:
         niceerror(caught=True,
                   caughtprefix='+++Api',

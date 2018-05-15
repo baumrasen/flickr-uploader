@@ -58,6 +58,9 @@ import lib.rate_limited as rate_limited
 # -----------------------------------------------------------------------------
 # Helper module function to split work accross functions in multiprocessing
 import lib.mprocessing as mp
+# -----------------------------------------------------------------------------
+# Helper module functions to wrap FlickrAPI with retry/try/exception/debug
+import lib.FlickrApiWrapper as Wrap
 
 
 # =============================================================================
@@ -4055,16 +4058,27 @@ class Uploadr(object):
                           .format(e.args[0]),
                           useniceprint=True)
 
+        get_success, get_result, get_errcode = nu_flickrapi_fn(
+            nuflickr.people.getPhotos,
+            (),
+            dict(user_id="me", per_page=1),
+            3, 3, False)
+
+        if get_success and get_errcode == 0:
+            countflickr = get_result.find('photos').attrib['total']
+        else:
+            countflickr = -1
+
         # Total FLickr photos count: find('photos').attrib['total'] -----------
-        countflickr = -1
-        res = self.people_get_photos()
-        logging.debug('Output for people_get_photos:')
-        logging.debug(xml.etree.ElementTree.tostring(res,
-                                                     encoding='utf-8',
-                                                     method='xml'))
-        if isGood(res):
-            countflickr = format(res.find('photos').attrib['total'])
-            logging.debug('Total photos on flickr: %s', countflickr)
+        # countflickr = -1
+        # res = self.people_get_photos()
+        # logging.debug('Output for people_get_photos:')
+        # logging.debug(xml.etree.ElementTree.tostring(res,
+        #                                              encoding='utf-8',
+        #                                              method='xml'))
+        # if isGood(res):
+        #     countflickr = format(res.find('photos').attrib['total'])
+        #     logging.debug('Total photos on flickr: %s', countflickr)
 
         # Total photos not on Sets/Albums on FLickr ---------------------------
         # (per_page=1 as only the header is required to obtain total):

@@ -100,8 +100,6 @@ my_cfg = MyConfig.MyConfig()
 my_cfg.LOGGING_LEVEL = int(str(my_cfg.LOGGING_LEVEL))
 # Update console logging level as per LOGGING_LEVEL from default config
 console_logging.setLevel(my_cfg.LOGGING_LEVEL)
-# CODING: Debug for now
-console_logging.setLevel(logging.DEBUG)
 # -----------------------------------------------------------------------------
 
 
@@ -417,7 +415,7 @@ def checkBaseDir_INIfile(base_dir, ini_file):
             'Config folder [%s] and/or INI file: [%s] not found or '
             'incorrect format: [%s]!', base_dir, ini_file, str(err))
 
-    logging.debug('result_check=[{%s]', result_check)
+    logging.debug('checkBaseDir_INIfile=[%s]', result_check)
     return result_check
 
 
@@ -525,7 +523,7 @@ if __name__ == "__main__":
             datefmt=UPLDRConstants.TimeFormat))
         logging.getLogger().addHandler(rotating_logging)
 
-        logging.warning('----------- (V%s) Init Rotating -----------(Log:%s)'
+        logging.warning('----------- (V%s) Init Rotating -----------(Log:%s)\n'
                         'Python version on this system: [%s]',
                         UPLDRConstants.Version,
                         my_cfg.LOGGING_LEVEL,

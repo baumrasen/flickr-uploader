@@ -168,37 +168,34 @@ def nu_flickrapi_fn(fn_name,
 
 
 # -----------------------------------------------------------------------------
-def nu_get_cached_token(self,
-                        api_key,
-                        api_secret,
-                        token_cache_location='token',
-                        perms='delete',
-                        attempts=3,
-                        waittime=5,
-                        randtime=False):
-    """ nu_get_cached_token
+# nu_authenticate
+#
+# Authenticates via flickrapi on flickr.com
+#
+def nu_authenticate(api_key,
+                    secret,
+                    token_cache_location,
+                    attempts=3,
+                    waittime=5,
+                    randtime=False):
+    """ nu_authenticate
+    Authenticate user so we can upload files.
+    Assumes the cached token is not available or valid.
 
-        Attempts to get the flickr token from disk.
+    api_key, secret, token_cache_location, perms
 
-        api_key, api_secret, token_cache_location, perms
-
-        Returns the flickrapi object.
-        The actual token: flickrobj.token_cache.token
+    Returns an instance object for the class flickrapi
     """
 
-    @retry(attempts=attempts, waittime=waittime, randtime=randtime)
-    def retry_flickrapi(kwargs):
-        return flickrapi.FlickrAPI(**kwargs)
-
-    logging.info('Obtaining Cached token')
-    logging.debug('TOKEN_CACHE:[%s]', token_cache_location)
+    # Instantiate flickr for connection to flickr via flickrapi
+    logging.info(' Authentication: Connecting...')
 
     fn_result = True
     try:
-        flickrobj = flickrapi.FlickrAPI(dict(
+        flickrobj = flickrapi.FlickrAPI(
             api_key,
-            api_secret,
-            token_cache_location=token_cache_location))
+            secret,
+            token_cache_location=token_cache_location)
     except flickrapi.exceptions.FlickrError as ex:
         niceerror(caught=True,
                   caughtprefix='+++Api',
@@ -209,42 +206,157 @@ def nu_get_cached_token(self,
                   exceptmsg=ex,
                   useniceprint=True,
                   exceptsysinfo=True)
-        fn_result = True
+        fn_result = False
 
     if not fn_result:
         return None   # Error
 
+    logging.info(' Authentication: Connected. Getting new token...')
 
+    fn_result = True
     try:
-        # Check if token permissions are correct.
-        if flickrobj.token_valid(perms=perms):
-            logging.info('Cached token obtained: [%s]',
-                         flickrobj.token_cache.token)
-            return flickrobj  # flickrobj.token_cache.token
-        else:
-            logging.warning('Token Non-Existant.')
-            return None  # None
-    except BaseException:
+        flickrobj.get_request_token(oauth_callback='oob')
+    except flickrapi.exceptions.FlickrError as ex:
         niceerror(caught=True,
                   caughtprefix='+++Api',
                   caughtcode='000',
-                  caughtmsg='Unexpected error in token_valid',
+                  caughtmsg='Error in flickrapi.FlickrAPI',
+                  exceptuse=True,
+                  exceptcode=ex.code,
+                  exceptmsg=ex,
+                  useniceprint=True,
                   exceptsysinfo=True)
+        fn_result = False
+        sys.exit(4)
+    except Exception as ex:
+        niceerror(caught=True,
+                  caughtprefix='+++Api',
+                  caughtcode='001',
+                  caughtmsg='Unexpected error in token_valid',
+                  useniceprint=True,
+                  exceptsysinfo=True)
+        fn_result = False
         raise
 
+    # Show url. Copy and paste it in your browser
+    # Adjust parameter "perms" to to your needs
+    authorize_url = flickrobj.auth_url(perms=u'delete')
+    print('Copy and paste following authorizaiton URL '
+          'in your browser to obtain Verifier Code.')
+    print(authorize_url)
 
-def nu_photos_add_tags(self, photo_id, tags):
-    """ nu_photos_add_tags
+    # Prompt for verifier code from the user.
+    # Python 2.7 and 3.6
+    # use "# noqa" to bypass flake8 error notifications
+    verifier = unicode(raw_input(  # noqa
+                                 'Verifier code (NNN-NNN-NNN): ')) \
+               if sys.version_info < (3, ) \
+               else input('Verifier code (NNN-NNN-NNN): ')
 
-        Local Wrapper for Flickr photos.addTags
+    print('Verifier: {!s}'.format(verifier))
+
+    # Trade the request token for an access token
+    try:
+        flickrobj.get_access_token(verifier)
+    except flickrapi.exceptions.FlickrError as ex:
+        niceerror(caught=True,
+                  caughtprefix='+++Api',
+                  caughtcode='030',
+                  caughtmsg='Error in flickrapi.get_access_token',
+                  exceptuse=True,
+                  exceptcode=ex.code,
+                  exceptmsg=ex,
+                  useniceprint=True,
+                  exceptsysinfo=True)
+        sys.exit(5)
+
+    NPR.niceprint('{!s} with {!s} permissions: {!s}'
+                  .format('Check Authentication',
+                          'delete',
+                          flickrobj.token_valid(perms='delete')))
+
+    # Some debug...
+    logging.info('Token Cache: [{!s}]', flickrobj.token_cache.token)
+
+    return flickrobj
+
+
+# -----------------------------------------------------------------------------
+def nu_get_cached_token(api_key,
+                        secret,
+                        token_cache_location='token',
+                        perms='delete'):
+    """ nu_get_cached_token
+
+        Attempts to get the flickr token from disk.
+
+        api_key, secret, token_cache_location, perms
+
+        Returns the flickrapi object.
+        The actual token is: flickrobj.token_cache.token
     """
 
-    logging.info('photos_add_tags: photo_id:[%s] tags:[%s]',
-                 photo_id, tags)
-    photos_add_tagsResp = self.nuflickr.photos.addTags(
-        photo_id=photo_id,
-        tags=tags)
-    return photos_add_tagsResp
+    # Instantiate flickr for connection to flickr via flickrapi
+    logging.info('   Cached token: Connecting...')
+
+    fn_result = True
+    try:
+        flickrobj = flickrapi.FlickrAPI(
+            api_key,
+            secret,
+            token_cache_location=token_cache_location)
+    except flickrapi.exceptions.FlickrError as ex:
+        niceerror(caught=True,
+                  caughtprefix='+++Api',
+                  caughtcode='000',
+                  caughtmsg='Error in flickrapi.FlickrAPI',
+                  exceptuse=True,
+                  exceptcode=ex.code,
+                  exceptmsg=ex,
+                  useniceprint=True,
+                  exceptsysinfo=True)
+        fn_result = False
+
+    if not fn_result:
+        return None   # Error
+
+    logging.info('   Cached token: Connected. Looking in TOKEN_CACHE:[%s]',
+                 token_cache_location)
+
+    fn_result = True
+    try:
+        # Check if token permissions are correct.
+        if flickrobj.token_valid(perms=perms):
+            logging.info('   Cached token: Success: [%s]',
+                         flickrobj.token_cache.token)
+        else:
+            fn_result = False
+            logging.warning('   Cached token: Token Non-Existant.')
+    except flickrapi.exceptions.FlickrError as ex:
+        niceerror(caught=True,
+                  caughtprefix='+++Api',
+                  caughtcode='000',
+                  caughtmsg='Error in flickrapi.token_valid',
+                  exceptuse=True,
+                  exceptcode=ex.code,
+                  exceptmsg=ex,
+                  useniceprint=True,
+                  exceptsysinfo=True)
+        fn_result = False
+    except BaseException:
+        niceerror(caught=True,
+                  caughtprefix='+++Api',
+                  caughtcode='001',
+                  caughtmsg='Unexpected error in token_valid',
+                  useniceprint=True,
+                  exceptsysinfo=True)
+        fn_result = False
+        raise
+
+    if fn_result:
+        return flickrobj  # flickrobj.token_cache.token
+    else:
+        return None   # Error
 
 
 # -----------------------------------------------------------------------------
@@ -252,9 +364,50 @@ def nu_photos_add_tags(self, photo_id, tags):
 #
 if __name__ == "__main__":
 
-    logging.basicConfig(level=logging.WARNING,
+    logging.basicConfig(level=logging.INFO,
                         format='[%(asctime)s]:[%(processName)-11s]' +
                         '[%(levelname)-8s]:[%(name)s] %(message)s')
 
     import doctest
     doctest.testmod()
+
+    import os
+    import sys
+    import lib.NicePrint as npc
+    NPR = npc.NicePrint()
+
+    # Define two variables within your OS environment (api_key, secret)
+    # to access flickr:
+    #
+    # export api_key=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    # export secret=YYYYYYYYYYYYYYYY
+    #
+    flickr_config = { 'api_key' : os.environ['api_key'],
+                      'secret' : os.environ['secret'],
+                      'TOKEN_CACHE' : os.path.join(
+                         os.path.dirname(sys.argv[0]),'token')}
+
+    NPR.niceprint('-----------------------------------Connecting to Flickr...')
+    flickr = None
+    flickr = nu_get_cached_token(
+        flickr_config['api_key'],
+        flickr_config['secret'],
+        token_cache_location=flickr_config['TOKEN_CACHE'])
+
+    if flickr is None:
+        flickr = nu_authenticate(
+            flickr_config['api_key'],
+            flickr_config['secret'],
+            token_cache_location=flickr_config['TOKEN_CACHE'])
+
+    if flickr is not None:
+        NPR.niceprint('-----------------------------------Number of Photos...')
+        get_success, get_result, get_errcode = nu_flickrapi_fn(
+            flickr.people.getPhotos,
+            (),
+            dict(user_id="me", per_page=1),
+            2, 10, True)
+
+        if get_success and get_errcode == 0:
+            NPR.niceprint('Number of Photos=[{!s}]'
+                          .format(get_result.find('photos').attrib['total']))

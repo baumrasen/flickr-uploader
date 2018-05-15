@@ -2000,7 +2000,7 @@ class Uploadr(object):
 
         success = False
         if ((get_success and get_errcode == 0) or
-            (not get_success and get_errcode == 1)):
+                (not get_success and get_errcode == 1)):
             # Error: 1: File already removed from Flickr
 
             dbDeleteRecordLocalDB(lock, file)

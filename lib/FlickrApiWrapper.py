@@ -382,10 +382,10 @@ if __name__ == "__main__":
     # export api_key=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # export secret=YYYYYYYYYYYYYYYY
     #
-    flickr_config = { 'api_key' : os.environ['api_key'],
-                      'secret' : os.environ['secret'],
-                      'TOKEN_CACHE' : os.path.join(
-                         os.path.dirname(sys.argv[0]),'token')}
+    flickr_config = {'api_key': os.environ['api_key'],
+                     'secret': os.environ['secret'],
+                     'TOKEN_CACHE': os.path.join(
+                         os.path.dirname(sys.argv[0]), 'token')}
 
     NPR.niceprint('-----------------------------------Connecting to Flickr...')
     flickr = None

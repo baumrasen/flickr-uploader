@@ -3442,72 +3442,6 @@ class Uploadr(object):
 
         return searchResp
 
-    # -------------------------------------------------------------------------
-    # people_get_photos
-    #
-    #   Local Wrapper for Flickr people.getPhotos
-    #
-    def people_get_photos(self):
-        """ people_get_photos
-        """
-
-        @retry(attempts=3, waittime=3, randtime=False)
-        def R_people_getPhotos(kwargs):
-            return self.nuflickr.people.getPhotos(**kwargs)
-
-        getPhotosResp = None
-        try:
-            getPhotosResp = R_people_getPhotos(dict(user_id="me",
-                                                    per_page=1))
-
-        except flickrapi.exceptions.FlickrError as ex:
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='200',
-                      caughtmsg='Error in people.getPhotos',
-                      exceptuse=True,
-                      exceptcode=ex.code,
-                      exceptmsg=ex,
-                      useniceprint=True,
-                      exceptsysinfo=True)
-        except (IOError, httplib.HTTPException):
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='201',
-                      caughtmsg='Caught IO/HTTP Error in people.getPhotos')
-        except BaseException:
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='202',
-                      caughtmsg='Caught exception in people.getPhotos',
-                      exceptsysinfo=True)
-        finally:
-            if getPhotosResp is None or not isGood(getPhotosResp):
-                logging.error('getPhotosResp:[%s]',
-                              'None'
-                              if getPhotosResp is None
-                              else isGood(getPhotosResp))
-
-        return getPhotosResp
-
-    # -------------------------------------------------------------------------
-    # photos_get_not_in_set
-    #
-    #   Local Wrapper for Flickr photos.getNotInSet
-    #
-    def photos_get_not_in_set(self, per_page):
-        """ photos_get_not_in_set
-
-            Local Wrapper for Flickr photos.getNotInSet
-        """
-
-        @retry(attempts=2, waittime=12, randtime=False)
-        def R_photos_getNotInSet(kwargs):
-            return self.nuflickr.photos.getNotInSet(**kwargs)
-
-        notinsetResp = R_photos_getNotInSet(dict(per_page=per_page))
-
-        return notinsetResp
 
     # -------------------------------------------------------------------------
     # photos_get_info
@@ -4058,81 +3992,48 @@ class Uploadr(object):
                           .format(e.args[0]),
                           useniceprint=True)
 
+        # Total FLickr photos count: find('photos').attrib['total'] -----------
         get_success, get_result, get_errcode = faw.nu_flickrapi_fn(
             self.nuflickr.people.getPhotos,
             (),
             dict(user_id="me", per_page=1),
-            3, 3, False)
+            3, 3, False,
+            caughtcode='390')
 
         if get_success and get_errcode == 0:
             countflickr = get_result.find('photos').attrib['total']
         else:
             countflickr = -1
 
-        # Total FLickr photos count: find('photos').attrib['total'] -----------
-        # countflickr = -1
-        # res = self.people_get_photos()
-        # logging.debug('Output for people_get_photos:')
-        # logging.debug(xml.etree.ElementTree.tostring(res,
-        #                                              encoding='utf-8',
-        #                                              method='xml'))
-        # if isGood(res):
-        #     countflickr = format(res.find('photos').attrib['total'])
-        #     logging.debug('Total photos on flickr: %s', countflickr)
+        # Total FLickr photos not in set: find('photos').attrib['total'] ------
+        get_success, get_result, get_errcode = faw.nu_flickrapi_fn(
+            self.nuflickr.photos.getNotInSet,
+            (),
+            dict(per_page=1),
+            3, 3, False,
+            caughtcode='400')
 
-        # Total photos not on Sets/Albums on FLickr ---------------------------
-        # (per_page=1 as only the header is required to obtain total):
-        #       find('photos').attrib['total']
-        try:
-            res = self.photos_get_not_in_set(1)
-
-        except flickrapi.exceptions.FlickrError as ex:
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='400',
-                      caughtmsg='Flickrapi exception on getNotInSet',
-                      exceptuse=True,
-                      exceptcode=ex.code,
-                      exceptmsg=ex)
-        except (IOError, httplib.HTTPException):
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='401',
-                      caughtmsg='Caught IO/HTTP Error in getNotInSet')
-        except BaseException:
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='402',
-                      caughtmsg='Caught exception in getNotInSet',
-                      exceptsysinfo=True)
-        finally:
-            logging.debug('Output for get_not_in_set:')
-            logging.debug(xml.etree.ElementTree.tostring(
-                res,
-                encoding='utf-8',
-                method='xml'))
+        if get_success and get_errcode == 0:
+            countnotinsets = int(format(
+                get_result.find('photos').attrib['total']))            
+        else:
             countnotinsets = 0
-            if isGood(res):
-                countnotinsets = int(format(
-                    res.find('photos').attrib['total']))
-                logging.debug('Photos not in sets on flickr: %s',
-                              countnotinsets)
 
-            # Print total stats counters --------------------------------------
-            NP.niceprint('\n  Initial Found Files:[{!s:>6s}]\n'
-                         '          - Bad Files:[{!s:>6s}] = [{!s:>6s}]\n'
-                         '                 Note: some Bad files may no '
-                         'longer exist!\n'
-                         'Photos count:\n'
-                         '                Local:[{!s:>6s}]\n'
-                         '               Flickr:[{!s:>6s}]\n'
-                         'Not in sets on Flickr:[{!s:>6s}]'
-                         .format(InitialFoundFiles,
-                                 BadFilesCount,
-                                 InitialFoundFiles - BadFilesCount,
-                                 countlocal,
-                                 countflickr,
-                                 countnotinsets))
+        # Print total stats counters ------------------------------------------
+        NP.niceprint('\n  Initial Found Files:[{!s:>6s}]\n'
+                     '          - Bad Files:[{!s:>6s}] = [{!s:>6s}]\n'
+                     '                 Note: some Bad files may no '
+                     'longer exist!\n'
+                     'Photos count:\n'
+                     '                Local:[{!s:>6s}]\n'
+                     '               Flickr:[{!s:>6s}]\n'
+                     'Not in sets on Flickr:[{!s:>6s}]'
+                     .format(InitialFoundFiles,
+                             BadFilesCount,
+                             InitialFoundFiles - BadFilesCount,
+                             countlocal,
+                             countflickr,
+                             countnotinsets))
 
         # List pics not in sets (if within a parameter) -----------------------
         # Maximum allowed per_page by Flickr is 500.
@@ -4144,27 +4045,23 @@ class Uploadr(object):
             # List pics not in sets (if within a parameter, default 10)
             # (per_page=min(self.ARGS.list_photos_not_in_set, 500):
             #       find('photos').attrib['total']
-            res = self.photos_get_not_in_set(
-                min(self.ARGS.list_photos_not_in_set, 500))
-            logging.debug('Output for list get_not_in_set:')
-            logging.debug(xml.etree.ElementTree.tostring(res,
-                                                         encoding='utf-8',
-                                                         method='xml'))
-
-            if isGood(res):
-                for count, row in enumerate(res.find('photos')
+            
+            get_success, get_result, get_errcode = faw.nu_flickrapi_fn(
+                self.nuflickr.photos.getNotInSet,
+                (),
+                dict(per_page=min(self.ARGS.list_photos_not_in_set, 500)),
+                3, 3, False,
+                caughtcode='410')
+            if get_success and get_errcode == 0:
+                for count, row in enumerate(get_result.find('photos')
                                             .findall('photo')):
                     logging.info('Photo Not in Set: id:[%s] title:[%s]',
                                  row.attrib['id'],
                                  strunicodeout(row.attrib['title']))
-                    logging.debug('Output for photos_get_not_in_set:')
-                    logging.debug(xml.etree.ElementTree.tostring(
-                        row,
-                        encoding='utf-8',
-                        method='xml'))
-                    NP.niceprint('Photo get_not_in_set: id:[{!s}] title:[{!s}]'
+                    NP.niceprint('Photo Not in Set: id:[{!s}] title:[{!s}]'
                                  .format(row.attrib['id'],
                                          strunicodeout(row.attrib['title'])))
+
                     logging.info('count=[%s]', count)
                     if ((count == 500) or
                         (count >= (self.ARGS.list_photos_not_in_set - 1)) or

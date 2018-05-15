@@ -108,7 +108,8 @@ def my_excepthook(exc_class, exc_value, exc_tb):
         Exception handler to be installed over sys.excepthook to allow
         traceback reporting information to be reported back to logging file
     """
-    logging.critical('Uncaught exception: {0}: {1}'.format(exc_class, exc_value))
+    logging.critical('Uncaught exception: {0}: {1}'
+                     .format(exc_class, exc_value))
     logging.critical(''.join(traceback.format_tb(exc_tb)))
 
 
@@ -526,10 +527,10 @@ if __name__ == "__main__":
         flogging.setLevel(logging.DEBUG)
         # Tell the handler to use this format
         flogging.setFormatter(
-            flogging.Formatter(fmt='[' + str(UPLDRConstants.Run) + ']' +
-                               '[%(asctime)s]:[%(processName)-11s]' +
-                               '[%(levelname)-8s]:[%(name)s] %(message)s',
-                               datefmt=UPLDRConstants.TimeFormat))
+            logging.Formatter(fmt='[' + str(UPLDRConstants.Run) + ']' +
+                              '[%(asctime)s]:[%(processName)-11s]' +
+                              '[%(levelname)-8s]:[%(name)s] %(message)s',
+                              datefmt=UPLDRConstants.TimeFormat))
         # add the handler to the root logger
         logging.getLogger().addHandler(flogging)
 

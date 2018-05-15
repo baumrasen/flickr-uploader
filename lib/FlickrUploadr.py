@@ -38,13 +38,9 @@ try:
         encoding='utf-8',
         method='xml')
 except AttributeError:
-    sys.stderr.write('Importing xml.etree.ElementTree...')
     try:
         import xml.etree.ElementTree
-        sys.stderr.write('done. Continuing.\n')
-        sys.stderr.flush()
     except ImportError:
-        sys.stderr.write('failed with ImportError.')
         raise
 import pprint
 from itertools import islice

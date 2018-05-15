@@ -512,13 +512,10 @@ if __name__ == "__main__":
             UPLDRConstants.err_file,
             maxBytes=25*1024*1024,  # Mas 25 MBytes per file size
             backupCount=3)  # 3 rotating files
-        rotating_logging.setLevel(
-            logging.getLogger().getEffectiveLevel() if
-            logging.getLogger().getEffectiveLevel() <= logging.DEBUG
-            else logging.getLogger().getEffectiveLevel() - 10)
+        rotating_logging.setLevel(logging.WARNING)
         rotating_logging.setFormatter(logging.Formatter(
-            fmt=UPLDRConstants.P + '[' + str(UPLDRConstants.Run) + ']' +
-            '[%(asctime)s]:[%(processName)-11s]' + UPLDRConstants.W +
+            fmt='[' + str(UPLDRConstants.Run) + ']' +
+            '[%(asctime)s]:[%(processName)-11s]' +
             '[%(levelname)-8s]:[%(name)s] %(message)s',
             datefmt=UPLDRConstants.TimeFormat))
         logging.getLogger().addHandler(rotating_logging)
@@ -528,10 +525,6 @@ if __name__ == "__main__":
                         UPLDRConstants.Version,
                         my_cfg.LOGGING_LEVEL,
                         sys.version)
-        logging.info('rotating_logging.setLevel=[%s]',
-                     logging.getLogger().getEffectiveLevel() if
-                     logging.getLogger().getEffectiveLevel() <= logging.DEBUG
-                     else logging.getLogger().getEffectiveLevel() - 10)
 
     # Source configuration from ini_file
     my_cfg.readconfig(UPLDRConstants.ini_file, ['Config'])
@@ -543,8 +536,19 @@ if __name__ == "__main__":
     else:
         raise ValueError('No config file found or incorrect config!')
 
-    # Update logging level as per LOGGING_LEVEL from INI file
+    # Update console/rotating logging level as per LOGGING_LEVEL from INI file
     console_logging.setLevel(my_cfg.LOGGING_LEVEL)
+    rotating_logging.setLevel(my_cfg.LOGGING_LEVEL if
+                              my_cfg.LOGGING_LEVEL <= logging.DEBUG
+                              else my_cfg.LOGGING_LEVEL - 10)
+    logging.warning('console_logging.setLevel=[%s] '
+                    'rotating_logging.setLevel=[%s] '
+                    'my_cfg.LOGGING_LEVEL=[%s]',
+                    my_cfg.LOGGING_LEVEL,
+                    my_cfg.LOGGING_LEVEL if
+                    my_cfg.LOGGING_LEVEL <= logging.DEBUG
+                    else my_cfg.LOGGING_LEVEL - 10,
+                    my_cfg.LOGGING_LEVEL)
 
     if my_cfg.LOGGING_LEVEL <= logging.INFO:
         NPR.niceprint('Output for FLICKR Configuration:')

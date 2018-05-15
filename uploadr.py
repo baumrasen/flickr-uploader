@@ -548,8 +548,22 @@ if __name__ == "__main__":
     # Update logging level as per LOGGING_LEVEL from INI file
     logging.getLogger().setLevel(my_cfg.LOGGING_LEVEL)
     if flogging is not None:
+        logging.removeHandler(flogging)
+        flogging = logging.handlers.RotatingFileHandler(
+            UPLDRConstants.err_file,
+            maxBytes=25*1024*1024,  # 25 MBytes
+            backupCount=3)
+        # Define the Logging level logging.DEBUG
         flogging.setLevel(logging.DEBUG)
-
+        # Tell the handler to use this format
+        flogging.setFormatter(
+            logging.Formatter(fmt='[' + str(UPLDRConstants.Run) + ']' +
+                              '[%(asctime)s]:[%(processName)-11s]' +
+                              '[%(levelname)-8s]:[%(name)s] %(message)s',
+                              datefmt=UPLDRConstants.TimeFormat))
+        # add the handler to the root logger
+        logging.getLogger().addHandler(flogging)
+        
     if my_cfg.LOGGING_LEVEL <= logging.INFO:
         NPR.niceprint('Output for FLICKR Configuration:')
         pprint.pprint(my_cfg.FLICKR)

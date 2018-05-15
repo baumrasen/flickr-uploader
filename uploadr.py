@@ -414,7 +414,7 @@ NUTIME = time
 # -----------------------------------------------------------------------------
 
 # =============================================================================
-# Class UPLDRConstants
+# Class UPLDReConstants
 #
 #   media_count = Counter of total files to initially upload
 #   base_dir      = Base configuration directory location
@@ -509,8 +509,8 @@ if __name__ == "__main__":
             sys.exit(2)
 
     # Write DEBUG messages or higher to err_file
-    if not checkBaseDir_INIfile(UPLDRConstants.base_dir,
-                                UPLDRConstants.err_file):
+    if not (UPLDRConstants.base_dir == ''
+            or os.path.isdir(UPLDRConstants.base_dir)):
         NPR.niceerror(caught=True,
                       caughtprefix='+++ ',
                       caughtcode='603',

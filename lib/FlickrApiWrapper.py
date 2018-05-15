@@ -77,7 +77,8 @@ def nu_flickrapi_fn(fn_name,
         for i, arg in enumerate(fn_args):
             logging.info('fn:[%s] arg[%s]={%s}', fn_name.__name__, i, arg)
         for name, value in fn_kwargs.items():
-            logging.info('fn:[%s] kwarg[%s]=[%s]', fn_name.__name__, name, value)
+            logging.info('fn:[%s] kwarg[%s]=[%s]',
+                         fn_name.__name__, name, value)
 
     fn_success = False
     fn_result = None

@@ -89,8 +89,8 @@ logging.getLogger().setLevel(logging.DEBUG)
 CONSOLE_LOGGING = logging.StreamHandler()
 CONSOLE_LOGGING.setLevel(logging.WARNING)
 CONSOLE_LOGGING.setFormatter(logging.Formatter(
-    fmt=UPLDRConstants.P + '[' + str(UPLDRConstants.Run) + ']' +
-    '[%(asctime)s]:[%(processName)-11s]' + UPLDRConstants.W +
+    fmt=UPLDRConstants.Pur + '[' + str(UPLDRConstants.Run) + ']' +
+    '[%(asctime)s]:[%(processName)-11s]' + UPLDRConstants.Std +
     '[%(levelname)-8s]:[%(name)s] %(message)s',
     datefmt=UPLDRConstants.TimeFormat))
 logging.getLogger().addHandler(CONSOLE_LOGGING)

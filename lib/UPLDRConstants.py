@@ -55,12 +55,12 @@ class UPLDRConstants:
 
     # -------------------------------------------------------------------------
     # Color Codes for colorful output
-    W = '\033[0m'    # white (normal)
-    R = '\033[31m'   # red
-    G = '\033[32m'   # green
-    Or = '\033[33m'   # orange
-    B = '\033[34m'   # blue
-    P = '\033[35m'   # purple
+    Std = '\033[0m'    # white (standard/normal)
+    Red = '\033[31m'   # red
+    Gre = '\033[32m'   # green
+    Ora = '\033[33m'   # orange
+    Blu = '\033[34m'   # blue
+    Pur = '\033[35m'   # purple
 
     # -------------------------------------------------------------------------
     # class UPLDRConstants __init__

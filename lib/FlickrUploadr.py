@@ -183,6 +183,59 @@ def md5checksum(afilepath):
         return calc_md5.hexdigest()
 
 
+# -------------------------------------------------------------------------
+# set_name_from_file
+#
+def set_name_from_file(afile, afiles_dir, afull_set_name):
+    """set_name_from_file
+
+       Return setName for a file path depending on FULL_SET_NAME True/False
+       Example:
+       File to upload: /home/user/media/2014/05/05/photo.jpg
+            FILES_DIR: /home/user/media
+        FULL_SET_NAME:
+               False=> 05
+                True=> 2014/05/05
+    """
+
+    assert len(afile) > 0, NP.niceassert('len({!s}) is not > 0:'
+                                         .format(strunicodeout(afile)))
+
+    logging.debug('set_name_from_file in: '
+                  'afile:[%s] afiles_dir=[%s] afull_set_name:[%s]',
+                  strunicodeout(afile),
+                  strunicodeout(afiles_dir),
+                  strunicodeout(afull_set_name))
+    if afull_set_name:
+        asetname = os.path.relpath(os.path.dirname(afile), afiles_dir)
+    else:
+        _, asetname = os.path.split(os.path.dirname(afile))
+    logging.debug('set_name_from_file out: '
+                  'afile:[%s] afiles_dir=[%s] afull_set_name:[%s]'
+                  ' asetname:[%s]',
+                  strunicodeout(afile),
+                  strunicodeout(afiles_dir),
+                  strunicodeout(afull_set_name),
+                  strunicodeout(asetname))
+
+    return asetname
+
+
+# -------------------------------------------------------------------------
+# rate_5_callspersecond
+#
+@rate_limited.rate_limited(5)  # 5 calls per second
+def rate_5_callspersecond():
+    """ rate_5_callspersecond
+
+        Pace the calls rate within a specific function
+
+          n   = for n calls per second  (ex. 3 means 3 calls per second)
+          1/n = for n seconds per call (ex. 0.5 means 4 seconds in between calls)
+    """
+    logging.debug('rate_limit timestamp:[%s]', time.strftime('%T'))
+
+
 # -----------------------------------------------------------------------------
 # Uploadr class
 #
@@ -1112,9 +1165,9 @@ class Uploadr(object):
             NP.niceprint('  Checking file:[{!s}]...'
                          .format(strunicodeout(file)))
 
-        setName = self.getSetNameFromFile(file,
-                                          self.xcfg.FILES_DIR,
-                                          self.xcfg.FULL_SET_NAME)
+        setName = set_name_from_file(file,
+                                     self.xcfg.FILES_DIR,
+                                     self.xcfg.FULL_SET_NAME)
 
         success = False
         con = lite.connect(self.xcfg.DB_PATH)
@@ -2100,49 +2153,6 @@ class Uploadr(object):
                             self.xcfg.SLEEP_TIME)
             NUTIME.sleep(self.xcfg.SLEEP_TIME)
 
-    # -------------------------------------------------------------------------
-    # getSetNameFromFile
-    #
-    # Return setName for a file path depending on FULL_SET_NAME True/False
-    #   File to upload: /home/user/media/2014/05/05/photo.jpg
-    #        FILES_DIR:  /home/user/media
-    #    FULL_SET_NAME:
-    #       False: 05
-    #       True: 2014/05/05
-    #
-    def getSetNameFromFile(self, afile, aFILES_DIR, aFULL_SET_NAME):
-        """getSetNameFromFile
-
-           Return setName for a file path depending on FULL_SET_NAME True/False
-           File to upload: /home/user/media/2014/05/05/photo.jpg
-           FILES_DIR:  /home/user/media
-           FULL_SET_NAME:
-              False: 05
-              True: 2014/05/05
-        """
-
-        assert len(afile) > 0, NP.niceassert('len({!s}) is not > 0:'
-                                             .format(strunicodeout(afile)))
-
-        logging.debug('getSetNameFromFile in: '
-                      'afile:[%s] aFILES_DIR=[%s] aFULL_SET_NAME:[%s]',
-                      strunicodeout(afile),
-                      strunicodeout(aFILES_DIR),
-                      strunicodeout(aFULL_SET_NAME))
-        if aFULL_SET_NAME:
-            asetname = os.path.relpath(os.path.dirname(afile), aFILES_DIR)
-        else:
-            _, asetname = os.path.split(os.path.dirname(afile))
-        logging.debug('getSetNameFromFile out: '
-                      'afile:[%s] aFILES_DIR=[%s] aFULL_SET_NAME:[%s]'
-                      ' asetname:[%s]',
-                      strunicodeout(afile),
-                      strunicodeout(aFILES_DIR),
-                      strunicodeout(aFULL_SET_NAME),
-                      strunicodeout(asetname))
-
-        return asetname
-
     # ---------------------------------------------------------------------
     # fn_addFilesToSets
     #
@@ -2161,9 +2171,9 @@ class Uploadr(object):
             for filepic in sfiles:
                 # filepic[1] = path for the file from table files
                 # filepic[2] = set_id from files table
-                setName = self.getSetNameFromFile(filepic[1],
-                                                  self.xcfg.FILES_DIR,
-                                                  self.xcfg.FULL_SET_NAME)
+                setName = set_name_from_file(filepic[1],
+                                             self.xcfg.FILES_DIR,
+                                             self.xcfg.FULL_SET_NAME)
                 aset = None
                 try:
                     # Acquire DBlock if in multiprocessing mode
@@ -2243,7 +2253,7 @@ class Uploadr(object):
 
         con = lite.connect(self.xcfg.DB_PATH)
         con.text_factory = str
-        con.create_function("getSet", 3, self.getSetNameFromFile)
+        con.create_function("getSet", 3, set_name_from_file)
         # Enable traceback return from create_function.
         lite.enable_callback_tracebacks(True)
 
@@ -2327,9 +2337,9 @@ class Uploadr(object):
                 for filepic in files:
                     # filepic[1] = path for the file from table files
                     # filepic[2] = set_id from files table
-                    setName = self.getSetNameFromFile(filepic[1],
-                                                      self.xcfg.FILES_DIR,
-                                                      self.xcfg.FULL_SET_NAME)
+                    setName = set_name_from_file(filepic[1],
+                                                 self.xcfg.FILES_DIR,
+                                                 self.xcfg.FULL_SET_NAME)
 
                     cur.execute('SELECT set_id, name '
                                 'FROM sets WHERE name = ?',
@@ -2433,9 +2443,9 @@ class Uploadr(object):
             # Error: 1: Photoset not found
             if ex.code == 1:
                 NP.niceprint('Photoset not found, creating new set...')
-                setName = self.getSetNameFromFile(file[1],
-                                                  self.xcfg.FILES_DIR,
-                                                  self.xcfg.FULL_SET_NAME)
+                setName = set_name_from_file(file[1],
+                                             self.xcfg.FILES_DIR,
+                                             self.xcfg.FULL_SET_NAME)
                 self.createSet(lock, setName, file[0], cur, con)
             # Error: 3: Photo Already in set
             elif ex.code == 3:
@@ -3603,19 +3613,6 @@ class Uploadr(object):
         pass
 
     # -------------------------------------------------------------------------
-    # rate4maddAlbumsMigrate
-    #
-    # Pace the calls to flickr on maddAlbumsMigrate
-    #
-    #   n   = for n calls per second  (ex. 3 means 3 calls per second)
-    #   1/n = for n seconds per call (ex. 0.5 meand 4 seconds in between calls)
-    @rate_limited.rate_limited(5)  # 5 calls per second
-    def rate4maddAlbumsMigrate(self):
-        """ rate4maddAlbumsMigrate
-        """
-        logging.debug('rate_limit timestamp:[%s]', time.strftime('%T'))
-
-    # -------------------------------------------------------------------------
     # maddAlbumsMigrate
     #
     # maddAlbumsMigrate wrapper for multiprocessing purposes
@@ -3644,9 +3641,9 @@ class Uploadr(object):
                          fname='addAlbumMigrate')
 
             # row[1] = path for the file from table files
-            setName = self.getSetNameFromFile(f[1],
-                                              self.xcfg.FILES_DIR,
-                                              self.xcfg.FULL_SET_NAME)
+            setName = set_name_from_file(f[1],
+                                         self.xcfg.FILES_DIR,
+                                         self.xcfg.FULL_SET_NAME)
             try:
                 terr = False
                 tfind, tid = self.photos_find_tag(
@@ -3698,8 +3695,8 @@ class Uploadr(object):
             # Show number of files processed so far
             NP.niceprocessedfiles(xcount, cTotal, False)
 
-            # Control pace (rate limit) of each proceess
-            self.rate4maddAlbumsMigrate()
+            # Control pace (rate limit)of each proceess
+            rate_5_callspersecond()
 
     # -------------------------------------------------------------------------
     # addAlbumsMigrate
@@ -3785,9 +3782,9 @@ class Uploadr(object):
                                  fname='addAlbumMigrate')
 
                     # row[1] = path for the file from table files
-                    setName = self.getSetNameFromFile(row[1],
-                                                      self.xcfg.FILES_DIR,
-                                                      self.xcfg.FULL_SET_NAME)
+                    setName = set_name_from_file(row[1],
+                                                 self.xcfg.FILES_DIR,
+                                                 self.xcfg.FULL_SET_NAME)
                     try:
                         terr = False
                         tfind, tid = self.photos_find_tag(
@@ -4014,8 +4011,8 @@ class Uploadr(object):
 
                     logging.info('count=[%s]', count)
                     if ((count == 500) or
-                        (count >= (self.args.list_photos_not_in_set - 1)) or
-                            (count >= (countnotinsets - 1))):
+                            (count >= (self.args.list_photos_not_in_set - 1))
+                            or (count >= (countnotinsets - 1))):
                         logging.info('Stopped at photo [%s] listing '
                                      'photos not in a set', count)
                         break

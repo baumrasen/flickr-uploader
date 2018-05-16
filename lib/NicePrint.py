@@ -118,11 +118,11 @@ class NicePrint:
 
         """
         print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
-              .format(UPLDRConstants.G,
+              .format(UPLDRConstants.Gre,
                       UPLDRConstants.Run,
                       time.strftime(UPLDRConstants.TimeFormat),
                       os.getpid(),
-                      UPLDRConstants.W,
+                      UPLDRConstants.Std,
                       'PRINT',
                       self.strunicodeout(fname),
                       self.strunicodeout(astr)))
@@ -141,11 +141,11 @@ class NicePrint:
                                             .format(param1))
         """
         return('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
-               .format(UPLDRConstants.R,
+               .format(UPLDRConstants.Red,
                        UPLDRConstants.Run,
                        time.strftime(UPLDRConstants.TimeFormat),
                        os.getpid(),
-                       UPLDRConstants.W,
+                       UPLDRConstants.Std,
                        'ASSERT',
                        'uploadr',
                        self.strunicodeout(astr)))

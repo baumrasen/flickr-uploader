@@ -2460,7 +2460,6 @@ class Uploadr(object):
                       useniceprint=True)
             con.close()
 
-
     # -------------------------------------------------------------------------
     # createSet
     #

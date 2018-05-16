@@ -125,12 +125,12 @@ class TestUPLDRConstantsMethods(unittest.TestCase):
 if __name__ == '__main__':
     # unittest.main()
 
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestMethods)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    SUITE = unittest.TestLoader().loadTestsFromTestCase(TestMethods)
+    unittest.TextTestRunner(verbosity=2).run(SUITE)
 
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestNicePrintMethods)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    SUITE = unittest.TestLoader().loadTestsFromTestCase(TestNicePrintMethods)
+    unittest.TextTestRunner(verbosity=2).run(SUITE)
 
-    suite = unittest.TestLoader().loadTestsFromTestCase(
+    SUITE = unittest.TestLoader().loadTestsFromTestCase(
         TestUPLDRConstantsMethods)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    unittest.TextTestRunner(verbosity=2).run(SUITE)

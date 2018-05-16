@@ -2380,114 +2380,77 @@ class Uploadr(object):
         if self.args.dry_run:
             return True
 
-        @retry(attempts=2, waittime=0, randtime=False)
-        def R_photosets_addPhoto(kwargs):
-            return self.nuflickr.photosets.addPhoto(**kwargs)
+        con = lite.connect(self.xcfg.DB_PATH)
+        con.text_factory = str
+        bcur = con.cursor()
 
-        try:
-            con = lite.connect(self.xcfg.DB_PATH)
-            con.text_factory = str
-            bcur = con.cursor()
+        get_success, get_result, get_errcode = faw.nu_flickrapi_fn(
+            self.nuflickr.photosets.addPhoto,
+            (),
+            dict(photoset_id=str(setId),
+                 photo_id=str(file[0])),
+            2, 0, False)
 
-            logging.info('Calling nuflickr.photosets.addPhoto'
-                         'set_id=[%s] photo_id=[%s]',
-                         setId, file[0])
-            # REMARK Result for Error 3 (Photo already in set)
-            # is passed via exception and so it is handled there
-            addPhotoResp = None
-            addPhotoResp = R_photosets_addPhoto(dict(photoset_id=str(setId),
-                                                     photo_id=str(file[0])))
+        success = False
+        if get_success and get_errcode == 0:
+            NP.niceprint(' Added file/set:[{!s}] setId:[{!s}]'
+                         .format(strunicodeout(file[1]),
+                                 strunicodeout(setId)))
 
-            logging.debug('Output for addPhotoResp:')
-            logging.debug(xml.etree.ElementTree.tostring(
-                addPhotoResp,
-                encoding='utf-8',
-                method='xml'))
-
-            if isGood(addPhotoResp):
-                NP.niceprint(' Added file/set:[{!s}] setId:[{!s}]'
-                             .format(strunicodeout(file[1]),
-                                     strunicodeout(setId)))
-                try:
-                    # Acquire DBlock if in multiprocessing mode
-                    self.useDBLock(lock, True)
-                    bcur.execute("UPDATE files SET set_id = ? "
-                                 "WHERE files_id = ?",
-                                 (setId, file[0]))
-                    con.commit()
-                except lite.Error as err:
-                    niceerror(caught=True,
-                              caughtprefix='+++ DB',
-                              caughtcode='096',
-                              caughtmsg='DB error on UPDATE files: [{!s}]'
-                              .format(err.args[0]),
-                              useniceprint=True)
-                finally:
-                    # Release DBlock if in multiprocessing mode
-                    self.useDBLock(lock, False)
-            else:
+            success = True
+            try:
+                # Acquire DBlock if in multiprocessing mode
+                self.useDBLock(lock, True)
+                bcur.execute("UPDATE files SET set_id = ? "
+                             "WHERE files_id = ?",
+                             (setId, file[0]))
+                con.commit()
+            except lite.Error as err:
                 niceerror(caught=True,
-                          caughtprefix='xxx',
-                          caughtcode='097',
-                          caughtmsg='Failed add photo to set (addFiletoSet)',
+                          caughtprefix='+++ DB',
+                          caughtcode='096',
+                          caughtmsg='DB error on UPDATE files: [{!s}]'
+                          .format(err.args[0]),
                           useniceprint=True)
-        except flickrapi.exceptions.FlickrError as ex:
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='100',
-                      caughtmsg='Flickrapi exception on photosets.addPhoto',
-                      exceptuse=True,
-                      exceptcode=ex.code,
-                      exceptmsg=ex,
-                      useniceprint=True)
+            finally:
+                # Release DBlock if in multiprocessing mode
+                self.useDBLock(lock, False)
+        elif not get_success and get_errcode == 1:
             # Error: 1: Photoset not found
-            if ex.code == 1:
-                NP.niceprint('Photoset not found, creating new set...')
-                setName = set_name_from_file(file[1],
-                                             self.xcfg.FILES_DIR,
-                                             self.xcfg.FULL_SET_NAME)
-                self.createSet(lock, setName, file[0], cur, con)
-            # Error: 3: Photo Already in set
-            elif ex.code == 3:
-                try:
-                    NP.niceprint('Photo already in set... updating DB'
-                                 'set_id=[{!s}] photo_id=[{!s}]'
-                                 .format(setId, file[0]))
-                    # Acquire DBlock if in multiprocessing mode
-                    self.useDBLock(lock, True)
-                    bcur.execute('UPDATE files SET set_id = ? '
-                                 'WHERE files_id = ?', (setId, file[0]))
-                except lite.Error as err:
-                    niceerror(caught=True,
-                              caughtprefix='+++ DB',
-                              caughtcode='110',
-                              caughtmsg='DB error on UPDATE SET: [{!s}]'
-                              .format(err.args[0]),
-                              useniceprint=True)
-                finally:
-                    con.commit()
-                    # Release DBlock if in multiprocessing mode
-                    self.useDBLock(lock, False)
-            else:
+            NP.niceprint('Photoset not found, creating new set...')
+            setName = set_name_from_file(file[1],
+                                         self.xcfg.FILES_DIR,
+                                         self.xcfg.FULL_SET_NAME)
+            # CODING: cur vs bcur! Check!
+            self.createSet(lock, setName, file[0], cur, con)
+        elif not get_success and get_errcode == 3:
+            # Error: 3: Photo already in set
+            try:
+                NP.niceprint('Photo already in set... updating DB'
+                             'set_id=[{!s}] photo_id=[{!s}]'
+                             .format(setId, file[0]))
+                # Acquire DBlock if in multiprocessing mode
+                self.useDBLock(lock, True)
+                bcur.execute('UPDATE files SET set_id = ? '
+                             'WHERE files_id = ?', (setId, file[0]))
+            except lite.Error as err:
                 niceerror(caught=True,
-                          caughtprefix='xxx',
-                          caughtcode='111',
-                          caughtmsg='Failed add photo to set (addFiletoSet)',
+                          caughtprefix='+++ DB',
+                          caughtcode='110',
+                          caughtmsg='DB error on UPDATE SET: [{!s}]'
+                          .format(err.args[0]),
                           useniceprint=True)
-        except lite.Error as err:
+            finally:
+                con.commit()
+                # Release DBlock if in multiprocessing mode
+                self.useDBLock(lock, False)
+        else:
             niceerror(caught=True,
-                      caughtprefix='+++ DB',
-                      caughtcode='120',
-                      caughtmsg='DB error on UPDATE files: [{!s}]'
-                      .format(err.args[0]),
+                      caughtprefix='xxx',
+                      caughtcode='097',
+                      caughtmsg='Failed add photo to set (addFiletoSet)',
                       useniceprint=True)
-        except BaseException:
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='121',
-                      caughtmsg='Caught exception in addFiletoSet',
-                      useniceprint=True,
-                      exceptsysinfo=True)
+
         # Closing DB connection
         if con is not None and con in locals():
             niceerror(caught=True,
@@ -2496,6 +2459,7 @@ class Uploadr(object):
                       caughtmsg='Closing DB connection on addFileToSet',
                       useniceprint=True)
             con.close()
+
 
     # -------------------------------------------------------------------------
     # createSet

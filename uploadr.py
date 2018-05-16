@@ -86,20 +86,20 @@ UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 # Parent logger is set to Maximum (DEBUG) so that suns will log as appropriate
 logging.getLogger().setLevel(logging.DEBUG)
 # define a Handler which writes WARNING messages or higher to the sys.stderr
-console_logging = logging.StreamHandler()
-console_logging.setLevel(logging.WARNING)
-console_logging.setFormatter(logging.Formatter(
+CONSOLE_LOGGING = logging.StreamHandler()
+CONSOLE_LOGGING.setLevel(logging.WARNING)
+CONSOLE_LOGGING.setFormatter(logging.Formatter(
     fmt=UPLDRConstants.P + '[' + str(UPLDRConstants.Run) + ']' +
     '[%(asctime)s]:[%(processName)-11s]' + UPLDRConstants.W +
     '[%(levelname)-8s]:[%(name)s] %(message)s',
     datefmt=UPLDRConstants.TimeFormat))
-logging.getLogger().addHandler(console_logging)
+logging.getLogger().addHandler(CONSOLE_LOGGING)
 
 # Inits with default configuration value, namely LOGGING_LEVEL
-my_cfg = MyConfig.MyConfig()
-my_cfg.LOGGING_LEVEL = int(str(my_cfg.LOGGING_LEVEL))
+MY_CFG = MyConfig.MyConfig()
+MY_CFG.LOGGING_LEVEL = int(str(MY_CFG.LOGGING_LEVEL))
 # Update console logging level as per LOGGING_LEVEL from default config
-console_logging.setLevel(my_cfg.LOGGING_LEVEL)
+CONSOLE_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL)
 # -----------------------------------------------------------------------------
 
 
@@ -114,14 +114,14 @@ if sys.version_info < (2, 7):
                      'Current Python version: [%s] '
                      'Exiting...',
                      UPLDRConstants.Version,
-                     my_cfg.LOGGING_LEVEL,
+                     MY_CFG.LOGGING_LEVEL,
                      sys.version)
     sys.exit(1)
 else:
     logging.warning('----------- (V%s) Init -----------(Log:%s)'
                     'Python version on this system: [%s]',
                     UPLDRConstants.Version,
-                    my_cfg.LOGGING_LEVEL,
+                    MY_CFG.LOGGING_LEVEL,
                     sys.version)
 # -----------------------------------------------------------------------------
 
@@ -286,33 +286,33 @@ def run_uploadr(args):
     #   FLICK        = Class Uploadr (created in the Main code)
 
     # Print/show arguments
-    if my_cfg.LOGGING_LEVEL <= logging.INFO:
+    if MY_CFG.LOGGING_LEVEL <= logging.INFO:
         NPR.niceprint('Output for arguments(args):')
         pprint.pprint(args)
 
     if args.verbose:
         NPR.niceprint('FILES_DIR: [{!s}]'
-                      .format(NPR.strunicodeout(my_cfg.FILES_DIR)))
+                      .format(NPR.strunicodeout(MY_CFG.FILES_DIR)))
 
-    logging.warning('FILES_DIR: [%s]', NPR.strunicodeout(my_cfg.FILES_DIR))
+    logging.warning('FILES_DIR: [%s]', NPR.strunicodeout(MY_CFG.FILES_DIR))
 
-    if my_cfg.FILES_DIR == "":
+    if MY_CFG.FILES_DIR == "":
         NPR.niceprint('Please configure in the INI file [normally uploadr.ini]'
                       ' the name of the folder [FILES_DIR] '
                       'with media available to sync with Flickr.')
         sys.exit(8)
     else:
-        if not os.path.isdir(my_cfg.FILES_DIR):
+        if not os.path.isdir(MY_CFG.FILES_DIR):
             logging.critical('FILES_DIR: [%s] is not valid.',
-                             NPR.strunicodeout(my_cfg.FILES_DIR))
+                             NPR.strunicodeout(MY_CFG.FILES_DIR))
             NPR.niceprint('Please configure the name of an existant folder '
                           'in the INI file [normally uploadr.ini] '
                           'with media available to sync with Flickr. '
                           'FILES_DIR: [{!s}] is not valid.'
-                          .format(NPR.strunicodeout(my_cfg.FILES_DIR)))
+                          .format(NPR.strunicodeout(MY_CFG.FILES_DIR)))
             sys.exit(8)
 
-    if my_cfg.FLICKR["api_key"] == "" or my_cfg.FLICKR["secret"] == "":
+    if MY_CFG.FLICKR["api_key"] == "" or MY_CFG.FLICKR["secret"] == "":
         logging.critical('Please enter an API key and secret in the '
                          'configuration '
                          'script file, normaly uploadr.ini (see README).')
@@ -322,7 +322,7 @@ def run_uploadr(args):
 
     # Instantiate class Uploadr. getCachedToken is called on __init__
     logging.debug('Instantiating the Main class FLICK = Uploadr()')
-    FLICK = FlickrUploadr.Uploadr(my_cfg, args)
+    FLICK = FlickrUploadr.Uploadr(MY_CFG, args)
 
     # Setup the database
     FLICK.setupDB()
@@ -333,10 +333,10 @@ def run_uploadr(args):
         # Will run in daemon mode every SLEEP_TIME seconds
         if FLICK.check_token():
             logging.warning('Will run in daemon mode every [%s] seconds',
-                            my_cfg.SLEEP_TIME)
+                            MY_CFG.SLEEP_TIME)
             logging.warning('Make sure you have previously authenticated!')
             NPR.niceprint('Will run in daemon mode every [{!s}] seconds'
-                          .format(my_cfg.SLEEP_TIME))
+                          .format(MY_CFG.SLEEP_TIME))
             FLICK.run()
         else:
             logging.warning('Not able to connect to Flickr.'
@@ -392,12 +392,12 @@ def run_uploadr(args):
 
 
 # -----------------------------------------------------------------------------
-# checkBaseDir_INIfile
+# check_base_ini_file
 #
 # Check if base_dir folder exists and ini_file exists and is a file
 #
-def checkBaseDir_INIfile(base_dir, ini_file):
-    """checkBaseDir_INIfile
+def check_base_ini_file(base_dir, ini_file):
+    """check_base_ini_file
 
     base_dir = Folder
     ini_file = INI File path
@@ -414,7 +414,7 @@ def checkBaseDir_INIfile(base_dir, ini_file):
             'Config folder [%s] and/or INI file: [%s] not found or '
             'incorrect format: [%s]!', base_dir, ini_file, str(err))
 
-    logging.debug('checkBaseDir_INIfile=[%s]', result_check)
+    logging.debug('check_base_ini_file=[%s]', result_check)
     return result_check
 
 
@@ -462,7 +462,7 @@ NPR = NicePrint.NicePrint()
 #
 NPR.niceprint('----------- (V{!s}) Start -----------(Log:{!s})'
               .format(UPLDRConstants.Version,
-                      my_cfg.LOGGING_LEVEL))
+                      MY_CFG.LOGGING_LEVEL))
 # Install exception handler
 sys.excepthook = my_excepthook
 
@@ -475,8 +475,8 @@ if __name__ == "__main__":
         UPLDRConstants.ini_file = PARSED_ARGS.config_file
         logging.info('UPLDRConstants.ini_file:[%s]',
                      NPR.strunicodeout(UPLDRConstants.ini_file))
-        if not checkBaseDir_INIfile(UPLDRConstants.base_dir,
-                                    UPLDRConstants.ini_file):
+        if not check_base_ini_file(UPLDRConstants.base_dir,
+                                   UPLDRConstants.ini_file):
             NPR.niceerror(caught=True,
                           caughtprefix='+++ ',
                           caughtcode='601',
@@ -485,8 +485,8 @@ if __name__ == "__main__":
                           useniceprint=True)
             sys.exit(2)
     else:
-        if not checkBaseDir_INIfile(UPLDRConstants.base_dir,
-                                    UPLDRConstants.ini_file):
+        if not check_base_ini_file(UPLDRConstants.base_dir,
+                                   UPLDRConstants.ini_file):
             NPR.niceerror(caught=True,
                           caughtprefix='+++ ',
                           caughtcode='602',
@@ -522,13 +522,13 @@ if __name__ == "__main__":
         logging.warning('----------- (V%s) Init Rotating -----------(Log:%s)\n'
                         'Python version on this system: [%s]',
                         UPLDRConstants.Version,
-                        my_cfg.LOGGING_LEVEL,
+                        MY_CFG.LOGGING_LEVEL,
                         sys.version)
 
     # Source configuration from ini_file
-    my_cfg.readconfig(UPLDRConstants.ini_file, ['Config'])
-    if my_cfg.processconfig():
-        if my_cfg.verifyconfig():
+    MY_CFG.readconfig(UPLDRConstants.ini_file, ['Config'])
+    if MY_CFG.processconfig():
+        if MY_CFG.verifyconfig():
             pass
         else:
             raise ValueError('No config file found or incorrect config!')
@@ -536,27 +536,27 @@ if __name__ == "__main__":
         raise ValueError('No config file found or incorrect config!')
 
     # Update console/rotating logging level as per LOGGING_LEVEL from INI file
-    console_logging.setLevel(my_cfg.LOGGING_LEVEL)
-    rotating_logging.setLevel(my_cfg.LOGGING_LEVEL if
-                              my_cfg.LOGGING_LEVEL <= logging.DEBUG
-                              else my_cfg.LOGGING_LEVEL - 10)
-    logging.warning('console_logging.setLevel=[%s] '
+    CONSOLE_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL)
+    rotating_logging.setLevel(MY_CFG.LOGGING_LEVEL if
+                              MY_CFG.LOGGING_LEVEL <= logging.DEBUG
+                              else MY_CFG.LOGGING_LEVEL - 10)
+    logging.warning('CONSOLE_LOGGING.setLevel=[%s] '
                     'rotating_logging.setLevel=[%s] '
-                    'my_cfg.LOGGING_LEVEL=[%s]',
-                    my_cfg.LOGGING_LEVEL,
-                    my_cfg.LOGGING_LEVEL if
-                    my_cfg.LOGGING_LEVEL <= logging.DEBUG
-                    else my_cfg.LOGGING_LEVEL - 10,
-                    my_cfg.LOGGING_LEVEL)
+                    'MY_CFG.LOGGING_LEVEL=[%s]',
+                    MY_CFG.LOGGING_LEVEL,
+                    MY_CFG.LOGGING_LEVEL if
+                    MY_CFG.LOGGING_LEVEL <= logging.DEBUG
+                    else MY_CFG.LOGGING_LEVEL - 10,
+                    MY_CFG.LOGGING_LEVEL)
 
-    if my_cfg.LOGGING_LEVEL <= logging.INFO:
+    if MY_CFG.LOGGING_LEVEL <= logging.INFO:
         NPR.niceprint('Output for FLICKR Configuration:')
-        pprint.pprint(my_cfg.FLICKR)
+        pprint.pprint(MY_CFG.FLICKR)
 
     # Ensure that only one instance of this script is running
     try:
         # FileLocker is an alias to portalocker (if available) or fcntl
-        FILELOCK(open(my_cfg.LOCK_PATH, 'w'),
+        FILELOCK(open(MY_CFG.LOCK_PATH, 'w'),
                  FileLocker.LOCK_EX | FileLocker.LOCK_NB)
     except IOError as err:
         if err.errno == errno.EAGAIN:
@@ -571,7 +571,7 @@ if __name__ == "__main__":
 
 NPR.niceprint('----------- (V{!s}) End -----------(Log:{!s})'
               .format(UPLDRConstants.Version,
-                      my_cfg.LOGGING_LEVEL))
+                      MY_CFG.LOGGING_LEVEL))
 logging.warning('----------- (V%s) End -----------(Log:%s)',
                 UPLDRConstants.Version,
-                my_cfg.LOGGING_LEVEL)
+                MY_CFG.LOGGING_LEVEL)

@@ -122,8 +122,10 @@ def mprocessing(args_verbose, args_verbose_progress,
         proc_pool.append(proc_task)
         logging.debug('===Job/Task Process: Starting...')
         proc_task.start()
-        logging.debug('===Job/Task Process: Started')
-        if args_verbose:
+        logging.debug('===Job/Task Process:  [%s] Started with pid:[%s]',
+                      proc_task.name,
+                      proc_task.pid)
+        if args_verbose_progress:
             npr.niceprint('===Job/Task Process: [{!s}] Started '
                           'with pid:[{!s}]'
                           .format(proc_task.name,

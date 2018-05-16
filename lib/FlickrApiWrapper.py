@@ -380,8 +380,6 @@ if __name__ == "__main__":
 
     import os
     import sys
-    import lib.NicePrint as npc
-    NPR = npc.NicePrint()
 
     # Define two variables within your OS environment (api_key, secret)
     # to access flickr:

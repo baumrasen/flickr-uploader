@@ -230,8 +230,8 @@ def rate_5_callspersecond():
 
         Pace the calls rate within a specific function
 
-          n   = for n calls per second  (ex. 3 means 3 calls per second)
-          1/n = for n seconds per call (ex. 0.5 means 4 seconds in between calls)
+          n   = n calls per second  (ex. 3 means 3 calls per second)
+          1/n = n seconds per call (ex. 0.5 means 4 seconds in between calls)
     """
     logging.debug('rate_limit timestamp:[%s]', time.strftime('%T'))
 

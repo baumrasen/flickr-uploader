@@ -283,7 +283,7 @@ def run_uploadr(args):
     # -------------------------------------------------------------------------
     # Local Variables
     #
-    #   FLICK        = Class Uploadr (created in the Main code)
+    #   myflick        = Class Uploadr (created in the Main code)
 
     # Print/show arguments
     if MY_CFG.LOGGING_LEVEL <= logging.INFO:
@@ -321,23 +321,23 @@ def run_uploadr(args):
         sys.exit(9)
 
     # Instantiate class Uploadr. getCachedToken is called on __init__
-    logging.debug('Instantiating the Main class FLICK = Uploadr()')
-    FLICK = FlickrUploadr.Uploadr(MY_CFG, args)
+    logging.debug('Instantiating the Main class myflick = Uploadr()')
+    myflick = FlickrUploadr.Uploadr(MY_CFG, args)
 
     # Setup the database
-    FLICK.setupDB()
+    myflick.setupDB()
     if args.clean_bad_files:
-        FLICK.cleanDBbadfiles()
+        myflick.cleanDBbadfiles()
 
     if args.daemon:
         # Will run in daemon mode every SLEEP_TIME seconds
-        if FLICK.check_token():
+        if myflick.check_token():
             logging.warning('Will run in daemon mode every [%s] seconds',
                             MY_CFG.SLEEP_TIME)
             logging.warning('Make sure you have previously authenticated!')
             NPR.niceprint('Will run in daemon mode every [{!s}] seconds'
                           .format(MY_CFG.SLEEP_TIME))
-            FLICK.run()
+            myflick.run()
         else:
             logging.warning('Not able to connect to Flickr.'
                             'Make sure you have previously authenticated!')
@@ -347,15 +347,15 @@ def run_uploadr(args):
     else:
         NPR.niceprint('Checking if token is available... '
                       'if not will authenticate')
-        if not FLICK.check_token():
+        if not myflick.check_token():
             # authenticate sys.exits in case of failure
-            FLICK.authenticate()
+            myflick.authenticate()
 
         if args.add_albums_migrate:
             NPR.niceprint('Performing preparation for migration to 2.7.0',
                           fname='addAlbumsMigrate')
 
-            if FLICK.addAlbumsMigrate():
+            if myflick.addAlbumsMigrate():
                 NPR.niceprint('Successfully added album tags to pics '
                               'on upload.',
                               fname='addAlbumsMigrate')
@@ -371,23 +371,23 @@ def run_uploadr(args):
         elif args.list_bad_files:
             NPR.niceprint('Listing badfiles: Start.',
                           fname='listBadFiles')
-            FLICK.listBadFiles()
+            myflick.listBadFiles()
             NPR.niceprint('Listing badfiles: End. No more options will run.',
                           fname='listBadFiles')
         else:
-            FLICK.removeUselessSetsTable()
-            FLICK.getFlickrSets()
-            FLICK.upload()
-            FLICK.removeDeletedMedia()
+            myflick.removeUselessSetsTable()
+            myflick.getFlickrSets()
+            myflick.upload()
+            myflick.removeDeletedMedia()
 
             if args.search_for_duplicates:
-                FLICK.searchForDuplicates()
+                myflick.searchForDuplicates()
 
             if args.remove_excluded:
-                FLICK.removeExcludedMedia()
+                myflick.removeExcludedMedia()
 
-            FLICK.createSets()
-            FLICK.printStat(UPLDRConstantsClass.media_count)
+            myflick.createSets()
+            myflick.printStat(UPLDRConstantsClass.media_count)
     # Run Uploadr -------------------------------------------------------------
 
 
@@ -495,7 +495,7 @@ if __name__ == "__main__":
             sys.exit(2)
 
     # Write one level more than console LOGGING level to err_file
-    rotating_logging = None
+    ROTATING_LOGGING = None
     if not (UPLDRConstants.base_dir == ''
             or os.path.isdir(UPLDRConstants.base_dir)):
         NPR.niceerror(caught=True,
@@ -507,17 +507,17 @@ if __name__ == "__main__":
     else:
         # Define a rotating file Handler which writes DEBUG messages
         # or higher to err_file
-        rotating_logging = logging.handlers.RotatingFileHandler(
+        ROTATING_LOGGING = logging.handlers.RotatingFileHandler(
             UPLDRConstants.err_file,
             maxBytes=25*1024*1024,  # Mas 25 MBytes per file size
             backupCount=3)  # 3 rotating files
-        rotating_logging.setLevel(logging.WARNING)
-        rotating_logging.setFormatter(logging.Formatter(
+        ROTATING_LOGGING.setLevel(logging.WARNING)
+        ROTATING_LOGGING.setFormatter(logging.Formatter(
             fmt='[' + str(UPLDRConstants.Run) + ']' +
             '[%(asctime)s]:[%(processName)-11s]' +
             '[%(levelname)-8s]:[%(name)s] %(message)s',
             datefmt=UPLDRConstants.TimeFormat))
-        logging.getLogger().addHandler(rotating_logging)
+        logging.getLogger().addHandler(ROTATING_LOGGING)
 
         logging.warning('----------- (V%s) Init Rotating -----------(Log:%s)\n'
                         'Python version on this system: [%s]',
@@ -537,11 +537,11 @@ if __name__ == "__main__":
 
     # Update console/rotating logging level as per LOGGING_LEVEL from INI file
     CONSOLE_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL)
-    rotating_logging.setLevel(MY_CFG.LOGGING_LEVEL if
+    ROTATING_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL if
                               MY_CFG.LOGGING_LEVEL <= logging.DEBUG
                               else MY_CFG.LOGGING_LEVEL - 10)
     logging.warning('CONSOLE_LOGGING.setLevel=[%s] '
-                    'rotating_logging.setLevel=[%s] '
+                    'ROTATING_LOGGING.setLevel=[%s] '
                     'MY_CFG.LOGGING_LEVEL=[%s]',
                     MY_CFG.LOGGING_LEVEL,
                     MY_CFG.LOGGING_LEVEL if

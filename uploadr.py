@@ -408,7 +408,7 @@ def check_base_ini_file(base_dir, ini_file):
         if not ((base_dir == '' or os.path.isdir(base_dir)) and
                 os.path.isfile(ini_file)):
             raise OSError('[Errno 2] No such file or directory')
-    except Exception as err:
+    except OSError as err:
         result_check = False
         logging.critical(
             'Config folder [%s] and/or INI file: [%s] not found or '

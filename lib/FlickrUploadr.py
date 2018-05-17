@@ -2050,7 +2050,7 @@ class Uploadr(object):
             (),
             dict(photo_id=str(file[0])),
             2, 2, False,
-            caughtcode='999')
+            caughtcode='111')
 
         success = False
         if ((get_success and get_errcode == 0) or
@@ -2064,7 +2064,7 @@ class Uploadr(object):
         else:
             niceerror(caught=True,
                       caughtprefix='xxx',
-                      caughtcode='089',
+                      caughtcode='090',
                       caughtmsg='Failed to delete photo (deleteFile)',
                       useniceprint=True)
 
@@ -2163,7 +2163,7 @@ class Uploadr(object):
         """ fn_addFilesToSets
         """
 
-        # CODING Use a different conn and cur to avoid erro +++096
+        # CODING Use a different conn and cur to avoid error +++096
         fn_con = lite.connect(self.xcfg.DB_PATH)
         fn_con.text_factory = str
 
@@ -2391,7 +2391,7 @@ class Uploadr(object):
             dict(photoset_id=str(setId),
                  photo_id=str(file[0])),
             2, 0, False,
-            caughtcode='999')
+            caughtcode='146')
 
         success = False
         if get_success and get_errcode == 0:
@@ -2486,7 +2486,7 @@ class Uploadr(object):
             dict(title=setName,
                  primary_photo_id=str(primaryPhotoId)),
             3, 10, True,
-            caughtcode='999')
+            caughtcode='124')
 
         success = False
         if get_success and get_errcode == 0:
@@ -2823,171 +2823,137 @@ class Uploadr(object):
 
         con = lite.connect(self.xcfg.DB_PATH)
         con.text_factory = str
-        try:
-            sets = self.nuflickr.photosets_getList()
+        cur = con.cursor()
 
-            logging.debug('Output for photosets_getList:')
-            logging.debug(xml.etree.ElementTree.tostring(
-                sets,
-                encoding='utf-8',
-                method='xml'))
+        get_success, get_result, get_errcode = faw.nu_flickrapi_fn(
+            self.nuflickr.photosets.getList,
+            (),
+            dict(),
+            2, 0, False,
+            caughtcode='166')
 
-            # Output format of photosets_getList:
-            #
-            # sets = flickr.photosets.getList(user_id='73509078@N00')
-            # if (self.isGoodsets.attrib['stat'] => 'ok'
-            # sets.find('photosets').attrib['cancreate'] => '1'
-            #
-            # set0 = sets.find('photosets').findall('photoset')[0]
-            # +-------------------------------+-----------+
-            # | variable                      | value     |
-            # +-------------------------------+-----------+
-            # | set0.attrib['id']             | u'5'      |
-            # | set0.attrib['primary']        | u'2483'   |
-            # | set0.attrib['secret']         | u'abcdef' |
-            # | set0.attrib['server']         | u'8'      |
-            # | set0.attrib['photos']         | u'4'      |
-            # | set0.title[0].text            | u'Test'   |
-            # | set0.description[0].text      | u'foo'    |
-            # | set0.find('title').text       | 'Test'    |
-            # | set0.find('description').text | 'foo'     |
-            # +-------------------------------+-----------+
-            #
-            # ... and similar for set1 ...
+        # Output format of photosets_getList:
+        #
+        # sets.find('photosets').attrib['cancreate'] => '1'
+        #
+        # set0 = sets.find('photosets').findall('photoset')[0]
+        # +-------------------------------+-----------+
+        # | variable                      | value     |
+        # +-------------------------------+-----------+
+        # | set0.attrib['id']             | u'5'      |
+        # | set0.attrib['primary']        | u'2483'   |
+        # | set0.attrib['secret']         | u'abcdef' |
+        # | set0.attrib['server']         | u'8'      |
+        # | set0.attrib['photos']         | u'4'      |
+        # | set0.title[0].text            | u'Test'   |
+        # | set0.description[0].text      | u'foo'    |
+        # | set0.find('title').text       | 'Test'    |
+        # | set0.find('description').text | 'foo'     |
+        # +-------------------------------+-----------+
+        #
+        # ... and similar for set1 ...
 
-            if isGood(sets):
-                cur = con.cursor()
+        if get_success and get_errcode == 0:
+            for aset in get_result.find('photosets').findall('photoset'):
+                logging.debug('Output for aset: %s',
+                              xml.etree.ElementTree.tostring(aset,
+                                                             encoding='utf-8',
+                                                             method='xml'))
+                setId = aset.attrib['id']
+                setName = aset.find('title').text
+                primaryPhotoId = aset.attrib['primary']
 
-                for row in sets.find('photosets').findall('photoset'):
-                    logging.debug('Output for row:')
-                    logging.debug(xml.etree.ElementTree.tostring(
-                        row,
-                        encoding='utf-8',
-                        method='xml'))
+                if self.args.verbose:
+                    NP.niceprint('  Add Set to DB:[{!s}] setId=[{!s}] '
+                                 'primaryId=[{!s}]'
+                                 .format('None'
+                                         if setName is None
+                                         else strunicodeout(setName),
+                                         setId,
+                                         primaryPhotoId))
 
-                    setId = row.attrib['id']
-                    setName = row.find('title').text
-                    primaryPhotoId = row.attrib['primary']
+                # On ocasions flickr returns a setName (title) as None.
+                # For instnace, while simultaneously performing massive
+                # delete operation on flickr.
+                logging.info('Searching on DB for setId:[%s] '
+                             'setName:[%s] primaryPhotoId:[%s]',
+                             setId,
+                             'None'
+                             if setName is None
+                             else strunicodeout(setName),
+                             primaryPhotoId)
 
-                    logging.debug('is_str_unicode [setId]:%s',
-                                  NP.is_str_unicode(setId))
-                    logging.debug('is_str_unicode [setName]:%s',
-                                  NP.is_str_unicode(setName))
-                    logging.debug('is_str_unicode [primaryPhotoId]:%s',
-                                  NP.is_str_unicode(primaryPhotoId))
+                logging.debug('SELECT set_id FROM sets WHERE set_id = "%s"',
+                              setId)
+                try:
+                    cur.execute("SELECT set_id FROM sets "
+                                "WHERE set_id = '" + setId + "'")
+                    foundSets = cur.fetchone()
+                    logging.info('Output for foundSets is [%s]',
+                                 'None' if foundSets is None else foundSets)
+                except lite.Error as err:
+                    niceerror(caught=True,
+                              caughtprefix='+++ DB',
+                              caughtcode='164',
+                              caughtmsg='DB error on SELECT FROM '
+                              'sets: [{!s}]'
+                              .format(err.args[0]),
+                              useniceprint=True)
 
-                    if self.args.verbose:
-                        NP.niceprint('  Add Set to DB:[{!s}] '
-                                     'setId=[{!s}] '
-                                     'primaryId=[{!s}]'
-                                     .format('None'
-                                             if setName is None
-                                             else strunicodeout(setName),
-                                             setId,
-                                             primaryPhotoId))
-
-                    # Control for when flickr return a setName (title) as None
-                    # Occurred while simultaneously performing massive delete
-                    # operation on flickr.
-                    if setName is not None:
-                        logging.info('Searching on DB for setId:[%s] '
-                                     'setName:[%s] '
-                                     'primaryPhotoId:[%s]',
-                                     setId,
-                                     strunicodeout(setName),
-                                     primaryPhotoId)
-                    else:
-                        logging.info('Searching on DB for setId:[%s] '
-                                     'setName:[None] '
-                                     'primaryPhotoId:[%s]',
-                                     setId,
-                                     primaryPhotoId)
-
-                    logging.info('SELECT set_id FROM sets '
-                                 'WHERE set_id = "%s"', setId)
+                if foundSets is None:
+                    logging.info('Adding set [%s] (%s) with primary photo [%s].',
+                                 setId,
+                                 'None'
+                                 if setName is None
+                                 else strunicodeout(setName),
+                                 primaryPhotoId)
                     try:
-                        cur.execute("SELECT set_id FROM sets "
-                                    "WHERE set_id = '" + setId + "'")
-                        foundSets = cur.fetchone()
-                        logging.info('Output for foundSets is [%s]',
-                                     'None'
-                                     if foundSets is None
-                                     else foundSets)
+                        logging.debug('INSERT INTO sets (set_id, name, '
+                                      'primary_photo_id) VALUES (%s,%s,%s)',
+                                      setId,
+                                      strunicodeout(setName),
+                                      primaryPhotoId)
+                        cur.execute('INSERT INTO sets (set_id, name, '
+                                    'primary_photo_id) VALUES (?,?,?)',
+                                    (setId, setName, primaryPhotoId))
+                        con.commit()
+
                     except lite.Error as err:
-                        niceerror(caught=True,
-                                  caughtprefix='+++ DB',
-                                  caughtcode='164',
-                                  caughtmsg='DB error on SELECT FROM '
-                                  'sets: [{!s}]'
-                                  .format(err.args[0]),
-                                  useniceprint=True)
-
-                    if foundSets is None:
-                        if setName is None:
-                            logging.info('Adding set [%s] (%s) '
-                                         'with primary photo [%s].',
-                                         setId,
-                                         'None',
-                                         primaryPhotoId)
-                        else:
-                            logging.info('Adding set [%s] (%s) '
-                                         'with primary photo [%s].',
-                                         setId,
-                                         strunicodeout(setName),
-                                         primaryPhotoId)
-                        try:
-                            cur.execute('INSERT INTO sets (set_id, name, '
-                                        'primary_photo_id) VALUES (?,?,?)',
-                                        (setId, setName, primaryPhotoId))
-                        except lite.Error as err:
-                            niceerror(caught=True,
-                                      caughtprefix='+++ DB',
-                                      caughtcode='165',
-                                      caughtmsg='DB error on INSERT INTO '
-                                      'sets: [{!s}]'
-                                      .format(err.args[0]),
-                                      useniceprint=True)
-                    else:
-                        logging.info('Set found on DB:[%s]',
-                                     strunicodeout(setName))
-                        if self.args.verbose:
-                            NP.niceprint('Set found on DB:[{!s}]'
-                                         .format(strunicodeout(setName)))
-
-                con.commit()
-
-                if con is not None:
-                    con.close()
-            else:
-                logging.debug('Output for sets:')
-                logging.debug(xml.etree.ElementTree.tostring(
-                    sets,
-                    encoding='utf-8',
-                    method='xml'))
-                niceerror(exceptuse=True,
-                          exceptcode=sets['code']
-                          if 'code' in sets
-                          else sets,
-                          exceptmsg=sets['message']
-                          if 'message' in sets
-                          else sets,
-                          useniceprint=True)
-
-        except flickrapi.exceptions.FlickrError as ex:
+                         niceerror(caught=True,
+                                   caughtprefix='+++ DB',
+                                   caughtcode='165',
+                                   caughtmsg='DB error on INSERT INTO '
+                                   'sets: [{!s}]'
+                                   .format(err.args[0]),
+                                   useniceprint=True)
+                else:
+                    logging.info('Set found on DB:[%s]',
+                                 strunicodeout(setName))
+                    if self.args.verbose:
+                        NP.niceprint('Set found on DB:[{!s}]'
+                                     .format(strunicodeout(setName)))
+        else:
             niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='170',
-                      caughtmsg='Flickrapi exception on photosets_getList',
+                      caughtprefix='xxx',
+                      caughtcode='089',
+                      caughtmsg='Failed to list photosets (photosets.getList)',
                       exceptuse=True,
-                      exceptcode=ex.code,
-                      exceptmsg=ex,
-                      useniceprint=True,
-                      exceptsysinfo=True)
+                      exceptcode=get_result['code']
+                      if 'code' in get_result
+                      else get_result,
+                      exceptmsg=get_result['message']
+                      if 'message' in get_result
+                      else get_result,
+                      useniceprint=True)
 
         # Closing DB connection
-        if con is not None:
+        if con is not None and con in locals():
+            niceerror(caught=True,
+                      caughtprefix='+++ DB',
+                      caughtcode='121',
+                      caughtmsg='Closing DB connection on photosets.getList',
+                      useniceprint=True)
             con.close()
-        NP.niceprint('*****Completed adding Flickr Sets to DB*****')
 
     # -------------------------------------------------------------------------
     # is_already_uploaded

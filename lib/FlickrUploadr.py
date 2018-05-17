@@ -2478,84 +2478,57 @@ class Uploadr(object):
         if self.args.dry_run:
             return True
 
-        @retry(attempts=3, waittime=10, randtime=True)
-        def R_photosets_create(kwargs):
-            return self.nuflickr.photosets.create(**kwargs)
+        get_success, get_result, get_errcode = faw.nu_flickrapi_fn(
+            self.nuflickr.photosets.create,
+            (),
+            dict(title=setName,
+                 primary_photo_id=str(primaryPhotoId)),
+            3, 10, True)
 
-        try:
-            createResp = None
-            createResp = R_photosets_create(dict(
-                title=setName,
-                primary_photo_id=str(primaryPhotoId)))
-
-        except flickrapi.exceptions.FlickrError as ex:
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='130',
-                      caughtmsg='Flickrapi exception on photosets.create',
-                      exceptuse=True,
-                      exceptcode=ex.code,
-                      exceptmsg=ex,
-                      useniceprint=True,
-                      exceptsysinfo=True)
+        success = False
+        if get_success and get_errcode == 0:
+            logging.warning('get_result["photoset"]["id"]:[%s]',
+                            get_result.find('photoset').attrib['id'])
+            self.logSetCreation(lock,
+                                get_result.find('photoset').attrib['id'],
+                                setName,
+                                primaryPhotoId,
+                                cur,
+                                con)
+            return get_result.find('photoset').attrib['id']
+        elif not get_success and get_errcode == 2:
             # Add to db the file NOT uploaded
             # A set on local DB (with primary photo) failed to be created on
             # FLickr because Primary Photo is not available.
             # Sets (possibly from previous runs) exist on local DB but the pics
             # are not loaded into Flickr.
             # FlickrError(u'Error: 2: Invalid primary photo id (nnnnnn)
-            if format(ex.code) == '2':
-                NP.niceprint('Primary photo [{!s}] for Set [{!s}] '
-                             'does not exist on Flickr. '
-                             'Probably deleted from Flickr but still '
-                             'on local db and local file.'
-                             .format(primaryPhotoId,
-                                     strunicodeout(setName)))
-                logging.error(
-                    'Primary photo [%s] for Set [%s] does not exist on Flickr.'
-                    ' Probably deleted from Flickr but still on local db '
-                    'and local file.',
-                    primaryPhotoId,
-                    strunicodeout(setName))
+            NP.niceprint('Primary photo [{!s}] for Set [{!s}] '
+                         'does not exist on Flickr. '
+                         'Probably deleted from Flickr but still '
+                         'on local db and local file.'
+                         .format(primaryPhotoId,
+                                 strunicodeout(setName)))
+            logging.error(
+                'Primary photo [%s] for Set [%s] does not exist on Flickr.'
+                ' Probably deleted from Flickr but still on local db '
+                'and local file.',
+                primaryPhotoId,
+                strunicodeout(setName))
+            success = False
+        else:
+            # CODING: Revise code/message output
+            niceerror(exceptuse=False,
+                      exceptcode=get_result['code']
+                      if 'code' in get_result
+                      else get_result,
+                      exceptmsg=get_result['message']
+                      if 'message' in get_result
+                      else get_result,
+                      useniceprint=True)
+            success = False
 
-                return False
-
-        except BaseException:
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='140',
-                      caughtmsg='Caught exception in createSet',
-                      useniceprint=True,
-                      exceptsysinfo=True)
-        finally:
-            if isGood(createResp):
-                logging.warning('createResp["photoset"]["id"]:[%s]',
-                                createResp.find('photoset').attrib['id'])
-                self.logSetCreation(lock,
-                                    createResp.find('photoset').attrib['id'],
-                                    setName,
-                                    primaryPhotoId,
-                                    cur,
-                                    con)
-                return createResp.find('photoset').attrib['id']
-            else:
-                logging.debug('Output for createResp:[%s]',
-                              'None' if createResp is None else '...')
-                if createResp is not None:
-                    logging.warning(xml.etree.ElementTree.tostring(
-                        createResp,
-                        encoding='utf-8',
-                        method='xml'))
-                    niceerror(exceptuse=False,
-                              exceptcode=createResp['code']
-                              if 'code' in createResp
-                              else createResp,
-                              exceptmsg=createResp['message']
-                              if 'message' in createResp
-                              else createResp,
-                              useniceprint=True)
-
-        return False
+        return success
 
     # -------------------------------------------------------------------------
     # setupDB

@@ -2901,7 +2901,8 @@ class Uploadr(object):
                               useniceprint=True)
 
                 if foundSets is None:
-                    logging.info('Adding set [%s] (%s) with primary photo [%s].',
+                    logging.info('Adding set [%s] (%s) '
+                                 'with primary photo [%s].',
                                  setId,
                                  'None'
                                  if setName is None
@@ -2919,13 +2920,13 @@ class Uploadr(object):
                         con.commit()
 
                     except lite.Error as err:
-                         niceerror(caught=True,
-                                   caughtprefix='+++ DB',
-                                   caughtcode='165',
-                                   caughtmsg='DB error on INSERT INTO '
-                                   'sets: [{!s}]'
-                                   .format(err.args[0]),
-                                   useniceprint=True)
+                        niceerror(caught=True,
+                                  caughtprefix='+++ DB',
+                                  caughtcode='165',
+                                  caughtmsg='DB error on INSERT INTO '
+                                  'sets: [{!s}]'
+                                  .format(err.args[0]),
+                                  useniceprint=True)
                 else:
                     logging.info('Set found on DB:[%s]',
                                  strunicodeout(setName))

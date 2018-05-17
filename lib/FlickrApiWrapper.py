@@ -79,8 +79,8 @@ def isGood(res):
 
 # -----------------------------------------------------------------------------
 def nu_flickrapi_fn(fn_name,
-                    fn_args=(),
-                    fn_kwargs=dict(),
+                    fn_args,  # format: ()
+                    fn_kwargs,  # format: dict()
                     attempts=3,
                     waittime=5,
                     randtime=False,

@@ -2049,7 +2049,8 @@ class Uploadr(object):
             self.nuflickr.photos.delete,
             (),
             dict(photo_id=str(file[0])),
-            2, 2, False)
+            2, 2, False,
+            caughtcode='999')
 
         success = False
         if ((get_success and get_errcode == 0) or
@@ -2389,7 +2390,8 @@ class Uploadr(object):
             (),
             dict(photoset_id=str(setId),
                  photo_id=str(file[0])),
-            2, 0, False)
+            2, 0, False,
+            caughtcode='999')
 
         success = False
         if get_success and get_errcode == 0:
@@ -2483,7 +2485,8 @@ class Uploadr(object):
             (),
             dict(title=setName,
                  primary_photo_id=str(primaryPhotoId)),
-            3, 10, True)
+            3, 10, True,
+            caughtcode='999')
 
         success = False
         if get_success and get_errcode == 0:

@@ -2043,7 +2043,7 @@ class Uploadr(object):
 
         NP.niceprint('  Deleting file:[{!s}]'.format(strunicodeout(file[1])))
 
-        get_success, get_result, get_errcode = faw.nu_flickrapi_fn(
+        get_success, get_result, get_errcode = faw.flickrapi_fn(
             self.nuflickr.photos.delete,
             (),
             dict(photo_id=str(file[0])),
@@ -2383,7 +2383,7 @@ class Uploadr(object):
         con.text_factory = str
         bcur = con.cursor()
 
-        get_success, get_result, get_errcode = faw.nu_flickrapi_fn(
+        get_success, get_result, get_errcode = faw.flickrapi_fn(
             self.nuflickr.photosets.addPhoto,
             (),
             dict(photoset_id=str(setId),
@@ -2478,7 +2478,7 @@ class Uploadr(object):
         if self.args.dry_run:
             return True
 
-        get_success, get_result, get_errcode = faw.nu_flickrapi_fn(
+        get_success, get_result, get_errcode = faw.flickrapi_fn(
             self.nuflickr.photosets.create,
             (),
             dict(title=setName,
@@ -2823,7 +2823,7 @@ class Uploadr(object):
         con.text_factory = str
         cur = con.cursor()
 
-        get_success, get_result, get_errcode = faw.nu_flickrapi_fn(
+        get_success, get_result, get_errcode = faw.flickrapi_fn(
             self.nuflickr.photosets.getList,
             (),
             dict(),
@@ -3844,7 +3844,7 @@ class Uploadr(object):
                           useniceprint=True)
 
         # Total FLickr photos count: find('photos').attrib['total'] -----------
-        get_success, get_result, get_errcode = faw.nu_flickrapi_fn(
+        get_success, get_result, get_errcode = faw.flickrapi_fn(
             self.nuflickr.people.getPhotos,
             (),
             dict(user_id="me", per_page=1),
@@ -3857,7 +3857,7 @@ class Uploadr(object):
             countflickr = -1
 
         # Total FLickr photos not in set: find('photos').attrib['total'] ------
-        get_success, get_result, get_errcode = faw.nu_flickrapi_fn(
+        get_success, get_result, get_errcode = faw.flickrapi_fn(
             self.nuflickr.photos.getNotInSet,
             (),
             dict(per_page=1),
@@ -3896,7 +3896,7 @@ class Uploadr(object):
             # List pics not in sets (if within a parameter, default 10)
             # (per_page=min(self.args.list_photos_not_in_set, 500):
             #       find('photos').attrib['total']
-            get_success, get_result, get_errcode = faw.nu_flickrapi_fn(
+            get_success, get_result, get_errcode = faw.flickrapi_fn(
                 self.nuflickr.photos.getNotInSet,
                 (),
                 dict(per_page=min(self.args.list_photos_not_in_set, 500)),
@@ -3912,8 +3912,8 @@ class Uploadr(object):
                         row.attrib['id'],
                         strunicodeout(row.attrib['title']))
 
-                    tags_success, tags_result, tags_errcode = nu_flickrapi_fn(
-                        flickr.tags.getListPhoto,
+                    tags_success, tags_result, tags_errcode = faw.flickrapi_fn(
+                        nuflickr.tags.getListPhoto,
                         (),
                         dict(photo_id=row.attrib['id']),
                         2, 2, False)

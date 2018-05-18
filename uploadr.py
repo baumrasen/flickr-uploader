@@ -193,7 +193,7 @@ def parse_arguments():
     # used in printStat function
     igrpparser.add_argument('-l', '--list-photos-not-in-set',
                             metavar='N', type=int,
-                            help='List as many as N photos (9)with tags) '
+                            help='List as many as N photos (with tags) '
                                  'not in set. Maximum listed photos is 500.')
     # finds duplicated images (based on checksum, titlename, setName) in Flickr
     igrpparser.add_argument('-z', '--search-for-duplicates',

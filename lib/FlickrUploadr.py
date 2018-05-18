@@ -2871,7 +2871,7 @@ class Uploadr(object):
                                          primaryPhotoId))
 
                 # On ocasions flickr returns a setName (title) as None.
-                # For instnace, while simultaneously performing massive
+                # For instance, while simultaneously performing massive
                 # delete operation on flickr.
                 logging.info('Searching on DB for setId:[%s] '
                              'setName:[%s] primaryPhotoId:[%s]',
@@ -3006,64 +3006,51 @@ class Uploadr(object):
         logging.info('Is Already Uploaded:[checksum:%s] [album:%s]?',
                      xchecksum, strunicodeout(xsetName))
 
+        # Searchs for image with tag:checksum (calls Flickr photos.search)
+        #
+        # Sample response:
+        # <photos page="2" pages="89" perpage="10" total="881">
+        #     <photo id="2636" owner="XXXX"
+        #             secret="XXX" server="2" title="test_04"
+        #             ispublic="1" isfriend="0" isfamily="0" />
+        #     <photo id="2635" owner="XXXX"
+        #         secret="XXX" server="2" title="test_03"
+        #         ispublic="0" isfriend="1" isfamily="1" />
+        # </photos>
+        #
         # Use a big random waitime to avoid errors in multiprocessing mode.
-        @retry(attempts=3, waittime=20, randtime=True)
-        def R_photos_search(kwargs):
-            return self.nuflickr.photos.search(**kwargs)
+        get_success, searchIsUploaded, get_errcode = faw.flickrapi_fn(
+            self.nuflickr.photos.search,
+            (),
+            dict(user_id="me",
+                 tags='checksum:{}'.format(xchecksum),
+                 extras='tags'),
+            3, 20, False,
+            caughtcode='180')
 
-        try:
-            searchIsUploaded = None
-            searchIsUploaded = R_photos_search(dict(user_id="me",
-                                                    tags='checksum:{}'
-                                                    .format(xchecksum),
-                                                    extras='tags'))
-        except flickrapi.exceptions.FlickrError as ex:
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='180',
-                      caughtmsg='Flickrapi exception on photos.search',
-                      exceptuse=True,
-                      exceptcode=ex.code,
-                      exceptmsg=ex,
-                      useniceprint=True,
-                      exceptsysinfo=True)
-        except (IOError, httplib.HTTPException):
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='181',
-                      caughtmsg='Caught IO/HTTP Error in photos.search')
-        except BaseException:
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='182',
-                      caughtmsg='Caught exception in photos.search',
-                      exceptsysinfo=True)
-        finally:
-            if searchIsUploaded is None or not isGood(searchIsUploaded):
-                logging.error('searchIsUploadedOK:[%s]',
-                              'None'
-                              if searchIsUploaded is None
-                              else isGood(searchIsUploaded))
-                # CODING: how to indicate an error... different from False?
-                # Possibly raising an exception?
-                # raise Exception('photos_search: Max attempts exhausted.')
-                if self.args.verbose:
-                    NP.niceprint(' IS_UPLOADED:[ERROR#1]',
-                                 fname='isuploaded')
-                logging.warning(' IS_UPLOADED:[ERROR#1]')
-                return returnIsPhotoUploaded, \
-                    returnPhotoUploaded, \
-                    returnPhotoID, \
-                    returnUploadedNoSet
+        if not (get_success and get_errcode == 0):
+            # CODING: how to indicate an error... different from False?
+            # Possibly raising an exception?
+            # raise Exception('photos.search: Max attempts exhausted.')
+            if self.args.verbose:
+                NP.niceprint(' IS_UPLOADED:[ERROR#1]',
+                             fname='isuploaded')
+            logging.warning(' IS_UPLOADED:[ERROR#1]')
 
-        logging.debug('Output for searchIsUploaded:')
-        logging.debug(xml.etree.ElementTree.tostring(searchIsUploaded,
-                                                     encoding='utf-8',
-                                                     method='xml'))
+            return returnIsPhotoUploaded, returnPhotoUploaded, \
+                returnPhotoID, returnUploadedNoSet
 
         # Number of pics with specified checksum
-        returnPhotoUploaded = int(searchIsUploaded
-                                  .find('photos').attrib['total'])
+        # CODING: Protect issue #66. Flickr returns attrib == '' instead of 0
+        # Set 'Number of pics with specified checksum' to 0 and return.
+        if len(searchIsUploaded.find('photos').attrib['total']) == 0:
+            returnPhotoUploaded = 0
+            logging.error(' IS_UPLOADED:[ERROR#3]: len.photos.total == 0')
+            NP.niceprint(' IS_UPLOADED:[ERROR#3]: len.photos.total == 0',
+                         fname='isuploaded')
+        else:
+            returnPhotoUploaded = int(searchIsUploaded
+                                      .find('photos').attrib['total'])
 
         if returnPhotoUploaded == 0:
             # A) checksum,                             Count=0  THEN NOT EXISTS
@@ -3110,58 +3097,25 @@ class Uploadr(object):
                                  strunicodeout(pic.attrib['title']))
                     continue
 
-                @retry(attempts=3, waittime=8, randtime=True)
-                def R_photos_getAllContexts(kwargs):
-                    return self.nuflickr.photos.getAllContexts(**kwargs)
+                ctx_success, resp, ctx_errcode = faw.flickrapi_fn(
+                    self.nuflickr.photos.getAllContexts,
+                    (),
+                    dict(photo_id=pic.attrib['id']),
+                    3, 8, True,
+                    caughtcode='195')
 
-                try:
-                    resp = None
-                    resp = R_photos_getAllContexts(
-                        dict(photo_id=pic.attrib['id']))
-                except flickrapi.exceptions.FlickrError as ex:
-                    niceerror(caught=True,
-                              caughtprefix='+++',
-                              caughtcode='195',
-                              caughtmsg='Flickrapi exception on '
-                              'getAllContexts',
-                              exceptuse=True,
-                              exceptcode=ex.code,
-                              exceptmsg=ex)
-                except (IOError, httplib.HTTPException):
-                    niceerror(caught=True,
-                              caughtprefix='+++',
-                              caughtcode='196',
-                              caughtmsg='Caught IO/HTTP Error in '
-                              'getAllContexts')
-                except BaseException:
-                    niceerror(caught=True,
-                              caughtprefix='+++',
-                              caughtcode='197',
-                              caughtmsg='Caught exception in getAllContexts',
-                              exceptsysinfo=True)
-                finally:
-                    if resp is None or not isGood(resp):
-                        logging.error('resp.getAllContextsOK:[%s]',
-                                      'None'
-                                      if resp is None
-                                      else isGood(resp))
-                        # CODING: how to indicate an error?
-                        # Possibly raising an exception?
-                        # raise Exception('photos_getAllContexts: '
-                        #                 'Max attempts exhausted.')
-                        if self.args.verbose:
-                            NP.niceprint(' IS_UPLOADED:[ERROR#2]',
-                                         fname='isuploaded')
-                        logging.warning(' IS_UPLOADED:[ERROR#2]')
-                        return returnIsPhotoUploaded, \
-                            returnPhotoUploaded, \
-                            returnPhotoID, \
-                            returnUploadedNoSet
-                    logging.debug('Output for resp.getAllContextsOK:')
-                    logging.debug(xml.etree.ElementTree.tostring(
-                        resp,
-                        encoding='utf-8',
-                        method='xml'))
+                if not (ctx_success and ctx_errcode == 0):
+                    # CODING: how to indicate an error?
+                    # Possibly raising an exception?
+                    # raise Exception('photos_getAllContexts: '
+                    #                 'Max attempts exhausted.')
+                    if self.args.verbose:
+                        NP.niceprint(' IS_UPLOADED:[ERROR#2]',
+                                     fname='isuploaded')
+                    logging.warning(' IS_UPLOADED:[ERROR#2]')
+
+                    return returnIsPhotoUploaded, returnPhotoUploaded, \
+                        returnPhotoID, returnUploadedNoSet
 
                 logging.info('len(resp.findall(''set'')):[%s]',
                              len(resp.findall('set')))
@@ -3187,10 +3141,8 @@ class Uploadr(object):
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
                         returnUploadedNoSet = True
-                        return returnIsPhotoUploaded, \
-                            returnPhotoUploaded, \
-                            returnPhotoID, \
-                            returnUploadedNoSet
+                        return returnIsPhotoUploaded, returnPhotoUploaded, \
+                            returnPhotoID, returnUploadedNoSet
                     else:
                         if self.args.verbose_progress:
                             NP.niceprint('IS_UPLOADED:[UPLOADED WITHOUT'
@@ -3235,10 +3187,8 @@ class Uploadr(object):
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
                         returnUploadedNoSet = False
-                        return returnIsPhotoUploaded, \
-                            returnPhotoUploaded, \
-                            returnPhotoID, \
-                            returnUploadedNoSet
+                        return returnIsPhotoUploaded, returnPhotoUploaded, \
+                            returnPhotoID, returnUploadedNoSet
                     else:
                         # D) checksum, title, other setName,       Count>=1
                         #                                       THEN NOT EXISTS
@@ -3252,60 +3202,6 @@ class Uploadr(object):
 
         return returnIsPhotoUploaded, returnPhotoUploaded, \
             returnPhotoID, returnUploadedNoSet
-# <?xml version="1.0" encoding="utf-8" ?>
-# <rsp stat="ok">
-#   <photos page="1" pages="1" perpage="100" total="2">
-#     <photo id="37564183184" owner="XXXX" secret="XXX"
-# server="4540" farm="5" title="DSC01397" ispublic="0" isfriend="0"
-# isfamily="0" tags="autoupload checksum1133825cea9d605f332d04b40a44a6d6" />
-#     <photo id="38210659646" owner="XXXX" secret="XXX"
-# server="4536" farm="5" title="DSC01397" ispublic="0" isfriend="0"
-# isfamily="0" tags="autoupload checksum1133825cea9d605f332d04b40a44a6d6" />
-#   </photos>
-# </rsp>
-# CAREFULL... flickrapi on occasion indicates total=2 but list only brings 1
-#
-# <?xml version="1.0" encoding="utf-8" ?>
-# <rsp stat="ok">
-#   <photos page="1" pages="1" perpage="100" total="2">
-#     <photo id="26486922439" owner="XXXX" secret="XXX"
-# server="4532" farm="5" title="017_17a-5" ispublic="0" isfriend="0"
-# isfamily="0" tags="autoupload checksum0449d770558cfac7a6786e468f917b9c" />
-#   </photos>
-# </rsp>
-
-    # -------------------------------------------------------------------------
-    # photos_search
-    #
-    # Searchs for image with tag:checksum (calls Flickr photos.search)
-    #
-    # Sample response:
-    # <photos page="2" pages="89" perpage="10" total="881">
-    #     <photo id="2636" owner="XXXX"
-    #             secret="XXX" server="2" title="test_04"
-    #             ispublic="1" isfriend="0" isfamily="0" />
-    #     <photo id="2635" owner="XXXX"
-    #         secret="XXX" server="2" title="test_03"
-    #         ispublic="0" isfriend="1" isfamily="1" />
-    # </photos>
-    def photos_search(self, checksum):
-        """ photos_search
-
-            Searchs for image with on tag:checksum
-        """
-
-        logging.info('FORMAT:[checksum:%s]', checksum)
-
-        searchResp = self.nuflickr.photos.search(user_id="me",
-                                                 tags='checksum:{}'
-                                                 .format(checksum))
-        # Debug
-        logging.debug('Output for SearchResp:')
-        logging.debug(xml.etree.ElementTree.tostring(searchResp,
-                                                     encoding='utf-8',
-                                                     method='xml'))
-
-        return searchResp
 
     # -------------------------------------------------------------------------
     # photos_get_info
@@ -3338,61 +3234,24 @@ class Uploadr(object):
 
         logging.info('find_tag: photo:[%s] intag:[%s]', photo_id, intag)
 
-        # Use a big random waitime to avoid errors in multiprocessing mode.
-        @retry(attempts=3, waittime=20, randtime=True)
-        def R_tags_getListPhoto(kwargs):
-            return self.nuflickr.tags.getListPhoto(**kwargs)
+        tag_success, tagsResp, tag_errcode = faw.flickrapi_fn(
+            self.nuflickr.tags.getListPhoto,
+            (),
+            dict(photo_id=photo_id),
+            3, 15, True,
+            caughtcode='205')
 
-        try:
-            tagsResp = None
-            tagsResp = R_tags_getListPhoto(dict(photo_id=photo_id))
-        except (IOError, ValueError, httplib.HTTPException):
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='205',
-                      caughtmsg='Caught IOError, ValueError, '
-                      'HTTP exception on getListPhoto',
-                      useniceprint=True,
-                      exceptsysinfo=True)
-        except flickrapi.exceptions.FlickrError as ex:
-            if format(ex.code) == '1':
-                logging.warning('+++206: '
-                                'Photo_id:[%s] Flickr: Photo not found '
-                                'on getListPhoto.', photo_id)
-                NP.niceprint('+++206: '
-                             'Photo_id:[{!s}] Flickr: Photo not found '
-                             'on getListPhoto.'
-                             .format(photo_id),
-                             fname='photos_find_tag')
-            else:
-                niceerror(caught=True,
-                          caughtprefix='+++',
-                          caughtcode='207',
-                          caughtmsg='Flickrapi exception on getListPhoto',
-                          exceptuse=True,
-                          exceptcode=ex.code,
-                          exceptmsg=ex,
-                          useniceprint=True,
-                          exceptsysinfo=True)
-            raise
+        if tag_success and tag_errcode == 0:
 
-        if not isGood(tagsResp):
-            raise IOError(tagsResp)
-
-        logging.debug('Output for photo_find_tag:')
-        logging.debug(xml.etree.ElementTree.tostring(tagsResp,
-                                                     encoding='utf-8',
-                                                     method='xml'))
-
-        tag_id = None
-        for tag in tagsResp.find('photo').find('tags').findall('tag'):
-            logging.info(tag.attrib['raw'])
-            if (strunicodeout(tag.attrib['raw']) ==
-                    strunicodeout(intag)):
-                tag_id = tag.attrib['id']
-                logging.info('Found tag_id:[%s] for intag:[%s]',
-                             tag_id, intag)
-                return True, tag_id
+            tag_id = None
+            for tag in tagsResp.find('photo').find('tags').findall('tag'):
+                logging.info(tag.attrib['raw'])
+                if (strunicodeout(tag.attrib['raw']) ==
+                        strunicodeout(intag)):
+                    tag_id = tag.attrib['id']
+                    logging.info('Found tag_id:[%s] for intag:[%s]',
+                                 tag_id, intag)
+                    return True, tag_id
 
         return False, ''
 
@@ -3908,7 +3767,7 @@ class Uploadr(object):
                     logging.info('Photo Not in Set: id:[%s] title:[%s]',
                                  row.attrib['id'],
                                  strunicodeout(row.attrib['title']))
-                    output_str = 'id:{!s}|title:{!s}|'.format(
+                    output_str = 'id={!s}|title={!s}|'.format(
                         row.attrib['id'],
                         strunicodeout(row.attrib['title']))
 
@@ -3919,9 +3778,9 @@ class Uploadr(object):
                         2, 2, False)
 
                     if get_success and get_errcode == 0:
-                        for tag in get_result.find('photo')\
+                        for tag in tags_result.find('photo')\
                                 .find('tags').findall('tag'):
-                            output_str += 'tag_attrib:{!s}|'\
+                            output_str += 'tag_attrib={!s}|'\
                                           .format(
                                               NP.strunicodeout(
                                                   tag.attrib['raw']))

@@ -1684,25 +1684,25 @@ class Uploadr(object):
     #                     as it is not used)
     #   file            = file to be uploaded to replace existing file
     #   file_id         = ID of the photo being replaced
-    #   oldfileMd5      = Old file MD5 (required to update checksum tag
+    #   oldfile_md5     = Old file MD5 (required to update checksum tag
     #                     on Flikr)
-    #   fileMd5         = New file MD5
+    #   file_md5        = New file MD5
     #   last_modified   = date/time last modification of the file to update
     #                     database
     #   cur             = current cursor for updating Database
     #   con             = current DB connection
     #
     def replacePhoto(self, lock, file, file_id,
-                     oldFileMd5, fileMd5, last_modified, cur, con):
+                     oldfile_md5, file_md5, last_modified, cur, con):
         """ replacePhoto
         lock            = parameter for multiprocessing control of access to DB
                           (if self.args.processes = 0 then lock can be None
                           as it is not used)
         file            = file to be uploaded to replace existing file
         file_id         = ID of the photo being replaced
-        oldfileMd5      = Old file MD5 (required to update checksum tag
+        oldfile_md5     = Old file MD5 (required to update checksum tag
                           on Flikr)
-        fileMd5         = New file MD5
+        file_md5        = New file MD5
         last_modified   = date/time last modification of the file to update
                           database
         cur             = current cursor for updating Database
@@ -1765,7 +1765,7 @@ class Uploadr(object):
                             faw.flickrapi_fn(
                                 self.nuflickr.photos.addTags, (),
                                 dict(photo_id=file_id,
-                                     tags='checksum:{}'.format(fileMd5)),
+                                     tags='checksum:{}'.format(file_md5)),
                                 2, 2, False, caughtcode='055')
 
                         if get_success and get_errcode == 0:
@@ -1778,7 +1778,7 @@ class Uploadr(object):
                                     2, 2, False, caughtcode='056')
 
                             if gi_success and gi_errcode == 0:
-                                # find tag checksum with oldFileMd5
+                                # find tag checksum with oldfile_md5
                                 # later use such tag_id to delete it
                                 tag_id = None
                                 for tag in res_get_info\
@@ -1786,7 +1786,7 @@ class Uploadr(object):
                                     .find('tags')\
                                         .findall('tag'):
                                     if (tag.attrib['raw'] ==
-                                            'checksum:{}'.format(oldFileMd5)):
+                                            'checksum:{}'.format(oldfile_md5)):
                                         tag_id = tag.attrib['id']
                                         logging.info('   Found tag_id:[%s]',
                                                      tag_id)
@@ -1855,7 +1855,7 @@ class Uploadr(object):
             try:
                 cur.execute('UPDATE files SET md5 = ?,last_modified = ? '
                             'WHERE files_id = ?',
-                            (fileMd5, last_modified, file_id))
+                            (file_md5, last_modified, file_id))
                 con.commit()
             except lite.Error as err:
                 niceerror(caught=True,

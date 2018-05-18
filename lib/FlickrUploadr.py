@@ -1763,29 +1763,26 @@ class Uploadr(object):
 
                     if isGood(replaceResp):
                         # Update checksum tag at this time.
-                        res_add_tag = self.photos_add_tags(
-                            file_id,
-                            ['checksum:{}'.format(fileMd5)]
-                        )
-                        logging.debug('Output for res_add_tag:')
-                        logging.debug(xml.etree.ElementTree.tostring(
-                            res_add_tag,
-                            encoding='utf-8',
-                            method='xml'))
-                        if isGood(res_add_tag):
+      
+                        get_success, res_add_tag, get_errcode = \
+                            faw.flickrapi_fn(
+                                self.nuflickr.photos.addTags, (),
+                                dict(photo_id=file_id,
+                                     tags='checksum:{}'.format(fileMd5)),
+                                2, 2, False, caughtcode='998')
+                        
+                        if get_success and get_errcode == 0:
                             # Gets Flickr file info to obtain all tags
-                            # in order to update checksum tag if exists
-                            res_get_info = self.photos_get_info(
-                                photo_id=file_id
-                            )
-                            logging.debug('Output for res_get_info:')
-                            logging.debug(xml.etree.ElementTree.tostring(
-                                res_get_info,
-                                encoding='utf-8',
-                                method='xml'))
-                            # find tag checksum with oldFileMd5
-                            # later use such tag_id to delete it
-                            if isGood(res_get_info):
+                            # in order to update checksum tag if exists                            
+                            gi_success, res_get_info, gi_errcode = \
+                                faw.flickrapi_fn(
+                                    self.nuflickr.photos.getInfo, (),
+                                    dict(photo_id=file_id),
+                                    2, 2, False, caughtcode='999')
+                            
+                            if gi_success and gi_errcode == 0:
+                                # find tag checksum with oldFileMd5
+                                # later use such tag_id to delete it                                
                                 tag_id = None
                                 for tag in res_get_info\
                                     .find('photo')\
@@ -1808,11 +1805,6 @@ class Uploadr(object):
                                     logging.info('Removing tag_id:[%s]',
                                                  tag_id)
                                     remtagResp = self.photos_remove_tag(tag_id)
-                                    logging.debug('Output for remtagResp:')
-                                    logging.debug(xml.etree.ElementTree
-                                                  .tostring(remtagResp,
-                                                            encoding='utf-8',
-                                                            method='xml'))
                                     if isGood(remtagResp):
                                         NP.niceprint('    Tag removed:[{!s}]'
                                                      .format(
@@ -2044,11 +2036,9 @@ class Uploadr(object):
         NP.niceprint('  Deleting file:[{!s}]'.format(strunicodeout(file[1])))
 
         get_success, get_result, get_errcode = faw.flickrapi_fn(
-            self.nuflickr.photos.delete,
-            (),
+            self.nuflickr.photos.delete, (),
             dict(photo_id=str(file[0])),
-            2, 2, False,
-            caughtcode='111')
+            2, 2, False, caughtcode='111')
 
         success = False
         if ((get_success and get_errcode == 0) or
@@ -2384,12 +2374,10 @@ class Uploadr(object):
         bcur = con.cursor()
 
         get_success, get_result, get_errcode = faw.flickrapi_fn(
-            self.nuflickr.photosets.addPhoto,
-            (),
+            self.nuflickr.photosets.addPhoto, (),
             dict(photoset_id=str(setId),
                  photo_id=str(file[0])),
-            2, 0, False,
-            caughtcode='146')
+            2, 0, False, caughtcode='146')
 
         success = False
         if get_success and get_errcode == 0:
@@ -2479,12 +2467,10 @@ class Uploadr(object):
             return True
 
         get_success, get_result, get_errcode = faw.flickrapi_fn(
-            self.nuflickr.photosets.create,
-            (),
+            self.nuflickr.photosets.create, (),
             dict(title=setName,
                  primary_photo_id=str(primaryPhotoId)),
-            3, 10, True,
-            caughtcode='124')
+            3, 10, True, caughtcode='124')
 
         success = False
         if get_success and get_errcode == 0:
@@ -2824,11 +2810,9 @@ class Uploadr(object):
         cur = con.cursor()
 
         get_success, get_result, get_errcode = faw.flickrapi_fn(
-            self.nuflickr.photosets.getList,
-            (),
+            self.nuflickr.photosets.getList, (),
             dict(),
-            2, 0, False,
-            caughtcode='166')
+            2, 0, False, caughtcode='166')
 
         # Output format of photosets_getList:
         #
@@ -3020,13 +3004,11 @@ class Uploadr(object):
         #
         # Use a big random waitime to avoid errors in multiprocessing mode.
         get_success, searchIsUploaded, get_errcode = faw.flickrapi_fn(
-            self.nuflickr.photos.search,
-            (),
+            self.nuflickr.photos.search, (),
             dict(user_id="me",
                  tags='checksum:{}'.format(xchecksum),
                  extras='tags'),
-            3, 20, False,
-            caughtcode='180')
+            3, 20, False, caughtcode='180')
 
         if not (get_success and get_errcode == 0):
             # CODING: how to indicate an error... different from False?
@@ -3098,11 +3080,9 @@ class Uploadr(object):
                     continue
 
                 ctx_success, resp, ctx_errcode = faw.flickrapi_fn(
-                    self.nuflickr.photos.getAllContexts,
-                    (),
+                    self.nuflickr.photos.getAllContexts, (),
                     dict(photo_id=pic.attrib['id']),
-                    3, 8, True,
-                    caughtcode='195')
+                    3, 8, True, caughtcode='195')
 
                 if not (ctx_success and ctx_errcode == 0):
                     # CODING: how to indicate an error?
@@ -3235,11 +3215,9 @@ class Uploadr(object):
         logging.info('find_tag: photo:[%s] intag:[%s]', photo_id, intag)
 
         tag_success, tagsResp, tag_errcode = faw.flickrapi_fn(
-            self.nuflickr.tags.getListPhoto,
-            (),
+            self.nuflickr.tags.getListPhoto, (),
             dict(photo_id=photo_id),
-            3, 15, True,
-            caughtcode='205')
+            3, 15, True, caughtcode='205')
 
         if tag_success and tag_errcode == 0:
 
@@ -3288,10 +3266,15 @@ class Uploadr(object):
             The tag to remove from the photo. This parameter should contain
             a tag id, as returned by flickr.photos.getInfo.
         """
+        
+        logging.info('remove_tag: tag_id:[%s]', tag_id)
+        
+        get_success, get_result, getg_errcode = faw.flickrapi_fn(
+            self.nuflickr.tags.removeTag, (),
+            dict(tag_id=tag_id),
+            3, 5, False, caughtcode='206')        
 
-        removeTagResp = self.nuflickr.photos.removeTag(tag_id=tag_id)
-
-        return removeTagResp
+        return get_result
 
     # -------------------------------------------------------------------------
     # photos_set_dates
@@ -3704,11 +3687,9 @@ class Uploadr(object):
 
         # Total FLickr photos count: find('photos').attrib['total'] -----------
         get_success, get_result, get_errcode = faw.flickrapi_fn(
-            self.nuflickr.people.getPhotos,
-            (),
+            self.nuflickr.people.getPhotos, (),
             dict(user_id="me", per_page=1),
-            3, 3, False,
-            caughtcode='390')
+            3, 3, False, caughtcode='390')
 
         if get_success and get_errcode == 0:
             countflickr = get_result.find('photos').attrib['total']
@@ -3717,11 +3698,9 @@ class Uploadr(object):
 
         # Total FLickr photos not in set: find('photos').attrib['total'] ------
         get_success, get_result, get_errcode = faw.flickrapi_fn(
-            self.nuflickr.photos.getNotInSet,
-            (),
+            self.nuflickr.photos.getNotInSet, (),
             dict(per_page=1),
-            3, 3, False,
-            caughtcode='400')
+            3, 3, False, caughtcode='400')
 
         if get_success and get_errcode == 0:
             countnotinsets = int(format(
@@ -3752,15 +3731,15 @@ class Uploadr(object):
                 self.args.list_photos_not_in_set > 0 and
                 countnotinsets > 0):
             NP.niceprint('*****Listing Photos not in a set in Flickr******')
+
             # List pics not in sets (if within a parameter, default 10)
             # (per_page=min(self.args.list_photos_not_in_set, 500):
             #       find('photos').attrib['total']
             get_success, get_result, get_errcode = faw.flickrapi_fn(
-                self.nuflickr.photos.getNotInSet,
-                (),
+                self.nuflickr.photos.getNotInSet, (),
                 dict(per_page=min(self.args.list_photos_not_in_set, 500)),
-                3, 3, False,
-                caughtcode='410')
+                3, 3, False, caughtcode='410')
+
             if get_success and get_errcode == 0:
                 for count, row in enumerate(get_result.find('photos')
                                             .findall('photo')):
@@ -3772,10 +3751,9 @@ class Uploadr(object):
                         strunicodeout(row.attrib['title']))
 
                     tags_success, tags_result, tags_errcode = faw.flickrapi_fn(
-                        self.nuflickr.tags.getListPhoto,
-                        (),
+                        self.nuflickr.tags.getListPhoto, (),
                         dict(photo_id=row.attrib['id']),
-                        2, 2, False)
+                        2, 2, False, caughtcode='411')
 
                     if get_success and get_errcode == 0:
                         for tag in tags_result.find('photo')\

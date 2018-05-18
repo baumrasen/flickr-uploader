@@ -1763,26 +1763,26 @@ class Uploadr(object):
 
                     if isGood(replaceResp):
                         # Update checksum tag at this time.
-      
+
                         get_success, res_add_tag, get_errcode = \
                             faw.flickrapi_fn(
                                 self.nuflickr.photos.addTags, (),
                                 dict(photo_id=file_id,
                                      tags='checksum:{}'.format(fileMd5)),
                                 2, 2, False, caughtcode='998')
-                        
+
                         if get_success and get_errcode == 0:
                             # Gets Flickr file info to obtain all tags
-                            # in order to update checksum tag if exists                            
+                            # in order to update checksum tag if exists
                             gi_success, res_get_info, gi_errcode = \
                                 faw.flickrapi_fn(
                                     self.nuflickr.photos.getInfo, (),
                                     dict(photo_id=file_id),
                                     2, 2, False, caughtcode='999')
-                            
+
                             if gi_success and gi_errcode == 0:
                                 # find tag checksum with oldFileMd5
-                                # later use such tag_id to delete it                                
+                                # later use such tag_id to delete it
                                 tag_id = None
                                 for tag in res_get_info\
                                     .find('photo')\
@@ -3266,13 +3266,13 @@ class Uploadr(object):
             The tag to remove from the photo. This parameter should contain
             a tag id, as returned by flickr.photos.getInfo.
         """
-        
+
         logging.info('remove_tag: tag_id:[%s]', tag_id)
-        
+
         get_success, get_result, getg_errcode = faw.flickrapi_fn(
             self.nuflickr.tags.removeTag, (),
             dict(tag_id=tag_id),
-            3, 5, False, caughtcode='206')        
+            3, 5, False, caughtcode='206')
 
         return get_result
 

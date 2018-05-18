@@ -67,6 +67,10 @@ class MyConfig(object):
         True
         >>> CFG.LOGGING_LEVEL == ELog
         True
+        >>> CFG.ROTATING_LOGGING_FILE_SIZE == 25*1024*1024
+        True
+        >>> CFG.ROTATING_LOGGING_FILE_COUNT == 3
+        True
 
     """
     # =====================================================================
@@ -102,7 +106,11 @@ class MyConfig(object):
         'FULL_SET_NAME',
         'MAX_SQL_ATTEMPTS',
         'MAX_UPLOAD_ATTEMPTS',
-        'LOGGING_LEVEL'
+        'LOGGING_LEVEL',
+        'ROTATING_LOGGING_PATH',
+        'ROTATING_LOGGING_FILE_SIZE',
+        'ROTATING_LOGGING_FILE_COUNT',
+        'ROTATING_LOGGING_LEVEL'
     ]
     # Default configuration keys/values pairs ---------------------------------
     INIvalues = [
@@ -160,7 +168,15 @@ class MyConfig(object):
         # MAX_UPLOAD_ATTEMPTS
         "10",
         # LOGGING_LEVEL (30 = logging.ERROR). Note: Affects doctests results
-        "40"
+        "40",
+        # ROTATING_LOGGING_PATH
+        "os.path.join(os.path.dirname(sys.argv[0]), 'uploadr.err')",
+        # ROTATING_LOGGING_FILE_SIZE
+        "25*1024*1024",  # 25 MBytes
+        # ROTATING_LOGGING_FILE_COUNT
+        "3",
+        # ROTATING_LOGGING_LEVEL
+        "30"
     ]
 
     # -------------------------------------------------------------------------
@@ -266,7 +282,11 @@ class MyConfig(object):
             'bool',  # 'FULL_SET_NAME',
             'int',   # 'MAX_SQL_ATTEMPTS',
             'int',   # 'MAX_UPLOAD_ATTEMPTS',
-            'int'    # 'LOGGING_LEVEL'
+            'int',   # 'LOGGING_LEVEL',
+            'str',   # ROTATING_LOGGING_PATH,
+            'int',   # ROTATING_LOGGING_FILE_SIZE,
+            'int',   # ROTATING_LOGGING_FILE_COUNT,
+            'int'    # ROTATING_LOGGING_LEVEL        
         ]
         INIcheck = dict(zip(self.INIkeys, INItypes))
         if logging.getLogger().getEffectiveLevel() <= logging.INFO:
@@ -339,18 +359,19 @@ class MyConfig(object):
             """ verify_logging_level
             """
 
-            # Further specific processing... LOGGING_LEVEL
-            if self.__dict__['LOGGING_LEVEL'] not in\
-                    [logging.NOTSET,
-                     logging.DEBUG,
-                     logging.INFO,
-                     logging.WARNING,
-                     logging.ERROR,
-                     logging.CRITICAL]:
-                self.__dict__['LOGGING_LEVEL'] = logging.ERROR
-            # Convert LOGGING_LEVEL into int() for later use in conditionals
-            self.__dict__['LOGGING_LEVEL'] = int(str(
-                self.__dict__['LOGGING_LEVEL']))
+            # Further specific processing... LOGGING_LEVELs
+            for level in ['LOGGING_LEVEL', 'ROTATING_LOGGING_LEVEL']:
+                if self.__dict__[level] not in\
+                        [logging.NOTSET,
+                         logging.DEBUG,
+                         logging.INFO,
+                         logging.WARNING,
+                         logging.ERROR,
+                         logging.CRITICAL]:
+                    self.__dict__[level] = logging.ERROR
+                # Convert LOGGING_LEVEL into int() for later use in conditionals
+                self.__dict__[level] = int(str(
+                    self.__dict__[level]))
 
             return True
 
@@ -389,7 +410,8 @@ class MyConfig(object):
             for item in ['DB_PATH',  # Check if basedir exists. Unicode Support
                          'LOCK_PATH',
                          'TOKEN_CACHE',
-                         'TOKEN_PATH']:
+                         'TOKEN_PATH',
+                         'ROTATING_LOGGING_PATH']:
                 logging.debug('verifyconfig for [%s]', item)
                 if not self.is_str_unicode(self.__dict__[item]):
                     self.__dict__[item] = unicode(  # noqa
@@ -411,7 +433,7 @@ class MyConfig(object):
         def verify_raw_files():
             """ verify_raw_files
 
-                Verify raw realted configuration.
+                Verify raw related configuration.
             """
 
             result = True

@@ -509,7 +509,7 @@ if __name__ == "__main__":
         # or higher to err_file
         ROTATING_LOGGING = logging.handlers.RotatingFileHandler(
             UPLDRConstants.err_file,
-            maxBytes=25*1024*1024,  # Mas 25 MBytes per file size
+            maxBytes=25*1024*1024,  # Max 25 MBytes per file size
             backupCount=3)  # 3 rotating files
         ROTATING_LOGGING.setLevel(logging.WARNING)
         ROTATING_LOGGING.setFormatter(logging.Formatter(

@@ -286,7 +286,7 @@ class MyConfig(object):
             'str',   # ROTATING_LOGGING_PATH,
             'int',   # ROTATING_LOGGING_FILE_SIZE,
             'int',   # ROTATING_LOGGING_FILE_COUNT,
-            'int'    # ROTATING_LOGGING_LEVEL        
+            'int'    # ROTATING_LOGGING_LEVEL
         ]
         INIcheck = dict(zip(self.INIkeys, INItypes))
         if logging.getLogger().getEffectiveLevel() <= logging.INFO:
@@ -369,7 +369,7 @@ class MyConfig(object):
                          logging.ERROR,
                          logging.CRITICAL]:
                     self.__dict__[level] = logging.ERROR
-                # Convert LOGGING_LEVEL into int() for later use in conditionals
+                # Convert LOGGING_LEVEL into int() for use in conditionals
                 self.__dict__[level] = int(str(
                     self.__dict__[level]))
 

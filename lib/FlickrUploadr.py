@@ -149,11 +149,12 @@ def chunk(itlist, size):
 
         Divides an iterable in slices/chunks of size size
 
-        >>> for a in chunk([ 1, 2, 3, 4, 5, 6], 2):
+        >>> for a in chunk([ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 3):
         ...     len(a)
-        2
-        2
-        2
+        3
+        3
+        3
+        1
     """
     itlist = iter(itlist)
     # lambda: creates a returning expression function
@@ -194,6 +195,13 @@ def set_name_from_file(afile, afiles_dir, afull_set_name):
         FULL_SET_NAME:
                False=> 05
                 True=> 2014/05/05
+
+        >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
+        '/some/photos', False)
+        'Album'
+        >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
+        '/some/photos', True)
+        'Parent/Album'
     """
 
     assert len(afile) > 0, NP.niceassert('len({!s}) is not > 0:'

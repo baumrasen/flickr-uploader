@@ -195,12 +195,6 @@ def parse_arguments():
                             metavar='N', type=int,
                             help='List as many as N photos (with tags) '
                                  'not in set. Maximum listed photos is 500.')
-    # finds duplicated images (based on checksum, titlename, setName) in Flickr
-    igrpparser.add_argument('-z', '--search-for-duplicates',
-                            action='store_true',
-                            help='Lists duplicated files: same checksum, '
-                                 'same title, list SetName (if different). '
-                                 'Not operational at this time.')
 
     # Processing related options ----------------------------------------------
     pgrpparser = parser.add_argument_group('Processing related options')
@@ -379,9 +373,6 @@ def run_uploadr(args):
             myflick.getFlickrSets()
             myflick.upload()
             myflick.removeDeletedMedia()
-
-            if args.search_for_duplicates:
-                myflick.searchForDuplicates()
 
             if args.remove_excluded:
                 myflick.removeExcludedMedia()

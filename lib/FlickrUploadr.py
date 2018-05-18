@@ -1004,31 +1004,18 @@ class Uploadr(object):
                                          NUTIME.localtime(xlast_modified))
             logging.info('video_date:[%s]', video_date)
 
-            try:
-                res_set_date = self.photos_set_dates(xfile_id,
-                                                     str(video_date))
-                logging.debug('Output for res_set_date:')
-                logging.debug(xml.etree.ElementTree.tostring(
-                    res_set_date,
-                    encoding='utf-8',
-                    method='xml'))
-                if isGood(res_set_date):
-                    NP.niceprint('Successful date:[{!s}] '
-                                 'for file:[{!s}]'
-                                 .format(strunicodeout(video_date),
-                                         strunicodeout(xfile)))
-            except (IOError, ValueError, httplib.HTTPException):
-                niceerror(caught=True,
-                          caughtprefix='+++',
-                          caughtcode='010',
-                          caughtmsg='Error setting date file_id:[{!s}]'
-                          .format(xfile_id),
-                          useniceprint=True,
-                          exceptsysinfo=True)
-                raise
-            finally:
-                if not isGood(res_set_date):
-                    raise IOError(res_set_date)
+            if self.args.verbose:
+                NP.niceprint('   Setting Date:[{!s}] for file:[{!s}] Id=[{!s}]'
+                             .format(datetxt, strunicodeout(xfile), photo_id))
+
+            res_set_date = self.photos_set_dates(xfile_id,
+                                                 str(video_date))
+
+            if isGood(res_set_date):
+                NP.niceprint('Successful date:[{!s}] '
+                             'for file:[{!s}]'
+                             .format(strunicodeout(video_date),
+                                     strunicodeout(xfile)))
 
         return True
 
@@ -1777,7 +1764,7 @@ class Uploadr(object):
                                 self.nuflickr.photos.addTags, (),
                                 dict(photo_id=file_id,
                                      tags='checksum:{}'.format(fileMd5)),
-                                2, 2, False, caughtcode='998')
+                                2, 2, False, caughtcode='055')
 
                         if get_success and get_errcode == 0:
                             # Gets Flickr file info to obtain all tags
@@ -1786,7 +1773,7 @@ class Uploadr(object):
                                 faw.flickrapi_fn(
                                     self.nuflickr.photos.getInfo, (),
                                     dict(photo_id=file_id),
-                                    2, 2, False, caughtcode='999')
+                                    2, 2, False, caughtcode='056')
 
                             if gi_success and gi_errcode == 0:
                                 # find tag checksum with oldFileMd5
@@ -3192,21 +3179,6 @@ class Uploadr(object):
             returnPhotoID, returnUploadedNoSet
 
     # -------------------------------------------------------------------------
-    # photos_get_info
-    #
-    #   Local Wrapper for Flickr photos.getInfo
-    #
-    def photos_get_info(self, photo_id):
-        """ photos_get_info
-
-            Local Wrapper for Flickr photos.getInfo
-        """
-
-        photos_get_infoResp = self.nuflickr.photos.getInfo(photo_id=photo_id)
-
-        return photos_get_infoResp
-
-    # -------------------------------------------------------------------------
     # photos_find_tag
     #
     #   Determines if tag is assigned to a pic.
@@ -3240,24 +3212,6 @@ class Uploadr(object):
                     return True, tag_id
 
         return False, ''
-
-    # -------------------------------------------------------------------------
-    # photos_add_tags
-    #
-    #   Local Wrapper for Flickr photos.addTags
-    #
-    def photos_add_tags(self, photo_id, tags):
-        """ photos_add_tags
-
-            Local Wrapper for Flickr photos.addTags
-        """
-
-        logging.info('photos_add_tags: photo_id:[%s] tags:[%s]',
-                     photo_id, tags)
-        photos_add_tagsResp = self.nuflickr.photos.addTags(
-            photo_id=photo_id,
-            tags=tags)
-        return photos_add_tagsResp
 
     # -------------------------------------------------------------------------
     # photos_remove_tag
@@ -3295,76 +3249,21 @@ class Uploadr(object):
             Update Date/Time Taken on Flickr for Video files
         """
 
-        if self.args.verbose:
-            NP.niceprint('   Setting Date:[{!s}] Id=[{!s}]'
-                         .format(datetxt, photo_id))
         logging.warning('   Setting Date:[%s] Id=[%s]', datetxt, photo_id)
 
-        @retry(attempts=3, waittime=15, randtime=True)
-        def R_photos_setdates(kwargs):
-            return self.nuflickr.photos.setdates(**kwargs)
+        get_success, respDate, get_errcode = faw.flickrapi_fn(
+            self.nuflickr.photos.setdates, (),
+            dict(photo_id=photo_id,
+                 date_taken='{!s}'.format(datetxt),
+                 date_taken_granularity=0),
+            3, 15, True, caughtcode='210')
 
-        try:
-            respDate = None
-            respDate = R_photos_setdates(
-                dict(photo_id=photo_id,
-                     date_taken='{!s}'.format(datetxt),
-                     date_taken_granularity=0))
-
-            logging.debug('Output for respDate:')
-            logging.debug(xml.etree.ElementTree.tostring(
-                respDate,
-                encoding='utf-8',
-                method='xml'))
-
-            if self.args.verbose:
-                NP.niceprint(' Set Date Reply:[{!s}]'
-                             .format(isGood(respDate)))
-
-        except flickrapi.exceptions.FlickrError as ex:
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='210',
-                      caughtmsg='Flickrapi exception on photos.setdates',
-                      exceptuse=True,
-                      exceptcode=ex.code,
-                      exceptmsg=ex,
-                      useniceprint=True)
-        except (IOError, httplib.HTTPException):
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='211',
-                      caughtmsg='Caught IOError, HTTP exception'
-                      'on photos.setdates',
-                      useniceprint=True)
-        except BaseException:
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='212',
-                      caughtmsg='Caught exception on photos.setdates',
-                      useniceprint=True,
-                      exceptsysinfo=True)
-        finally:
-            if (respDate is not None) and isGood(respDate):
-                logging.debug('Set Date Response: OK!')
+        if get_success and get_errcode == 0:
+            logging.debug('Set Date Response: OK!')
+        else:
+            logging.error('Set Date Response: NOK!')
 
         return respDate
-
-    # -------------------------------------------------------------------------
-    # searchForDuplicates
-    #
-    # Pics with same checksum, on the same Album and a different filename
-    # Pics with same checksum, on different same Album and a different filename
-    #
-    # CODING: to be developed.
-    #
-    def searchForDuplicates(self):
-        """ searchForDuplicates
-
-            Not implemented.
-        """
-
-        pass
 
     # -------------------------------------------------------------------------
     # maddAlbumsMigrate
@@ -3410,7 +3309,7 @@ class Uploadr(object):
             except (flickrapi.exceptions.FlickrError, Exception) as ex:
                 niceerror(caught=True,
                           caughtprefix='+++',
-                          caughtcode='214',
+                          caughtcode='212',
                           caughtmsg='Exception on photos_find_tag',
                           exceptuse=True,
                           # exceptcode=ex.code,
@@ -3427,17 +3326,13 @@ class Uploadr(object):
                 terr = True
 
             if not terr and not tfind:
-                res_add_tag = self.photos_add_tags(
-                    f[0],
-                    ['album:"{}"'.format(f[2]
-                                         if f[2] is not None
-                                         else setName)]
-                )
-                logging.debug('Output for res_add_tag:')
-                logging.debug(xml.etree.ElementTree.tostring(
-                    res_add_tag,
-                    encoding='utf-8',
-                    method='xml'))
+                get_success, res_add_tag, get_errcode = faw.flickrapi_fn(
+                    self.nuflickr.photos.addTags, (),
+                    dict(photo_id=f[0],
+                         tags='album:"{}"'.format(f[2]
+                                                  if f[2] is not None
+                                                  else setName)),
+                    2, 2, False, caughtcode='214')
 
             logging.debug('===Multiprocessing=== in.mutex.acquire(w)')
             mutex.acquire()
@@ -3574,17 +3469,16 @@ class Uploadr(object):
                         continue
 
                     if not terr and not tfind:
-                        res_add_tag = self.photos_add_tags(
-                            row[0],
-                            ['album:"{}"'.format(row[2]
-                                                 if row[2] is not None
-                                                 else setName)]
-                        )
-                        logging.debug('Output for res_add_tag:')
-                        logging.debug(xml.etree.ElementTree.tostring(
-                            res_add_tag,
-                            encoding='utf-8',
-                            method='xml'))
+                        get_success, res_add_tag, get_errcode = \
+                            faw.flickrapi_fn(
+                                self.nuflickr.photos.addTags, (),
+                                dict(photo_id=row[0],
+                                     tags='album:"{}"'
+                                     .format(row[2]
+                                             if row[2] is not None
+                                             else setName)),
+                                2, 2, False, caughtcode='218')
+
                     NP.niceprocessedfiles(count, countTotal, False)
 
                 NP.niceprocessedfiles(count, countTotal, True)
@@ -3615,7 +3509,7 @@ class Uploadr(object):
             except lite.Error as err:
                 niceerror(caught=True,
                           caughtprefix='+++ DB',
-                          caughtcode='218',
+                          caughtcode='219',
                           caughtmsg='DB error on SELECT FROM sets: [{!s}]'
                           .format(err.args[0]),
                           useniceprint=True)

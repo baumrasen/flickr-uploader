@@ -194,7 +194,7 @@ def rate_limited(max_per_second):
             except Exception as ex:
                 NPR.niceerror(caught=True,
                               caughtprefix='+++Rate',
-                              caughtcode='000',
+                              caughtcode='001',
                               caughtmsg='Exception on rate_limited_function',
                               exceptuse=True,
                               # exceptCode=ex.code,

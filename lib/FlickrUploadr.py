@@ -3917,21 +3917,21 @@ class Uploadr(object):
                         (),
                         dict(photo_id=row.attrib['id']),
                         2, 2, False)
-                    
+
                     if get_success and get_errcode == 0:
                         for tag in get_result.find('photo')\
                                 .find('tags').findall('tag'):
                             output_str += 'tag_attrib:{!s}|'\
                                           .format(
-                                NP.strunicodeout(
-                                tag.attrib['raw']))
+                                              NP.strunicodeout(
+                                                  tag.attrib['raw']))
 
                     NP.niceprint(output_str)
 
                     logging.info('count=[%s]', count)
-                    if ((count == 500) or
-                            (count >= (self.args.list_photos_not_in_set - 1))
-                            or (count >= (countnotinsets - 1))):
+                    if (count == 500 or
+                            count >= (self.args.list_photos_not_in_set - 1) or
+                            count >= (countnotinsets - 1)):
                         logging.info('Stopped at photo [%s] listing '
                                      'photos not in a set', count)
                         break

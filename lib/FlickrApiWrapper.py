@@ -76,14 +76,14 @@ def isGood(res):
 
 
 # -----------------------------------------------------------------------------
-def nu_flickrapi_fn(fn_name,
-                    fn_args,  # format: ()
-                    fn_kwargs,  # format: dict()
-                    attempts=3,
-                    waittime=5,
-                    randtime=False,
-                    caughtcode='000'):
-    """ nu_flickrapi_fn
+def flickrapi_fn(fn_name,
+                 fn_args,  # format: ()
+                 fn_kwargs,  # format: dict()
+                 attempts=3,
+                 waittime=5,
+                 randtime=False,
+                 caughtcode='000'):
+    """ flickrapi_fn
 
         Runs flickrapi fn_name function handing over **fn_kwargs.
         It retries attempts, waittime, randtime with @retry
@@ -287,11 +287,11 @@ def nu_authenticate(api_key,
 
 
 # -----------------------------------------------------------------------------
-def nu_get_cached_token(api_key,
-                        secret,
-                        token_cache_location='token',
-                        perms='delete'):
-    """ nu_get_cached_token
+def get_cached_token(api_key,
+                     secret,
+                     token_cache_location='token',
+                     perms='delete'):
+    """ get_cached_token
 
         Attempts to get the flickr token from disk.
 
@@ -392,7 +392,7 @@ if __name__ == "__main__":
 
     NPR.niceprint('-----------------------------------Connecting to Flickr...')
     flickr = None
-    flickr = nu_get_cached_token(
+    flickr = get_cached_token(
         flickr_config['api_key'],
         flickr_config['secret'],
         token_cache_location=flickr_config['TOKEN_CACHE'])
@@ -405,7 +405,7 @@ if __name__ == "__main__":
 
     if flickr is not None:
         NPR.niceprint('-----------------------------------Number of Photos...')
-        get_success, get_result, get_errcode = nu_flickrapi_fn(
+        get_success, get_result, get_errcode = flickrapi_fn(
             flickr.people.getPhotos,
             (),
             dict(user_id="me", per_page=1),

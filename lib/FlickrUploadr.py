@@ -1006,7 +1006,9 @@ class Uploadr(object):
 
             if self.args.verbose:
                 NP.niceprint('   Setting Date:[{!s}] for file:[{!s}] Id=[{!s}]'
-                             .format(datetxt, strunicodeout(xfile), photo_id))
+                             .format(video_date,
+                                     strunicodeout(xfile),
+                                     xfile_id))
 
             res_set_date = self.photos_set_dates(xfile_id,
                                                  str(video_date))

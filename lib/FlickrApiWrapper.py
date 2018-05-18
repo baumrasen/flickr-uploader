@@ -99,6 +99,10 @@ def flickrapi_fn(fn_name,
 
     @retry(attempts=attempts, waittime=waittime, randtime=randtime)
     def retry_flickrapi_fn(kwargs):
+        """ retry_flickrapi_fn
+
+            Decorator to retry calling a function
+        """
         return fn_name(**kwargs)
 
     logging.info('fn:[%s] attempts:[%s] waittime:[%s] randtime:[%s]',
@@ -169,8 +173,8 @@ def flickrapi_fn(fn_name,
                       else isGood(fn_result))
         fn_result = None
 
-    logging.info('fn:[{!s}] success:[{!s}] result:[{!s}] errcode:[{!s}]'
-                 .format(fn_name.__name__, fn_success, fn_result, fn_errcode))
+    logging.info('fn:[%s] success:[%s] result:[%s] errcode:[%s]',
+                 fn_name.__name__, fn_success, fn_result, fn_errcode)
 
     return fn_success, fn_result, fn_errcode
 
@@ -281,7 +285,7 @@ def nu_authenticate(api_key,
                           flickrobj.token_valid(perms='delete')))
 
     # Some debug...
-    logging.info('Token Cache: [{!s}]', flickrobj.token_cache.token)
+    logging.info('Token Cache: [%s]', flickrobj.token_cache.token)
 
     return flickrobj
 
@@ -358,11 +362,12 @@ def get_cached_token(api_key,
         fn_result = False
         raise
 
-    if fn_result:
-        return flickrobj  # flickrobj.token_cache.token
-    else:
-        return None   # Error
+    # if fn_result:
+    #     return flickrobj  # flickrobj.token_cache.token
+    # else:
+    #     return None   # Error
 
+    return flickrobj if fn_result else None
 
 # -----------------------------------------------------------------------------
 # If called directly run doctests
@@ -385,28 +390,28 @@ if __name__ == "__main__":
     # export api_key=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # export secret=YYYYYYYYYYYYYYYY
     #
-    flickr_config = {'api_key': os.environ['api_key'],
+    FLICKR_CONFIG = {'api_key': os.environ['api_key'],
                      'secret': os.environ['secret'],
                      'TOKEN_CACHE': os.path.join(
                          os.path.dirname(sys.argv[0]), 'token')}
 
     NPR.niceprint('-----------------------------------Connecting to Flickr...')
-    flickr = None
-    flickr = get_cached_token(
-        flickr_config['api_key'],
-        flickr_config['secret'],
-        token_cache_location=flickr_config['TOKEN_CACHE'])
+    FLICKR = None
+    FLICKR = get_cached_token(
+        FLICKR_CONFIG['api_key'],
+        FLICKR_CONFIG['secret'],
+        token_cache_location=FLICKR_CONFIG['TOKEN_CACHE'])
 
-    if flickr is None:
-        flickr = nu_authenticate(
-            flickr_config['api_key'],
-            flickr_config['secret'],
-            token_cache_location=flickr_config['TOKEN_CACHE'])
+    if FLICKR is None:
+        FLICKR = nu_authenticate(
+            FLICKR_CONFIG['api_key'],
+            FLICKR_CONFIG['secret'],
+            token_cache_location=FLICKR_CONFIG['TOKEN_CACHE'])
 
-    if flickr is not None:
+    if FLICKR is not None:
         NPR.niceprint('-----------------------------------Number of Photos...')
         get_success, get_result, get_errcode = flickrapi_fn(
-            flickr.people.getPhotos,
+            FLICKR.people.getPhotos,
             (),
             dict(user_id="me", per_page=1),
             2, 10, True)

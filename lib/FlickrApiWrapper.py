@@ -26,9 +26,7 @@ try:
 except ImportError:
     import http.client as httplib  # Python 3
 import xml
-# Avoids error on some systems:
-#    AttributeError: 'module' object has no attribute 'etree'
-#    on logging.info(xml.etree.ElementTree.tostring(...
+# Prevents error "AttributeError: 'module' object has no attribute 'etree'"
 try:
     DUMMYXML = xml.etree.ElementTree.tostring(
         xml.etree.ElementTree.Element('xml.etree'),

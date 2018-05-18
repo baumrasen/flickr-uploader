@@ -29,9 +29,7 @@ import sqlite3 as lite
 import hashlib
 import subprocess
 import xml
-# Avoids error on some systems:
-#    AttributeError: 'module' object has no attribute 'etree'
-#    on logging.info(xml.etree.ElementTree.tostring(...
+# Prevents error "AttributeError: 'module' object has no attribute 'etree'"
 try:
     DUMMYXML = xml.etree.ElementTree.tostring(
         xml.etree.ElementTree.Element('xml.etree'),
@@ -3898,7 +3896,6 @@ class Uploadr(object):
             # List pics not in sets (if within a parameter, default 10)
             # (per_page=min(self.args.list_photos_not_in_set, 500):
             #       find('photos').attrib['total']
-
             get_success, get_result, get_errcode = faw.nu_flickrapi_fn(
                 self.nuflickr.photos.getNotInSet,
                 (),
@@ -3911,9 +3908,25 @@ class Uploadr(object):
                     logging.info('Photo Not in Set: id:[%s] title:[%s]',
                                  row.attrib['id'],
                                  strunicodeout(row.attrib['title']))
-                    NP.niceprint('Photo Not in Set: id:[{!s}] title:[{!s}]'
-                                 .format(row.attrib['id'],
-                                         strunicodeout(row.attrib['title'])))
+                    output_str = 'id:{!s}|title:{!s}|'.format(
+                        row.attrib['id'],
+                        strunicodeout(row.attrib['title']))
+
+                    tags_success, tags_result, tags_errcode = nu_flickrapi_fn(
+                        flickr.tags.getListPhoto,
+                        (),
+                        dict(photo_id=row.attrib['id']),
+                        2, 2, False)
+                    
+                    if get_success and get_errcode == 0:
+                        for tag in get_result.find('photo')\
+                                .find('tags').findall('tag'):
+                            output_str += 'tag_attrib:{!s}|'\
+                                          .format(
+                                NP.strunicodeout(
+                                tag.attrib['raw']))
+
+                    NP.niceprint(output_str)
 
                     logging.info('count=[%s]', count)
                     if ((count == 500) or

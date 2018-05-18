@@ -3913,7 +3913,7 @@ class Uploadr(object):
                         strunicodeout(row.attrib['title']))
 
                     tags_success, tags_result, tags_errcode = faw.flickrapi_fn(
-                        nuflickr.tags.getListPhoto,
+                        self.nuflickr.tags.getListPhoto,
                         (),
                         dict(photo_id=row.attrib['id']),
                         2, 2, False)

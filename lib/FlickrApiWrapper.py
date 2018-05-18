@@ -369,6 +369,7 @@ def get_cached_token(api_key,
 
     return flickrobj if fn_result else None
 
+
 # -----------------------------------------------------------------------------
 # If called directly run doctests
 #

@@ -263,6 +263,8 @@ class MyConfig(object):
     #
     def processconfig(self):
         """ processconfig
+
+            Evaluates configuration items. Uses default values if not valid.
         """
         # Default types for keys/values pairs ---------------------------------
         INItypes = [
@@ -357,10 +359,14 @@ class MyConfig(object):
     #
     def verifyconfig(self):
         """ verifyconfig
+
+            Verifies configuration. Must be called after processconfig().
         """
 
         def verify_logging_level():
             """ verify_logging_level
+
+                Verifies Logging related option is set to a valid value.
             """
 
             # Further specific processing... LOGGING_LEVELs
@@ -381,11 +387,14 @@ class MyConfig(object):
 
         def verify_files_dir():
             """ verify_files_dir
+
+                Checks folder is valid and exists.
             """
 
             result = True
             # Further specific processing... FILES_DIR
             for item in ['FILES_DIR']:  # Check if dir exists. Unicode Support
+
                 logging.debug('verifyconfig for [%s]', item)
                 if not self.is_str_unicode(self.__dict__[item]):
                     self.__dict__[item] = unicode(  # noqa
@@ -393,17 +402,19 @@ class MyConfig(object):
                         'utf-8') \
                         if sys.version_info < (3, ) \
                         else str(self.__dict__[item])
+
                 if not os.path.isdir(self.__dict__[item]):
                     logging.critical('%s: [%s] is not a valid folder.',
                                      item,
                                      self.strunicodeout(self.__dict__[item]))
                     result = False
+
             return result
 
         def verify_paths():
             """ verify_paths
 
-                Further specific verification processing...
+                Checks parent folder for item (file) is valid and exists for:
                       DB_PATH
                       LOCK_PATH
                       TOKEN_CACHE
@@ -414,8 +425,8 @@ class MyConfig(object):
             for item in ['DB_PATH',  # Check if basedir exists. Unicode Support
                          'LOCK_PATH',
                          'TOKEN_CACHE',
-                         'TOKEN_PATH',
-                         'ROTATING_LOGGING_PATH']:
+                         'TOKEN_PATH']:
+
                 logging.debug('verifyconfig for [%s]', item)
                 if not self.is_str_unicode(self.__dict__[item]):
                     self.__dict__[item] = unicode(  # noqa
@@ -423,6 +434,7 @@ class MyConfig(object):
                         'utf-8') \
                         if sys.version_info < (3, ) \
                         else str(self.__dict__[item])
+
                 if (len(os.path.dirname(self.__dict__[item])) > 0 and
                         not os.path.isdir(
                             os.path.dirname(self.__dict__[item]))):
@@ -432,6 +444,37 @@ class MyConfig(object):
                                      self.strunicodeout(os.path.dirname(
                                          self.__dict__[item])))
                     result = False
+            return result
+
+        def verify_rotating_path():
+            """ verify_rotating_path
+
+                Checks parent folder for item (file) is valid and exists.
+                      ROTATING_LOGGING_PATH
+            """
+
+            result = True
+            if self.__dict__['ROTATING_LOGGING']:
+                for item in ['ROTATING_LOGGING_PATH']:
+                    logging.debug('verifyconfig for [%s]', item)
+                    if not self.is_str_unicode(self.__dict__[item]):
+                        self.__dict__[item] = unicode(  # noqa
+                            self.__dict__[item],
+                            'utf-8') \
+                            if sys.version_info < (3, ) \
+                            else str(self.__dict__[item])
+
+                    if (len(os.path.dirname(self.__dict__[item])) > 0 and
+                            not os.path.isdir(
+                                os.path.dirname(self.__dict__[item]))):
+                        logging.critical('%s:[%s] is not in '
+                                         'a valid folder:[%s].',
+                                         item,
+                                         self.strunicodeout(
+                                             self.__dict__[item]),
+                                         self.strunicodeout(os.path.dirname(
+                                             self.__dict__[item])))
+                        result = False
             return result
 
         def verify_raw_files():
@@ -533,6 +576,8 @@ class MyConfig(object):
         elif not verify_files_dir():
             returnverify = False
         elif not verify_paths():
+            returnverify = False
+        elif not verify_rotating_path()
             returnverify = False
         elif not verify_raw_files():
             returnverify = False

@@ -3024,8 +3024,8 @@ class Uploadr(object):
         # Set 'Number of pics with specified checksum' to 0 and return.
         if len(searchIsUploaded.find('photos').attrib['total']) == 0:
             returnPhotoUploaded = 0
-            logging.error(' IS_UPLOADED:[ERROR#3]: len.photos.total == 0')
-            NP.niceprint(' IS_UPLOADED:[ERROR#3]: len.photos.total == 0',
+            logging.error(' IS_UPLOADED:[ERROR#3]: Invalid return. Confinuing')
+            NP.niceprint(' IS_UPLOADED:[ERROR#3]: Invalid return. Confinuing',
                          fname='isuploaded')
         else:
             returnPhotoUploaded = int(searchIsUploaded

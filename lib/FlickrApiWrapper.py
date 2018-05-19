@@ -74,6 +74,7 @@ def isGood(res):
     else:
         return False
 
+    return False if res is None else (not res == "" and res.attrib['stat'] == "ok")
 
 # -----------------------------------------------------------------------------
 def flickrapi_fn(fn_name,
@@ -411,12 +412,12 @@ if __name__ == "__main__":
 
     if FLICKR is not None:
         NPR.niceprint('-----------------------------------Number of Photos...')
-        get_success, get_result, get_errcode = flickrapi_fn(
+        GET_SUCCESS, GET_RESULT, GET_ERRCODE = flickrapi_fn(
             FLICKR.people.getPhotos,
             (),
             dict(user_id="me", per_page=1),
             2, 10, True)
 
-        if get_success and get_errcode == 0:
+        if GET_SUCCESS and GET_ERRCODE == 0:
             NPR.niceprint('Number of Photos=[{!s}]'
                           .format(get_result.find('photos').attrib['total']))

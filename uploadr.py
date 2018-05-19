@@ -485,37 +485,6 @@ if __name__ == "__main__":
                           useniceprint=True)
             sys.exit(2)
 
-    # Write one level more than console LOGGING level to err_file
-    ROTATING_LOGGING = None
-    if not (UPLDRConstants.base_dir == ''
-            or os.path.isdir(UPLDRConstants.base_dir)):
-        NPR.niceerror(caught=True,
-                      caughtprefix='+++ ',
-                      caughtcode='603',
-                      caughtmsg='Invalid sys.argv ERR file '
-                      'prevents output to file.',
-                      useniceprint=True)
-    else:
-        # Define a rotating file Handler which writes DEBUG messages
-        # or higher to err_file
-        ROTATING_LOGGING = logging.handlers.RotatingFileHandler(
-            UPLDRConstants.err_file,
-            maxBytes=25*1024*1024,  # Max 25 MBytes per file size
-            backupCount=3)  # 3 rotating files
-        ROTATING_LOGGING.setLevel(logging.WARNING)
-        ROTATING_LOGGING.setFormatter(logging.Formatter(
-            fmt='[' + str(UPLDRConstants.Run) + ']' +
-            '[%(asctime)s]:[%(processName)-11s]' +
-            '[%(levelname)-8s]:[%(name)s] %(message)s',
-            datefmt=UPLDRConstants.TimeFormat))
-        logging.getLogger().addHandler(ROTATING_LOGGING)
-
-        logging.warning('----------- (V%s) Init Rotating -----------(Log:%s)\n'
-                        'Python version on this system: [%s]',
-                        UPLDRConstants.Version,
-                        MY_CFG.LOGGING_LEVEL,
-                        sys.version)
-
     # Source configuration from ini_file
     MY_CFG.readconfig(UPLDRConstants.ini_file, ['Config'])
     if MY_CFG.processconfig():
@@ -526,18 +495,52 @@ if __name__ == "__main__":
     else:
         raise ValueError('No config file found or incorrect config!')
 
+    # Write one level more than console LOGGING level to err_file
+    if MY_CFG.ROTATING_LOGGING:
+        ROTATING_LOGGING = None
+        if not (UPLDRConstants.base_dir == ''
+                or os.path.isdir(UPLDRConstants.base_dir)):
+            NPR.niceerror(caught=True,
+                          caughtprefix='+++ ',
+                          caughtcode='603',
+                          caughtmsg='Invalid sys.argv ERR file '
+                          'prevents output to file.',
+                          useniceprint=True)
+        else:
+            # Define a rotating file Handler which writes DEBUG messages
+            # or higher to err_file
+            ROTATING_LOGGING = logging.handlers.RotatingFileHandler(
+                UPLDRConstants.err_file,
+                maxBytes=25*1024*1024,  # Max 25 MBytes per file size
+                backupCount=3)  # 3 rotating files
+            ROTATING_LOGGING.setLevel(logging.WARNING)
+            ROTATING_LOGGING.setFormatter(logging.Formatter(
+                fmt='[' + str(UPLDRConstants.Run) + ']' +
+                '[%(asctime)s]:[%(processName)-11s]' +
+                '[%(levelname)-8s]:[%(name)s] %(message)s',
+                datefmt=UPLDRConstants.TimeFormat))
+            logging.getLogger().addHandler(ROTATING_LOGGING)
+
+            logging.warning('----------- (V%s) Init Rotating -----------(Log:%s)\n'
+                            'Python version on this system: [%s]',
+                            UPLDRConstants.Version,
+                            MY_CFG.LOGGING_LEVEL,
+                            sys.version)
+
     # Update console/rotating logging level as per LOGGING_LEVEL from INI file
     CONSOLE_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL)
-    ROTATING_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL if
-                              MY_CFG.LOGGING_LEVEL <= logging.DEBUG
-                              else MY_CFG.LOGGING_LEVEL - 10)
+    if MY_CFG.ROTATING_LOGGING:
+        ROTATING_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL if
+                                  MY_CFG.LOGGING_LEVEL <= logging.DEBUG
+                                  else MY_CFG.LOGGING_LEVEL - 10)
     logging.warning('CONSOLE_LOGGING.setLevel=[%s] '
-                    'ROTATING_LOGGING.setLevel=[%s] '
+                    'ROTATING_LOGGING.setLevel/enabled?=[%s/%s] '
                     'MY_CFG.LOGGING_LEVEL=[%s]',
                     MY_CFG.LOGGING_LEVEL,
                     MY_CFG.LOGGING_LEVEL if
                     MY_CFG.LOGGING_LEVEL <= logging.DEBUG
                     else MY_CFG.LOGGING_LEVEL - 10,
+                    MY_CFG.ROTATING_LOGGING,
                     MY_CFG.LOGGING_LEVEL)
 
     if MY_CFG.LOGGING_LEVEL <= logging.INFO:

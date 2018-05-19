@@ -107,6 +107,7 @@ class MyConfig(object):
         'MAX_SQL_ATTEMPTS',
         'MAX_UPLOAD_ATTEMPTS',
         'LOGGING_LEVEL',
+        'ROTATING_LOGGING',
         'ROTATING_LOGGING_PATH',
         'ROTATING_LOGGING_FILE_SIZE',
         'ROTATING_LOGGING_FILE_COUNT',
@@ -169,6 +170,8 @@ class MyConfig(object):
         "10",
         # LOGGING_LEVEL (30 = logging.ERROR). Note: Affects doctests results
         "40",
+        # ROTATING_LOGGING
+        "False",
         # ROTATING_LOGGING_PATH
         "os.path.join(os.path.dirname(sys.argv[0]), 'uploadr.err')",
         # ROTATING_LOGGING_FILE_SIZE
@@ -283,6 +286,7 @@ class MyConfig(object):
             'int',   # 'MAX_SQL_ATTEMPTS',
             'int',   # 'MAX_UPLOAD_ATTEMPTS',
             'int',   # 'LOGGING_LEVEL',
+            'bool',  # ROTATING_LOGGING
             'str',   # ROTATING_LOGGING_PATH,
             'int',   # ROTATING_LOGGING_FILE_SIZE,
             'int',   # ROTATING_LOGGING_FILE_COUNT,

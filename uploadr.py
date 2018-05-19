@@ -516,22 +516,20 @@ if __name__ == "__main__":
     # Write one level more than console LOGGING level to err_file
     if MY_CFG.ROTATING_LOGGING:
         ROTATING_LOGGING = None
-        if not (UPLDRConstants.base_dir == ''
-                or os.path.isdir(UPLDRConstants.base_dir)):
+        if not os.path.isdir(os.dirname(MY_CFG.ROTATING_LOGGING_FILE)):
             NPR.niceerror(caught=True,
                           caughtprefix='+++ ',
                           caughtcode='603',
-                          caughtmsg='Invalid sys.argv ERR file '
-                          'prevents output to file.',
+                          caughtmsg='Invalid ROTATING_LOGGING config.',
                           useniceprint=True)
         else:
             # Define a rotating file Handler which writes DEBUG messages
             # or higher to err_file
             ROTATING_LOGGING = logging.handlers.RotatingFileHandler(
                 UPLDRConstants.err_file,
-                maxBytes=25*1024*1024,  # Max 25 MBytes per file size
-                backupCount=3)  # 3 rotating files
-            ROTATING_LOGGING.setLevel(logging.WARNING)
+                maxBytes=MY_CFG.ROTATING_LOGGING_FILE_SIZE,
+                backupCount=MY_CFG.ROTATING_LOGGING_FILE_COUNT)
+            ROTATING_LOGGING.setLevel(MY_CFG.ROTATING_LOGGING_LEVEL)
             ROTATING_LOGGING.setFormatter(logging.Formatter(
                 fmt='[' + str(UPLDRConstants.Run) + ']' +
                 '[%(asctime)s]:[%(processName)-11s]' +

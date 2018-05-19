@@ -68,8 +68,9 @@ def is_good(res):
         Check res is not None and res.attrib['stat'] == "ok" for XML object
     """
     return False\
-           if res is None\
-           else (not res == "" and res.attrib['stat'] == "ok")
+    if res is None\
+    else (not res == "" and res.attrib['stat'] == "ok")
+
 
 # -----------------------------------------------------------------------------
 def flickrapi_fn(fn_name,

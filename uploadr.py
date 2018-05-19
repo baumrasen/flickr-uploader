@@ -516,7 +516,7 @@ if __name__ == "__main__":
     # Write one level more than console LOGGING level to err_file
     if MY_CFG.ROTATING_LOGGING:
         ROTATING_LOGGING = None
-        if not os.path.isdir(os.dirname(MY_CFG.ROTATING_LOGGING_FILE)):
+        if not os.path.isdir(os.path.dirname(MY_CFG.ROTATING_LOGGING_FILE)):
             NPR.niceerror(caught=True,
                           caughtprefix='+++ ',
                           caughtcode='603',

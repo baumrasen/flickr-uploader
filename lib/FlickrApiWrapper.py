@@ -415,4 +415,4 @@ if __name__ == "__main__":
 
         if GET_SUCCESS and GET_ERRCODE == 0:
             NPR.niceprint('Number of Photos=[{!s}]'
-                          .format(get_result.find('photos').attrib['total']))
+                          .format(GET_RESULT.find('photos').attrib['total']))

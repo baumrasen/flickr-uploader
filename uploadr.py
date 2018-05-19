@@ -306,21 +306,30 @@ def run_uploadr(args):
                               .format(NPR.strunicodeout(MY_CFG.FILES_DIR)))
                 sys.exit(8)
 
-    check_files_dir()
+    def check_flickr_key_secret():
+        """ def check_flickr_key_secret():
 
-    if MY_CFG.FLICKR["api_key"] == "" or MY_CFG.FLICKR["secret"] == "":
-        logging.critical('Please enter an API key and secret in the '
-                         'configuration '
-                         'script file, normaly uploadr.ini (see README).')
-        NPR.niceprint('Please enter an API key and secret in the configuration'
-                      ' script file, normaly uploadr.ini (see README).')
-        sys.exit(9)
+            Confirms the configuration for api_key and secret is defined.
+            Exits from program otherwise.
+        """
+
+        if MY_CFG.FLICKR["api_key"] == "" or MY_CFG.FLICKR["secret"] == "":
+            logging.critical('Please enter an API key and secret in the '
+                             'configuration '
+                             'script file, normaly uploadr.ini (see README).')
+            NPR.niceprint('Please enter an API key and secret in the configuration'
+                          ' script file, normaly uploadr.ini (see README).')
+            sys.exit(9)
+
+    # Initial checks
+    check_files_dir()
+    check_flickr_key_secret()
 
     # Instantiate class Uploadr. getCachedToken is called on __init__
     logging.debug('Instantiating the Main class myflick = Uploadr()')
     myflick = FlickrUploadr.Uploadr(MY_CFG, args)
 
-    # Setup the database
+    # Setup the database. Clean badfiles entries if asked
     myflick.setupDB()
     if args.clean_bad_files:
         myflick.cleanDBbadfiles()

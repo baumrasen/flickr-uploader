@@ -577,7 +577,7 @@ class MyConfig(object):
             returnverify = False
         elif not verify_paths():
             returnverify = False
-        elif not verify_rotating_path()
+        elif not verify_rotating_path():
             returnverify = False
         elif not verify_raw_files():
             returnverify = False

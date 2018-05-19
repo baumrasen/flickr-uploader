@@ -435,7 +435,7 @@ class MyConfig(object):
                         if sys.version_info < (3, ) \
                         else str(self.__dict__[item])
 
-                if ((len(os.path.dirname(self.__dict__[item])) > 0) and
+                if (len(os.path.dirname(self.__dict__[item])) and
                         not os.path.isdir(
                             os.path.dirname(self.__dict__[item]))):
                     logging.critical('%s:[%s] is not in a valid folder:[%s].',
@@ -464,7 +464,7 @@ class MyConfig(object):
                             if sys.version_info < (3, ) \
                             else str(self.__dict__[item])
 
-                    if (len(os.path.dirname(self.__dict__[item])) > 0 and
+                    if (len(os.path.dirname(self.__dict__[item])) and
                             not os.path.isdir(
                                 os.path.dirname(self.__dict__[item]))):
                         logging.critical('%s:[%s] is not in '

@@ -549,9 +549,7 @@ if __name__ == "__main__":
                     'ROTATING_LOGGING.setLevel/enabled?=[%s/%s] '
                     'MY_CFG.LOGGING_LEVEL=[%s]',
                     MY_CFG.LOGGING_LEVEL,
-                    MY_CFG.LOGGING_LEVEL if
-                    MY_CFG.LOGGING_LEVEL <= logging.DEBUG
-                    else MY_CFG.LOGGING_LEVEL - 10,
+                    MY_CFG.ROTATING_LOGGING_LEVEL,
                     MY_CFG.ROTATING_LOGGING,
                     MY_CFG.LOGGING_LEVEL)
     CONSOLE_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL)

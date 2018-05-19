@@ -316,9 +316,10 @@ def run_uploadr(args):
         if MY_CFG.FLICKR["api_key"] == "" or MY_CFG.FLICKR["secret"] == "":
             logging.critical('Please enter an API key and secret in the '
                              'configuration '
-                             'script file, normaly uploadr.ini (see README).')
-            NPR.niceprint('Please enter an API key and secret in the configuration'
-                          ' script file, normaly uploadr.ini (see README).')
+                             'file [normaly uploadr.ini] (see README).')
+            NPR.niceprint('Please enter an API key and secret in the '
+                          'configuration'
+                          'file [normaly uploadr.ini] (see README).')
             sys.exit(9)
 
     # Initial checks

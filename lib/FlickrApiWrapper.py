@@ -58,12 +58,12 @@ retry = rate_limited.retry
 
 
 # -----------------------------------------------------------------------------
-# isGood
+# is_good
 #
 # Checks if res.attrib['stat'] == "ok"
 #
-def isGood(res):
-    """ isGood
+def is_good(res):
+    """ is_good
 
         Check res is not None and res.attrib['stat'] == "ok" for XML object
     """
@@ -83,7 +83,7 @@ def flickrapi_fn(fn_name,
 
         Runs flickrapi fn_name function handing over **fn_kwargs.
         It retries attempts, waittime, randtime with @retry
-        Checks results isGood and provides feedback accordingly.
+        Checks results is_good and provides feedback accordingly.
         Captures flicrkapi or BasicException error situations.
         caughtcode to report on exception error.
 
@@ -152,7 +152,7 @@ def flickrapi_fn(fn_name,
     finally:
         pass
 
-    if isGood(fn_result):
+    if is_good(fn_result):
         fn_success = True
 
         logging.info('fn:[%s] Output for fn_result:',
@@ -162,11 +162,11 @@ def flickrapi_fn(fn_name,
             encoding='utf-8',
             method='xml'))
     else:
-        logging.error('fn:[%s] isGood(fn_result):[%s]',
+        logging.error('fn:[%s] is_good(fn_result):[%s]',
                       fn_name.__name__,
                       'None'
                       if fn_result is None
-                      else isGood(fn_result))
+                      else is_good(fn_result))
         fn_result = None
 
     logging.info('fn:[%s] success:[%s] result:[%s] errcode:[%s]',

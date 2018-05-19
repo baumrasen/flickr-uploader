@@ -67,14 +67,14 @@ import lib.FlickrApiWrapper as faw
 #   strunicodeout       = from NicePrint module
 #   niceerror           = from NicePrint module
 #   retry               = from rate_limited
-#   isGood              = from FlickrApiWrapper
+#   is_good             = from FlickrApiWrapper
 # -----------------------------------------------------------------------------
 UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 NP = NicePrint.NicePrint()
 strunicodeout = NP.strunicodeout
 niceerror = NP.niceerror
 retry = rate_limited.retry
-isGood = faw.isGood
+is_good = faw.is_good
 
 NUTIME = time
 # -----------------------------------------------------------------------------
@@ -1013,7 +1013,7 @@ class Uploadr(object):
             res_set_date = self.photos_set_dates(xfile_id,
                                                  str(video_date))
 
-            if isGood(res_set_date):
+            if is_good(res_set_date):
                 NP.niceprint('Successful date:[{!s}] '
                              'for file:[{!s}]'
                              .format(strunicodeout(video_date),
@@ -1350,13 +1350,13 @@ class Uploadr(object):
                         )
 
                         logging.info('Output for uploadResp:[%s]',
-                                     isGood(uploadResp))
+                                     is_good(uploadResp))
                         logging.debug(xml.etree.ElementTree.tostring(
                             uploadResp,
                             encoding='utf-8',
                             method='xml'))
 
-                        if isGood(uploadResp):
+                        if is_good(uploadResp):
                             ZuploadOK = True
                             # Save photo_id returned from Flickr upload
                             photo_id = uploadResp.findall('photoid')[0].text
@@ -1756,9 +1756,9 @@ class Uploadr(object):
                         replaceResp,
                         encoding='utf-8',
                         method='xml'))
-                    logging.info('replaceResp:[%s]', isGood(replaceResp))
+                    logging.info('replaceResp:[%s]', is_good(replaceResp))
 
-                    if isGood(replaceResp):
+                    if is_good(replaceResp):
                         # Update checksum tag at this time.
 
                         get_success, res_add_tag, get_errcode = \
@@ -1802,7 +1802,7 @@ class Uploadr(object):
                                     logging.info('Removing tag_id:[%s]',
                                                  tag_id)
                                     remtagResp = self.photos_remove_tag(tag_id)
-                                    if isGood(remtagResp):
+                                    if is_good(remtagResp):
                                         NP.niceprint('    Tag removed:[{!s}]'
                                                      .format(
                                                          strunicodeout(file)))
@@ -1831,19 +1831,19 @@ class Uploadr(object):
                                          'to replace, skipping')
                     continue
 
-            if (not isGood(replaceResp)) or \
-                (not isGood(res_add_tag)) or \
-                    (not isGood(res_get_info)):
+            if (not is_good(replaceResp)) or \
+                (not is_good(res_add_tag)) or \
+                    (not is_good(res_get_info)):
                 NP.niceprint('Issue replacing:[{!s}]'
                              .format(strunicodeout(file)))
 
-            if not isGood(replaceResp):
+            if not is_good(replaceResp):
                 raise IOError(replaceResp)
 
-            if not isGood(res_add_tag):
+            if not is_good(res_add_tag):
                 raise IOError(res_add_tag)
 
-            if not isGood(res_get_info):
+            if not is_good(res_get_info):
                 raise IOError(res_get_info)
 
             NP.niceprint('  Replaced file:[{!s}].'

@@ -521,7 +521,8 @@ if __name__ == "__main__":
                 datefmt=UPLDRConstants.TimeFormat))
             logging.getLogger().addHandler(ROTATING_LOGGING)
 
-            logging.warning('----------- (V%s) Init Rotating -----------(Log:%s)\n'
+            logging.warning('----------- (V%s) Init Rotating '
+                            '-----------(Log:%s)\n'
                             'Python version on this system: [%s]',
                             UPLDRConstants.Version,
                             MY_CFG.LOGGING_LEVEL,

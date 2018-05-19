@@ -204,8 +204,8 @@ def set_name_from_file(afile, afiles_dir, afull_set_name):
         'Parent/Album'
     """
 
-    assert len(afile) > 0, NP.niceassert('len({!s}) is not > 0:'
-                                         .format(strunicodeout(afile)))
+    assert afile, NP.niceassert('[{!s}] is empty!'
+                                .format(strunicodeout(afile)))
 
     logging.debug('set_name_from_file in: '
                   'afile:[%s] afiles_dir=[%s] afull_set_name:[%s]',
@@ -3022,7 +3022,7 @@ class Uploadr(object):
         # Number of pics with specified checksum
         # CODING: Protect issue #66. Flickr returns attrib == '' instead of 0
         # Set 'Number of pics with specified checksum' to 0 and return.
-        if len(searchIsUploaded.find('photos').attrib['total']) == 0:
+        if not searchIsUploaded.find('photos').attrib['total']:
             returnPhotoUploaded = 0
             logging.error(' IS_UPLOADED:[ERROR#3]: Invalid return. Confinuing')
             NP.niceprint(' IS_UPLOADED:[ERROR#3]: Invalid return. Confinuing',
@@ -3099,7 +3099,7 @@ class Uploadr(object):
 
                 # B) checksum, title, empty setName,       Count=1
                 #                 THEN EXISTS, ASSIGN SET IF tag album IS FOUND
-                if len(resp.findall('set')) == 0:
+                if not resp.findall('set'):
                     # CODING: Consider one additional result for PHOTO UPLOADED
                     # WITHOUT SET WITH ALBUM TAG when row exists on DB. Mark
                     # such row on the database files.set_id to null

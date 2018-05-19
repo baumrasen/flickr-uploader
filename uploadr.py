@@ -279,9 +279,9 @@ def run_uploadr(args):
     #
     #   myflick        = Class Uploadr (created in the Main code)
 
-    def check_files_dir(self):
+    def check_files_dir():
         """ check_files_dir
-            
+
             Confirms setting MYCFG.FILES_DIR is defined and a valid folder.
             Exits from program otherwise.
         """
@@ -289,9 +289,9 @@ def run_uploadr(args):
         if args.verbose:
             NPR.niceprint('FILES_DIR: [{!s}]'
                           .format(NPR.strunicodeout(MY_CFG.FILES_DIR)))
-    
+
         if MY_CFG.FILES_DIR == "":
-            NPR.niceprint('Please configure in the INI file [normally uploadr.ini]'
+            NPR.niceprint('Please configure in INI file [normally uploadr.ini]'
                           ' the name of the folder [FILES_DIR] '
                           'with media available to sync with Flickr.')
             sys.exit(8)
@@ -299,14 +299,14 @@ def run_uploadr(args):
             if not os.path.isdir(MY_CFG.FILES_DIR):
                 logging.critical('FILES_DIR: [%s] is not valid.',
                                  NPR.strunicodeout(MY_CFG.FILES_DIR))
-                NPR.niceprint('Please configure the name of an existant folder '
-                              'in the INI file [normally uploadr.ini] '
+                NPR.niceprint('Please configure the name of an existant folder'
+                              ' in INI file [normally uploadr.ini] '
                               'with media available to sync with Flickr. '
                               'FILES_DIR: [{!s}] is not valid.'
                               .format(NPR.strunicodeout(MY_CFG.FILES_DIR)))
                 sys.exit(8)
 
-    self.check_files_dir()
+    check_files_dir()
 
     if MY_CFG.FLICKR["api_key"] == "" or MY_CFG.FLICKR["secret"] == "":
         logging.critical('Please enter an API key and secret in the '
@@ -545,13 +545,12 @@ if __name__ == "__main__":
                     MY_CFG.LOGGING_LEVEL <= logging.DEBUG
                     else MY_CFG.LOGGING_LEVEL - 10,
                     MY_CFG.ROTATING_LOGGING,
-                    MY_CFG.LOGGING_LEVEL)    
+                    MY_CFG.LOGGING_LEVEL)
     CONSOLE_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL)
     if MY_CFG.ROTATING_LOGGING:
         ROTATING_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL if
                                   MY_CFG.LOGGING_LEVEL <= logging.DEBUG
                                   else MY_CFG.LOGGING_LEVEL - 10)
-
 
     if MY_CFG.LOGGING_LEVEL <= logging.INFO:
         NPR.niceprint('Output for FLICKR Configuration:')

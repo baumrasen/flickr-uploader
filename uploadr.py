@@ -526,7 +526,7 @@ if __name__ == "__main__":
             # Define a rotating file Handler which writes DEBUG messages
             # or higher to err_file
             ROTATING_LOGGING = logging.handlers.RotatingFileHandler(
-                UPLDRConstants.err_file,
+                MY_CFG.ROTATING_LOGGING_PATH,
                 maxBytes=MY_CFG.ROTATING_LOGGING_FILE_SIZE,
                 backupCount=MY_CFG.ROTATING_LOGGING_FILE_COUNT)
             ROTATING_LOGGING.setLevel(MY_CFG.ROTATING_LOGGING_LEVEL)

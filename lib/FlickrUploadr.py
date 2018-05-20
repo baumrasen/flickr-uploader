@@ -256,20 +256,28 @@ class Uploadr(object):
     # -------------------------------------------------------------------------
     # class Uploadr __init__
     #
-    def __init__(self, axCfg, args):
+    def __init__(self, a_cfg, args):
         """ class Uploadr __init__
 
-            axCfg = Configuration (check lib.myconfig)
+            a_cfg = A Configuration (check lib.myconfig)
             args  = provides access to arguments values
 
             Gets FlickrAPI cached token, if available.
+                Saves into self.nuflickr (flicrkapi object) and self.token
             Adds .3gp mimetime as video.
         """
 
-        self.xcfg = axCfg
+        self.xcfg = a_cfg
         self.args = args
+
         # get nuflickr/token from Cache file, if it exists
-        self.nuflickr, self.token = self.getCachedToken()
+        self.nuflickr = faw.get_cached_token(
+            self.xcfg.FLICKR["api_key"],
+            self.xcfg.FLICKR["secret"],
+            token_cache_location=self.xcfg.TOKEN_CACHE,
+            perms='delete')
+        if self.nuflickr is not None:
+            self.token = self.nuflickr.token_cache.token
 
         # Add mimetype .3gp to allow detection of .3gp as video
         logging.info('Adding mimetype "video/3gp"/".3gp"')
@@ -285,59 +293,15 @@ class Uploadr(object):
             logging.warning('Added mimetype "video/3gp"/".3gp" correctly.')
 
     # -------------------------------------------------------------------------
-    # getCachedToken
-    #
-    # If available, obtains the flickrapi Cached Token from local file.
-    # Returns the flickrapi object to be saved on the Class variable "nuflickr"
-    # Returns the token to be saved on the Class variable "token"
-    #
-    def getCachedToken(self):
-        """ getCachedToken
-
-            Attempts to get the flickr token from disk.
-
-            Returns the flickrapi object, token
-        """
-
-        logging.info('Obtaining Cached token')
-        logging.debug('TOKEN_CACHE:[%s]', self.xcfg.TOKEN_CACHE)
-        flickrobj = flickrapi.FlickrAPI(
-            self.xcfg.FLICKR["api_key"],
-            self.xcfg.FLICKR["secret"],
-            token_cache_location=self.xcfg.TOKEN_CACHE)
-
-        try:
-            # Check if token permissions are correct.
-            if flickrobj.token_valid(perms='delete'):
-                logging.info('Cached token obtained: [%s]',
-                             flickrobj.token_cache.token)
-                return flickrobj, flickrobj.token_cache.token
-            else:
-                logging.warning('Token Non-Existant.')
-                return None, None
-        except BaseException:
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='007',
-                      caughtmsg='Unexpected error in token_valid',
-                      exceptsysinfo=True)
-            raise
-
-    # -------------------------------------------------------------------------
     # check_token
     #
-    # If available, obtains the flickrapi Cached Token from local file.
-    #
-    # Returns
-    #   True: if self.token is defined and allows flicrk 'delete' operation
-    #   False: if self.token is not defined or flicrk 'delete' is not allowed
+    # Returns True if self.token is defined
     #
     def check_token(self):
         """ check_token
 
-            flickr.auth.checkToken
-
-            Returns the credentials attached to an authentication token.
+            Returns True if self.token has been defined in class __init__
+            via get_cached_token
         """
         logging.warning(
             'check_token:(self.token is None):[%s]'
@@ -366,58 +330,14 @@ class Uploadr(object):
         """
 
         # Instantiate nuflickr for connection to flickr via flickrapi
-        self.nuflickr = flickrapi.FlickrAPI(
+        self.nuflickr = faw.nu_authenticate(
             self.xcfg.FLICKR["api_key"],
             self.xcfg.FLICKR["secret"],
-            token_cache_location=self.xcfg.TOKEN_CACHE)
-        # Get request token
-        NP.niceprint('Getting new token.')
-        try:
-            self.nuflickr.get_request_token(oauth_callback='oob')
-        except Exception as ex:
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='004',
-                      caughtmsg='Exception on get_request_token. Exiting...',
-                      exceptuse=True,
-                      # exceptCode=ex.code,
-                      exceptmsg=ex,
-                      useniceprint=True,
-                      exceptsysinfo=True)
-            sys.exit(4)
+            token_cache_location=self.xcfg.TOKEN_CACHE,
+            perms=u'delete')
 
-        # Show url. Copy and paste it in your browser
-        authorize_url = self.nuflickr.auth_url(perms=u'delete')
-        NP.niceprint('Copy and paste following authorizaiton URL '
-                     'in your browser to obtain Verifier Code.')
-        print(authorize_url)
-
-        # Prompt for verifier code from the user.
-        verifier = unicode(raw_input(  # noqa
-            'Verifier code (NNN-NNN-NNN): ')) \
-            if sys.version_info < (3, ) \
-            else input('Verifier code (NNN-NNN-NNN): ')
-
-        logging.warning('Verifier: %s', verifier)
-
-        # Trade the request token for an access token
-        try:
-            self.nuflickr.get_access_token(verifier)
-        except flickrapi.exceptions.FlickrError as ex:
-            niceerror(caught=True,
-                      caughtprefix='+++',
-                      caughtcode='005',
-                      caughtmsg='Flickrapi exception on get_access_token. '
-                      'Exiting...',
-                      exceptuse=True,
-                      exceptcode=ex.code,
-                      exceptmsg=ex,
-                      useniceprint=True,
-                      exceptsysinfo=True)
-            sys.exit(5)
-
-        NP.niceprint('Check Authentication with [delete] permissions: {!s}'
-                     .format(self.nuflickr.token_valid(perms='delete')))
+        if self.nuflickr is not None:
+            self.token = self.nuflickr.token_cache.token
 
     # -------------------------------------------------------------------------
     # removeExcludedMedia

@@ -184,14 +184,15 @@ def flickrapi_fn(fn_name,
 #
 def nu_authenticate(api_key,
                     secret,
-                    token_cache_location):
+                    token_cache_location,
+                    perms='delete'):
     """ nu_authenticate
 
         Authenticate user so we can upload files.
         Assumes the cached token is not available or valid.
-    
+
         api_key, secret, token_cache_location, perms
-    
+
         Returns an instance object for the class flickrapi
     """
 
@@ -248,10 +249,10 @@ def nu_authenticate(api_key,
 
     # Show url. Copy and paste it in your browser
     # Adjust parameter "perms" to to your needs
-    authorize_url = flickrobj.auth_url(perms=u'delete')
+    authorize_url = flickrobj.auth_url(perms=perms)
     print('Copy and paste following authorizaiton URL '
           'in your browser to obtain Verifier Code.')
-    print(authorize_url)
+    print(NPR.strunicodeout(authorize_url))
 
     # Prompt for verifier code from the user.
     # Python 2.7 and 3.6

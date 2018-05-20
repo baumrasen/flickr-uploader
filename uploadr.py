@@ -162,6 +162,10 @@ def parse_arguments():
                             help='Optional configuration file. '
                                  'Default is:[{!s}]'
                             .format(UPLDR_K.ini_file))
+    cgrpparser.add_argument('-a', '--authenticate', action='store_true',
+                            help='Performs/Verifies authentication with '
+                                 'Flickr. To be run on initial setup.'
+                                 'Does not run any other option.')
 
     # Verbose related options -------------------------------------------------
     vgrpparser = parser.add_argument_group('Verbose and dry-run options')
@@ -335,7 +339,16 @@ def run_uploadr(args):
     if args.clean_bad_files:
         myflick.cleanDBbadfiles()
 
-    if args.daemon:
+    if args.authentication:
+        NPR.niceprint('Checking if token is available... '
+                      'if not will authenticate')
+        if not myflick.check_token():
+            # authenticate sys.exits in case of failure
+            myflick.authenticate()
+        else:
+            NPR.niceprint('Token is available.')
+
+    elif args.daemon:
         # Will run in daemon mode every SLEEP_TIME seconds
         if myflick.check_token():
             logging.warning('Will run in daemon mode every [%s] seconds'
@@ -357,6 +370,8 @@ def run_uploadr(args):
         if not myflick.check_token():
             # authenticate sys.exits in case of failure
             myflick.authenticate()
+        else:
+            NPR.niceprint('Token is available.')
 
         if args.add_albums_migrate:
             NPR.niceprint('Performing preparation for migration to 2.7.0',
@@ -515,7 +530,7 @@ if __name__ == "__main__":
     else:
         raise ValueError('No config file found or incorrect config!')
 
-    # Write one level more than console LOGGING level to err_file
+    # Rotating LOGGING level to err_file
     if MY_CFG.ROTATING_LOGGING:
         ROTATING_LOGGING = None
         if not os.path.isdir(os.path.dirname(MY_CFG.ROTATING_LOGGING_PATH)):

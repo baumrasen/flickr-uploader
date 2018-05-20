@@ -3184,9 +3184,9 @@ class Uploadr(object):
         """ photos_find_tag
 
             Determines if intag is assigned to a pic.
-
-            found_tag = False or True
-            tag_id = tag_id if found
+            Returns:
+                found_tag = False/True
+                tag_id    = tag_id if found
         """
 
         logging.info('find_tag: photo:[%s] intag:[%s]', photo_id, intag)
@@ -3294,35 +3294,19 @@ class Uploadr(object):
             setName = set_name_from_file(f[1],
                                          self.xcfg.FILES_DIR,
                                          self.xcfg.FULL_SET_NAME)
-            try:
-                terr = False
-                tfind, tid = self.photos_find_tag(
-                    photo_id=f[0],
-                    intag='album:{}'.format(f[2]
-                                            if f[2] is not None
-                                            else setName))
-                NP.niceprint('Found:[{!s}] TagId:[{!s}]'
+            tfind, tid = self.photos_find_tag(
+                photo_id=f[0],
+                intag='album:{}'.format(f[2]
+                                        if f[2] is not None
+                                        else setName))
+
+            logging.warning('       Find Tag:[%s] TagId:[%s]',
+                            tfind, tid)
+            if self.args.verbose:
+                NP.niceprint('       Find Tag::[{!s}] TagId:[{!s}]'
                              .format(tfind, tid))
-            except (flickrapi.exceptions.FlickrError, Exception) as ex:
-                niceerror(caught=True,
-                          caughtprefix='+++',
-                          caughtcode='212',
-                          caughtmsg='Exception on photos_find_tag',
-                          exceptuse=True,
-                          # exceptcode=ex.code,
-                          exceptmsg=ex,
-                          useniceprint=False,
-                          exceptsysinfo=True)
 
-                logging.warning('Error processing Photo_id:[%s]. '
-                                'Continuing...', f[0])
-                NP.niceprint('Error processing Photo_id:[{!s}]. Continuing...'
-                             .format(str(f[0])),
-                             fname='addAlbumMigrate')
-
-                terr = True
-
-            if not terr and not tfind:
+            if not tfind:
                 get_success, res_add_tag, get_errcode = faw.flickrapi_fn(
                     self.nuflickr.photos.addTags, (),
                     dict(photo_id=f[0],
@@ -3330,6 +3314,25 @@ class Uploadr(object):
                                                   if f[2] is not None
                                                   else setName)),
                     2, 2, False, caughtcode='214')
+
+                a_result = get_success and get_errcode == 0
+                logging.warning('%s: Photo_id:[%s]. ',
+                                'Added album tag'
+                                if a_result
+                                else 'Failed tagging',
+                                str(row[0]))
+                NP.niceprint('{!s}: Photo_id:[{!s}]. '
+                             .format(' Failed tagging'
+                                     if a_result
+                                     else 'Failed tagging',
+                                     str(row[0])),
+                             fname='addAlbumMigrate')
+            else:
+                logging.warning('      Found Tag:[%s] TagId:[{%s]',
+                                tfind, tid)
+                if self.args.verbose:
+                    NP.niceprint('      Found Tag::[{!s}] TagId:[{!s}]'
+                                 .format(tfind, tid))
 
             logging.debug('===Multiprocessing=== in.mutex.acquire(w)')
             mutex.acquire()
@@ -3431,41 +3434,20 @@ class Uploadr(object):
                     setName = set_name_from_file(row[1],
                                                  self.xcfg.FILES_DIR,
                                                  self.xcfg.FULL_SET_NAME)
-                    try:
-                        terr = False
-                        tfind, tid = self.photos_find_tag(
-                            photo_id=row[0],
-                            intag='album:{}'.format(row[2]
-                                                    if row[2] is not None
-                                                    else setName))
-                        NP.niceprint('Found:[{!s}] TagId:[{!s}]'
+
+                    tfind, tid = self.photos_find_tag(
+                        photo_id=row[0],
+                        intag='album:{}'.format(row[2]
+                                                if row[2] is not None
+                                                else setName))
+
+                    logging.warning('       Find Tag:[%s] TagId:[%s]',
+                                    tfind, tid)
+                    if self.args.verbose:
+                        NP.niceprint('       Find Tag::[{!s}] TagId:[{!s}]'
                                      .format(tfind, tid))
-                    except (flickrapi.exceptions.FlickrError, Exception) as ex:
-                        niceerror(caught=True,
-                                  caughtprefix='+++',
-                                  caughtcode='217',
-                                  caughtmsg='Exception on photos_find_tag',
-                                  exceptuse=True,
-                                  # exceptcode=ex.code,
-                                  exceptmsg=ex,
-                                  useniceprint=False,
-                                  exceptsysinfo=True)
 
-                        logging.warning('Error processing Photo_id:[%s]. '
-                                        'Continuing...',
-                                        str(row[0]))
-                        NP.niceprint('Error processing Photo_id:[{!s}]. '
-                                     'Continuing...'
-                                     .format(str(row[0])),
-                                     fname='addAlbumMigrate')
-
-                        terr = True
-
-                        NP.niceprocessedfiles(count, countTotal, False)
-
-                        continue
-
-                    if not terr and not tfind:
+                    if not tfind:
                         get_success, res_add_tag, get_errcode = \
                             faw.flickrapi_fn(
                                 self.nuflickr.photos.addTags, (),
@@ -3475,6 +3457,25 @@ class Uploadr(object):
                                              if row[2] is not None
                                              else setName)),
                                 2, 2, False, caughtcode='218')
+
+                        a_result = get_success and get_errcode == 0
+                        logging.warning('%s: Photo_id:[%s]. ',
+                                        'Added album tag'
+                                        if a_result
+                                        else 'Failed tagging',
+                                        str(row[0]))
+                        NP.niceprint('{!s}: Photo_id:[{!s}]. '
+                                     .format(' Failed tagging'
+                                             if a_result
+                                             else 'Failed tagging',
+                                             str(row[0])),
+                                     fname='addAlbumMigrate')
+                    else:
+                        logging.warning('      Found Tag:[%s] TagId:[{%s]',
+                                        tfind, tid)
+                        if self.args.verbose:
+                            NP.niceprint('      Found Tag::[{!s}] TagId:[{!s}]'
+                                         .format(tfind, tid))
 
                     NP.niceprocessedfiles(count, countTotal, False)
 

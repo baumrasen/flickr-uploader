@@ -86,7 +86,7 @@ class MyConfig(object):
     # Config section ----------------------------------------------------------
     INISections = ['Config']
     # Default configuration keys/values pairs ---------------------------------
-    INIkeys = [
+    ini_keys = [
         'FILES_DIR',
         'FLICKR',
         'SLEEP_TIME',
@@ -192,7 +192,7 @@ class MyConfig(object):
         """
 
         # Assume default values into class dictionary of values ---------------
-        self.__dict__ = dict(zip(self.INIkeys, self.INIvalues))
+        self.__dict__ = dict(zip(self.ini_keys, self.INIvalues))
 
         if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
             logging.debug('\t\t\t\tDefault INI key/values pairs...')
@@ -230,7 +230,7 @@ class MyConfig(object):
 
             # Find incorrect config keys on INI File and delete them
             dropkeys = [key for key in self.__dict__.keys()
-                        if key not in self.INIkeys]
+                        if key not in self.ini_keys]
             logging.debug('dropkeys:[%s]', dropkeys)
             for key in dropkeys:
                 logging.debug('del key:[%s]', key)
@@ -267,7 +267,7 @@ class MyConfig(object):
             Evaluates configuration items. Uses default values if not valid.
         """
         # Default types for keys/values pairs ---------------------------------
-        INItypes = [
+        ini_types = [
             'str',   # 'FILES_DIR',
             'dict',  # 'FLICKR',
             'int',   # 'SLEEP_TIME',
@@ -294,14 +294,14 @@ class MyConfig(object):
             'int',   # ROTATING_LOGGING_FILE_COUNT,
             'int'    # ROTATING_LOGGING_LEVEL
         ]
-        INIcheck = dict(zip(self.INIkeys, INItypes))
+        ini_check = dict(zip(self.ini_keys, ini_types))
         if logging.getLogger().getEffectiveLevel() <= logging.INFO:
             logging.debug('\t\t\t\tDefault INI key/type pairs...')
-            for item in sorted(INIcheck):
+            for item in sorted(ini_check):
                 logging.debug('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                               .format(item,
-                                      type(INIcheck[item]),
-                                      self.strunicodeout(INIcheck[item])))
+                                      type(ini_check[item]),
+                                      self.strunicodeout(ini_check[item])))
         # Evaluate values
         for item in sorted(self.__dict__):
             logging.debug('Eval for : [{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
@@ -310,12 +310,12 @@ class MyConfig(object):
                                   self.strunicodeout(self.__dict__[item])))
 
             try:
-                if INIcheck[item] in ('list', 'int', 'bool', 'str', 'dict'):
+                if ini_check[item] in ('list', 'int', 'bool', 'str', 'dict'):
                     logging.debug('isinstance=%s',
                                   isinstance(eval(self.__dict__[item]),
-                                             eval(INIcheck[item])))
+                                             eval(ini_check[item])))
                     if not(isinstance(eval(self.__dict__[item]),
-                                      eval(INIcheck[item]))):
+                                      eval(ini_check[item]))):
                         raise
                 else:
                     raise
@@ -323,17 +323,17 @@ class MyConfig(object):
                 self.niceerror(caught=True,
                                caughtprefix='+++ ',
                                caughtcode='800',
-                               caughtmsg='Caught an exception INIcheck',
+                               caughtmsg='Caught an exception ini_check',
                                exceptsysinfo=True)
-                logging.critical('Invalid INI value for:[%s] '
-                                 'Using default value:[%s]',
-                                 item,
-                                 self.INIvalues[self.INIkeys.index(str(item))])
+                logging.critical(
+                    'Invalid INI value for:[%s] Using default value:[%s]',
+                    item,
+                    self.INIvalues[self.ini_keys.index(str(item))])
                 # Using default value to avoid exiting.
                 # Use verifyconfig  to confirm valid values.
                 self.__dict__.update(dict(zip(
                     [item],
-                    [self.INIvalues[self.INIkeys.index(str(item))]])))
+                    [self.INIvalues[self.ini_keys.index(str(item))]])))
             finally:
                 self.__dict__[item] = eval(self.__dict__[item])
                 logging.debug('Eval done: [{!s:20s}]/type:[{!s:13s}] '

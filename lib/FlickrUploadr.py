@@ -66,15 +66,11 @@ import lib.FlickrApiWrapper as faw
 #
 #   strunicodeout       = from NicePrint module
 #   niceerror           = from NicePrint module
-#   retry               = from rate_limited
-#   is_good             = from FlickrApiWrapper
 # -----------------------------------------------------------------------------
-UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
+UPLDR_K = UPLDRConstantsClass.UPLDRConstants()
 NP = NicePrint.NicePrint()
 strunicodeout = NP.strunicodeout
 niceerror = NP.niceerror
-retry = rate_limited.retry
-is_good = faw.is_good
 
 NUTIME = time
 # -----------------------------------------------------------------------------
@@ -1013,7 +1009,7 @@ class Uploadr(object):
             res_set_date = self.photos_set_dates(xfile_id,
                                                  str(video_date))
 
-            if is_good(res_set_date):
+            if faw.is_good(res_set_date):
                 NP.niceprint('Successful date:[{!s}] '
                              'for file:[{!s}]'
                              .format(strunicodeout(video_date),
@@ -1350,13 +1346,13 @@ class Uploadr(object):
                         )
 
                         logging.info('Output for uploadResp:[%s]',
-                                     is_good(uploadResp))
+                                     faw.is_good(uploadResp))
                         logging.debug(xml.etree.ElementTree.tostring(
                             uploadResp,
                             encoding='utf-8',
                             method='xml'))
 
-                        if is_good(uploadResp):
+                        if faw.is_good(uploadResp):
                             ZuploadOK = True
                             # Save photo_id returned from Flickr upload
                             photo_id = uploadResp.findall('photoid')[0].text
@@ -1627,7 +1623,7 @@ class Uploadr(object):
                 try:
                     logging.warning('CHANGES row[6]=[%s-(%s)]',
                                     NUTIME.strftime(
-                                        UPLDRConstants.TimeFormat,
+                                        UPLDR_K.TimeFormat,
                                         NUTIME.localtime(row[6])),
                                     row[6])
                     if row[6] is None:
@@ -1756,9 +1752,9 @@ class Uploadr(object):
                         replaceResp,
                         encoding='utf-8',
                         method='xml'))
-                    logging.info('replaceResp:[%s]', is_good(replaceResp))
+                    logging.info('replaceResp:[%s]', faw.is_good(replaceResp))
 
-                    if is_good(replaceResp):
+                    if faw.is_good(replaceResp):
                         # Update checksum tag at this time.
 
                         get_success, res_add_tag, get_errcode = \
@@ -1802,7 +1798,7 @@ class Uploadr(object):
                                     logging.info('Removing tag_id:[%s]',
                                                  tag_id)
                                     remtagResp = self.photos_remove_tag(tag_id)
-                                    if is_good(remtagResp):
+                                    if faw.is_good(remtagResp):
                                         NP.niceprint('    Tag removed:[{!s}]'
                                                      .format(
                                                          strunicodeout(file)))
@@ -1831,19 +1827,19 @@ class Uploadr(object):
                                          'to replace, skipping')
                     continue
 
-            if (not is_good(replaceResp)) or \
-                (not is_good(res_add_tag)) or \
-                    (not is_good(res_get_info)):
+            if (not faw.is_good(replaceResp)) or \
+                (not faw.is_good(res_add_tag)) or \
+                    (not faw.is_good(res_get_info)):
                 NP.niceprint('Issue replacing:[{!s}]'
                              .format(strunicodeout(file)))
 
-            if not is_good(replaceResp):
+            if not faw.is_good(replaceResp):
                 raise IOError(replaceResp)
 
-            if not is_good(res_add_tag):
+            if not faw.is_good(res_add_tag):
                 raise IOError(res_add_tag)
 
-            if not is_good(res_get_info):
+            if not faw.is_good(res_get_info):
                 raise IOError(res_get_info)
 
             NP.niceprint('  Replaced file:[{!s}].'
@@ -2128,7 +2124,7 @@ class Uploadr(object):
         while True:
             NP.niceprint(' Daemon mode go:[{!s}]'
                          .format(NUTIME.strftime(
-                             UPLDRConstants.TimeFormat)))
+                             UPLDR_K.TimeFormat)))
             # run upload
             self.upload()
             NP.niceprint('Daemon mode out:[{!s}]'
@@ -3534,7 +3530,7 @@ class Uploadr(object):
                               strunicodeout(str(row[2])),
                               strunicodeout(str(row[3])),
                               strunicodeout(str(row[4])),
-                              NUTIME.strftime(UPLDRConstants.TimeFormat,
+                              NUTIME.strftime(UPLDR_K.TimeFormat,
                                               NUTIME.localtime(row[5]))))
                 sys.stdout.flush()
 
@@ -3659,7 +3655,7 @@ class Uploadr(object):
                         dict(photo_id=row.attrib['id']),
                         2, 2, False, caughtcode='411')
 
-                    if get_success and get_errcode == 0:
+                    if tags_success and tags_errcode == 0:
                         for tag in tags_result.find('photo')\
                                 .find('tags').findall('tag'):
                             output_str += 'tag_attrib={!s}|'\
@@ -3695,20 +3691,20 @@ class Uploadr(object):
                            = False => Release
         """
 
-        useDBLockReturn = False
+        use_dblock_return = False
 
         logging.debug('Entering useDBLock with useDBoperation:[%s].',
                       useDBoperation)
 
         if useDBthisLock is None:
             logging.debug('useDBLock: useDBthisLock is [None].')
-            return useDBLockReturn
+            return use_dblock_return
 
         logging.debug('useDBLock: useDBthisLock.semlock:[%s].',
                       useDBthisLock._semlock)
 
         if useDBoperation is None:
-            return useDBLockReturn
+            return use_dblock_return
 
         if (self.args.processes is not None) and\
            (self.args.processes) and \
@@ -3718,7 +3714,7 @@ class Uploadr(object):
                 logging.debug('===Multiprocessing=== -->[ ].lock.acquire')
                 try:
                     if useDBthisLock.acquire():
-                        useDBLockReturn = True
+                        use_dblock_return = True
                 except BaseException:
                     niceerror(caught=True,
                               caughtprefix='+++ ',
@@ -3733,7 +3729,7 @@ class Uploadr(object):
                 logging.debug('===Multiprocessing=== <--[ ].lock.release')
                 try:
                     useDBthisLock.release()
-                    useDBLockReturn = True
+                    use_dblock_return = True
                 except BaseException:
                     niceerror(caught=True,
                               caughtprefix='+++ ',
@@ -3747,15 +3743,15 @@ class Uploadr(object):
 
             logging.info('Exiting useDBLock with useDBoperation:[%s]. '
                          'Result:[%s]',
-                         useDBoperation, useDBLockReturn)
+                         useDBoperation, use_dblock_return)
         else:
-            useDBLockReturn = True
+            use_dblock_return = True
             logging.warning('(No multiprocessing. Nothing to do) '
                             'Exiting useDBLock with useDBoperation:[%s]. '
                             'Result:[%s]',
-                            useDBoperation, useDBLockReturn)
+                            useDBoperation, use_dblock_return)
 
-        return useDBLockReturn
+        return use_dblock_return
 
 
 # -----------------------------------------------------------------------------

@@ -19,7 +19,7 @@ import os
 import logging
 import time
 import lib.UPLDRConstants as UPLDRConstantsClass
-UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
+UPLDR_K = UPLDRConstantsClass.UPLDRConstants()
 
 
 # -----------------------------------------------------------------------------
@@ -118,11 +118,11 @@ class NicePrint:
 
         """
         print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
-              .format(UPLDRConstants.Gre,
-                      UPLDRConstants.Run,
-                      time.strftime(UPLDRConstants.TimeFormat),
+              .format(UPLDR_K.Gre,
+                      UPLDR_K.Run,
+                      time.strftime(UPLDR_K.TimeFormat),
                       os.getpid(),
-                      UPLDRConstants.Std,
+                      UPLDR_K.Std,
                       'PRINT',
                       self.strunicodeout(fname),
                       self.strunicodeout(astr)))
@@ -141,11 +141,11 @@ class NicePrint:
                                             .format(param1))
         """
         return('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
-               .format(UPLDRConstants.Red,
-                       UPLDRConstants.Run,
-                       time.strftime(UPLDRConstants.TimeFormat),
+               .format(UPLDR_K.Red,
+                       UPLDR_K.Run,
+                       time.strftime(UPLDR_K.TimeFormat),
                        os.getpid(),
-                       UPLDRConstants.Std,
+                       UPLDR_K.Std,
                        'ASSERT',
                        'uploadr',
                        self.strunicodeout(astr)))

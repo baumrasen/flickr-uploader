@@ -54,7 +54,6 @@ import lib.rate_limited as rate_limited
 # -----------------------------------------------------------------------------
 NPR = NicePrint.NicePrint()
 niceerror = NPR.niceerror
-retry = rate_limited.retry
 
 
 # -----------------------------------------------------------------------------
@@ -94,7 +93,9 @@ def flickrapi_fn(fn_name,
             fn_errcode = error reported by flickrapi exception
     """
 
-    @retry(attempts=attempts, waittime=waittime, randtime=randtime)
+    @rate_limited.retry(attempts=attempts,
+                        waittime=waittime,
+                        randtime=randtime)
     def retry_flickrapi_fn(kwargs):
         """ retry_flickrapi_fn
 

@@ -81,7 +81,7 @@ import lib.MyConfig as MyConfig
 # Logging init code
 #
 # Getting definitions from UPLDRConstants
-UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
+UPLDR_K = UPLDRConstantsClass.UPLDRConstants()
 # Sets LOGGING_LEVEL to allow logging even if everything else is wrong!
 # Parent logger is set to Maximum (DEBUG) so that suns will log as appropriate
 logging.getLogger().setLevel(logging.DEBUG)
@@ -89,10 +89,10 @@ logging.getLogger().setLevel(logging.DEBUG)
 CONSOLE_LOGGING = logging.StreamHandler()
 CONSOLE_LOGGING.setLevel(logging.WARNING)
 CONSOLE_LOGGING.setFormatter(logging.Formatter(
-    fmt=UPLDRConstants.Pur + '[' + str(UPLDRConstants.Run) + ']' +
-    '[%(asctime)s]:[%(processName)-11s]' + UPLDRConstants.Std +
+    fmt=UPLDR_K.Pur + '[' + str(UPLDR_K.Run) + ']' +
+    '[%(asctime)s]:[%(processName)-11s]' + UPLDR_K.Std +
     '[%(levelname)-8s]:[%(name)s] %(message)s',
-    datefmt=UPLDRConstants.TimeFormat))
+    datefmt=UPLDR_K.TimeFormat))
 logging.getLogger().addHandler(CONSOLE_LOGGING)
 
 # Inits with default configuration value, namely LOGGING_LEVEL
@@ -113,14 +113,14 @@ if sys.version_info < (2, 7):
                      'This script requires Python 2.7 or newer.'
                      'Current Python version: [%s] '
                      'Exiting...',
-                     UPLDRConstants.Version,
+                     UPLDR_K.Version,
                      MY_CFG.LOGGING_LEVEL,
                      sys.version)
     sys.exit(1)
 else:
     logging.warning('----------- (V%s) Init -----------(Log:%s)'
                     'Python version on this system: [%s]',
-                    UPLDRConstants.Version,
+                    UPLDR_K.Version,
                     MY_CFG.LOGGING_LEVEL,
                     sys.version)
 # -----------------------------------------------------------------------------
@@ -161,7 +161,7 @@ def parse_arguments():
                             type=str,
                             help='Optional configuration file. '
                                  'Default is:[{!s}]'
-                            .format(UPLDRConstants.ini_file))
+                            .format(UPLDR_K.ini_file))
 
     # Verbose related options -------------------------------------------------
     vgrpparser = parser.add_argument_group('Verbose and dry-run options')
@@ -433,23 +433,23 @@ def check_base_ini_file(base_dir, ini_file):
 #   ini_file      = Configuration file
 # -----------------------------------------------------------------------------
 # UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
-UPLDRConstants.media_count = 0
+UPLDR_K.media_count = 0
 # Base dir for config and support files.
 #   Will use --config-file argument option
 #   If not, first try sys.prefix/etc folder (not operational)
 #   If not, then try Current Working Directory
-# UPLDRConstants.base_dir = os.path.join(sys.prefix, 'etc')
-UPLDRConstants.base_dir = os.path.dirname(sys.argv[0])
-UPLDRConstants.ini_file = os.path.join(UPLDRConstants.base_dir, "uploadr.ini")
-UPLDRConstants.err_file = os.path.join(UPLDRConstants.base_dir, "uploadr.err")
+# UPLDR_K.base_dir = os.path.join(sys.prefix, 'etc')
+UPLDR_K.base_dir = os.path.dirname(sys.argv[0])
+UPLDR_K.ini_file = os.path.join(UPLDR_K.base_dir, "uploadr.ini")
+UPLDR_K.err_file = os.path.join(UPLDR_K.base_dir, "uploadr.err")
 
 # CODING: Debug a series of control values
-logging.info('      base_dir:[%s]', UPLDRConstants.base_dir)
+logging.info('      base_dir:[%s]', UPLDR_K.base_dir)
 logging.info('           cwd:[%s]', os.getcwd())
 logging.info('    prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
 logging.info('   sys.argv[0]:[%s]', os.path.dirname(sys.argv[0]))
-logging.info('      ini_file:[%s]', UPLDRConstants.ini_file)
-logging.info('      err_file:[%s]', UPLDRConstants.err_file)
+logging.info('      ini_file:[%s]', UPLDR_K.ini_file)
+logging.info('      err_file:[%s]', UPLDR_K.err_file)
 # -----------------------------------------------------------------------------
 
 # =============================================================================
@@ -465,7 +465,7 @@ NPR = NicePrint.NicePrint()
 # Main code
 #
 NPR.niceprint('----------- (V{!s}) Start -----------(Log:{!s})'
-              .format(UPLDRConstants.Version,
+              .format(UPLDR_K.Version,
                       MY_CFG.LOGGING_LEVEL))
 # Install exception handler
 sys.excepthook = my_excepthook
@@ -481,11 +481,11 @@ if __name__ == "__main__":
 
     # Argument --config-file overrides configuration filename.
     if PARSED_ARGS.config_file:
-        UPLDRConstants.ini_file = PARSED_ARGS.config_file
-        logging.info('UPLDRConstants.ini_file:[%s]',
-                     NPR.strunicodeout(UPLDRConstants.ini_file))
-        if not check_base_ini_file(UPLDRConstants.base_dir,
-                                   UPLDRConstants.ini_file):
+        UPLDR_K.ini_file = PARSED_ARGS.config_file
+        logging.info('UPLDR_K.ini_file:[%s]',
+                     NPR.strunicodeout(UPLDR_K.ini_file))
+        if not check_base_ini_file(UPLDR_K.base_dir,
+                                   UPLDR_K.ini_file):
             NPR.niceerror(caught=True,
                           caughtprefix='+++ ',
                           caughtcode='601',
@@ -494,8 +494,8 @@ if __name__ == "__main__":
                           useniceprint=True)
             sys.exit(2)
     else:
-        if not check_base_ini_file(UPLDRConstants.base_dir,
-                                   UPLDRConstants.ini_file):
+        if not check_base_ini_file(UPLDR_K.base_dir,
+                                   UPLDR_K.ini_file):
             NPR.niceerror(caught=True,
                           caughtprefix='+++ ',
                           caughtcode='602',
@@ -504,7 +504,7 @@ if __name__ == "__main__":
             sys.exit(2)
 
     # Source configuration from ini_file
-    MY_CFG.readconfig(UPLDRConstants.ini_file, ['Config'])
+    MY_CFG.readconfig(UPLDR_K.ini_file, ['Config'])
     if MY_CFG.processconfig():
         if MY_CFG.verifyconfig():
             pass
@@ -531,16 +531,16 @@ if __name__ == "__main__":
                 backupCount=MY_CFG.ROTATING_LOGGING_FILE_COUNT)
             ROTATING_LOGGING.setLevel(MY_CFG.ROTATING_LOGGING_LEVEL)
             ROTATING_LOGGING.setFormatter(logging.Formatter(
-                fmt='[' + str(UPLDRConstants.Run) + ']' +
+                fmt='[' + str(UPLDR_K.Run) + ']' +
                 '[%(asctime)s]:[%(processName)-11s]' +
                 '[%(levelname)-8s]:[%(name)s] %(message)s',
-                datefmt=UPLDRConstants.TimeFormat))
+                datefmt=UPLDR_K.TimeFormat))
             logging.getLogger().addHandler(ROTATING_LOGGING)
 
             logging.warning('----------- (V%s) Init Rotating '
                             '-----------(Log:%s)\n'
                             'Python version on this system: [%s]',
-                            UPLDRConstants.Version,
+                            UPLDR_K.Version,
                             MY_CFG.LOGGING_LEVEL,
                             sys.version)
 
@@ -579,8 +579,8 @@ if __name__ == "__main__":
     run_uploadr(PARSED_ARGS)
 
 NPR.niceprint('----------- (V{!s}) End -----------(Log:{!s})'
-              .format(UPLDRConstants.Version,
+              .format(UPLDR_K.Version,
                       MY_CFG.LOGGING_LEVEL))
 logging.warning('----------- (V%s) End -----------(Log:%s)',
-                UPLDRConstants.Version,
+                UPLDR_K.Version,
                 MY_CFG.LOGGING_LEVEL)

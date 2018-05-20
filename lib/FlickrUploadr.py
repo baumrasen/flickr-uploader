@@ -339,7 +339,6 @@ class Uploadr(object):
 
             Returns the credentials attached to an authentication token.
         """
-        result = False
         logging.warning(
             'check_token:(self.token is None):[%s]'
             'check_token:(nuflickr is None):[%s]'
@@ -350,10 +349,9 @@ class Uploadr(object):
             if self.nuflickr is not None
             else 'Not valid as nuflickr is None')
 
-        if self.nuflickr is not None:
-            result = self.nuflickr.token_cache.token is not None
-
-        return result
+        return self.nuflickr.token_cache.token is not None\
+            if self.nuflickr is not None\
+            else False
 
     # -------------------------------------------------------------------------
     # authenticate
@@ -1829,8 +1827,7 @@ class Uploadr(object):
                     (not faw.is_good(res_get_info)):
                 NP.niceprint('Issue replacing:[{!s}]'
                              .format(strunicodeout(file)))
-                logging.error('Issue replacing:[{!s}]'
-                              .format(strunicodeout(file)))
+                logging.error('Issue replacing:[%s]', strunicodeout(file))
 
             if not faw.is_good(replaceResp):
                 raise IOError(replaceResp)
@@ -1841,10 +1838,10 @@ class Uploadr(object):
             if not faw.is_good(res_get_info):
                 raise IOError(res_get_info)
 
-            NP.niceprint('  Replaced file:[{!s}].'
+            NP.niceprint('  Replaced file:[{!s}]'
                          .format(strunicodeout(file)))
-            logging.warning('  Replaced file:[{!s}].'
-                            .format(strunicodeout(file)))
+            logging.warning('  Replaced file:[%s]',
+                            strunicodeout(file))
 
             # Update the db the file uploaded
             # Control for when running multiprocessing set locking

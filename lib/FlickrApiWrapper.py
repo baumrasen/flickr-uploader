@@ -186,12 +186,13 @@ def nu_authenticate(api_key,
                     secret,
                     token_cache_location):
     """ nu_authenticate
-    Authenticate user so we can upload files.
-    Assumes the cached token is not available or valid.
 
-    api_key, secret, token_cache_location, perms
-
-    Returns an instance object for the class flickrapi
+        Authenticate user so we can upload files.
+        Assumes the cached token is not available or valid.
+    
+        api_key, secret, token_cache_location, perms
+    
+        Returns an instance object for the class flickrapi
     """
 
     # Instantiate flickr for connection to flickr via flickrapi
@@ -260,7 +261,7 @@ def nu_authenticate(api_key,
         if sys.version_info < (3, ) \
         else input('Verifier code (NNN-NNN-NNN): ')
 
-    print('Verifier: {!s}'.format(verifier))
+    logging.warning('Verifier: {!s}'.format(verifier))
 
     # Trade the request token for an access token
     try:
@@ -277,7 +278,7 @@ def nu_authenticate(api_key,
                   exceptsysinfo=True)
         sys.exit(5)
 
-    NPR.niceprint('{!s} with {!s} permissions: {!s}'
+    NPR.niceprint('{!s} with [{!s}] permissions: {!s}'
                   .format('Check Authentication',
                           'delete',
                           flickrobj.token_valid(perms='delete')))
@@ -359,11 +360,6 @@ def get_cached_token(api_key,
                   exceptsysinfo=True)
         fn_result = False
         raise
-
-    # if fn_result:
-    #     return flickrobj  # flickrobj.token_cache.token
-    # else:
-    #     return None   # Error
 
     return flickrobj if fn_result else None
 

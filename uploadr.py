@@ -435,10 +435,12 @@ def check_base_ini_file(base_dir, ini_file):
 # UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
 UPLDR_K.media_count = 0
 # Base dir for config and support files.
-#   Will use --config-file argument option
-#   If not, first try sys.prefix/etc folder (not operational)
-#   If not, then try Current Working Directory
+#   Will use --config-file argument option [after PARSED_ARGS]
+#   If not, first try sys.prefix/etc folder [not operational]
+#   If not, then try Current Working Directory (getcwd) [not operational]
+#   If not, then try folder where uploadr.py is located (dirname(sys.argv[0]))
 # UPLDR_K.base_dir = os.path.join(sys.prefix, 'etc')
+# UPLDR_K.base_dir = os.getcwd()
 UPLDR_K.base_dir = os.path.dirname(sys.argv[0])
 UPLDR_K.ini_file = os.path.join(UPLDR_K.base_dir, "uploadr.ini")
 UPLDR_K.err_file = os.path.join(UPLDR_K.base_dir, "uploadr.err")

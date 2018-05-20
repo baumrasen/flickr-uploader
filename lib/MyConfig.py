@@ -380,8 +380,7 @@ class MyConfig(object):
                          logging.CRITICAL]:
                     self.__dict__[level] = logging.ERROR
                 # Convert LOGGING_LEVEL into int() for use in conditionals
-                self.__dict__[level] = int(str(
-                    self.__dict__[level]))
+                self.__dict__[level] = int(str(self.__dict__[level]))
 
             return True
 

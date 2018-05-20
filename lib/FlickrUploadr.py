@@ -906,7 +906,8 @@ class Uploadr(object):
         # Update Date/Time on Flickr for Video files
         # Flickr doesn't read it from the video file itself.
         filetype = mimetypes.guess_type(xfile)
-        logging.info('filetype is:[%s]', 'None'
+        logging.info('filetype is:[%s]',
+                     'None'
                      if filetype is None
                      else filetype[0])
 
@@ -3224,7 +3225,7 @@ class Uploadr(object):
                              .format(tfind, tid))
 
             if not tfind:
-                get_success, res_add_tag, get_errcode = faw.flickrapi_fn(
+                get_success, _, get_errcode = faw.flickrapi_fn(
                     self.nuflickr.photos.addTags, (),
                     dict(photo_id=f[0],
                          tags='album:"{}"'.format(f[2]
@@ -3367,7 +3368,7 @@ class Uploadr(object):
                                      .format(tfind, tid))
 
                     if not tfind:
-                        get_success, res_add_tag, get_errcode = \
+                        get_success, _, get_errcode = \
                             faw.flickrapi_fn(
                                 self.nuflickr.photos.addTags, (),
                                 dict(photo_id=row[0],

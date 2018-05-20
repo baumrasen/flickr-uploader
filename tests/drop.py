@@ -133,7 +133,7 @@ if __name__ == '__main__':
     # Check that the access token is valid
     try:
         DBX.users_get_current_account()
-    except AuthError as err:
+    except AuthError:
         sys.exit("ERROR: Invalid access token; try re-generating an "
                  "access token from the app console on the web.")
 

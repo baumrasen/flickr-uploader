@@ -238,12 +238,14 @@ def nu_authenticate(api_key,
                   exceptsysinfo=True)
         fn_result = False
         sys.exit(4)
-    except Exception as ex:
+    except Exception as exc:
         niceerror(caught=True,
                   caughtprefix='+++Api',
                   caughtcode='003',
                   caughtmsg='Unexpected error in token_valid',
                   useniceprint=True,
+                  exceptuse=True,
+                  exceptmsg=exc,
                   exceptsysinfo=True)
         fn_result = False
         raise
@@ -263,7 +265,7 @@ def nu_authenticate(api_key,
         if sys.version_info < (3, ) \
         else input('Verifier code (NNN-NNN-NNN): ')
 
-    logging.warning('Verifier: {!s}'.format(verifier))
+    logging.warning('Verifier: %s', verifier)
 
     # Trade the request token for an access token
     try:

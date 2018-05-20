@@ -1755,8 +1755,7 @@ class Uploadr(object):
                     logging.info('replaceResp:[%s]', faw.is_good(replaceResp))
 
                     if faw.is_good(replaceResp):
-                        # Update checksum tag at this time.
-
+                        # Add checksum tag with new md5
                         get_success, res_add_tag, get_errcode = \
                             faw.flickrapi_fn(
                                 self.nuflickr.photos.addTags, (),
@@ -1766,7 +1765,7 @@ class Uploadr(object):
 
                         if get_success and get_errcode == 0:
                             # Gets Flickr file info to obtain all tags
-                            # in order to update checksum tag if exists
+                            # in order to delete checksum tag of old md5
                             gi_success, res_get_info, gi_errcode = \
                                 faw.flickrapi_fn(
                                     self.nuflickr.photos.getInfo, (),
@@ -1774,8 +1773,7 @@ class Uploadr(object):
                                     2, 2, False, caughtcode='056')
 
                             if gi_success and gi_errcode == 0:
-                                # find tag checksum with oldfile_md5
-                                # later use such tag_id to delete it
+                                # find tag checksum with old md5 to delete it
                                 tag_id = None
                                 for tag in res_get_info\
                                     .find('photo')\
@@ -1794,11 +1792,10 @@ class Uploadr(object):
                                     # break from attempting to update tag_id
                                     break
                                 else:
-                                    # update tag_id with new Md5
+                                    # delete tag_id with old Md5
                                     logging.info('Removing tag_id:[%s]',
                                                  tag_id)
-                                    remtagResp = self.photos_remove_tag(tag_id)
-                                    if faw.is_good(remtagResp):
+                                    if self.photos_remove_tag(tag_id):
                                         NP.niceprint('    Tag removed:[{!s}]'
                                                      .format(
                                                          strunicodeout(file)))
@@ -1832,6 +1829,8 @@ class Uploadr(object):
                     (not faw.is_good(res_get_info)):
                 NP.niceprint('Issue replacing:[{!s}]'
                              .format(strunicodeout(file)))
+                logging.error('Issue replacing:[{!s}]'
+                              .format(strunicodeout(file)))
 
             if not faw.is_good(replaceResp):
                 raise IOError(replaceResp)
@@ -1844,6 +1843,8 @@ class Uploadr(object):
 
             NP.niceprint('  Replaced file:[{!s}].'
                          .format(strunicodeout(file)))
+            logging.warning('  Replaced file:[{!s}].'
+                            .format(strunicodeout(file)))
 
             # Update the db the file uploaded
             # Control for when running multiprocessing set locking
@@ -2028,7 +2029,7 @@ class Uploadr(object):
 
         NP.niceprint('  Deleting file:[{!s}]'.format(strunicodeout(file[1])))
 
-        get_success, get_result, get_errcode = faw.flickrapi_fn(
+        get_success, _, get_errcode = faw.flickrapi_fn(
             self.nuflickr.photos.delete, (),
             dict(photo_id=str(file[0])),
             2, 2, False, caughtcode='111')
@@ -2366,19 +2367,17 @@ class Uploadr(object):
         con.text_factory = str
         bcur = con.cursor()
 
-        get_success, get_result, get_errcode = faw.flickrapi_fn(
+        get_success, _, get_errcode = faw.flickrapi_fn(
             self.nuflickr.photosets.addPhoto, (),
             dict(photoset_id=str(setId),
                  photo_id=str(file[0])),
             2, 0, False, caughtcode='146')
 
-        success = False
         if get_success and get_errcode == 0:
             NP.niceprint(' Added file/set:[{!s}] setId:[{!s}]'
                          .format(strunicodeout(file[1]),
                                  strunicodeout(setId)))
 
-            success = True
             try:
                 # Acquire DBlock if in multiprocessing mode
                 self.useDBLock(lock, True)
@@ -3100,7 +3099,7 @@ class Uploadr(object):
                     # WITHOUT SET WITH ALBUM TAG when row exists on DB. Mark
                     # such row on the database files.set_id to null
                     # to force re-assigning to Album/Set on flickr.
-                    tfind, tid = self.photos_find_tag(
+                    tfind, _ = self.photos_find_tag(
                         photo_id=pic.attrib['id'],
                         intag='album:{}'
                         .format(xsetName))
@@ -3229,12 +3228,12 @@ class Uploadr(object):
 
         logging.info('remove_tag: tag_id:[%s]', tag_id)
 
-        get_success, get_result, getg_errcode = faw.flickrapi_fn(
+        get_success, _, _ = faw.flickrapi_fn(
             self.nuflickr.tags.removeTag, (),
             dict(tag_id=tag_id),
             3, 5, False, caughtcode='206')
 
-        return get_result
+        return get_success
 
     # -------------------------------------------------------------------------
     # photos_set_dates

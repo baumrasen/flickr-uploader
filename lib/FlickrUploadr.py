@@ -3316,16 +3316,18 @@ class Uploadr(object):
                     2, 2, False, caughtcode='214')
 
                 a_result = get_success and get_errcode == 0
-                logging.warning('%s: Photo_id:[%s]. ',
+                logging.warning('%s: Photo_id:[%s] [%s] ',
                                 'Added album tag'
                                 if a_result
-                                else 'Failed tagging',
-                                str(row[0]))
-                NP.niceprint('{!s}: Photo_id:[{!s}]. '
-                             .format(' Failed tagging'
+                                else ' Failed tagging',
+                                str(f[0]),
+                                strunicodeout(f[1]))
+                NP.niceprint('{!s}: Photo_id:[{!s}] [{!s}]'
+                             .format('Added album tag'
                                      if a_result
-                                     else 'Failed tagging',
-                                     str(row[0])),
+                                     else ' Failed tagging',
+                                     str(f[0]),
+                                     strunicodeout(f[1])),
                              fname='addAlbumMigrate')
             else:
                 logging.warning('      Found Tag:[%s] TagId:[{%s]',
@@ -3459,16 +3461,18 @@ class Uploadr(object):
                                 2, 2, False, caughtcode='218')
 
                         a_result = get_success and get_errcode == 0
-                        logging.warning('%s: Photo_id:[%s]. ',
+                        logging.warning('%s: Photo_id:[%s] [%s]',
                                         'Added album tag'
                                         if a_result
-                                        else 'Failed tagging',
-                                        str(row[0]))
-                        NP.niceprint('{!s}: Photo_id:[{!s}]. '
-                                     .format(' Failed tagging'
+                                        else ' Failed tagging',
+                                        str(row[0]),
+                                        strunicodeout(row[1]))
+                        NP.niceprint('{!s}: Photo_id:[{!s}] [{!s}]'
+                                     .format('Added album tag'
                                              if a_result
-                                             else 'Failed tagging',
-                                             str(row[0])),
+                                             else ' Failed tagging',
+                                             str(row[0]),
+                                             strunicodeout(row[1])),
                                      fname='addAlbumMigrate')
                     else:
                         logging.warning('      Found Tag:[%s] TagId:[{%s]',

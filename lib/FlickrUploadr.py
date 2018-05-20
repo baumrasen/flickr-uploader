@@ -3303,7 +3303,7 @@ class Uploadr(object):
             logging.warning('       Find Tag:[%s] TagId:[%s]',
                             tfind, tid)
             if self.args.verbose:
-                NP.niceprint('       Find Tag::[{!s}] TagId:[{!s}]'
+                NP.niceprint('       Find Tag:[{!s}] TagId:[{!s}]'
                              .format(tfind, tid))
 
             if not tfind:
@@ -3333,7 +3333,7 @@ class Uploadr(object):
                 logging.warning('      Found Tag:[%s] TagId:[{%s]',
                                 tfind, tid)
                 if self.args.verbose:
-                    NP.niceprint('      Found Tag::[{!s}] TagId:[{!s}]'
+                    NP.niceprint('      Found Tag:[{!s}] TagId:[{!s}]'
                                  .format(tfind, tid))
 
             logging.debug('===Multiprocessing=== in.mutex.acquire(w)')
@@ -3446,7 +3446,7 @@ class Uploadr(object):
                     logging.warning('       Find Tag:[%s] TagId:[%s]',
                                     tfind, tid)
                     if self.args.verbose:
-                        NP.niceprint('       Find Tag::[{!s}] TagId:[{!s}]'
+                        NP.niceprint('       Find Tag:[{!s}] TagId:[{!s}]'
                                      .format(tfind, tid))
 
                     if not tfind:
@@ -3478,7 +3478,7 @@ class Uploadr(object):
                         logging.warning('      Found Tag:[%s] TagId:[{%s]',
                                         tfind, tid)
                         if self.args.verbose:
-                            NP.niceprint('      Found Tag::[{!s}] TagId:[{!s}]'
+                            NP.niceprint('      Found Tag:[{!s}] TagId:[{!s}]'
                                          .format(tfind, tid))
 
                     NP.niceprocessedfiles(count, countTotal, False)

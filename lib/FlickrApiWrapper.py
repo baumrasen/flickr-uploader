@@ -379,7 +379,6 @@ if __name__ == "__main__":
     doctest.testmod()
 
     import os
-    import sys
 
     # Define two variables within your OS environment (api_key, secret)
     # to access flickr:

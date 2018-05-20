@@ -20,6 +20,7 @@ from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 # -----------------------------------------------------------------------------
 # Import section
 #
+import sys
 import logging
 try:
     import httplib as httplib      # Python 2

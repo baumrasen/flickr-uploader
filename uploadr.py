@@ -339,7 +339,7 @@ def run_uploadr(args):
     if args.clean_bad_files:
         myflick.cleanDBbadfiles()
 
-    if args.authentication:
+    if args.authenticate:
         NPR.niceprint('Checking if token is available... '
                       'if not will authenticate')
         if not myflick.check_token():

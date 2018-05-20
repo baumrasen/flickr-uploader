@@ -115,11 +115,11 @@ class TestUPLDRConstantsMethods(unittest.TestCase):
     def test_media_count(self):
         """ test_media_count
         """
-        UPLDR_K = UPLDRConstantsClass.UPLDRConstants()
+        upldr_k = UPLDRConstantsClass.UPLDRConstants()
 
         for j in range(1, 20):
-            UPLDR_K.media_count = j
-            self.assertEqual(UPLDR_K.media_count, j)
+            upldr_k.media_count = j
+            self.assertEqual(upldr_k.media_count, j)
 
 
 if __name__ == '__main__':

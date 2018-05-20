@@ -24,13 +24,13 @@ import lib.NicePrint as NicePrint
 # mprocessing
 #
 def mprocessing(args_verbose, args_verbose_progress,
-                nprocs, lockDB, running, mutex, itemslist, a_fn, cur):
+                nprocs, lockdb, running, mutex, itemslist, a_fn, cur):
     """ mprocessing Function
 
     verbose          = verbose info
     verbose_progress = further verbose
     nprocs           = Number of processes to launch
-    lockDB           = lock for access to Database
+    lockdb           = lock for access to Database
     running          = Value to count processed items
     mutex            = mutex for access to value running
     itemslist        = list of items to be processed
@@ -89,7 +89,7 @@ def mprocessing(args_verbose, args_verbose_progress,
         return iter(lambda: tuple(islice(iter_list, size)), ())
 
     proc_pool = []
-    lockDB = multiprocessing.Lock()
+    lockdb = multiprocessing.Lock()
     running = multiprocessing.Value('i', 0)
     mutex = multiprocessing.Lock()
     count_total = len(itemslist)
@@ -113,7 +113,7 @@ def mprocessing(args_verbose, args_verbose_progress,
         logging.debug('===Job/Task Process: Creating...')
         proc_task = multiprocessing.Process(
             target=a_fn,  # argument function
-            args=(lockDB,
+            args=(lockdb,
                   running,
                   mutex,
                   splititemslist,
@@ -177,15 +177,15 @@ def mprocessing(args_verbose, args_verbose_progress,
     logging.warning('===Multiprocessing=== pool joined! '
                     'All processes finished.')
 
-    # Will release (set to None) the nulockDB lock control
+    # Will release (set to None) the lockdb lock control
     # this prevents subsequent calls to
     # useDBLock( nuLockDB, False)
     # to raise exception:
     #   ValueError('semaphore or lock released too many times')
     logging.info('===Multiprocessing=== pool joined! '
-                 'Is lockDB  None? [%s]. Setting lockDB to None anyhow.',
-                 lockDB is None)
-    lockDB = None
+                 'Is lockdb  None? [%s]. Setting lockdb to None anyhow.',
+                 lockdb is None)
+    lockdb = None
 
     # Show number of total files processed
     npr.niceprocessedfiles(running.value, count_total, True)

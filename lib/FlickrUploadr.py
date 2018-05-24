@@ -1647,7 +1647,7 @@ class Uploadr(object):
             for x in range(0, self.xcfg.MAX_UPLOAD_ATTEMPTS):
                 res_add_tag = None
                 res_get_info = None
-                replace_resp = None
+                replaceResp = None
 
                 try:
                     if x > 0:
@@ -1658,7 +1658,7 @@ class Uploadr(object):
                                              self.xcfg.MAX_UPLOAD_ATTEMPTS))
 
                     # Use fileobj with filename='dummy'to accept unicode file.
-                    replace_resp = self.nuflickr.replace(
+                    replaceResp = self.nuflickr.replace(
                         filename='dummy',
                         fileobj=photo,
                         # fileobj=FileWithCallback(

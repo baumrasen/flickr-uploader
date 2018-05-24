@@ -1647,7 +1647,7 @@ class Uploadr(object):
             for x in range(0, self.xcfg.MAX_UPLOAD_ATTEMPTS):
                 res_add_tag = None
                 res_get_info = None
-                replaceResp = None
+                replace_resp = None
 
                 try:
                     if x > 0:
@@ -1658,7 +1658,7 @@ class Uploadr(object):
                                              self.xcfg.MAX_UPLOAD_ATTEMPTS))
 
                     # Use fileobj with filename='dummy'to accept unicode file.
-                    replaceResp = self.nuflickr.replace(
+                    replace_resp = self.nuflickr.replace(
                         filename='dummy',
                         fileobj=photo,
                         # fileobj=FileWithCallback(
@@ -3109,7 +3109,7 @@ class Uploadr(object):
 
         logging.info('find_tag: photo:[%s] intag:[%s]', photo_id, intag)
 
-        tag_success, tagsResp, tag_errcode = faw.flickrapi_fn(
+        tag_success, tag_result, tag_errcode = faw.flickrapi_fn(
             self.nuflickr.tags.getListPhoto, (),
             dict(photo_id=photo_id),
             3, 15, True, caughtcode='205')
@@ -3117,7 +3117,7 @@ class Uploadr(object):
         if tag_success and tag_errcode == 0:
 
             tag_id = None
-            for tag in tagsResp.find('photo').find('tags').findall('tag'):
+            for tag in tag_result.find('photo').find('tags').findall('tag'):
                 logging.info(tag.attrib['raw'])
                 if (strunicodeout(tag.attrib['raw']) ==
                         strunicodeout(intag)):
@@ -3166,7 +3166,7 @@ class Uploadr(object):
 
         logging.warning('   Setting Date:[%s] Id=[%s]', datetxt, photo_id)
 
-        get_success, respDate, get_errcode = faw.flickrapi_fn(
+        get_success, get_result, get_errcode = faw.flickrapi_fn(
             self.nuflickr.photos.setdates, (),
             dict(photo_id=photo_id,
                  date_taken='{!s}'.format(datetxt),
@@ -3178,7 +3178,7 @@ class Uploadr(object):
         else:
             logging.error('Set Date Response: NOK!')
 
-        return respDate
+        return get_result
 
     # -------------------------------------------------------------------------
     # maddAlbumsMigrate

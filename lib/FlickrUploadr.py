@@ -649,48 +649,48 @@ class Uploadr(object):
     # Converts a RAW file into JPG. Also copies tags from RAW file.
     # Uses external exiftool.
     #
-    def convertRawFile(self, Ddirpath, Ffname, Fext, Ffnameonly):
+    def convertRawFile(self, a_dirpath, a_fname, a_fext, a_fbasename):
         """ convertRawFile
 
-        Ddirpath   = dirpath folder for filename
-        Ffname     = filename (including extension)
-        Fext       = lower case extension of current file
-        Ffnameonly = filiename without extension
+        a_dirpath  = dirpath folder for filename
+        a_fname    = filename (including extension)
+        a_fext     = lower case extension of current file
+        a_fbasename = filiename without extension
         """
         # ---------------------------------------------------------------------
         # convertRawFileCommand
         #
         # Prepare and executes the command for RAW file conversion.
         #
-        def convertRawFileCommand(ConvertOrCopyTags):
+        def convertRawFileCommand(convert_or_copy_tags):
             """ convertRawFileCommand
 
-            ConvertOrCopyTags = 'Convert'  converts a raw file to JPG
-                                'CopyTags' copy tags from raw file to JPG
+            convert_or_copy_tags = 'Convert'  converts a raw file to JPG
+                                   'CopyTags' copy tags from raw file to JPG
             """
 
-            assert ConvertOrCopyTags in ['Convert', 'CopyTags'],\
+            assert convert_or_copy_tags in ['Convert', 'CopyTags'],\
                 NP.niceassert('convertRawFileCommand: wrong argument:[{!s}]'
-                              .format(ConvertOrCopyTags))
+                              .format(convert_or_copy_tags))
 
             result_cmd = True
-            if ConvertOrCopyTags == 'Convert':
+            if convert_or_copy_tags == 'Convert':
                 flag = "-PreviewImage" \
-                       if Fext == 'cr2' else "-JpgFromRaw"
+                       if a_fext == 'cr2' else "-JpgFromRaw"
                 command = os.path.join(strunicodeout(self.xcfg.RAW_TOOL_PATH),
                                        'exiftool') +\
-                    " -b " + flag + " -w .JPG -ext " + Fext + " -r " +\
-                    "'" + os.path.join(strunicodeout(Ddirpath),
-                                       strunicodeout(Ffname)) + "'"
-            elif ConvertOrCopyTags == 'CopyTags':
+                    " -b " + flag + " -w .JPG -ext " + a_fext + " -r " +\
+                    "'" + os.path.join(strunicodeout(a_dirpath),
+                                       strunicodeout(a_fname)) + "'"
+            elif convert_or_copy_tags == 'CopyTags':
                 command = os.path.join(strunicodeout(self.xcfg.RAW_TOOL_PATH),
                                        'exiftool') +\
                     " -overwrite_original_in_place -tagsfromfile " +\
-                    "'" + os.path.join(strunicodeout(Ddirpath),
-                                       strunicodeout(Ffname)) + "'" +\
+                    "'" + os.path.join(strunicodeout(a_dirpath),
+                                       strunicodeout(a_fname)) + "'" +\
                     " -r -all:all -ext JPG " +\
-                    "'" + os.path.join(strunicodeout(Ddirpath),
-                                       strunicodeout(Ffnameonly)) + ".JPG'"
+                    "'" + os.path.join(strunicodeout(a_dirpath),
+                                       strunicodeout(a_fbasename)) + ".JPG'"
             else:
                 # Nothing to do
                 return False
@@ -703,7 +703,7 @@ class Uploadr(object):
                           caughtprefix='+++',
                           caughtcode='016',
                           caughtmsg='Error calling exiftool:[{!s}]'
-                          .format(ConvertOrCopyTags),
+                          .format(convert_or_copy_tags),
                           useniceprint=True,
                           exceptsysinfo=True)
                 result_cmd = False
@@ -718,55 +718,55 @@ class Uploadr(object):
             return True
 
         NP.niceprint(' Converting raw:[{!s}]'
-                     .format(strunicodeout(os.path.join(Ddirpath, Ffname))))
+                     .format(strunicodeout(os.path.join(a_dirpath, a_fname))))
         logging.info(' Converting raw:[%s]',
-                     strunicodeout(os.path.join(Ddirpath, Ffname)))
+                     strunicodeout(os.path.join(a_dirpath, a_fname)))
         success = False
 
-        # fileExt = FFname's extension (without the ".")
-        fileExt = os.path.splitext(Ffname)[-1][1:].lower()
-        assert strunicodeout(Fext) == strunicodeout(fileExt),\
+        # file_ext = a_fname's extension (without the ".")
+        file_ext = os.path.splitext(a_fname)[-1][1:].lower()
+        assert strunicodeout(a_fext) == strunicodeout(file_ext),\
             NP.niceassert('File extensions differ:[{!s}]!=[{!s}]'
-                          .format(strunicodeout(Fext),
-                                  strunicodeout(fileExt)))
+                          .format(strunicodeout(a_fext),
+                                  strunicodeout(file_ext)))
 
-        if not os.path.exists(os.path.join(Ddirpath, Ffnameonly) + ".JPG"):
+        if not os.path.exists(os.path.join(a_dirpath, a_fbasename) + ".JPG"):
             logging.info('.....Create JPG:[%s] jpg:[%s] ext:[%s]',
-                         strunicodeout(Ffname),
-                         strunicodeout(Ffnameonly),
-                         strunicodeout(fileExt))
+                         strunicodeout(a_fname),
+                         strunicodeout(a_fbasename),
+                         strunicodeout(file_ext))
             if convertRawFileCommand('Convert'):
                 NP.niceprint('....Created JPG:[{!s}]'
-                             .format(strunicodeout(Ffnameonly) + ".JPG"))
+                             .format(strunicodeout(a_fbasename) + ".JPG"))
             else:
-                NP.niceprint('.....raw failed:[{!s}]'.format(Ffname))
+                NP.niceprint('.....raw failed:[{!s}]'.format(a_fname))
                 return success
         else:
             NP.niceprint('raw: JPG exists:[{!s}]'
-                         .format(strunicodeout(Ffnameonly) + ".JPG"))
+                         .format(strunicodeout(a_fbasename) + ".JPG"))
             logging.warning('raw: JPG exists:[%s]',
-                            strunicodeout(Ffnameonly) + ".JPG")
+                            strunicodeout(a_fbasename) + ".JPG")
             return success
 
-        if os.path.exists(strunicodeout(os.path.join(Ddirpath, Ffnameonly)) +
+        if os.path.exists(strunicodeout(os.path.join(a_dirpath, a_fbasename)) +
                           ".JPG"):
             NP.niceprint('...Copying tags:[{!s}]'
-                         .format(strunicodeout(Ffname)))
+                         .format(strunicodeout(a_fname)))
 
             if convertRawFileCommand('CopyTags'):
                 NP.niceprint('....Copied tags:[{!s}]'
-                             .format(strunicodeout(Ffname)))
+                             .format(strunicodeout(a_fname)))
             else:
-                NP.niceprint('raw tags failed:[{!s}]'.format(Ffname))
+                NP.niceprint('raw tags failed:[{!s}]'.format(a_fname))
                 return success
         else:
-            NP.niceprint('.....raw failed:[{!s}]'.format(Ffname))
-            logging.warning('.....raw failed:[%s]', Ffname)
+            NP.niceprint('.....raw failed:[{!s}]'.format(a_fname))
+            logging.warning('.....raw failed:[%s]', a_fname)
             return success
 
         success = True
-        NP.niceprint('  Converted raw:[{!s}]'.format(strunicodeout(Ffname)))
-        logging.info('  Converted raw:[%s]', strunicodeout(Ffname))
+        NP.niceprint('  Converted raw:[{!s}]'.format(strunicodeout(a_fname)))
+        logging.info('  Converted raw:[%s]', strunicodeout(a_fname))
 
         return success
 

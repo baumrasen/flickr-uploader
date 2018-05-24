@@ -4,6 +4,9 @@
 
 ## Pending improvements
 -----------------------
+* FlickrUploadr Use Exception or BaseException?
+ W:613,23: Catching too general exception Exception (broad-except)
+* Set PATHS based on a BASE Dir vairable in INI file... all others to depend on this onw. How?
 * Reconfirm the uploading sequence when -u option is set which
   affects isLoaded = False control variable
 * "Check for duplicates/wrong checksum" on upload may not be working fully!
@@ -19,9 +22,11 @@
   has changed while the actual checksum/album of the file is actually the same)
 * Consider new option --remove-ignored to address IGNORED_REGEX changes
   similar to how --remove-excluded handles changes in EXCLUDED_FOLDERS.
-* Align try/except handling within functions like people_get_photos or outside
-  like photos_get_not_in_set
 * **[NOT FULLY TESTED YET]** You can try and run (Let me know if it works!)
+   * pip install flickr-uploader --prefix=~/apps/Python
+      * this will copy to 'PREFIX/etc' the data files uploadr.ini and uploadr.cron
+      * uploadr.ini PATH setting must be switched from argv (as sys.prefix
+      does not work!)...
    * `python3 setup.py install --prefix=~/apps/Python`
    * `python3 setup.py installcfg --folder=~/apps/Python` to install config
   From v2.7.4 uploadr.ini is searched form CWD (current working directory)

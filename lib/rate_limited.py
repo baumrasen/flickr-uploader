@@ -272,6 +272,7 @@ def retry(attempts=3, waittime=5, randtime=False):
                 except flickrapi.exceptions.FlickrError as exc:
                     logging.error('___Retry f():[%s]: Error code A: [%s]',
                                   a_fn.__name__, exc)
+                    error = exc
                 except lite.Error as err:
                     logging.error('___Retry f():[%s]: Error code B: [%s]',
                                   a_fn.__name__, err)
@@ -280,9 +281,10 @@ def retry(attempts=3, waittime=5, randtime=False):
                     # CODING: Check how to handle this particular scenario.
                     # flick.useDBLock(nulockDB, False)
                     # self.useDBLock( lock, True)
-                except Exception:
+                except Exception as err:
                     logging.error('___Retry f():[%s]: Error code C: Catchall',
                                   a_fn.__name__)
+                    error = err
 
                 logging.warning('___Function:[%s] Waiting:[%s] Rnd:[%s]',
                                 a_fn.__name__, waittime, randtime)

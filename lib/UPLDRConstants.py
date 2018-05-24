@@ -50,7 +50,7 @@ class UPLDRConstants:
             Version = __version__.__version__
         else:
             Version = '2.7.0'
-    except BaseException:
+    except Exception:
         Version = '2.7.0'
 
     # -------------------------------------------------------------------------

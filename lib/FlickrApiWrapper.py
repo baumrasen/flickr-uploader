@@ -355,7 +355,7 @@ def get_cached_token(api_key,
                   useniceprint=True,
                   exceptsysinfo=True)
         fn_result = False
-    except BaseException:
+    except Exception:
         niceerror(caught=True,
                   caughtprefix='+++Api',
                   caughtcode='012',

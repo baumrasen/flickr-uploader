@@ -269,23 +269,19 @@ def retry(attempts=3, waittime=5, randtime=False):
                                  'Attempt:[%s] of [%s]',
                                  a_fn.__name__, i + 1, attempts)
                     return a_fn(*args, **kwargs)
-                except Exception as err:
-                    logging.error('___Retry f():[%s]: Error code A: [%s]',
-                                  a_fn.__name__, err)
-                    error = err
                 except flickrapi.exceptions.FlickrError as exc:
-                    logging.error('___Retry f():[%s]: Error code B: [%s]',
+                    logging.error('___Retry f():[%s]: Error code A: [%s]',
                                   a_fn.__name__, exc)
                 except lite.Error as err:
-                    logging.error('___Retry f():[%s]: Error code C: [%s]',
+                    logging.error('___Retry f():[%s]: Error code B: [%s]',
                                   a_fn.__name__, err)
                     error = err
                     # Release the lock on error.
                     # CODING: Check how to handle this particular scenario.
                     # flick.useDBLock(nulockDB, False)
                     # self.useDBLock( lock, True)
-                except BaseException:
-                    logging.error('___Retry f():[%s]: Error code D: Catchall',
+                except Exception:
+                    logging.error('___Retry f():[%s]: Error code C: Catchall',
                                   a_fn.__name__)
 
                 logging.warning('___Function:[%s] Waiting:[%s] Rnd:[%s]',

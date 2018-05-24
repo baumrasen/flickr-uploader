@@ -698,7 +698,7 @@ class Uploadr(object):
             logging.info(command)
             try:
                 p_cmd = subprocess.call(command, shell=True)
-            except BaseException:
+            except Exception:
                 niceerror(caught=True,
                           caughtprefix='+++',
                           caughtcode='016',
@@ -1839,7 +1839,7 @@ class Uploadr(object):
             # Release the lock on error.
             self.useDBLock(lock, False)
             success = False
-        except BaseException:
+        except Exception:
             niceerror(caught=True,
                       caughtprefix='+++',
                       caughtcode='082',
@@ -1919,7 +1919,7 @@ class Uploadr(object):
                               .format(err.args[0]),
                               useniceprint=True,
                               exceptsysinfo=True)
-                except BaseException:
+                except Exception:
                     niceerror(caught=True,
                               caughtprefix='+++',
                               caughtcode='088',
@@ -3637,7 +3637,7 @@ class Uploadr(object):
                 try:
                     if useDBthisLock.acquire():
                         use_dblock_return = True
-                except BaseException:
+                except Exception:
                     niceerror(caught=True,
                               caughtprefix='+++ ',
                               caughtcode='002',
@@ -3652,7 +3652,7 @@ class Uploadr(object):
                 try:
                     useDBthisLock.release()
                     use_dblock_return = True
-                except BaseException:
+                except Exception:
                     niceerror(caught=True,
                               caughtprefix='+++ ',
                               caughtcode='003',

@@ -322,7 +322,7 @@ class MyConfig(object):
                 else:
                     raise ValueError('Incorrect config item:[{!s]'
                                      .format(item))
-            except BaseException:
+            except Exception:
                 self.niceerror(caught=True,
                                caughtprefix='+++ ',
                                caughtcode='800',

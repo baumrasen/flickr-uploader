@@ -184,7 +184,7 @@ def md5checksum(afilepath):
 def set_name_from_file(afile, afiles_dir, afull_set_name):
     """set_name_from_file
 
-       Return setName for a file path depending on FULL_SET_NAME True/False
+       Return setname for a file path depending on FULL_SET_NAME True/False
        Example:
        File to upload: /home/user/media/2014/05/05/photo.jpg
             FILES_DIR: /home/user/media
@@ -1075,7 +1075,7 @@ class Uploadr(object):
             NP.niceprint('  Checking file:[{!s}]...'
                          .format(strunicodeout(file)))
 
-        setName = set_name_from_file(file,
+        setname = set_name_from_file(file,
                                      self.xcfg.FILES_DIR,
                                      self.xcfg.FULL_SET_NAME)
 
@@ -1126,7 +1126,7 @@ class Uploadr(object):
                 isLoaded, isCount, isfile_id, isNoSet = \
                     self.is_already_uploaded(file,
                                              file_checksum,
-                                             setName)
+                                             setname)
                 logging.info('is_already_uploaded:[%s] '
                              'count:[%s] pic:[%s] '
                              'row is None == [%s] '
@@ -1153,11 +1153,11 @@ class Uploadr(object):
                 logging.warning(' Already loaded:[%s]...'
                                 'On Album:[%s]... UPDATING LOCAL DATABASE.',
                                 strunicodeout(file),
-                                strunicodeout(setName))
+                                strunicodeout(setname))
                 NP.niceprint(' Already loaded:[{!s}]...'
                              'On Album:[{!s}]... UPDATING LOCAL DATABASE.'
                              .format(strunicodeout(file),
-                                     strunicodeout(setName)))
+                                     strunicodeout(setname)))
                 dbInsertIntoFiles(lock, isfile_id, file,
                                   file_checksum, last_modified)
 
@@ -1172,10 +1172,10 @@ class Uploadr(object):
                     NP.niceprint(' Uploading file:[{!s}]...'
                                  'On Album:[{!s}]...'
                                  .format(strunicodeout(file),
-                                         strunicodeout(setName)))
+                                         strunicodeout(setname)))
 
                 logging.warning(' Uploading file:[%s]... On Album:[%s]...',
-                                strunicodeout(file), strunicodeout(setName))
+                                strunicodeout(file), strunicodeout(setname))
 
                 if file_checksum is None:
                     file_checksum = md5checksum(file)
@@ -1256,7 +1256,7 @@ class Uploadr(object):
                             .format(
                                 self.xcfg.FLICKR["tags"],
                                 file_checksum,
-                                strunicodeout(setName),
+                                strunicodeout(setname),
                                 self.args.tags if self.args.tags else '')
                             .replace(',', ''),
                             is_public=str(self.xcfg.FLICKR["is_public"]),
@@ -1312,7 +1312,7 @@ class Uploadr(object):
                             self.is_already_uploaded(
                                 file,
                                 file_checksum,
-                                setName)
+                                setname)
                         logging.warning('is_already_uploaded:[%s] '
                                         'Zcount:[%s] Zpic:[%s] '
                                         'ZisNoSet:[%s]',
@@ -1413,7 +1413,7 @@ class Uploadr(object):
                                 self.is_already_uploaded(
                                     file,
                                     file_checksum,
-                                    setName)
+                                    setname)
                             logging.warning('is_already_uploaded:[%s] '
                                             'Zcount:[%s] Zpic:[%s] '
                                             'ZisNoSet:[%s]',
@@ -1647,7 +1647,7 @@ class Uploadr(object):
             for x in range(0, self.xcfg.MAX_UPLOAD_ATTEMPTS):
                 res_add_tag = None
                 res_get_info = None
-                replaceResp = None
+                replace_resp = None
 
                 try:
                     if x > 0:
@@ -1658,7 +1658,7 @@ class Uploadr(object):
                                              self.xcfg.MAX_UPLOAD_ATTEMPTS))
 
                     # Use fileobj with filename='dummy'to accept unicode file.
-                    replaceResp = self.nuflickr.replace(
+                    replace_resp = self.nuflickr.replace(
                         filename='dummy',
                         fileobj=photo,
                         # fileobj=FileWithCallback(
@@ -1666,14 +1666,15 @@ class Uploadr(object):
                         photo_id=file_id
                     )
 
-                    logging.debug('Output for replaceResp:')
+                    logging.debug('Output for replace_resp:')
                     logging.debug(xml.etree.ElementTree.tostring(
-                        replaceResp,
+                        replace_resp,
                         encoding='utf-8',
                         method='xml'))
-                    logging.info('replaceResp:[%s]', faw.is_good(replaceResp))
+                    logging.info('replace_resp:[%s]',
+                                 faw.is_good(replace_resp))
 
-                    if faw.is_good(replaceResp):
+                    if faw.is_good(replace_resp):
                         # Add checksum tag with new md5
                         get_success, res_add_tag, get_errcode = \
                             faw.flickrapi_fn(
@@ -1743,15 +1744,15 @@ class Uploadr(object):
                                          'to replace, skipping')
                     continue
 
-            if (not faw.is_good(replaceResp)) or \
+            if (not faw.is_good(replace_resp)) or \
                 (not faw.is_good(res_add_tag)) or \
                     (not faw.is_good(res_get_info)):
                 NP.niceprint('Issue replacing:[{!s}]'
                              .format(strunicodeout(file)))
                 logging.error('Issue replacing:[%s]', strunicodeout(file))
 
-            if not faw.is_good(replaceResp):
-                raise IOError(replaceResp)
+            if not faw.is_good(replace_resp):
+                raise IOError(replace_resp)
 
             if not faw.is_good(res_add_tag):
                 raise IOError(res_add_tag)
@@ -1975,7 +1976,7 @@ class Uploadr(object):
     #
     #   Creates on flickrdb local database a SetName(Album)
     #
-    def logSetCreation(self, lock, setId, setName, primaryPhotoId, cur, con):
+    def logSetCreation(self, lock, set_id, setname, primaryPhotoId, cur, con):
         """ logSetCreation
 
         Creates on flickrdb local database a SetName(Album)
@@ -1986,17 +1987,17 @@ class Uploadr(object):
         Also updates photo DB entry with its set_id
         """
 
-        logging.warning('  Add set to DB:[%s]', strunicodeout(setName))
+        logging.warning('  Add set to DB:[%s]', strunicodeout(setname))
         if self.args.verbose:
             NP.niceprint('  Add set to DB:[{!s}]'
-                         .format(strunicodeout(setName)))
+                         .format(strunicodeout(setname)))
 
         try:
             # Acquire DBlock if in multiprocessing mode
             self.useDBLock(lock, True)
             cur.execute('INSERT INTO sets (set_id, name, primary_photo_id) '
                         'VALUES (?,?,?)',
-                        (setId, setName, primaryPhotoId))
+                        (set_id, setname, primaryPhotoId))
         except lite.Error as err:
             niceerror(caught=True,
                       caughtprefix='+++ DB',
@@ -2013,7 +2014,7 @@ class Uploadr(object):
             # Acquire DBlock if in multiprocessing mode
             self.useDBLock(lock, True)
             cur.execute('UPDATE files SET set_id = ? WHERE files_id = ?',
-                        (setId, primaryPhotoId))
+                        (set_id, primaryPhotoId))
         except lite.Error as err:
             niceerror(caught=True,
                       caughtprefix='+++ DB',
@@ -2072,7 +2073,7 @@ class Uploadr(object):
             for filepic in sfiles:
                 # filepic[1] = path for the file from table files
                 # filepic[2] = set_id from files table
-                setName = set_name_from_file(filepic[1],
+                setname = set_name_from_file(filepic[1],
                                              self.xcfg.FILES_DIR,
                                              self.xcfg.FULL_SET_NAME)
                 aset = None
@@ -2081,7 +2082,7 @@ class Uploadr(object):
                     self.useDBLock(lockDB, True)
                     acur.execute('SELECT set_id, name '
                                  'FROM sets WHERE name = ?',
-                                 (setName,))
+                                 (setname,))
                     aset = acur.fetchone()
                 except lite.Error as err:
                     niceerror(caught=True,
@@ -2096,14 +2097,14 @@ class Uploadr(object):
                     self.useDBLock(lockDB, False)
 
                 if aset is not None:
-                    setId = aset[0]
+                    set_id = aset[0]
 
                     NP.niceprint('Add file to set:[{!s}] '
-                                 'set:[{!s}] setId=[{!s}]'
+                                 'set:[{!s}] set_id=[{!s}]'
                                  .format(strunicodeout(filepic[1]),
-                                         strunicodeout(setName),
-                                         setId))
-                    self.addFileToSet(lockDB, setId, filepic, acur)
+                                         strunicodeout(setname),
+                                         set_id))
+                    self.addFileToSet(lockDB, set_id, filepic, acur)
                 else:
                     NP.niceprint('Not able to assign pic to set')
                     logging.error('Not able to assign pic to set')
@@ -2181,27 +2182,27 @@ class Uploadr(object):
                 raise
 
             for aset in setsToCreate:
-                # aset[0] = setName
+                # aset[0] = setname
                 # Find Primary photo
-                setName = strunicodeout(aset[0])
+                setname = strunicodeout(aset[0])
                 cur.execute('SELECT MIN(files_id), path '
                             'FROM files '
                             'WHERE set_id is NULL '
                             'AND getSet(path, ?, ?) = ?',
                             (self.xcfg.FILES_DIR,
                              self.xcfg.FULL_SET_NAME,
-                             setName,))
+                             setname,))
                 primaryPic = cur.fetchone()
 
                 # primaryPic[0] = files_id from files table
-                setId = self.createSet(slockDB,
-                                       setName, primaryPic[0],
-                                       cur, con)
+                set_id = self.createSet(slockDB,
+                                        setname, primaryPic[0],
+                                        cur, con)
                 NP.niceprint('Created the set:[{!s}] '
-                             'setId=[{!s}] '
+                             'set_id=[{!s}] '
                              'primaryId=[{!s}]'
-                             .format(strunicodeout(setName),
-                                     setId,
+                             .format(strunicodeout(setname),
+                                     set_id,
                                      primaryPic[0]))
 
             cur.execute('SELECT files_id, path, set_id '
@@ -2238,23 +2239,23 @@ class Uploadr(object):
                 for filepic in files:
                     # filepic[1] = path for the file from table files
                     # filepic[2] = set_id from files table
-                    setName = set_name_from_file(filepic[1],
+                    setname = set_name_from_file(filepic[1],
                                                  self.xcfg.FILES_DIR,
                                                  self.xcfg.FULL_SET_NAME)
 
                     cur.execute('SELECT set_id, name '
                                 'FROM sets WHERE name = ?',
-                                (setName,))
+                                (setname,))
                     aset = cur.fetchone()
                     if aset is not None:
-                        setId = aset[0]
+                        set_id = aset[0]
 
                         NP.niceprint('Add file to set:[{!s}] '
-                                     'set:[{!s}] setId=[{!s}]'
+                                     'set:[{!s}] set_id=[{!s}]'
                                      .format(strunicodeout(filepic[1]),
-                                             strunicodeout(setName),
-                                             setId))
-                        self.addFileToSet(slockDB, setId, filepic, cur)
+                                             strunicodeout(setname),
+                                             set_id))
+                        self.addFileToSet(slockDB, set_id, filepic, cur)
                     else:
                         NP.niceprint('Not able to assign pic to set')
                         logging.error('Not able to assign pic to set')
@@ -2267,7 +2268,7 @@ class Uploadr(object):
     # -------------------------------------------------------------------------
     # addFiletoSet
     #
-    def addFileToSet(self, lock, setId, file, cur):
+    def addFileToSet(self, lock, set_id, file, cur):
         """ addFileToSet
 
             Adds a file to set...
@@ -2287,21 +2288,21 @@ class Uploadr(object):
 
         get_success, _, get_errcode = faw.flickrapi_fn(
             self.nuflickr.photosets.addPhoto, (),
-            dict(photoset_id=str(setId),
+            dict(photoset_id=str(set_id),
                  photo_id=str(file[0])),
             2, 0, False, caughtcode='146')
 
         if get_success and get_errcode == 0:
-            NP.niceprint(' Added file/set:[{!s}] setId:[{!s}]'
+            NP.niceprint(' Added file/set:[{!s}] set_id:[{!s}]'
                          .format(strunicodeout(file[1]),
-                                 strunicodeout(setId)))
+                                 strunicodeout(set_id)))
 
             try:
                 # Acquire DBlock if in multiprocessing mode
                 self.useDBLock(lock, True)
                 bcur.execute("UPDATE files SET set_id = ? "
                              "WHERE files_id = ?",
-                             (setId, file[0]))
+                             (set_id, file[0]))
                 con.commit()
             except lite.Error as err:
                 niceerror(caught=True,
@@ -2316,21 +2317,21 @@ class Uploadr(object):
         elif not get_success and get_errcode == 1:
             # Error: 1: Photoset not found
             NP.niceprint('Photoset not found, creating new set...')
-            setName = set_name_from_file(file[1],
+            setname = set_name_from_file(file[1],
                                          self.xcfg.FILES_DIR,
                                          self.xcfg.FULL_SET_NAME)
             # CODING: cur vs bcur! Check!
-            self.createSet(lock, setName, file[0], cur, con)
+            self.createSet(lock, setname, file[0], cur, con)
         elif not get_success and get_errcode == 3:
             # Error: 3: Photo already in set
             try:
                 NP.niceprint('Photo already in set... updating DB'
                              'set_id=[{!s}] photo_id=[{!s}]'
-                             .format(setId, file[0]))
+                             .format(set_id, file[0]))
                 # Acquire DBlock if in multiprocessing mode
                 self.useDBLock(lock, True)
                 bcur.execute('UPDATE files SET set_id = ? '
-                             'WHERE files_id = ?', (setId, file[0]))
+                             'WHERE files_id = ?', (set_id, file[0]))
             except lite.Error as err:
                 niceerror(caught=True,
                           caughtprefix='+++ DB',
@@ -2363,22 +2364,22 @@ class Uploadr(object):
     #
     # Creates an Album in Flickr.
     #
-    def createSet(self, lock, setName, primaryPhotoId, cur, con):
+    def createSet(self, lock, setname, primaryPhotoId, cur, con):
         """ createSet
 
         Creates an Album in Flickr.
         Calls logSetCreation to create Album on local database.
         """
 
-        logging.info('   Creating set:[%s]', strunicodeout(setName))
-        NP.niceprint('   Creating set:[{!s}]'.format(strunicodeout(setName)))
+        logging.info('   Creating set:[%s]', strunicodeout(setname))
+        NP.niceprint('   Creating set:[{!s}]'.format(strunicodeout(setname)))
 
         if self.args.dry_run:
             return True
 
         get_success, get_result, get_errcode = faw.flickrapi_fn(
             self.nuflickr.photosets.create, (),
-            dict(title=setName,
+            dict(title=setname,
                  primary_photo_id=str(primaryPhotoId)),
             3, 10, True, caughtcode='124')
 
@@ -2388,7 +2389,7 @@ class Uploadr(object):
                             get_result.find('photoset').attrib['id'])
             self.logSetCreation(lock,
                                 get_result.find('photoset').attrib['id'],
-                                setName,
+                                setname,
                                 primaryPhotoId,
                                 cur,
                                 con)
@@ -2405,13 +2406,13 @@ class Uploadr(object):
                          'Probably deleted from Flickr but still '
                          'on local db and local file.'
                          .format(primaryPhotoId,
-                                 strunicodeout(setName)))
+                                 strunicodeout(setname)))
             logging.error(
                 'Primary photo [%s] for Set [%s] does not exist on Flickr.'
                 ' Probably deleted from Flickr but still on local db '
                 'and local file.',
                 primaryPhotoId,
-                strunicodeout(setName))
+                strunicodeout(setname))
             success = False
         else:
             # CODING: Revise code/message output
@@ -2751,35 +2752,35 @@ class Uploadr(object):
                               xml.etree.ElementTree.tostring(aset,
                                                              encoding='utf-8',
                                                              method='xml'))
-                setId = aset.attrib['id']
-                setName = aset.find('title').text
+                set_id = aset.attrib['id']
+                setname = aset.find('title').text
                 primaryPhotoId = aset.attrib['primary']
 
                 if self.args.verbose:
-                    NP.niceprint('  Add Set to DB:[{!s}] setId=[{!s}] '
+                    NP.niceprint('  Add Set to DB:[{!s}] set_id=[{!s}] '
                                  'primaryId=[{!s}]'
                                  .format('None'
-                                         if setName is None
-                                         else strunicodeout(setName),
-                                         setId,
+                                         if setname is None
+                                         else strunicodeout(setname),
+                                         set_id,
                                          primaryPhotoId))
 
-                # On ocasions flickr returns a setName (title) as None.
+                # On ocasions flickr returns a setname (title) as None.
                 # For instance, while simultaneously performing massive
                 # delete operation on flickr.
-                logging.info('Searching on DB for setId:[%s] '
-                             'setName:[%s] primaryPhotoId:[%s]',
-                             setId,
+                logging.info('Searching on DB for set_id:[%s] '
+                             'setname:[%s] primaryPhotoId:[%s]',
+                             set_id,
                              'None'
-                             if setName is None
-                             else strunicodeout(setName),
+                             if setname is None
+                             else strunicodeout(setname),
                              primaryPhotoId)
 
                 logging.debug('SELECT set_id FROM sets WHERE set_id = "%s"',
-                              setId)
+                              set_id)
                 try:
                     cur.execute("SELECT set_id FROM sets "
-                                "WHERE set_id = '" + setId + "'")
+                                "WHERE set_id = '" + set_id + "'")
                     foundSets = cur.fetchone()
                     logging.info('Output for foundSets is [%s]',
                                  'None' if foundSets is None else foundSets)
@@ -2795,20 +2796,20 @@ class Uploadr(object):
                 if foundSets is None:
                     logging.info('Adding set [%s] (%s) '
                                  'with primary photo [%s].',
-                                 setId,
+                                 set_id,
                                  'None'
-                                 if setName is None
-                                 else strunicodeout(setName),
+                                 if setname is None
+                                 else strunicodeout(setname),
                                  primaryPhotoId)
                     try:
                         logging.debug('INSERT INTO sets (set_id, name, '
                                       'primary_photo_id) VALUES (%s,%s,%s)',
-                                      setId,
-                                      strunicodeout(setName),
+                                      set_id,
+                                      strunicodeout(setname),
                                       primaryPhotoId)
                         cur.execute('INSERT INTO sets (set_id, name, '
                                     'primary_photo_id) VALUES (?,?,?)',
-                                    (setId, setName, primaryPhotoId))
+                                    (set_id, setname, primaryPhotoId))
                         con.commit()
 
                     except lite.Error as err:
@@ -2821,10 +2822,10 @@ class Uploadr(object):
                                   useniceprint=True)
                 else:
                     logging.info('Set found on DB:[%s]',
-                                 strunicodeout(setName))
+                                 strunicodeout(setname))
                     if self.args.verbose:
                         NP.niceprint('Set found on DB:[{!s}]'
-                                     .format(strunicodeout(setName)))
+                                     .format(strunicodeout(setname)))
         else:
             niceerror(caught=True,
                       caughtprefix='xxx',
@@ -2856,12 +2857,12 @@ class Uploadr(object):
     #
     # Possible outcomes:
     # A) checksum,                             Count=0  THEN NOT EXISTS
-    # B) checksum, title, empty setName,       Count=1  THEN EXISTS, ASSIGN SET
+    # B) checksum, title, empty setname,       Count=1  THEN EXISTS, ASSIGN SET
     #                                                   IF tag album IS FOUND
-    # C) checksum, title, setName (1 or more), Count>=1 THEN EXISTS
-    # D) checksum, title, other setName,       Count>=1 THEN NOT EXISTS
-    # E) checksum, title, setName & ALSO checksum, title, other setName => N/A
-    # F) checksum, title, setName & ALSO checksum, title, empty setName => N/A
+    # C) checksum, title, setname (1 or more), Count>=1 THEN EXISTS
+    # D) checksum, title, other setname,       Count>=1 THEN NOT EXISTS
+    # E) checksum, title, setname & ALSO checksum, title, other setname => N/A
+    # F) checksum, title, setname & ALSO checksum, title, empty setname => N/A
     #
     # Logic:
     #   Search photos with checksum
@@ -2871,14 +2872,14 @@ class Uploadr(object):
     #   THEN yes found loaded.
     # Note: There could be more entries due to errors. To be checked manually.
     #
-    def is_already_uploaded(self, xfile, xchecksum, xsetName):
+    def is_already_uploaded(self, xfile, xchecksum, xsetname):
         """ is_already_uploaded
 
             Searchs for image with same:
                 title(file without extension)
                 tag:checksum
                 SetName
-                    if setName is not defined on a pic, it attempts to
+                    if setname is not defined on a pic, it attempts to
                     check tag:album
 
             returnIsPhotoUploaded = True (already loaded)/False(not loaded)
@@ -2898,7 +2899,7 @@ class Uploadr(object):
         returnUploadedNoSet = False
 
         logging.info('Is Already Uploaded:[checksum:%s] [album:%s]?',
-                     xchecksum, strunicodeout(xsetName))
+                     xchecksum, strunicodeout(xsetname))
 
         # Searchs for image with tag:checksum (calls Flickr photos.search)
         #
@@ -3010,7 +3011,7 @@ class Uploadr(object):
                 logging.info('len(resp.findall(''set'')):[%s]',
                              len(resp.findall('set')))
 
-                # B) checksum, title, empty setName,       Count=1
+                # B) checksum, title, empty setname,       Count=1
                 #                 THEN EXISTS, ASSIGN SET IF tag album IS FOUND
                 if not resp.findall('set'):
                     # CODING: Consider one additional result for PHOTO UPLOADED
@@ -3020,7 +3021,7 @@ class Uploadr(object):
                     tfind, _ = self.photos_find_tag(
                         photo_id=pic.attrib['id'],
                         intag='album:{}'
-                        .format(xsetName))
+                        .format(xsetname))
                     if tfind:
                         if self.args.verbose:
                             NP.niceprint(' IS_UPLOADED:[UPLOADED WITHOUT'
@@ -3055,19 +3056,19 @@ class Uploadr(object):
                         pic.attrib['id'],
                         strunicodeout(xfile),
                         strunicodeout(xtitle_filename),
-                        strunicodeout(xsetName),
+                        strunicodeout(xsetname),
                         strunicodeout(pic.attrib['title']),
                         strunicodeout(setinlist.attrib['title']),
                         strunicodeout(pic.attrib['tags']))
 
                     logging.warning(
                         'Compare Sets=[%s]',
-                        (strunicodeout(xsetName) ==
+                        (strunicodeout(xsetname) ==
                          strunicodeout(setinlist.attrib['title'])))
 
-                    # C) checksum, title, setName (1 or more), Count>=1
+                    # C) checksum, title, setname (1 or more), Count>=1
                     #                                               THEN EXISTS
-                    if (strunicodeout(xsetName) ==
+                    if (strunicodeout(xsetname) ==
                             strunicodeout(setinlist.attrib['title'])):
                         if self.args.verbose:
                             NP.niceprint(' IS_UPLOADED:[TRUE WITH SET]',
@@ -3080,7 +3081,7 @@ class Uploadr(object):
                         return returnIsPhotoUploaded, returnPhotoUploaded, \
                             returnPhotoID, returnUploadedNoSet
                     else:
-                        # D) checksum, title, other setName,       Count>=1
+                        # D) checksum, title, other setname,       Count>=1
                         #                                       THEN NOT EXISTS
                         if self.args.verbose_progress:
                             NP.niceprint(' IS_UPLOADED:[FALSE OTHER SET, '
@@ -3209,14 +3210,14 @@ class Uploadr(object):
                          fname='addAlbumMigrate')
 
             # row[1] = path for the file from table files
-            setName = set_name_from_file(f[1],
+            setname = set_name_from_file(f[1],
                                          self.xcfg.FILES_DIR,
                                          self.xcfg.FULL_SET_NAME)
             tfind, tid = self.photos_find_tag(
                 photo_id=f[0],
                 intag='album:{}'.format(f[2]
                                         if f[2] is not None
-                                        else setName))
+                                        else setname))
 
             logging.warning('       Find Tag:[%s] TagId:[%s]',
                             tfind, tid)
@@ -3230,7 +3231,7 @@ class Uploadr(object):
                     dict(photo_id=f[0],
                          tags='album:"{}"'.format(f[2]
                                                   if f[2] is not None
-                                                  else setName)),
+                                                  else setname)),
                     2, 2, False, caughtcode='214')
 
                 a_result = get_success and get_errcode == 0
@@ -3351,7 +3352,7 @@ class Uploadr(object):
                                  fname='addAlbumMigrate')
 
                     # row[1] = path for the file from table files
-                    setName = set_name_from_file(row[1],
+                    setname = set_name_from_file(row[1],
                                                  self.xcfg.FILES_DIR,
                                                  self.xcfg.FULL_SET_NAME)
 
@@ -3359,7 +3360,7 @@ class Uploadr(object):
                         photo_id=row[0],
                         intag='album:{}'.format(row[2]
                                                 if row[2] is not None
-                                                else setName))
+                                                else setname))
 
                     logging.warning('       Find Tag:[%s] TagId:[%s]',
                                     tfind, tid)
@@ -3375,7 +3376,7 @@ class Uploadr(object):
                                      tags='album:"{}"'
                                      .format(row[2]
                                              if row[2] is not None
-                                             else setName)),
+                                             else setname)),
                                 2, 2, False, caughtcode='218')
 
                         a_result = get_success and get_errcode == 0

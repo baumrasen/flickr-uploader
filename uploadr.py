@@ -403,7 +403,7 @@ def run_uploadr(args):
             myflick.removeDeletedMedia()
 
             if args.remove_excluded:
-                myflick.removeExcludedMedia()
+                myflick.remove_excluded_media()
 
             myflick.createSets()
             myflick.printStat(UPLDRConstantsClass.media_count)

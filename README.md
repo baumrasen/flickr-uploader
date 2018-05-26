@@ -91,35 +91,36 @@ Summary steps:
 5. Download and install flickr-uploader
 
 ### 1.Enable SSH access to Synology DSM Server. (Optionally) install Python 3.
-Enable and access your Synology DSM via SSH with an admin user.
-Avoid the use of root for security reasons.
-(Optionally) install via the Synology DSM Packages the "Python 3" package (corresponds to version 3.5)
+- Enable and access your Synology DSM via SSH with an admin user.
+- Avoid the use of root for security reasons.
+- (Optionally) install via the Synology DSM Packages the "Python 3" package (corresponds to version 3.5)
 
 ### 2. Prepare a local folder location for Python modules install.
-**This avoids messing up with the system files.**
-To create a local install destination directory/folder define and export PYTHONPATH variable:
+- **IMPORTANT NOTE: To avoid messing up with the system files.**
+- Create a local install destination directory/folder define and export PYTHONPATH variable (ex: for Python 2.7):
 ```bash
 $ cd
 $ mkdir apps
 $ mkdir apps/Python
 $ export PYTHONPATH=~/apps/Python/lib/python2.7/site-packages
 ```
-Or, for Python 3.5:
+- Or, for Python 3.5:
 ``` bash
 $ export PYTHONPATH=~/apps/Python/lib/python3.5/site-packages
 ```
-Create also a 'dev' directory/folder. Download here the files/packages prior to intstallation:
+- Create also a `dev` directory/folder to use as working area where to download/extract the files/packages prior to intstallation:
 ```bash
 $ cd
 $ mkdir dev
 dev$ cd dev
 ```
 ### 3. Download and install pip
-**Download** get-pip.py
-**Extract to** ~/dev
-And then **install** by running `python get-pip.py --prefix=~/apps/Python`
-Follow [these guidelines for PIP installation](https://pip.pypa.io/en/latest/installing/).
-*Make sure to use the --prefix parameter*
+- **IMPORTANT NOTE: pip allows you to more easily install python related modules/applications.**
+- **Download** get-pip.py
+- **Extract to** ~/dev
+- And then **install** by running `python get-pip.py --prefix=~/apps/Python`
+- Follow [these guidelines for PIP installation](https://pip.pypa.io/en/latest/installing/).
+- **IMPORTANT NOTE: Make sure to use the --prefix parameter**
 ```bash
 $ cd
 $ cd dev
@@ -142,8 +143,7 @@ Installing collected packages: pip, setuptools, wheel
 ```
 ### 4. Download and install flickrapi (2.4.0)
 
-#### 4.1 OPTION A: With pip
-
+#### 4.1 OPTION #1 (recommended): With PIP (installed in step #3 above)
 ```bash
 $ cd
 $ cd dev
@@ -151,13 +151,10 @@ dev$ export PYTHONPATH=~/apps/Python/lib/python2.7/site-packages
 dev$ pip install flickrapi --prefix=~/apps/Python
 ```
 
-#### 4.2 OPTION B: Mannually
-
-**Download** flickrapi-2.4.tar.gz from [PyPi.Python.Org](https://pypi.python.org/pypi/flickrapi).
-
-**Extract to** ~/dev and run `python setup.py install --prefix=~/apps/Python
-
-**Make sure to use the --prefix parameter**
+#### 4.2 OPTION #2: Mannually
+- **Download** flickrapi-2.4.tar.gz from [PyPi.Python.Org](https://pypi.python.org/pypi/flickrapi).
+- **Extract to** ~/dev and run `python setup.py install --prefix=~/apps/Python`
+- **Make sure to use the --prefix parameter**
 ```bash
 $ cd dev
 dev$ wget https://files.pythonhosted.org/packages/b1/f1/d10fa0872e4f781c2ed47e94e728ecd3c1998f8c8d12e78c7329a25d0727/flickrapi-2.4.0.tar.gz
@@ -189,26 +186,24 @@ Finished processing dependencies for flickrapi==2.4.0
 ```
 
 ###  5. Download and install flickr-uploader
-Soon to be available on Pypi.
-For now you can download it from GitHub [flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest).
-You can find under **Assets**:
-* the source code packages;
-* a distribution package Published on [https://github.com/oPromessa/flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest)
-
-Extract the contents of the elected tar file.
-* You can then run it from the current folder.
-* Edit the uploadr.ini as appropriate (check Configuration section)
-
+- Soon to be available on Pypi.org for installation also via PIP
+- For now you can download it from GitHub [flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest).
+- You can find under **Assets**:
+   * the source code packages;
+   * a distribution package Published on [https://github.com/oPromessa/flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest)
+- Extract the contents of the elected tar file.
+   * You can then run it from the current folder.
+   * Edit the uploadr.ini as appropriate (check Configuration section)
 ```bash
 $ cd
 $ cd dev
-dev$ wget https://github.com/oPromessa/flickr-uploader/releases/download/2.8.1/flickr-uploader-2.8.1.tar.gz
-dev$ tar xzvf flickr-uploader-2.8.1.tar.gz
-dev$ cd flickr-uploader-2.8.1
-dev/flickr-uploader-2.8.1$ python3.5 setup.py install --prefix=~/apps/Python/
-dev/flickr-uploader-2.8.1$ python3.5 setup.py installcfg --folder ~/apps
+dev$ wget https://github.com/oPromessa/flickr-uploader/releases/download/2.8.5/flickr-uploader-2.8.5.tar.gz
+dev$ tar xzvf flickr-uploader-2.8.5.tar.gz
+dev$ cd flickr-uploader-2.8.5
+dev/flickr-uploader-2.8.5$ python3.5 setup.py install --prefix=~/apps/Python/
+dev/flickr-uploader-2.8.5$ python3.5 setup.py installcfg --folder ~/apps
+```
 
- 
 ## Configuration
 ----------------
 Go to http://www.flickr.com/services/apps/create/apply and apply for an API
@@ -241,7 +236,6 @@ of the upload arguments above correspond to for Flickr's API.
 ```bash
 $  export PYTHONPATH=~/apps/Python/lib/python2.7/site-packages
 ```
-
 - On the **first run** you need to authenticate the applicaiton against Flickr.
    - use the `-a` option
    - uploadr.py will provide you a URL/link which you need to run
@@ -250,7 +244,7 @@ $ cd dev
 dev$ uploadr.py -a
 Importing xml.etree.ElementTree...done. Continuing.
 --------- (V2.7.7) Init:  ---------
-Python version on this system: 3.6.3 (default, Oct  3 2017, 21:45:48) 
+Python version on this system: 3.6.3 (default, Oct  3 2017, 21:45:48)
 [GCC 7.2.0]
 [2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] --------- (V2.7.7) Start time: 2018.04.16 23:55:09 ---------(Log:40)
 [2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] Setting up database:[/home/user/dev/flickrdb]
@@ -284,7 +278,7 @@ $ ./uploadr.py --dry-run
 ```
 Run `./uploadrd.py --help` for up to the minute information on arguments:
 ```bash
-[2601][2018.05.20 22:25:11]:[19737      ][PRINT   ]:[uploadr] ----------- (V2.8.5) Start -----------(Log:40)
+[2554][2018.05.26 18:59:19]:[3916       ][PRINT   ]:[uploadr] ----------- (V2.8.5-r1) Start -----------(Log:40)
 usage: uploadr.py [-h] [-C filename.ini] [-a] [-v] [-x] [-n] [-i TITLE]
                   [-e DESCRIPTION] [-t TAGS] [-l N] [-r] [-p P] [-u] [-d] [-b]
                   [-c] [-s] [-g] [--add-albums-migrate]
@@ -297,7 +291,7 @@ optional arguments:
 Configuration related options:
   -C filename.ini, --config-file filename.ini
                         Optional configuration file. Default
-                        is:[./uploadr.ini]
+                        is:[/home/ruler/uploader/bin/uploadr.ini]
   -a, --authenticate    Performs/Verifies authentication with Flickr. To be
                         run on initial setup.Does not run any other option.
 

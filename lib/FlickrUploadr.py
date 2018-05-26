@@ -340,13 +340,13 @@ class Uploadr(object):
             self.token = self.nuflickr.token_cache.token
 
     # -------------------------------------------------------------------------
-    # removeExcludedMedia
+    # remove_excluded_media
     #
     # When EXCLUDED_FOLDERS defintion changes. You can run the -g
     # or --remove-excluded option in order to remove files previously uploaded.
     #
-    def removeExcludedMedia(self):
-        """ removeExcludedMedia
+    def remove_excluded_media(self):
+        """ remove_excluded_media
 
         Remove previously uploaded files, that are now being excluded due to
         change of the INI file configuration EXCLUDED_FOLDERS.
@@ -594,16 +594,16 @@ class Uploadr(object):
 
         NP.niceprint('*****Converting files*****')
         for fullpath in rawfiles:
-            dirpath, f = os.path.split(fullpath)
-            fnameonly = os.path.splitext(f)[0]
-            ext = os.path.splitext(f)[1][1:].lower()
+            dirpath, afile = os.path.split(fullpath)
+            fnameonly = os.path.splitext(afile)[0]
+            ext = os.path.splitext(afile)[1][1:].lower()
 
             if self.args.dry_run:
                 NP.niceprint('Dry Run rawfile:[{!s}]...'
                              .format(strunicodeout(fullpath)))
                 continue
 
-            if self.convertRawFile(dirpath, f, ext, fnameonly):
+            if self.convertRawFile(dirpath, afile, ext, fnameonly):
                 try:
                     okfilesize = True
                     filesize = os.path.getsize(
@@ -632,14 +632,14 @@ class Uploadr(object):
                                  .format(os.path.normpath(
                                      strunicodeout(dirpath) +
                                      strunicodeout('/') +
-                                     strunicodeout(f))))
+                                     strunicodeout(afile))))
             else:
                 NP.niceprint('Convert raw file failed. '
                              'Skipping file: [{!s}]'
                              .format(os.path.normpath(
                                  strunicodeout(dirpath) +
                                  strunicodeout('/') +
-                                 strunicodeout(f))))
+                                 strunicodeout(afile))))
         finalMediafiles.sort()
         NP.niceprint('*****Completed converting files*****')
 
@@ -807,51 +807,51 @@ class Uploadr(object):
                                  os.path.normpath(dirpath))),
                              strunicodeout(os.path.normpath(dirpath)))
 
-            for f in filenames:
+            for afile in filenames:
                 filePath = os.path.join(strunicodeout(dirpath),
-                                        strunicodeout(f))
+                                        strunicodeout(afile))
                 # Ignore filenames wihtin IGNORED_REGEX
-                if any(ignored.search(f)
+                if any(ignored.search(afile)
                        for ignored in self.xcfg.IGNORED_REGEX):
                     logging.debug('File %s in IGNORED_REGEX:',
                                   strunicodeout(filePath))
                     continue
-                ext = os.path.splitext(os.path.basename(f))[1][1:].lower()
+                ext = os.path.splitext(os.path.basename(afile))[1][1:].lower()
                 if ext in self.xcfg.ALLOWED_EXT:
                     filesize = os.path.getsize(os.path.join(
-                        strunicodeout(dirpath), strunicodeout(f)))
+                        strunicodeout(dirpath), strunicodeout(afile)))
                     if filesize < self.xcfg.FILE_MAX_SIZE:
                         files.append(
                             os.path.normpath(
                                 strunicodeout(dirpath) +
                                 strunicodeout("/") +
-                                strunicodeout(f).replace("'", "\'")))
+                                strunicodeout(afile).replace("'", "\'")))
                     else:
                         NP.niceprint('Skipping file due to '
                                      'size restriction: [{!s}]'.format(
                                          os.path.normpath(
                                              strunicodeout(dirpath) +
                                              strunicodeout('/') +
-                                             strunicodeout(f))))
+                                             strunicodeout(afile))))
                 # Assumes xCFG.ALLOWED_EXT and xCFG.RAW_EXT are disjoint
                 elif (self.xcfg.CONVERT_RAW_FILES and
                       (ext in self.xcfg.RAW_EXT)):
                     if not os.path.exists(
                             os.path.join(
                                 strunicodeout(dirpath),
-                                strunicodeout(os.path.splitext(f)[0])) +
+                                strunicodeout(os.path.splitext(afile)[0])) +
                             ".JPG"):
                         logging.debug('rawfiles: including:[%s]',
-                                      strunicodeout(f))
+                                      strunicodeout(afile))
                         rawfiles.append(
                             os.path.normpath(
                                 strunicodeout(dirpath) +
                                 strunicodeout("/") +
-                                strunicodeout(f).replace("'", "\'")))
+                                strunicodeout(afile).replace("'", "\'")))
                     else:
                         logging.warning('rawfiles: JPG exists. '
                                         'Not including:[%s]',
-                                        strunicodeout(f))
+                                        strunicodeout(afile))
         rawfiles.sort()
         files.sort()
         if self.xcfg.LOGGING_LEVEL <= logging.DEBUG:

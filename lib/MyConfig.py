@@ -316,11 +316,11 @@ class MyConfig(object):
                                              eval(ini_check[item])))
                     if not(isinstance(eval(self.__dict__[item]),
                                       eval(ini_check[item]))):
-                        raise ValueError('Incorrect config item:[{!s]'
+                        raise ValueError('Incorrect config item:[{!s}]'
                                          .format(item))
 
                 else:
-                    raise ValueError('Incorrect config item:[{!s]'
+                    raise ValueError('Incorrect config item:[{!s}]'
                                      .format(item))
             except Exception:
                 self.niceerror(caught=True,

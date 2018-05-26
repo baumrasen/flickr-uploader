@@ -1014,7 +1014,7 @@ class Uploadr(object):
                              'INSERT INTO files',
                              x,
                              self.xcfg.MAX_SQL_ATTEMPTS)
-                DBexception = False
+                db_exception = False
                 try:
                     # Acquire DBlock if in multiprocessing mode
                     self.useDBLock(lock, True)
@@ -1026,7 +1026,7 @@ class Uploadr(object):
                         (file_id, file, file_checksum,
                          last_modified))
                 except lite.Error as err:
-                    DBexception = True
+                    db_exception = True
                     niceerror(caught=True,
                               caughtprefix='+++ DB',
                               caughtcode='030',
@@ -1039,7 +1039,7 @@ class Uploadr(object):
                     # Release DBlock if in multiprocessing mode
                     self.useDBLock(lock, False)
 
-                if DBexception:
+                if db_exception:
                     niceerror(caught=True,
                               caughtprefix='+++ DB',
                               caughtcode='031',
@@ -1976,7 +1976,10 @@ class Uploadr(object):
     #
     #   Creates on flickrdb local database a SetName(Album)
     #
-    def logSetCreation(self, lock, set_id, setname, primaryPhotoId, cur, con):
+    def logSetCreation(self, lock,
+                       set_id, setname,
+                       primary_photo_id,
+                       cur, con):
         """ logSetCreation
 
         Creates on flickrdb local database a SetName(Album)
@@ -1997,7 +2000,7 @@ class Uploadr(object):
             self.useDBLock(lock, True)
             cur.execute('INSERT INTO sets (set_id, name, primary_photo_id) '
                         'VALUES (?,?,?)',
-                        (set_id, setname, primaryPhotoId))
+                        (set_id, setname, primary_photo_id))
         except lite.Error as err:
             niceerror(caught=True,
                       caughtprefix='+++ DB',
@@ -2014,7 +2017,7 @@ class Uploadr(object):
             # Acquire DBlock if in multiprocessing mode
             self.useDBLock(lock, True)
             cur.execute('UPDATE files SET set_id = ? WHERE files_id = ?',
-                        (set_id, primaryPhotoId))
+                        (set_id, primary_photo_id))
         except lite.Error as err:
             niceerror(caught=True,
                       caughtprefix='+++ DB',
@@ -2060,7 +2063,7 @@ class Uploadr(object):
     #
     # Processing function for adding files to set in multiprocessing mode
     #
-    def fn_addFilesToSets(self, lockDB, running, mutex, sfiles, cTotal, cur):
+    def fn_addFilesToSets(self, lockDB, running, mutex, sfiles, c_total, cur):
         """ fn_addFilesToSets
         """
 
@@ -2117,7 +2120,7 @@ class Uploadr(object):
                 logging.info('===Multiprocessing=== out.mutex.release(w)')
 
                 # Show number of files processed so far
-                NP.niceprocessedfiles(xcount, cTotal, False)
+                NP.niceprocessedfiles(xcount, c_total, False)
 
         # Closing DB connection
         if fn_con is not None:
@@ -2192,18 +2195,18 @@ class Uploadr(object):
                             (self.xcfg.FILES_DIR,
                              self.xcfg.FULL_SET_NAME,
                              setname,))
-                primaryPic = cur.fetchone()
+                primary_pic = cur.fetchone()
 
-                # primaryPic[0] = files_id from files table
+                # primary_pic[0] = files_id from files table
                 set_id = self.createSet(slockDB,
-                                        setname, primaryPic[0],
+                                        setname, primary_pic[0],
                                         cur, con)
                 NP.niceprint('Created the set:[{!s}] '
                              'set_id=[{!s}] '
                              'primaryId=[{!s}]'
                              .format(strunicodeout(setname),
                                      set_id,
-                                     primaryPic[0]))
+                                     primary_pic[0]))
 
             cur.execute('SELECT files_id, path, set_id '
                         'FROM files '
@@ -2364,7 +2367,7 @@ class Uploadr(object):
     #
     # Creates an Album in Flickr.
     #
-    def createSet(self, lock, setname, primaryPhotoId, cur, con):
+    def createSet(self, lock, setname, primary_photo_id, cur, con):
         """ createSet
 
         Creates an Album in Flickr.
@@ -2380,7 +2383,7 @@ class Uploadr(object):
         get_success, get_result, get_errcode = faw.flickrapi_fn(
             self.nuflickr.photosets.create, (),
             dict(title=setname,
-                 primary_photo_id=str(primaryPhotoId)),
+                 primary_photo_id=str(primary_photo_id)),
             3, 10, True, caughtcode='124')
 
         success = False
@@ -2390,7 +2393,7 @@ class Uploadr(object):
             self.logSetCreation(lock,
                                 get_result.find('photoset').attrib['id'],
                                 setname,
-                                primaryPhotoId,
+                                primary_photo_id,
                                 cur,
                                 con)
             return get_result.find('photoset').attrib['id']
@@ -2405,13 +2408,13 @@ class Uploadr(object):
                          'does not exist on Flickr. '
                          'Probably deleted from Flickr but still '
                          'on local db and local file.'
-                         .format(primaryPhotoId,
+                         .format(primary_photo_id,
                                  strunicodeout(setname)))
             logging.error(
                 'Primary photo [%s] for Set [%s] does not exist on Flickr.'
                 ' Probably deleted from Flickr but still on local db '
                 'and local file.',
-                primaryPhotoId,
+                primary_photo_id,
                 strunicodeout(setname))
             success = False
         else:
@@ -2754,7 +2757,7 @@ class Uploadr(object):
                                                              method='xml'))
                 set_id = aset.attrib['id']
                 setname = aset.find('title').text
-                primaryPhotoId = aset.attrib['primary']
+                primary_photo_id = aset.attrib['primary']
 
                 if self.args.verbose:
                     NP.niceprint('  Add Set to DB:[{!s}] set_id=[{!s}] '
@@ -2763,27 +2766,27 @@ class Uploadr(object):
                                          if setname is None
                                          else strunicodeout(setname),
                                          set_id,
-                                         primaryPhotoId))
+                                         primary_photo_id))
 
                 # On ocasions flickr returns a setname (title) as None.
                 # For instance, while simultaneously performing massive
                 # delete operation on flickr.
                 logging.info('Searching on DB for set_id:[%s] '
-                             'setname:[%s] primaryPhotoId:[%s]',
+                             'setname:[%s] primary_photo_id:[%s]',
                              set_id,
                              'None'
                              if setname is None
                              else strunicodeout(setname),
-                             primaryPhotoId)
+                             primary_photo_id)
 
                 logging.debug('SELECT set_id FROM sets WHERE set_id = "%s"',
                               set_id)
                 try:
                     cur.execute("SELECT set_id FROM sets "
                                 "WHERE set_id = '" + set_id + "'")
-                    foundSets = cur.fetchone()
-                    logging.info('Output for foundSets is [%s]',
-                                 'None' if foundSets is None else foundSets)
+                    found_sets = cur.fetchone()
+                    logging.info('Output for found_sets is [%s]',
+                                 'None' if found_sets is None else found_sets)
                 except lite.Error as err:
                     niceerror(caught=True,
                               caughtprefix='+++ DB',
@@ -2793,23 +2796,23 @@ class Uploadr(object):
                               .format(err.args[0]),
                               useniceprint=True)
 
-                if foundSets is None:
+                if found_sets is None:
                     logging.info('Adding set [%s] (%s) '
                                  'with primary photo [%s].',
                                  set_id,
                                  'None'
                                  if setname is None
                                  else strunicodeout(setname),
-                                 primaryPhotoId)
+                                 primary_photo_id)
                     try:
                         logging.debug('INSERT INTO sets (set_id, name, '
                                       'primary_photo_id) VALUES (%s,%s,%s)',
                                       set_id,
                                       strunicodeout(setname),
-                                      primaryPhotoId)
+                                      primary_photo_id)
                         cur.execute('INSERT INTO sets (set_id, name, '
                                     'primary_photo_id) VALUES (?,?,?)',
-                                    (set_id, setname, primaryPhotoId))
+                                    (set_id, setname, primary_photo_id))
                         con.commit()
 
                     except lite.Error as err:
@@ -3186,7 +3189,7 @@ class Uploadr(object):
     #
     # maddAlbumsMigrate wrapper for multiprocessing purposes
     #
-    def maddAlbumsMigrate(self, lock, running, mutex, filelist, cTotal, cur):
+    def maddAlbumsMigrate(self, lock, running, mutex, filelist, c_total, cur):
         """ maddAlbumsMigrate
 
             Wrapper function for multiprocessing support to call uploadFile
@@ -3263,7 +3266,7 @@ class Uploadr(object):
             logging.info('===Multiprocessing=== out.mutex.release(w)')
 
             # Show number of files processed so far
-            NP.niceprocessedfiles(xcount, cTotal, False)
+            NP.niceprocessedfiles(xcount, c_total, False)
 
             # Control pace (rate limit)of each proceess
             rate_5_callspersecond()
@@ -3312,7 +3315,7 @@ class Uploadr(object):
                           useniceprint=True)
                 return False
 
-            countTotal = len(existingMedia)
+            count_total = len(existingMedia)
             # running in multi processing mode
             if self.args.processes and self.args.processes > 0:
                 logging.debug('Running [%s] processes pool.',
@@ -3338,7 +3341,7 @@ class Uploadr(object):
             # running in single processing mode
             else:
                 count = 0
-                countTotal = len(existingMedia)
+                count_total = len(existingMedia)
                 for row in existingMedia:
                     count += 1
                     # row[0] = files_id
@@ -3400,9 +3403,9 @@ class Uploadr(object):
                             NP.niceprint('      Found Tag:[{!s}] TagId:[{!s}]'
                                          .format(tfind, tid))
 
-                    NP.niceprocessedfiles(count, countTotal, False)
+                    NP.niceprocessedfiles(count, count_total, False)
 
-                NP.niceprocessedfiles(count, countTotal, True)
+                NP.niceprocessedfiles(count, count_total, True)
 
         return True
 
@@ -3437,7 +3440,7 @@ class Uploadr(object):
                 return False
 
             count = 0
-            countTotal = len(badFiles)
+            count_total = len(badFiles)
             for row in badFiles:
                 count += 1
                 # row[0] = files_id
@@ -3457,7 +3460,7 @@ class Uploadr(object):
                                               NUTIME.localtime(row[5]))))
                 sys.stdout.flush()
 
-            NP.niceprocessedfiles(count, countTotal, True)
+            NP.niceprocessedfiles(count, count_total, True)
 
         return True
 
@@ -3491,14 +3494,14 @@ class Uploadr(object):
                           useniceprint=True)
 
         # Total Local badfiles photos count -----------------------------------
-        BadFilesCount = 0
+        bad_files_count = 0
         with con:
             try:
                 cur = con.cursor()
                 cur.execute("SELECT Count(*) FROM badfiles")
-                BadFilesCount = cur.fetchone()[0]
+                bad_files_count = cur.fetchone()[0]
                 logging.info('Total badfiles count on local: %s',
-                             BadFilesCount)
+                             bad_files_count)
             except lite.Error as err:
                 niceerror(caught=True,
                           caughtprefix='+++ DB',
@@ -3541,8 +3544,8 @@ class Uploadr(object):
                      '               Flickr:[{!s:>6s}]\n'
                      'Not in sets on Flickr:[{!s:>6s}]'
                      .format(InitialFoundFiles,
-                             BadFilesCount,
-                             InitialFoundFiles - BadFilesCount,
+                             bad_files_count,
+                             InitialFoundFiles - bad_files_count,
                              countlocal,
                              countflickr,
                              countnotinsets))

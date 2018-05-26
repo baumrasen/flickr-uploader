@@ -54,7 +54,6 @@ import lib.rate_limited as rate_limited
 #   NPR.niceprint = from niceprint module
 # -----------------------------------------------------------------------------
 NPR = NicePrint.NicePrint()
-niceerror = NPR.niceerror
 
 
 # -----------------------------------------------------------------------------
@@ -121,37 +120,38 @@ def flickrapi_fn(fn_name,
         fn_result = retry_flickrapi_fn(fn_kwargs)
     except flickrapi.exceptions.FlickrError as flickr_ex:
         fn_errcode = flickr_ex.code
-        niceerror(caught=True,
-                  caughtprefix='+++Api',
-                  caughtcode=caughtcode,
-                  caughtmsg='Flickrapi exception on [{!s}]'
-                  .format(fn_name.__name__),
-                  exceptuse=True,
-                  exceptcode=flickr_ex.code,
-                  exceptmsg=flickr_ex,
-                  useniceprint=True,
-                  exceptsysinfo=True)
+        NPR.niceerror(caught=True,
+                      caughtprefix='+++Api',
+                      caughtcode=caughtcode,
+                      caughtmsg='Flickrapi exception on [{!s}]'
+                      .format(fn_name.__name__),
+                      exceptuse=True,
+                      exceptcode=flickr_ex.code,
+                      exceptmsg=flickr_ex,
+                      useniceprint=True,
+                      exceptsysinfo=True)
     except (IOError, httplib.HTTPException):
-        niceerror(caught=True,
-                  caughtprefix='+++Api',
-                  caughtcode=caughtcode,
-                  caughtmsg='Caught IO/HTTP Error on [{!s}]'
-                  .format(fn_name.__name__))
+        NPR.niceerror(caught=True,
+                      caughtprefix='+++Api',
+                      caughtcode=caughtcode,
+                      caughtmsg='Caught IO/HTTP Error on [{!s}]'
+                      .format(fn_name.__name__))
     except Exception as exc:
-        niceerror(caught=True,
-                  caughtprefix='+++Api',
-                  caughtcode=caughtcode,
-                  caughtmsg='Exception on [{!s}]'.format(fn_name.__name__),
-                  exceptuse=True,
-                  exceptmsg=exc,
-                  useniceprint=True,
-                  exceptsysinfo=True)
+        NPR.niceerror(caught=True,
+                      caughtprefix='+++Api',
+                      caughtcode=caughtcode,
+                      caughtmsg='Exception on [{!s}]'.format(fn_name.__name__),
+                      exceptuse=True,
+                      exceptmsg=exc,
+                      useniceprint=True,
+                      exceptsysinfo=True)
     except BaseException:
-        niceerror(caught=True,
-                  caughtprefix='+++Api',
-                  caughtcode=caughtcode,
-                  caughtmsg='BaseException on [{!s}]'.format(fn_name.__name__),
-                  exceptsysinfo=True)
+        NPR.niceerror(caught=True,
+                      caughtprefix='+++Api',
+                      caughtcode=caughtcode,
+                      caughtmsg='BaseException on [{!s}]'
+                      .format(fn_name.__name__),
+                      exceptsysinfo=True)
     finally:
         pass
 
@@ -207,15 +207,15 @@ def nu_authenticate(api_key,
             secret,
             token_cache_location=token_cache_location)
     except flickrapi.exceptions.FlickrError as ex:
-        niceerror(caught=True,
-                  caughtprefix='+++Api',
-                  caughtcode='001',
-                  caughtmsg='Error in flickrapi.FlickrAPI',
-                  exceptuse=True,
-                  exceptcode=ex.code,
-                  exceptmsg=ex,
-                  useniceprint=True,
-                  exceptsysinfo=True)
+        NPR.niceerror(caught=True,
+                      caughtprefix='+++Api',
+                      caughtcode='001',
+                      caughtmsg='Error in flickrapi.FlickrAPI',
+                      exceptuse=True,
+                      exceptcode=ex.code,
+                      exceptmsg=ex,
+                      useniceprint=True,
+                      exceptsysinfo=True)
         fn_result = False
 
     if not fn_result:
@@ -227,26 +227,26 @@ def nu_authenticate(api_key,
     try:
         flickrobj.get_request_token(oauth_callback='oob')
     except flickrapi.exceptions.FlickrError as ex:
-        niceerror(caught=True,
-                  caughtprefix='+++Api',
-                  caughtcode='002',
-                  caughtmsg='Error in flickrapi.FlickrAPI',
-                  exceptuse=True,
-                  exceptcode=ex.code,
-                  exceptmsg=ex,
-                  useniceprint=True,
-                  exceptsysinfo=True)
+        NPR.niceerror(caught=True,
+                      caughtprefix='+++Api',
+                      caughtcode='002',
+                      caughtmsg='Error in flickrapi.FlickrAPI',
+                      exceptuse=True,
+                      exceptcode=ex.code,
+                      exceptmsg=ex,
+                      useniceprint=True,
+                      exceptsysinfo=True)
         fn_result = False
         sys.exit(4)
     except Exception as exc:
-        niceerror(caught=True,
-                  caughtprefix='+++Api',
-                  caughtcode='003',
-                  caughtmsg='Unexpected error in token_valid',
-                  useniceprint=True,
-                  exceptuse=True,
-                  exceptmsg=exc,
-                  exceptsysinfo=True)
+        NPR.niceerror(caught=True,
+                      caughtprefix='+++Api',
+                      caughtcode='003',
+                      caughtmsg='Unexpected error in token_valid',
+                      useniceprint=True,
+                      exceptuse=True,
+                      exceptmsg=exc,
+                      exceptsysinfo=True)
         fn_result = False
         raise
 
@@ -271,15 +271,15 @@ def nu_authenticate(api_key,
     try:
         flickrobj.get_access_token(verifier)
     except flickrapi.exceptions.FlickrError as ex:
-        niceerror(caught=True,
-                  caughtprefix='+++Api',
-                  caughtcode='004',
-                  caughtmsg='Error in flickrapi.get_access_token',
-                  exceptuse=True,
-                  exceptcode=ex.code,
-                  exceptmsg=ex,
-                  useniceprint=True,
-                  exceptsysinfo=True)
+        NPR.niceerror(caught=True,
+                      caughtprefix='+++Api',
+                      caughtcode='004',
+                      caughtmsg='Error in flickrapi.get_access_token',
+                      exceptuse=True,
+                      exceptcode=ex.code,
+                      exceptmsg=ex,
+                      useniceprint=True,
+                      exceptsysinfo=True)
         sys.exit(5)
 
     NPR.niceprint('{!s} with [{!s}] permissions: {!s}'
@@ -318,15 +318,15 @@ def get_cached_token(api_key,
             secret,
             token_cache_location=token_cache_location)
     except flickrapi.exceptions.FlickrError as ex:
-        niceerror(caught=True,
-                  caughtprefix='+++Api',
-                  caughtcode='010',
-                  caughtmsg='Error in flickrapi.FlickrAPI',
-                  exceptuse=True,
-                  exceptcode=ex.code,
-                  exceptmsg=ex,
-                  useniceprint=True,
-                  exceptsysinfo=True)
+        NPR.niceerror(caught=True,
+                      caughtprefix='+++Api',
+                      caughtcode='010',
+                      caughtmsg='Error in flickrapi.FlickrAPI',
+                      exceptuse=True,
+                      exceptcode=ex.code,
+                      exceptmsg=ex,
+                      useniceprint=True,
+                      exceptsysinfo=True)
         fn_result = False
 
     if not fn_result:
@@ -345,23 +345,23 @@ def get_cached_token(api_key,
             fn_result = False
             logging.warning('   Cached token: Token Non-Existant.')
     except flickrapi.exceptions.FlickrError as ex:
-        niceerror(caught=True,
-                  caughtprefix='+++Api',
-                  caughtcode='011',
-                  caughtmsg='Error in flickrapi.token_valid',
-                  exceptuse=True,
-                  exceptcode=ex.code,
-                  exceptmsg=ex,
-                  useniceprint=True,
-                  exceptsysinfo=True)
+        NPR.niceerror(caught=True,
+                      caughtprefix='+++Api',
+                      caughtcode='011',
+                      caughtmsg='Error in flickrapi.token_valid',
+                      exceptuse=True,
+                      exceptcode=ex.code,
+                      exceptmsg=ex,
+                      useniceprint=True,
+                      exceptsysinfo=True)
         fn_result = False
     except Exception:
-        niceerror(caught=True,
-                  caughtprefix='+++Api',
-                  caughtcode='012',
-                  caughtmsg='Unexpected error in token_valid',
-                  useniceprint=True,
-                  exceptsysinfo=True)
+        NPR.niceerror(caught=True,
+                      caughtprefix='+++Api',
+                      caughtcode='012',
+                      caughtmsg='Unexpected error in token_valid',
+                      useniceprint=True,
+                      exceptsysinfo=True)
         fn_result = False
         raise
 

@@ -193,8 +193,8 @@ def rate_limited(max_per_second):
 
             except Exception as ex:
                 NPR.niceerror(caught=True,
-                              caughtprefix='+++',
-                              caughtcode='000',
+                              caughtprefix='+++Rate',
+                              caughtcode='001',
                               caughtmsg='Exception on rate_limited_function',
                               exceptuse=True,
                               # exceptCode=ex.code,
@@ -254,39 +254,37 @@ def retry(attempts=3, waittime=5, randtime=False):
             rtime = time
             error = None
 
-            if logging.getLogger().getEffectiveLevel() <= logging.WARNING:
+            if logging.getLogger().getEffectiveLevel() <= logging.INFO:
                 if args is not None:
                     logging.info('___Retry f():[%s] '
                                  'Max:[%s] Delay:[%s] Rnd[%s]',
                                  a_fn.__name__, attempts,
                                  waittime, randtime)
                     for i, arg in enumerate(args):
-                        logging.info('___Retry f():[%s] arg[%s]={%s}',
-                                     a_fn.__name__, i, arg)
+                        logging.debug('___Retry f():[%s] arg[%s]=[%s]',
+                                      a_fn.__name__, i, arg)
             for i in range(attempts if attempts > 0 else 1):
                 try:
                     logging.info('___Retry f():[%s]: '
                                  'Attempt:[%s] of [%s]',
                                  a_fn.__name__, i + 1, attempts)
                     return a_fn(*args, **kwargs)
-                except Exception as err:
-                    logging.error('___Retry f():[%s]: Error code A: [%s]',
-                                  a_fn.__name__, err)
-                    error = err
                 except flickrapi.exceptions.FlickrError as exc:
-                    logging.error('___Retry f():[%s]: Error code B: [%s]',
+                    logging.error('___Retry f():[%s]: Error code A: [%s]',
                                   a_fn.__name__, exc)
+                    error = exc
                 except lite.Error as err:
-                    logging.error('___Retry f():[%s]: Error code C: [%s]',
+                    logging.error('___Retry f():[%s]: Error code B: [%s]',
                                   a_fn.__name__, err)
                     error = err
                     # Release the lock on error.
                     # CODING: Check how to handle this particular scenario.
                     # flick.useDBLock(nulockDB, False)
                     # self.useDBLock( lock, True)
-                except BaseException:
-                    logging.error('___Retry f():[%s]: Error code D: Catchall',
+                except Exception as err:
+                    logging.error('___Retry f():[%s]: Error code C: Catchall',
                                   a_fn.__name__)
+                    error = err
 
                 logging.warning('___Function:[%s] Waiting:[%s] Rnd:[%s]',
                                 a_fn.__name__, waittime, randtime)

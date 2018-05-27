@@ -77,47 +77,58 @@ You should get the following depending on how the setting FULL_SET_NAME is set:
 * portalocker module for Windows systems. Not mandatory for Synology.
 * File write access (for the token and local database)
 * Flickr API key (free)
+* exiftool, **only** if you intend to convert RAW files to JPG. [Install instructions here.](https://sno.phy.queensu.ca/%7Ephil/exiftool/install.html). Note: You need to also install the DSM Package Perl.
 
 ## Setup on Synology
 --------------------
-Might work on other platforms like Windows also.
-*Side note:* don't be overwhelmed with this setup. They are quite straitghtforward.
-Summary steps:
+- Might work on other platforms like Windows also.
+- *Side note:* don't be overwhelmed with this setup. They are quite straitghtforward.
+- Summary steps:
 
-1. Enable SSH access to Synology DSM Server
+1. Enable SSH access to Synology DSM Server. (Optionally) install Python 3.
 2. Prepare a local folder location for Python modules install
 3. Download and install pip
 4. Download and install flickrapi
 5. Download and install flickr-uploader
 
-### 1.Enable SSH access to Synology DSM Server
-Enable and access your Synology DSM via SSH with an admin user.
-Avoid the use of root for security reasons.
+### 1.Enable SSH access to Synology DSM Server. (Optionally) install Python 3.
+- Enable and access your Synology DSM via SSH with an admin user.
+- Avoid the use of root for security reasons.
+- (Optionally) install via the Synology DSM Packages the "Python 3" package (corresponds to version 3.5)
 
 ### 2. Prepare a local folder location for Python modules install.
-**This avoids messing up with the system files.**
-To create a local install destination directory/folder define and export PYTHONPATH variable:
+- **IMPORTANT NOTE: To avoid messing up with the system files.**
+- Create a local install destination directory/folder define and export PYTHONPATH variable (ex: for Python 2.7):
 ```bash
 $ cd
 $ mkdir apps
 $ mkdir apps/Python
 $ export PYTHONPATH=~/apps/Python/lib/python2.7/site-packages
 ```
-Create also a 'dev' directory/folder. Download here the files/packages prior to intstallation:
+- Or, for Python 3.5:
+``` bash
+$ export PYTHONPATH=~/apps/Python/lib/python3.5/site-packages
+```
+- Create also a `dev` directory/folder to use as working area where to download/extract the files/packages prior to intstallation:
 ```bash
 $ cd
 $ mkdir dev
 dev$ cd dev
 ```
 ### 3. Download and install pip
-**Download** get-pip.py
-**Extract to** ~/dev
-And then **install** by running `python get-pip.py --prefix=~/apps/Python`
-Follow [these guidelines for PIP installation](https://pip.pypa.io/en/latest/installing/).
-*Make sure to use the --prefix parameter*
+- **IMPORTANT NOTE: pip allows you to more easily install python related modules/applications.**
+- **Download** get-pip.py
+- **Extract to** ~/dev
+- And then **install** by running `python get-pip.py --prefix=~/apps/Python`
+- Follow [these guidelines for PIP installation](https://pip.pypa.io/en/latest/installing/).
+- **IMPORTANT NOTE: Make sure to use the --prefix parameter**
 ```bash
 $ cd
 $ cd dev
+dev$ curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 1603k  100 1603k    0     0  3828k      0 --:--:-- --:--:-- --:--:-- 3827k
 dev$ python get-pip.py --prefix=~/apps/Python
 Collecting pip
     Downloading pip-9.0.1-py2.py3-none-any.whl (1.3MB)
@@ -131,14 +142,34 @@ Collecting wheel
 Installing collected packages: pip, setuptools, wheel
     Successfully installed pip setuptools wheel
 ```
-### 4. Download and install flickrapi (2.4.0 or 2.3.1)
-**Download** flickrapi-2.3.tar.gz from [PyPi.Python.Org](https://pypi.python.org/pypi/flickrapi).
+### 4. Download and install flickrapi (2.4.0)
 
-**Extract to** ~/dev and run `python setup.py install --prefix=~/apps/Python`
-
-**Make sure to use the --prefix parameter**
+#### 4.1 OPTION #1 (recommended): With PIP (installed in step #3 above)
 ```bash
-$ python setup.py install --prefix=~/apps/Python
+$ cd
+$ cd dev
+dev$ export PYTHONPATH=~/apps/Python/lib/python2.7/site-packages
+dev$ pip install flickrapi --prefix=~/apps/Python
+```
+
+#### 4.2 OPTION #2: Mannually
+- **Download** flickrapi-2.4.tar.gz from [PyPi.Python.Org](https://pypi.python.org/pypi/flickrapi).
+- **Extract to** ~/dev and run `python setup.py install --prefix=~/apps/Python`
+- **Make sure to use the --prefix parameter**
+```bash
+$ cd dev
+dev$ wget https://files.pythonhosted.org/packages/b1/f1/d10fa0872e4f781c2ed47e94e728ecd3c1998f8c8d12e78c7329a25d0727/flickrapi-2.4.0.tar.gz
+dev$ tar tzvf flickrapi-2.4.0.tar.gz
+flickrapi-2.4.0/
+flickrapi-2.4.0/CHANGELOG.md
+flickrapi-2.4.0/MANIFEST.in
+flickrapi-2.4.0/.coveragerc
+flickrapi-2.4.0/LICENSE.txt
+flickrapi-2.4.0/tox.ini
+flickrapi-2.4.0/README.md
+(...)
+dev$ cd flickrapi-2.4.0
+dev/flickrapi-2.4.0$ python setup.py install --prefix=~/apps/Python
 python setup.py install --prefix=~/apps/Python
 running install
 running bdist_egg
@@ -151,20 +182,27 @@ Moving chardet-3.0.4-py2.7.egg to /xxx/xxx/xxx/apps/Python/lib/python2.7/site-pa
 Adding chardet 3.0.4 to easy-install.pth file
 Installing chardetect script to /xxx/xxx/xxx/apps/Python/bin
 
-Installed /xxx/xxx/xxx/apps/Python/lib/python2.7/site-packages/chardet-3.0.4-py2.7.egg
-Finished processing dependencies for flickrapi==2.3
+Installed /xxxx/xxx/xxx/apps/Python/lib/python3.5/site-packages/certifi-2018.4.16-py3.5.egg
+Finished processing dependencies for flickrapi==2.4.0
 ```
 
 ###  5. Download and install flickr-uploader
-Soon to be available on Pypi.
-For now you can download it from GitHub [flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest).
-You can find under **Assets**:
-* the source code packages;
-* a distribution package Published on [https://github.com/oPromessa/flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest)
-
-Extract the contents of the elected tar file.
-* You can then run it from the current folder.
-* Edit the uploadr.ini as appropriate (check Configuration section)
+- Soon to be available on Pypi.org for installation also via PIP.
+- For now you can download it from GitHub [flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest).
+- You can find under **Assets**:
+   * the source code packages;
+   * a distribution package Published on [https://github.com/oPromessa/flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest)
+- Extract the contents of the elected tar file.
+   * You can then run it from the current folder.
+   * Edit the uploadr.ini as appropriate (check Configuration section)
+```bash
+$ cd
+$ cd apps
+apps$ wget https://github.com/oPromessa/flickr-uploader/releases/download/2.8.5/flickr-uploader-2.8.5.tar.gz
+apps$ tar xzvf flickr-uploader-2.8.5.tar.gz
+apps$ cd flickr-uploader-2.8.5
+apps$ ./uplaodr.py -a
+```
 
 ## Configuration
 ----------------
@@ -198,15 +236,15 @@ of the upload arguments above correspond to for Flickr's API.
 ```bash
 $  export PYTHONPATH=~/apps/Python/lib/python2.7/site-packages
 ```
-
 - On the **first run** you need to authenticate the applicaiton against Flickr.
+   - use the `-a` option
    - uploadr.py will provide you a URL/link which you need to run
 ```bash
 $ cd dev
-dev$ uploadr.py 
+dev$ uploadr.py -a
 Importing xml.etree.ElementTree...done. Continuing.
 --------- (V2.7.7) Init:  ---------
-Python version on this system: 3.6.3 (default, Oct  3 2017, 21:45:48) 
+Python version on this system: 3.6.3 (default, Oct  3 2017, 21:45:48)
 [GCC 7.2.0]
 [2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] --------- (V2.7.7) Start time: 2018.04.16 23:55:09 ---------(Log:40)
 [2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] Setting up database:[/home/user/dev/flickrdb]
@@ -240,14 +278,10 @@ $ ./uploadr.py --dry-run
 ```
 Run `./uploadrd.py --help` for up to the minute information on arguments:
 ```bash
-Importing xml.etree.ElementTree...done. Continuing.
---------- (V2.7.7) Init:  ---------
-Python version on this system: 3.6.3 (default, Oct  3 2017, 21:45:48) 
-[GCC 7.2.0]
-[2930][2018.04.16 23:47:54]:[12706      ][PRINT   ]:[uploadr] --------- (V2.7.7) Start time: 2018.04.16 23:47:54 ---------(Log:40)
-usage: uploadr.py [-h] [-C filename.ini] [-v] [-x] [-n] [-i TITLE]
-                  [-e DESCRIPTION] [-t TAGS] [-l N] [-z] [-r] [-p P] [-u] [-d]
-                  [-b] [-c] [-s] [-g] [--add-albums-migrate]
+[2554][2018.05.26 18:59:19]:[3916       ][PRINT   ]:[uploadr] ----------- (V2.8.5-r1) Start -----------(Log:40)
+usage: uploadr.py [-h] [-C filename.ini] [-a] [-v] [-x] [-n] [-i TITLE]
+                  [-e DESCRIPTION] [-t TAGS] [-l N] [-r] [-p P] [-u] [-d] [-b]
+                  [-c] [-s] [-g] [--add-albums-migrate]
 
 Upload files to Flickr. Uses uploadr.ini as config file.
 
@@ -256,8 +290,10 @@ optional arguments:
 
 Configuration related options:
   -C filename.ini, --config-file filename.ini
-                        Optional configuration file. Default is:
-                        [/home/ruler/uploader/etc/uploadr.ini]
+                        Optional configuration file. Default
+                        is:[/home/ruler/uploader/bin/uploadr.ini]
+  -a, --authenticate    Performs/Verifies authentication with Flickr. To be
+                        run on initial setup.Does not run any other option.
 
 Verbose and dry-run options:
   -v, --verbose         Provides some more verbose output. See also -x option.
@@ -279,23 +315,21 @@ Information options:
   -t TAGS, --tags TAGS  Space-separated tags for uploaded files. It appends to
                         the tags defined in INI file.
   -l N, --list-photos-not-in-set N
-                        List as many as N photos not in set. Maximum listed
-                        photos is 500.
-  -z, --search-for-duplicates
-                        Lists duplicated files: same checksum, same title,
-                        list SetName (if different). Not operational at this
-                        time.
+                        List as many as N photos (with tags) not in set.
+                        Maximum listed photos is 500.
 
 Processing related options:
   -r, --drip-feed       Wait a bit between uploading individual files.
-  -p P, --processes P   Number of photos to upload simultaneously.
+  -p P, --processes P   Number of photos to upload simultaneously. Number of
+                        process to assign pics to sets.
   -u, --not-is-already-uploaded
                         Do not check if file is already uploaded and exists on
                         flickr prior to uploading. Use this option for faster
                         INITIAL upload. Do not use it in subsequent uploads to
                         prevent/recover orphan pics without a set.
   -d, --daemon          Run forever as a daemon.Uploading every SLEEP_TIME
-                        seconds. Please note it only performs upload/replace.
+                        seconds. Please note it only performs upload/raw
+                        convert/replace.
 
 Handling bad and excluded files:
   -b, --bad-files       Save on database bad files to prevent continuous

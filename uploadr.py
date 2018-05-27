@@ -47,11 +47,12 @@ from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 # =============================================================================
 # Import section
 import sys
+import traceback
 import logging
+import logging.handlers
 import argparse
 import os
 import os.path
-import time
 try:
     # Use portalocker if available. Required for Windows systems
     import portalocker as FileLocker  # noqa
@@ -80,23 +81,60 @@ import lib.MyConfig as MyConfig
 # Logging init code
 #
 # Getting definitions from UPLDRConstants
-UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
+UPLDR_K = UPLDRConstantsClass.UPLDRConstants()
 # Sets LOGGING_LEVEL to allow logging even if everything else is wrong!
-logging.basicConfig(stream=sys.stderr,
-                    level=int(str(logging.WARNING)),  # logging.DEBUG
-                    datefmt=UPLDRConstants.TimeFormat,
-                    format=UPLDRConstants.P + '[' +
-                    str(UPLDRConstants.Run) + ']' +
-                    '[%(asctime)s]:[%(processName)-11s]' +
-                    UPLDRConstants.W +
-                    '[%(levelname)-8s]:[%(name)s] %(message)s')
-# Inits with default configuration values.
-my_cfg = MyConfig.MyConfig()
-# Get LOGGING_LEVEL defaul configuration
-my_cfg.LOGGING_LEVEL = int(str(my_cfg.LOGGING_LEVEL))
-# Update logging level as per LOGGING_LEVEL from default config
-logging.getLogger().setLevel(my_cfg.LOGGING_LEVEL)
+# Parent logger is set to Maximum (DEBUG) so that suns will log as appropriate
+logging.getLogger().setLevel(logging.DEBUG)
+# define a Handler which writes WARNING messages or higher to the sys.stderr
+CONSOLE_LOGGING = logging.StreamHandler()
+CONSOLE_LOGGING.setLevel(logging.WARNING)
+CONSOLE_LOGGING.setFormatter(logging.Formatter(
+    fmt=UPLDR_K.Pur + '[' + str(UPLDR_K.Run) + ']' +
+    '[%(asctime)s]:[%(processName)-11s]' + UPLDR_K.Std +
+    '[%(levelname)-8s]:[%(name)s] %(message)s',
+    datefmt=UPLDR_K.TimeFormat))
+logging.getLogger().addHandler(CONSOLE_LOGGING)
+
+# Inits with default configuration value, namely LOGGING_LEVEL
+MY_CFG = MyConfig.MyConfig()
+MY_CFG.LOGGING_LEVEL = int(str(MY_CFG.LOGGING_LEVEL))
+# Update console logging level as per LOGGING_LEVEL from default config
+CONSOLE_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL)
 # -----------------------------------------------------------------------------
+
+
+# =============================================================================
+# Init code
+#
+# Python version must be greater than 2.7 for this script to run
+#
+if sys.version_info < (2, 7):
+    logging.critical('----------- (V%s) Error Init -----------(Log:%s)'
+                     'This script requires Python 2.7 or newer.'
+                     'Current Python version: [%s] '
+                     'Exiting...',
+                     UPLDR_K.Version,
+                     MY_CFG.LOGGING_LEVEL,
+                     sys.version)
+    sys.exit(1)
+else:
+    logging.warning('----------- (V%s) Init -----------(Log:%s)'
+                    'Python version on this system: [%s]',
+                    UPLDR_K.Version,
+                    MY_CFG.LOGGING_LEVEL,
+                    sys.version)
+# -----------------------------------------------------------------------------
+
+
+# -----------------------------------------------------------------------------
+def my_excepthook(exc_class, exc_value, exc_tb):
+    """ my_excepthook
+
+        Exception handler to be installed over sys.excepthook to allow
+        traceback reporting information to be reported back to logging file
+    """
+    logging.critical('Exception: %s: %s', exc_class, exc_value)
+    logging.critical('%s', ''.join(traceback.format_tb(exc_tb)))
 
 
 # -----------------------------------------------------------------------------
@@ -119,21 +157,15 @@ def parse_arguments():
     # Configuration related options -------------------------------------------
     cgrpparser = parser.add_argument_group('Configuration related options')
     cgrpparser.add_argument('-C', '--config-file', action='store',
-                            # dest='xINIfile',
                             metavar='filename.ini',
                             type=str,
-                            # default=UPLDRConstants.ini_file,
                             help='Optional configuration file. '
                                  'Default is:[{!s}]'
-                            .format(UPLDRConstants.ini_file))
-    # cgrpparser.add_argument('-C', '--config-file', action='store',
-    #                         # dest='xINIfile',
-    #                         metavar='filename.ini',
-    #                         type=argparse.FileType('r'),
-    #                         default=UPLDRConstants.INIfile,
-    #                         help='Optional configuration file.'
-    #                              'default is [{!s}]'
-    #                              .format(UPLDRConstants.INIfile))
+                            .format(UPLDR_K.ini_file))
+    cgrpparser.add_argument('-a', '--authenticate', action='store_true',
+                            help='Performs/Verifies authentication with '
+                                 'Flickr. To be run on initial setup.'
+                                 'Does not run any other option.')
 
     # Verbose related options -------------------------------------------------
     vgrpparser = parser.add_argument_group('Verbose and dry-run options')
@@ -165,14 +197,8 @@ def parse_arguments():
     # used in printStat function
     igrpparser.add_argument('-l', '--list-photos-not-in-set',
                             metavar='N', type=int,
-                            help='List as many as N photos not in set. '
-                                 'Maximum listed photos is 500.')
-    # finds duplicated images (based on checksum, titlename, setName) in Flickr
-    igrpparser.add_argument('-z', '--search-for-duplicates',
-                            action='store_true',
-                            help='Lists duplicated files: same checksum, '
-                                 'same title, list SetName (if different). '
-                                 'Not operational at this time.')
+                            help='List as many as N photos (with tags) '
+                                 'not in set. Maximum listed photos is 500.')
 
     # Processing related options ----------------------------------------------
     pgrpparser = parser.add_argument_group('Processing related options')
@@ -255,61 +281,83 @@ def run_uploadr(args):
     # -------------------------------------------------------------------------
     # Local Variables
     #
-    #   FLICK        = Class Uploadr (created in the Main code)
+    #   myflick        = Class Uploadr (created in the Main code)
 
-    # Print/show arguments
-    if my_cfg.LOGGING_LEVEL <= logging.INFO:
-        NPR.niceprint('Output for arguments(args):')
-        pprint.pprint(args)
+    def check_files_dir():
+        """ check_files_dir
 
-    if args.verbose:
-        NPR.niceprint('FILES_DIR: [{!s}]'
-                      .format(NPR.strunicodeout(my_cfg.FILES_DIR)))
+            Confirms setting MYCFG.FILES_DIR is defined and a valid folder.
+            Exits from program otherwise.
+        """
+        logging.warning('FILES_DIR: [%s]', NPR.strunicodeout(MY_CFG.FILES_DIR))
+        if args.verbose:
+            NPR.niceprint('FILES_DIR: [{!s}]'
+                          .format(NPR.strunicodeout(MY_CFG.FILES_DIR)))
 
-    logging.warning('FILES_DIR: [%s]', NPR.strunicodeout(my_cfg.FILES_DIR))
-
-    if my_cfg.FILES_DIR == "":
-        NPR.niceprint('Please configure in the INI file [normally uploadr.ini]'
-                      ' the name of the folder [FILES_DIR] '
-                      'with media available to sync with Flickr.')
-        sys.exit(8)
-    else:
-        if not os.path.isdir(my_cfg.FILES_DIR):
-            logging.critical('FILES_DIR: [%s] is not valid.',
-                             NPR.strunicodeout(my_cfg.FILES_DIR))
-            NPR.niceprint('Please configure the name of an existant folder '
-                          'in the INI file [normally uploadr.ini] '
-                          'with media available to sync with Flickr. '
-                          'FILES_DIR: [{!s}] is not valid.'
-                          .format(NPR.strunicodeout(my_cfg.FILES_DIR)))
+        if MY_CFG.FILES_DIR == "":
+            NPR.niceprint('Please configure in INI file [normally uploadr.ini]'
+                          ' the name of the folder [FILES_DIR] '
+                          'with media available to sync with Flickr.')
             sys.exit(8)
+        else:
+            if not os.path.isdir(MY_CFG.FILES_DIR):
+                logging.critical('FILES_DIR: [%s] is not valid.',
+                                 NPR.strunicodeout(MY_CFG.FILES_DIR))
+                NPR.niceprint('Please configure the name of an existant folder'
+                              ' in INI file [normally uploadr.ini] '
+                              'with media available to sync with Flickr. '
+                              'FILES_DIR: [{!s}] is not valid.'
+                              .format(NPR.strunicodeout(MY_CFG.FILES_DIR)))
+                sys.exit(8)
 
-    if my_cfg.FLICKR["api_key"] == "" or my_cfg.FLICKR["secret"] == "":
-        logging.critical('Please enter an API key and secret in the '
-                         'configuration '
-                         'script file, normaly uploadr.ini (see README).')
-        NPR.niceprint('Please enter an API key and secret in the configuration'
-                      ' script file, normaly uploadr.ini (see README).')
-        sys.exit(9)
+    def check_flickr_key_secret():
+        """ def check_flickr_key_secret():
+
+            Confirms the configuration for api_key and secret is defined.
+            Exits from program otherwise.
+        """
+
+        if MY_CFG.FLICKR["api_key"] == "" or MY_CFG.FLICKR["secret"] == "":
+            logging.critical('Please enter an API key and secret in the '
+                             'configuration '
+                             'file [normaly uploadr.ini] (see README).')
+            NPR.niceprint('Please enter an API key and secret in the '
+                          'configuration'
+                          'file [normaly uploadr.ini] (see README).')
+            sys.exit(9)
+
+    # Initial checks
+    check_files_dir()
+    check_flickr_key_secret()
 
     # Instantiate class Uploadr. getCachedToken is called on __init__
-    logging.debug('Instantiating the Main class FLICK = Uploadr()')
-    FLICK = FlickrUploadr.Uploadr(my_cfg, args)
+    logging.debug('Instantiating the Main class myflick = Uploadr()')
+    myflick = FlickrUploadr.Uploadr(MY_CFG, args)
 
-    # Setup the database
-    FLICK.setupDB()
+    # Setup the database. Clean badfiles entries if asked
+    myflick.setupDB()
     if args.clean_bad_files:
-        FLICK.cleanDBbadfiles()
+        myflick.cleanDBbadfiles()
 
-    if args.daemon:
+    if args.authenticate:
+        NPR.niceprint('Checking if token is available... '
+                      'if not, will authenticate')
+        if not myflick.check_token():
+            # authenticate sys.exits in case of failure
+            myflick.authenticate()
+        else:
+            NPR.niceprint('Token is available.')
+
+    elif args.daemon:
         # Will run in daemon mode every SLEEP_TIME seconds
-        if FLICK.check_token():
-            logging.warning('Will run in daemon mode every [%s] seconds',
-                            my_cfg.SLEEP_TIME)
-            logging.warning('Make sure you have previously authenticated!')
+        if myflick.check_token():
+            logging.warning('Will run in daemon mode every [%s] seconds'
+                            'Make sure you have previously authenticated!',
+                            MY_CFG.SLEEP_TIME)
             NPR.niceprint('Will run in daemon mode every [{!s}] seconds'
-                          .format(my_cfg.SLEEP_TIME))
-            FLICK.run()
+                          'Make sure you have previously authenticated!'
+                          .format(MY_CFG.SLEEP_TIME))
+            myflick.run()
         else:
             logging.warning('Not able to connect to Flickr.'
                             'Make sure you have previously authenticated!')
@@ -319,15 +367,17 @@ def run_uploadr(args):
     else:
         NPR.niceprint('Checking if token is available... '
                       'if not will authenticate')
-        if not FLICK.check_token():
+        if not myflick.check_token():
             # authenticate sys.exits in case of failure
-            FLICK.authenticate()
+            myflick.authenticate()
+        else:
+            NPR.niceprint('Token is available.')
 
         if args.add_albums_migrate:
             NPR.niceprint('Performing preparation for migration to 2.7.0',
                           fname='addAlbumsMigrate')
 
-            if FLICK.addAlbumsMigrate():
+            if myflick.addAlbumsMigrate():
                 NPR.niceprint('Successfully added album tags to pics '
                               'on upload.',
                               fname='addAlbumsMigrate')
@@ -343,33 +393,30 @@ def run_uploadr(args):
         elif args.list_bad_files:
             NPR.niceprint('Listing badfiles: Start.',
                           fname='listBadFiles')
-            FLICK.listBadFiles()
+            myflick.listBadFiles()
             NPR.niceprint('Listing badfiles: End. No more options will run.',
                           fname='listBadFiles')
         else:
-            FLICK.removeUselessSetsTable()
-            FLICK.getFlickrSets()
-            FLICK.upload()
-            FLICK.removeDeletedMedia()
-
-            if args.search_for_duplicates:
-                FLICK.searchForDuplicates()
+            myflick.removeUselessSetsTable()
+            myflick.getFlickrSets()
+            myflick.upload()
+            myflick.removeDeletedMedia()
 
             if args.remove_excluded:
-                FLICK.removeExcludedMedia()
+                myflick.remove_excluded_media()
 
-            FLICK.createSets()
-            FLICK.printStat(UPLDRConstantsClass.media_count)
+            myflick.createSets()
+            myflick.printStat(UPLDRConstantsClass.media_count)
     # Run Uploadr -------------------------------------------------------------
 
 
 # -----------------------------------------------------------------------------
-# checkBaseDir_INIfile
+# check_base_ini_file
 #
 # Check if base_dir folder exists and ini_file exists and is a file
 #
-def checkBaseDir_INIfile(base_dir, ini_file):
-    """checkBaseDir_INIfile
+def check_base_ini_file(base_dir, ini_file):
+    """check_base_ini_file
 
     base_dir = Folder
     ini_file = INI File path
@@ -380,47 +427,46 @@ def checkBaseDir_INIfile(base_dir, ini_file):
         if not ((base_dir == '' or os.path.isdir(base_dir)) and
                 os.path.isfile(ini_file)):
             raise OSError('[Errno 2] No such file or directory')
-    except Exception as err:
+    except OSError as err:
         result_check = False
         logging.critical(
             'Config folder [%s] and/or INI file: [%s] not found or '
             'incorrect format: [%s]!', base_dir, ini_file, str(err))
 
-    logging.debug('result_check=[{%s]', result_check)
+    logging.debug('check_base_ini_file=[%s]', result_check)
     return result_check
 
 
 # =============================================================================
 # Global Variables
 #
-#   NUTIME = for working with time module (import time)
-#
 # -----------------------------------------------------------------------------
-NUTIME = time
-# -----------------------------------------------------------------------------
-
-# =============================================================================
-# Class UPLDRConstants
+# Class UPLDReConstants
 #
 #   media_count = Counter of total files to initially upload
 #   base_dir      = Base configuration directory location
 #   ini_file      = Configuration file
 # -----------------------------------------------------------------------------
 # UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
-UPLDRConstants.media_count = 0
+UPLDR_K.media_count = 0
 # Base dir for config and support files.
-#   Will use --config-file argument option
-#   If not, first try sys.prefix/etc folder
-#   If not, then try Current Working Directory
-UPLDRConstants.base_dir = os.path.join(sys.prefix, 'etc')
-UPLDRConstants.ini_file = os.path.join(UPLDRConstants.base_dir, "uploadr.ini")
+#   Will use --config-file argument option [after PARSED_ARGS]
+#   If not, first try sys.prefix/etc folder [not operational]
+#   If not, then try Current Working Directory (getcwd) [not operational]
+#   If not, then try folder where uploadr.py is located (dirname(sys.argv[0]))
+# UPLDR_K.base_dir = os.path.join(sys.prefix, 'etc')
+# UPLDR_K.base_dir = os.getcwd()
+UPLDR_K.base_dir = os.path.dirname(sys.argv[0])
+UPLDR_K.ini_file = os.path.join(UPLDR_K.base_dir, "uploadr.ini")
+UPLDR_K.err_file = os.path.join(UPLDR_K.base_dir, "uploadr.err")
 
-if my_cfg.LOGGING_LEVEL <= logging.DEBUG:
-    logging.debug('      base_dir:[%s]', UPLDRConstants.base_dir)
-    logging.debug('           cwd:[%s]', os.getcwd())
-    logging.debug('    prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
-    logging.debug('   sys.argv[0]:[%s]', os.path.dirname(sys.argv[0]))
-    logging.debug('      ini_file:[%s]', UPLDRConstants.ini_file)
+# CODING: Debug a series of control values
+logging.info('      base_dir:[%s]', UPLDR_K.base_dir)
+logging.info('           cwd:[%s]', os.getcwd())
+logging.info('    prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
+logging.info('   sys.argv[0]:[%s]', os.path.dirname(sys.argv[0]))
+logging.info('      ini_file:[%s]', UPLDR_K.ini_file)
+logging.info('      err_file:[%s]', UPLDR_K.err_file)
 # -----------------------------------------------------------------------------
 
 # =============================================================================
@@ -431,44 +477,32 @@ if my_cfg.LOGGING_LEVEL <= logging.DEBUG:
 NPR = NicePrint.NicePrint()
 # -----------------------------------------------------------------------------
 
-# =============================================================================
-# Init code
-#
-# Python version must be greater than 2.7 for this script to run
-#
-if sys.version_info < (2, 7):
-    sys.stderr.write('--------- (V' + UPLDRConstants.Version +
-                     ') Error Init: ' + ' ---------\n')
-    sys.stderr.write("This script requires Python 2.7 or newer.\n")
-    sys.stderr.write("Current version: " + sys.version + "\n")
-    sys.stderr.flush()
-    sys.exit(1)
-else:
-    sys.stderr.write('--------- (V' + UPLDRConstants.Version +
-                     ') Init: ' + ' ---------\n')
-    sys.stderr.write('Python version on this system: ' + sys.version + '\n')
-    sys.stderr.flush()
-# -----------------------------------------------------------------------------
-
 
 # =============================================================================
 # Main code
 #
-NPR.niceprint('--------- (V{!s}) Start time: {!s} ---------(Log:{!s})'
-              .format(UPLDRConstants.Version,
-                      NUTIME.strftime(UPLDRConstants.TimeFormat),
-                      my_cfg.LOGGING_LEVEL))
+NPR.niceprint('----------- (V{!s}) Start -----------(Log:{!s})'
+              .format(UPLDR_K.Version,
+                      MY_CFG.LOGGING_LEVEL))
+# Install exception handler
+sys.excepthook = my_excepthook
+
 if __name__ == "__main__":
-    # Parse the argumens options
+    # Parse the arguments options
     PARSED_ARGS = parse_arguments()
+
+    # Print/show arguments
+    if MY_CFG.LOGGING_LEVEL <= logging.INFO:
+        NPR.niceprint('Output for arguments(args):')
+        pprint.pprint(PARSED_ARGS)
 
     # Argument --config-file overrides configuration filename.
     if PARSED_ARGS.config_file:
-        UPLDRConstants.ini_file = PARSED_ARGS.config_file
-        logging.info('UPLDRConstants.ini_file:[%s]',
-                     NPR.strunicodeout(UPLDRConstants.ini_file))
-        if not checkBaseDir_INIfile(UPLDRConstants.base_dir,
-                                    UPLDRConstants.ini_file):
+        UPLDR_K.ini_file = PARSED_ARGS.config_file
+        logging.info('UPLDR_K.ini_file:[%s]',
+                     NPR.strunicodeout(UPLDR_K.ini_file))
+        if not check_base_ini_file(UPLDR_K.base_dir,
+                                   UPLDR_K.ini_file):
             NPR.niceerror(caught=True,
                           caughtprefix='+++ ',
                           caughtcode='601',
@@ -477,13 +511,8 @@ if __name__ == "__main__":
                           useniceprint=True)
             sys.exit(2)
     else:
-        # sys.argv[0]
-        UPLDRConstants.base_dir = os.path.dirname(sys.argv[0])
-        UPLDRConstants.ini_file = os.path.join(UPLDRConstants.base_dir,
-                                               'uploadr.ini')
-
-        if not checkBaseDir_INIfile(UPLDRConstants.base_dir,
-                                    UPLDRConstants.ini_file):
+        if not check_base_ini_file(UPLDR_K.base_dir,
+                                   UPLDR_K.ini_file):
             NPR.niceerror(caught=True,
                           caughtprefix='+++ ',
                           caughtcode='602',
@@ -492,26 +521,68 @@ if __name__ == "__main__":
             sys.exit(2)
 
     # Source configuration from ini_file
-    my_cfg.readconfig(UPLDRConstants.ini_file, ['Config'])
-    if my_cfg.processconfig():
-        if my_cfg.verifyconfig():
+    MY_CFG.readconfig(UPLDR_K.ini_file, ['Config'])
+    if MY_CFG.processconfig():
+        if MY_CFG.verifyconfig():
             pass
         else:
             raise ValueError('No config file found or incorrect config!')
     else:
         raise ValueError('No config file found or incorrect config!')
 
-    # Update logging level as per LOGGING_LEVEL from INI file
-    logging.getLogger().setLevel(my_cfg.LOGGING_LEVEL)
+    # Rotating LOGGING level to err_file
+    if MY_CFG.ROTATING_LOGGING:
+        ROTATING_LOGGING = None
+        if not os.path.isdir(os.path.dirname(MY_CFG.ROTATING_LOGGING_PATH)):
+            NPR.niceerror(caught=True,
+                          caughtprefix='+++ ',
+                          caughtcode='603',
+                          caughtmsg='Invalid ROTATING_LOGGING config.',
+                          useniceprint=True)
+        else:
+            # Define a rotating file Handler which writes DEBUG messages
+            # or higher to err_file
+            ROTATING_LOGGING = logging.handlers.RotatingFileHandler(
+                MY_CFG.ROTATING_LOGGING_PATH,
+                maxBytes=MY_CFG.ROTATING_LOGGING_FILE_SIZE,
+                backupCount=MY_CFG.ROTATING_LOGGING_FILE_COUNT)
+            ROTATING_LOGGING.setLevel(MY_CFG.ROTATING_LOGGING_LEVEL)
+            ROTATING_LOGGING.setFormatter(logging.Formatter(
+                fmt='[' + str(UPLDR_K.Run) + ']' +
+                '[%(asctime)s]:[%(processName)-11s]' +
+                '[%(levelname)-8s]:[%(name)s] %(message)s',
+                datefmt=UPLDR_K.TimeFormat))
+            logging.getLogger().addHandler(ROTATING_LOGGING)
 
-    if my_cfg.LOGGING_LEVEL <= logging.INFO:
+            logging.warning('----------- (V%s) Init Rotating '
+                            '-----------(Log:%s)\n'
+                            'Python version on this system: [%s]',
+                            UPLDR_K.Version,
+                            MY_CFG.LOGGING_LEVEL,
+                            sys.version)
+
+    # Update console/rotating logging level as per LOGGING_LEVEL from INI file
+    logging.warning('CONSOLE_LOGGING.setLevel=[%s] '
+                    'ROTATING_LOGGING.setLevel/enabled?=[%s/%s] '
+                    'MY_CFG.LOGGING_LEVEL=[%s]',
+                    MY_CFG.LOGGING_LEVEL,
+                    MY_CFG.ROTATING_LOGGING_LEVEL,
+                    MY_CFG.ROTATING_LOGGING,
+                    MY_CFG.LOGGING_LEVEL)
+    CONSOLE_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL)
+    if MY_CFG.ROTATING_LOGGING:
+        ROTATING_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL if
+                                  MY_CFG.LOGGING_LEVEL <= logging.DEBUG
+                                  else MY_CFG.LOGGING_LEVEL - 10)
+
+    if MY_CFG.LOGGING_LEVEL <= logging.INFO:
         NPR.niceprint('Output for FLICKR Configuration:')
-        pprint.pprint(my_cfg.FLICKR)
+        pprint.pprint(MY_CFG.FLICKR)
 
     # Ensure that only one instance of this script is running
     try:
         # FileLocker is an alias to portalocker (if available) or fcntl
-        FILELOCK(open(my_cfg.LOCK_PATH, 'w'),
+        FILELOCK(open(MY_CFG.LOCK_PATH, 'w'),
                  FileLocker.LOCK_EX | FileLocker.LOCK_NB)
     except IOError as err:
         if err.errno == errno.EAGAIN:
@@ -524,9 +595,9 @@ if __name__ == "__main__":
     # Run uploader
     run_uploadr(PARSED_ARGS)
 
-NPR.niceprint('--------- (V{!s}) End time: {!s} -----------(Log:{!s})'
-              .format(UPLDRConstants.Version,
-                      NUTIME.strftime(UPLDRConstants.TimeFormat),
-                      my_cfg.LOGGING_LEVEL))
-sys.stderr.write('--------- ' + 'End: ' + ' ---------\n')
-sys.stderr.flush()
+NPR.niceprint('----------- (V{!s}) End -----------(Log:{!s})'
+              .format(UPLDR_K.Version,
+                      MY_CFG.LOGGING_LEVEL))
+logging.warning('----------- (V%s) End -----------(Log:%s)',
+                UPLDR_K.Version,
+                MY_CFG.LOGGING_LEVEL)

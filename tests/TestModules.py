@@ -38,7 +38,7 @@ class TestNicePrintMethods(unittest.TestCase):
 
         print(astr.getvalue())
         print('type:{}'.format(type(astr)))
-        npre = '\[[0-9. :]+\].+hello$'
+        npre = r'\[[0-9. :]+\].+hello$'
         self.assertRegexpMatches(astr.getvalue(), npre)
 
     def test_unicode(self):
@@ -115,22 +115,22 @@ class TestUPLDRConstantsMethods(unittest.TestCase):
     def test_media_count(self):
         """ test_media_count
         """
-        UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
+        upldr_k = UPLDRConstantsClass.UPLDRConstants()
 
         for j in range(1, 20):
-            UPLDRConstants.media_count = j
-            self.assertEqual(UPLDRConstants.media_count, j)
+            upldr_k.media_count = j
+            self.assertEqual(upldr_k.media_count, j)
 
 
 if __name__ == '__main__':
     # unittest.main()
 
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestMethods)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    SUITE = unittest.TestLoader().loadTestsFromTestCase(TestMethods)
+    unittest.TextTestRunner(verbosity=2).run(SUITE)
 
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestNicePrintMethods)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    SUITE = unittest.TestLoader().loadTestsFromTestCase(TestNicePrintMethods)
+    unittest.TextTestRunner(verbosity=2).run(SUITE)
 
-    suite = unittest.TestLoader().loadTestsFromTestCase(
+    SUITE = unittest.TestLoader().loadTestsFromTestCase(
         TestUPLDRConstantsMethods)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    unittest.TextTestRunner(verbosity=2).run(SUITE)

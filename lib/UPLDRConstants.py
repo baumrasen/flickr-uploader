@@ -50,17 +50,17 @@ class UPLDRConstants:
             Version = __version__.__version__
         else:
             Version = '2.7.0'
-    except BaseException:
+    except Exception:
         Version = '2.7.0'
 
     # -------------------------------------------------------------------------
     # Color Codes for colorful output
-    W = '\033[0m'    # white (normal)
-    R = '\033[31m'   # red
-    G = '\033[32m'   # green
-    Or = '\033[33m'   # orange
-    B = '\033[34m'   # blue
-    P = '\033[35m'   # purple
+    Std = '\033[0m'    # white (standard/normal)
+    Red = '\033[31m'   # red
+    Gre = '\033[32m'   # green
+    Ora = '\033[33m'   # orange
+    Blu = '\033[34m'   # blue
+    Pur = '\033[35m'   # purple
 
     # -------------------------------------------------------------------------
     # class UPLDRConstants __init__
@@ -74,9 +74,11 @@ class UPLDRConstants:
         #
         #   base_dir      = Base configuration directory for files
         #   ini_file      = Location of INI file, normally named "uploadr.ini"
+        #   err_file      = Location of ERR file, normally named "uploadr.err"
         #
         self.base_dir = str('.')
         self.ini_file = str('uploadr.ini')
+        self.err_file = str('uploadr.err')
 
 
 # -----------------------------------------------------------------------------

@@ -67,6 +67,10 @@ class MyConfig(object):
         True
         >>> CFG.LOGGING_LEVEL == ELog
         True
+        >>> CFG.ROTATING_LOGGING_FILE_SIZE == 25*1024*1024
+        True
+        >>> CFG.ROTATING_LOGGING_FILE_COUNT == 3
+        True
 
     """
     # =====================================================================
@@ -82,7 +86,7 @@ class MyConfig(object):
     # Config section ----------------------------------------------------------
     INISections = ['Config']
     # Default configuration keys/values pairs ---------------------------------
-    INIkeys = [
+    ini_keys = [
         'FILES_DIR',
         'FLICKR',
         'SLEEP_TIME',
@@ -102,7 +106,12 @@ class MyConfig(object):
         'FULL_SET_NAME',
         'MAX_SQL_ATTEMPTS',
         'MAX_UPLOAD_ATTEMPTS',
-        'LOGGING_LEVEL'
+        'LOGGING_LEVEL',
+        'ROTATING_LOGGING',
+        'ROTATING_LOGGING_PATH',
+        'ROTATING_LOGGING_FILE_SIZE',
+        'ROTATING_LOGGING_FILE_COUNT',
+        'ROTATING_LOGGING_LEVEL'
     ]
     # Default configuration keys/values pairs ---------------------------------
     INIvalues = [
@@ -159,8 +168,18 @@ class MyConfig(object):
         "3",
         # MAX_UPLOAD_ATTEMPTS
         "10",
-        # LOGGING_LEVEL (40 = logging.ERROR)
-        "40"
+        # LOGGING_LEVEL (30 = logging.ERROR). Note: Affects doctests results
+        "40",
+        # ROTATING_LOGGING
+        "False",
+        # ROTATING_LOGGING_PATH
+        "os.path.join(os.path.dirname(sys.argv[0]), 'uploadr.err')",
+        # ROTATING_LOGGING_FILE_SIZE
+        "25*1024*1024",  # 25 MBytes
+        # ROTATING_LOGGING_FILE_COUNT
+        "3",
+        # ROTATING_LOGGING_LEVEL
+        "30"
     ]
 
     # -------------------------------------------------------------------------
@@ -173,7 +192,7 @@ class MyConfig(object):
         """
 
         # Assume default values into class dictionary of values ---------------
-        self.__dict__ = dict(zip(self.INIkeys, self.INIvalues))
+        self.__dict__ = dict(zip(self.ini_keys, self.INIvalues))
 
         if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
             logging.debug('\t\t\t\tDefault INI key/values pairs...')
@@ -211,7 +230,7 @@ class MyConfig(object):
 
             # Find incorrect config keys on INI File and delete them
             dropkeys = [key for key in self.__dict__.keys()
-                        if key not in self.INIkeys]
+                        if key not in self.ini_keys]
             logging.debug('dropkeys:[%s]', dropkeys)
             for key in dropkeys:
                 logging.debug('del key:[%s]', key)
@@ -244,9 +263,11 @@ class MyConfig(object):
     #
     def processconfig(self):
         """ processconfig
+
+            Evaluates configuration items. Uses default values if not valid.
         """
         # Default types for keys/values pairs ---------------------------------
-        INItypes = [
+        ini_types = [
             'str',   # 'FILES_DIR',
             'dict',  # 'FLICKR',
             'int',   # 'SLEEP_TIME',
@@ -266,16 +287,21 @@ class MyConfig(object):
             'bool',  # 'FULL_SET_NAME',
             'int',   # 'MAX_SQL_ATTEMPTS',
             'int',   # 'MAX_UPLOAD_ATTEMPTS',
-            'int'    # 'LOGGING_LEVEL'
+            'int',   # 'LOGGING_LEVEL',
+            'bool',  # ROTATING_LOGGING
+            'str',   # ROTATING_LOGGING_PATH,
+            'int',   # ROTATING_LOGGING_FILE_SIZE,
+            'int',   # ROTATING_LOGGING_FILE_COUNT,
+            'int'    # ROTATING_LOGGING_LEVEL
         ]
-        INIcheck = dict(zip(self.INIkeys, INItypes))
+        ini_check = dict(zip(self.ini_keys, ini_types))
         if logging.getLogger().getEffectiveLevel() <= logging.INFO:
             logging.debug('\t\t\t\tDefault INI key/type pairs...')
-            for item in sorted(INIcheck):
+            for item in sorted(ini_check):
                 logging.debug('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                               .format(item,
-                                      type(INIcheck[item]),
-                                      self.strunicodeout(INIcheck[item])))
+                                      type(ini_check[item]),
+                                      self.strunicodeout(ini_check[item])))
         # Evaluate values
         for item in sorted(self.__dict__):
             logging.debug('Eval for : [{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
@@ -284,30 +310,33 @@ class MyConfig(object):
                                   self.strunicodeout(self.__dict__[item])))
 
             try:
-                if INIcheck[item] in ('list', 'int', 'bool', 'str', 'dict'):
+                if ini_check[item] in ('list', 'int', 'bool', 'str', 'dict'):
                     logging.debug('isinstance=%s',
                                   isinstance(eval(self.__dict__[item]),
-                                             eval(INIcheck[item])))
+                                             eval(ini_check[item])))
                     if not(isinstance(eval(self.__dict__[item]),
-                                      eval(INIcheck[item]))):
-                        raise
+                                      eval(ini_check[item]))):
+                        raise ValueError('Incorrect config item:[{!s}]'
+                                         .format(item))
+
                 else:
-                    raise
-            except BaseException:
+                    raise ValueError('Incorrect config item:[{!s}]'
+                                     .format(item))
+            except Exception:
                 self.niceerror(caught=True,
                                caughtprefix='+++ ',
                                caughtcode='800',
-                               caughtmsg='Caught an exception INIcheck',
+                               caughtmsg='Caught an exception ini_check',
                                exceptsysinfo=True)
-                logging.critical('Invalid INI value for:[%s] '
-                                 'Using default value:[%s]',
-                                 item,
-                                 self.INIvalues[self.INIkeys.index(str(item))])
+                logging.critical(
+                    'Invalid INI value for:[%s] Using default value:[%s]',
+                    item,
+                    self.INIvalues[self.ini_keys.index(str(item))])
                 # Using default value to avoid exiting.
                 # Use verifyconfig  to confirm valid values.
                 self.__dict__.update(dict(zip(
                     [item],
-                    [self.INIvalues[self.INIkeys.index(str(item))]])))
+                    [self.INIvalues[self.ini_keys.index(str(item))]])))
             finally:
                 self.__dict__[item] = eval(self.__dict__[item])
                 logging.debug('Eval done: [{!s:20s}]/type:[{!s:13s}] '
@@ -333,34 +362,41 @@ class MyConfig(object):
     #
     def verifyconfig(self):
         """ verifyconfig
+
+            Verifies configuration. Must be called after processconfig().
         """
 
         def verify_logging_level():
             """ verify_logging_level
+
+                Verifies Logging related option is set to a valid value.
             """
 
-            # Further specific processing... LOGGING_LEVEL
-            if self.__dict__['LOGGING_LEVEL'] not in\
-                    [logging.NOTSET,
-                     logging.DEBUG,
-                     logging.INFO,
-                     logging.WARNING,
-                     logging.ERROR,
-                     logging.CRITICAL]:
-                self.__dict__['LOGGING_LEVEL'] = logging.ERROR
-            # Convert LOGGING_LEVEL into int() for later use in conditionals
-            self.__dict__['LOGGING_LEVEL'] = int(str(
-                self.__dict__['LOGGING_LEVEL']))
+            # Further specific processing... LOGGING_LEVELs
+            for level in ['LOGGING_LEVEL', 'ROTATING_LOGGING_LEVEL']:
+                if self.__dict__[level] not in\
+                        [logging.NOTSET,
+                         logging.DEBUG,
+                         logging.INFO,
+                         logging.WARNING,
+                         logging.ERROR,
+                         logging.CRITICAL]:
+                    self.__dict__[level] = logging.ERROR
+                # Convert LOGGING_LEVEL into int() for use in conditionals
+                self.__dict__[level] = int(str(self.__dict__[level]))
 
             return True
 
         def verify_files_dir():
             """ verify_files_dir
+
+                Checks folder is valid and exists.
             """
 
             result = True
             # Further specific processing... FILES_DIR
             for item in ['FILES_DIR']:  # Check if dir exists. Unicode Support
+
                 logging.debug('verifyconfig for [%s]', item)
                 if not self.is_str_unicode(self.__dict__[item]):
                     self.__dict__[item] = unicode(  # noqa
@@ -368,17 +404,19 @@ class MyConfig(object):
                         'utf-8') \
                         if sys.version_info < (3, ) \
                         else str(self.__dict__[item])
+
                 if not os.path.isdir(self.__dict__[item]):
                     logging.critical('%s: [%s] is not a valid folder.',
                                      item,
                                      self.strunicodeout(self.__dict__[item]))
                     result = False
+
             return result
 
         def verify_paths():
             """ verify_paths
 
-                Further specific verification processing...
+                Checks parent folder for item (file) is valid and exists for:
                       DB_PATH
                       LOCK_PATH
                       TOKEN_CACHE
@@ -390,6 +428,7 @@ class MyConfig(object):
                          'LOCK_PATH',
                          'TOKEN_CACHE',
                          'TOKEN_PATH']:
+
                 logging.debug('verifyconfig for [%s]', item)
                 if not self.is_str_unicode(self.__dict__[item]):
                     self.__dict__[item] = unicode(  # noqa
@@ -397,7 +436,8 @@ class MyConfig(object):
                         'utf-8') \
                         if sys.version_info < (3, ) \
                         else str(self.__dict__[item])
-                if (len(os.path.dirname(self.__dict__[item])) > 0 and
+
+                if (os.path.dirname(self.__dict__[item]) and
                         not os.path.isdir(
                             os.path.dirname(self.__dict__[item]))):
                     logging.critical('%s:[%s] is not in a valid folder:[%s].',
@@ -408,10 +448,41 @@ class MyConfig(object):
                     result = False
             return result
 
+        def verify_rotating_path():
+            """ verify_rotating_path
+
+                Checks parent folder for item (file) is valid and exists.
+                      ROTATING_LOGGING_PATH
+            """
+
+            result = True
+            if self.__dict__['ROTATING_LOGGING']:
+                for item in ['ROTATING_LOGGING_PATH']:
+                    logging.debug('verifyconfig for [%s]', item)
+                    if not self.is_str_unicode(self.__dict__[item]):
+                        self.__dict__[item] = unicode(  # noqa
+                            self.__dict__[item],
+                            'utf-8') \
+                            if sys.version_info < (3, ) \
+                            else str(self.__dict__[item])
+
+                    if (os.path.dirname(self.__dict__[item]) and
+                            not os.path.isdir(
+                                os.path.dirname(self.__dict__[item]))):
+                        logging.critical('%s:[%s] is not in '
+                                         'a valid folder:[%s].',
+                                         item,
+                                         self.strunicodeout(
+                                             self.__dict__[item]),
+                                         self.strunicodeout(os.path.dirname(
+                                             self.__dict__[item])))
+                        result = False
+            return result
+
         def verify_raw_files():
             """ verify_raw_files
 
-                Verify raw realted configuration.
+                Verify raw related configuration.
             """
 
             result = True
@@ -507,6 +578,8 @@ class MyConfig(object):
         elif not verify_files_dir():
             returnverify = False
         elif not verify_paths():
+            returnverify = False
+        elif not verify_rotating_path():
             returnverify = False
         elif not verify_raw_files():
             returnverify = False

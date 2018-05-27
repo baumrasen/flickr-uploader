@@ -29,7 +29,7 @@ DESCRIPTION = 'Upload a directory of media to Flickr to use as a backup to '
 'your local storage. flickr-uploader designed primarly for Synology Devices.'
 URL = 'https://github.com/oPromessa/flickr-uploader/'
 
-EMAIL = 'oPromessa@github.com'
+EMAIL = 'oPromessa@gmail.com'
 AUTHOR = 'oPromessa'
 REQUIRES_PYTHON = '>=2.7.*, >=3.6.*, <4'
 LIB = 'lib'
@@ -40,7 +40,11 @@ REQUIRED = [
     'flickrapi',
 ]
 # What data_files are required for this applicaiton to be configured?
-DATA_FILES = [('', ['uploadr.ini', 'uploadr.cron'])]
+DATA_FILES = [('etc', ['uploadr.ini', 'uploadr.cron'])]
+
+# Use with upload command for PYPI test url: test.pypi.org
+# PYPI_REPOSITORY = ''
+PYPI_REPOSITORY = '--repository-url https://test.pypi.org/legacy/'
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
@@ -99,9 +103,9 @@ class UploadCommand(Command):
         os.system('{0} setup.py sdist bdist_wheel --universal'
                   .format(sys.executable))
 
-        # Upload disabled for now
-        # self.bstatus('Uploading the package to PyPi via Twine...')
+        self.bstatus('Uploading the package to PyPi via Twine...')
         # os.system('twine upload dist/*')
+        os.system('twine upload {!s} dist/*'.format(PYPI_REPOSITORY))
 
         # upload to GitHub disabled for now
         # self.bstatus('Pushing git tags...')
@@ -238,7 +242,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
         # Pick your license as you wish (should match "license" above)
@@ -247,7 +251,10 @@ setup(
         # that you indicate whether you support Python 2, Python 3 or both.
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.6'
+        'Programming Language :: Python :: 3.6',
+        'Topic :: Multimedia',
+        'Topic :: System :: Archiving :: Backup',
+        'Topic :: System :: Archiving :: Mirroring'
     ],
     # $ setup.py publish support.
     cmdclass={

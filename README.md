@@ -77,12 +77,13 @@ You should get the following depending on how the setting FULL_SET_NAME is set:
 * portalocker module for Windows systems. Not mandatory for Synology.
 * File write access (for the token and local database)
 * Flickr API key (free)
+* exiftool, **only** if you intend to convert RAW files to JPG. [Install instructions here.](https://sno.phy.queensu.ca/%7Ephil/exiftool/install.html). Note: You need to also install the DSM Package Perl.
 
 ## Setup on Synology
 --------------------
-Might work on other platforms like Windows also.
-*Side note:* don't be overwhelmed with this setup. They are quite straitghtforward.
-Summary steps:
+- Might work on other platforms like Windows also.
+- *Side note:* don't be overwhelmed with this setup. They are quite straitghtforward.
+- Summary steps:
 
 1. Enable SSH access to Synology DSM Server. (Optionally) install Python 3.
 2. Prepare a local folder location for Python modules install
@@ -186,7 +187,7 @@ Finished processing dependencies for flickrapi==2.4.0
 ```
 
 ###  5. Download and install flickr-uploader
-- Soon to be available on Pypi.org for installation also via PIP
+- Soon to be available on Pypi.org for installation also via PIP.
 - For now you can download it from GitHub [flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest).
 - You can find under **Assets**:
    * the source code packages;
@@ -196,12 +197,11 @@ Finished processing dependencies for flickrapi==2.4.0
    * Edit the uploadr.ini as appropriate (check Configuration section)
 ```bash
 $ cd
-$ cd dev
-dev$ wget https://github.com/oPromessa/flickr-uploader/releases/download/2.8.5/flickr-uploader-2.8.5.tar.gz
-dev$ tar xzvf flickr-uploader-2.8.5.tar.gz
-dev$ cd flickr-uploader-2.8.5
-dev/flickr-uploader-2.8.5$ python3.5 setup.py install --prefix=~/apps/Python/
-dev/flickr-uploader-2.8.5$ python3.5 setup.py installcfg --folder ~/apps
+$ cd apps
+apps$ wget https://github.com/oPromessa/flickr-uploader/releases/download/2.8.5/flickr-uploader-2.8.5.tar.gz
+apps$ tar xzvf flickr-uploader-2.8.5.tar.gz
+apps$ cd flickr-uploader-2.8.5
+apps$ ./uplaodr.py -a
 ```
 
 ## Configuration

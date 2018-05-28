@@ -451,7 +451,8 @@ def check_base_ini_file(base_dir, ini_file):
 UPLDR_K.media_count = 0
 # Base dir for config and support files.
 #   Will use --config-file argument option [after PARSED_ARGS]
-#   If not, first try sys.prefix/etc folder [not operational]
+#   If not, first try os.path.abspath(os.path.dirname(__file__))
+#   If not, then try sys.prefix/etc folder [not operational]
 #   If not, then try Current Working Directory (getcwd) [not operational]
 #   If not, then try folder where uploadr.py is located (dirname(sys.argv[0]))
 # UPLDR_K.base_dir = os.path.join(sys.prefix, 'etc')
@@ -461,12 +462,14 @@ UPLDR_K.ini_file = os.path.join(UPLDR_K.base_dir, "uploadr.ini")
 UPLDR_K.err_file = os.path.join(UPLDR_K.base_dir, "uploadr.err")
 
 # CODING: Debug a series of control values
-logging.info('      base_dir:[%s]', UPLDR_K.base_dir)
-logging.info('           cwd:[%s]', os.getcwd())
-logging.info('    prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
-logging.info('   sys.argv[0]:[%s]', os.path.dirname(sys.argv[0]))
-logging.info('      ini_file:[%s]', UPLDR_K.ini_file)
-logging.info('      err_file:[%s]', UPLDR_K.err_file)
+logging.critical('      base_dir:[%s]', UPLDR_K.base_dir)
+logging.critical('           cwd:[%s]', os.getcwd())
+logging.critical('    prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
+logging.critical('   sys.argv[0]:[%s]', os.path.dirname(sys.argv[0]))
+logging.critical('      __file__:[%s]', __file__)
+logging.critical('path(__file__):[%s]', os.path.abspath(os.path.dirname(__file__)))
+logging.critical('      ini_file:[%s]', UPLDR_K.ini_file)
+logging.critical('      err_file:[%s]', UPLDR_K.err_file)
 # -----------------------------------------------------------------------------
 
 # =============================================================================

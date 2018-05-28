@@ -4,9 +4,9 @@
 
 ## Pending improvements
 -----------------------
-* FlickrUploadr Use Exception or BaseException?
- W:613,23: Catching too general exception Exception (broad-except)
-* Set PATHS based on a BASE Dir vairable in INI file... all others to depend on this onw. How?
+* Pypi test install:
+  pip2.7 install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple flickr-uploader  --prefix=~/apps/Python 
+* Set PATHS based on a BASE Dir variable in INI file... all others to depend on this onw. How?
 * Reconfirm the uploading sequence when -u option is set which
   affects isLoaded = False control variable
 * "Check for duplicates/wrong checksum" on upload may not be working fully!

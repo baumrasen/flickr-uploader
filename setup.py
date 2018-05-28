@@ -215,6 +215,7 @@ setup(
     version=ABOUT['__version__'],
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
+    long_description_content_type="text/markdown",
     author=AUTHOR,
     author_email=EMAIL,
     # Support for this feature is relatively recent.

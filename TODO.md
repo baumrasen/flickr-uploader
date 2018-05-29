@@ -5,7 +5,11 @@
 ## Pending improvements
 -----------------------
 * Pypi test install:
-  pip2.7 install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple flickr-uploader  --prefix=~/apps/Python 
+  pip2.7 install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple flickr-uploader  --prefix=~/apps/Python
+  Use flickr-uploader==2.8.6a1 to install a specific version (alpha1 in this case)
+* python setup.py install: use --old-and-unmanageable option to data copy files.
+  python2.7 setup.py install --prefix=~/apps/Python --old-and-unmanageable
+  drop installcfg option
 * Set PATHS based on a BASE Dir variable in INI file... all others to depend on this onw. How?
 * Reconfirm the uploading sequence when -u option is set which
   affects isLoaded = False control variable

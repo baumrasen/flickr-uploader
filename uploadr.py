@@ -75,6 +75,9 @@ import lib.NicePrint as NicePrint
 # -----------------------------------------------------------------------------
 # Helper class and functions to load, process and verify INI configuration.
 import lib.MyConfig as MyConfig
+# -----------------------------------------------------------------------------
+# Helper class to allow multiprocessing looging into a single file
+import lib.multiprocessing_logging as multiprocessing_logging
 
 
 # =============================================================================
@@ -579,6 +582,11 @@ if __name__ == "__main__":
         ROTATING_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL if
                                   MY_CFG.LOGGING_LEVEL <= logging.DEBUG
                                   else MY_CFG.LOGGING_LEVEL - 10)
+
+    # Allow multiprocessing looging into a single file (not for Windows)
+    logging.info('multiprocessing logging handlers: Activating...')
+    multiprocessing_logging.install_mp_handler()
+    logging.info('multiprocessing logging handlers: Activated.')
 
     if MY_CFG.LOGGING_LEVEL <= logging.INFO:
         NPR.niceprint('Output for FLICKR Configuration:')

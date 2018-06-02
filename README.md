@@ -394,6 +394,8 @@ Inspired by:
 * https://github.com/sybrenstuvel/flickrapi
 * http://micampe.it/things/flickruploadr
 * https://github.com/joelmx/flickrUploadr
+Makes dynamic use of the following libraries:
+* https://github.com/jruere/multiprocessing-logging under **GNU LESSER GENERAL PUBLIC LICENSE**
 
 ## Final remarks
 ---------------
@@ -469,3 +471,6 @@ Photos count:
                Flickr:[   750]
 Not in sets on Flickr:[     0]
 ```
+
+* Q: What happens if the local control Database (flickrdb) is deleted?
+  - By re-running the program **without the -u opiotn** it will go thru your local files and check/search for already loaded pics with same checksum+Set and re-builds the local database.

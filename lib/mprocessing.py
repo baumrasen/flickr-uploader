@@ -27,14 +27,21 @@ def mprocessing(args_verbose, args_verbose_progress,
                 nprocs, lockdb, running, mutex, itemslist, a_fn, cur):
     """ mprocessing Function
 
-    verbose          = verbose info
-    verbose_progress = further verbose
-    nprocs           = Number of processes to launch
-    lockdb           = lock for access to Database
-    running          = Value to count processed items
-    mutex            = mutex for access to value running
+    verbose          = verbose info (bool)
+    verbose_progress = further verbose (bool)
+    nprocs           = Number of processes to launch (int)
+    lockdb           = lock for access to Database (lock obj to be created)
+    running          = Value to count processed items (count obj to be created)
+    mutex            = mutex for access to value running (obj to be created)
     itemslist        = list of items to be processed
     a_fn             = a function which is the target of the multiprocessing
+                       a_fn must cater the following arguments
+                            lockdb
+                            running
+                            mutex
+                            splititemslist = partial splitted list
+                            count_total    = len(itemslist)
+                            cur
     cur              = cursor variable for DB access
     """
     # proc_pool   = Local variable proc_pool for Pool of processes

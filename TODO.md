@@ -4,12 +4,13 @@
 
 ## Pending improvements
 -----------------------
+* Test use of library https://github.com/jruere/multiprocessing-logging in Windows
 * Pypi test install:
-  pip2.7 install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple flickr-uploader  --prefix=~/apps/Python
+  `pip2.7 install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple flickr-uploader --prefix=~/apps/Python`
   Use flickr-uploader==2.8.6a1 to install a specific version (alpha1 in this case)
 * python setup.py install: use --old-and-unmanageable option to data copy files.
-  python2.7 setup.py install --prefix=~/apps/Python --old-and-unmanageable
-  drop installcfg option
+  `python2.7 setup.py install --prefix=~/apps/Python --old-and-unmanageable`
+* drop installcfg option? May still be usable to place files in a user specific folder
 * Set PATHS based on a BASE Dir variable in INI file... all others to depend on this onw. How?
   os.path.abspath(os.path.join(os.getcwd(), os.path.pardir, "etc", "uploadr.ini"))
 * Reconfirm the uploading sequence when -u option is set which
@@ -19,7 +20,7 @@
 * Would be nice to update ALL tags on replacePhoto and not only the
   mandatory checksum tag as FLICKR maintains the tags from the first load.
 * Change code to insert on database prior to upload and then update result.
-* CODING: REUPLOAD deleted files from Flickr...                
+* CODING: REUPLOAD deleted files from Flickr...
   Test if it Re-uploads or not pictures removed/deleted from flickr Web
   interface; while they still exist on local filesystem and local DB.
   (without the -u option, it should find the file and update database).
@@ -32,7 +33,7 @@
       * this will copy to 'PREFIX/etc' the data files uploadr.ini and uploadr.cron
       * uploadr.ini PATH setting must be switched from argv (as sys.prefix
       does not work!)...
-   * `python3 setup.py install --prefix=~/apps/Python`
+   * `python3 setup.py install --prefix=~/apps/Python
    * `python3 setup.py installcfg --folder=~/apps/Python` to install config
   From v2.7.4 uploadr.ini is searched form CWD (current working directory)
   which allows to run upload.py form the --prefix/bin folder as it is
@@ -68,9 +69,6 @@
   setName if setName is not None else 'None'
   BUT worst than that is that one will be saving on the local database
   sets with name (title) empty which will cause other functions to fail.
-* If local flickrdb is deleted it will run is_photo_already_uploaded to
-  search for already loaded pics with checksum+Set and re-build the
-  local database.
 * In multiprocessing mode, when uploading additional files to your library
   the work is divided into sorted chunks by each process and it may occur
   that some processes have more work than others defeating the purpose
@@ -82,8 +80,6 @@
   (over such size) are not removed.
 * If you change IGNORED_REGEX in settings, the previously loaded files
   (which match such regular expression) are not removed.
-* Arguments not fully tested:
-   * -z (not yet fully developed)
 
 ## Update History
 -----------------

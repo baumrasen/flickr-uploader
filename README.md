@@ -394,6 +394,7 @@ Inspired by:
 * https://github.com/sybrenstuvel/flickrapi
 * http://micampe.it/things/flickruploadr
 * https://github.com/joelmx/flickrUploadr
+
 Makes dynamic use of the following libraries:
 * https://github.com/jruere/multiprocessing-logging under **GNU LESSER GENERAL PUBLIC LICENSE**
 

@@ -53,7 +53,8 @@ class MultiProcessingHandler(logging.Handler):
         self.queue = multiprocessing.Queue(-1)
         self._is_closed = False
         # The thread handles receiving records asynchronously.
-        self._receive_thread = threading.Thread(target=self._receive, name=name)
+        self._receive_thread = threading.Thread(target=self._receive,
+                                                name=name)
         self._receive_thread.daemon = True
         self._receive_thread.start()
 

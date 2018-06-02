@@ -26,7 +26,7 @@ from pkg_resources import Requirement, resource_filename
 # Package meta-data.
 NAME = 'flickr-uploader'
 DESCRIPTION = 'Upload a directory of media to Flickr to use as a backup to '\
-'your local storage. flickr-uploader designed primarly for Synology Devices.'
+    'your local storage. flickr-uploader designed primarly for Synology Devices.'
 URL = 'https://github.com/oPromessa/flickr-uploader/'
 
 EMAIL = 'oPromessa@gmail.com'

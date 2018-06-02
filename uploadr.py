@@ -473,10 +473,11 @@ logging.critical('   sys.argv[0]:[%s]', os.path.dirname(sys.argv[0]))
 logging.critical('      __file__:[%s]', __file__)
 logging.critical('path(__file__):[%s]',
                  os.path.abspath(os.path.dirname(__file__)))
-logging.critical(':[%s]', os.path.abspath(sys.argv[0],
-                                          os.path.pardir,
-                                          "etc",
-                                          "uploadr.ini"))
+logging.critical('sysargv/../etc:[%s]', os.path.abspath(
+    os.path.join(os.path.dirname(sys.argv[0]),
+                 os.path.pardir,
+                 'etc',
+                 'uploadr.ini')))
 logging.critical('      ini_file:[%s]', UPLDR_K.ini_file)
 # -----------------------------------------------------------------------------
 

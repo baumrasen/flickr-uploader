@@ -173,7 +173,8 @@ class MyConfig(object):
         # ROTATING_LOGGING
         "False",
         # ROTATING_LOGGING_PATH
-        "os.path.join(os.path.dirname(sys.argv[0]), 'uploadr.err')",
+        "os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), "
+        "'uploadr.err'))",
         # ROTATING_LOGGING_FILE_SIZE
         "25*1024*1024",  # 25 MBytes
         # ROTATING_LOGGING_FILE_COUNT

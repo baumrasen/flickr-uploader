@@ -416,7 +416,9 @@ def run_uploadr(args):
 # Check if base_dir folder exists and ini_file exists and is a file
 #
 def check_base_ini_file(base_dir, ini_file):
-    """check_base_ini_file
+    """ check_base_ini_file
+
+    Returns True if base_dir is a directory and ini_file is a regular file.
 
     base_dir = Folder
     ini_file = INI File path
@@ -459,7 +461,6 @@ UPLDR_K.media_count = 0
 # UPLDR_K.base_dir = os.getcwd()
 UPLDR_K.base_dir = os.path.dirname(sys.argv[0])
 UPLDR_K.ini_file = os.path.join(UPLDR_K.base_dir, "uploadr.ini")
-UPLDR_K.err_file = os.path.join(UPLDR_K.base_dir, "uploadr.err")
 
 # CODING: Debug a series of control values
 logging.critical('      base_dir:[%s]', UPLDR_K.base_dir)
@@ -468,8 +469,9 @@ logging.critical('    prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
 logging.critical('   sys.argv[0]:[%s]', os.path.dirname(sys.argv[0]))
 logging.critical('      __file__:[%s]', __file__)
 logging.critical('path(__file__):[%s]', os.path.abspath(os.path.dirname(__file__)))
+logging.critical(':[%s]', os.path.abspath(sys.argv[0], os.path.pardir, "etc", "uploadr.ini"))
+
 logging.critical('      ini_file:[%s]', UPLDR_K.ini_file)
-logging.critical('      err_file:[%s]', UPLDR_K.err_file)
 # -----------------------------------------------------------------------------
 
 # =============================================================================

@@ -11,6 +11,7 @@
   python2.7 setup.py install --prefix=~/apps/Python --old-and-unmanageable
   drop installcfg option
 * Set PATHS based on a BASE Dir variable in INI file... all others to depend on this onw. How?
+  os.path.abspath(os.path.join(os.getcwd(), os.path.pardir, "etc", "uploadr.ini"))
 * Reconfirm the uploading sequence when -u option is set which
   affects isLoaded = False control variable
 * "Check for duplicates/wrong checksum" on upload may not be working fully!

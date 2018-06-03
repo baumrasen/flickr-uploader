@@ -2886,21 +2886,22 @@ class Uploadr(object):
                     if setname is not defined on a pic, it attempts to
                     check tag:album
 
-            returnIsPhotoUploaded = True (already loaded)/False(not loaded)
-            returnPhotoUploaded   = Number of found Images
-            returnPhotoID         = Pic ID on Flickr
-            returnUploadedNoSet   = True , B, C, D, E or F
-            Case | returnIsPhotoUploaded | returnUploadedNoSet | returnPhotoID
+            ret_is_photo_uploaded = True (already loaded)/False(not loaded)
+            ret_photos_uploaded   = Number of found Images
+            ret_photo_id         = Pic ID on Flickr
+            ret_uploaded_no_set   = True , B, C, D, E or F
+
+            Case | ret_is_photo_uploaded | ret_uploaded_no_set | ret_photo_id
             A    | False                 | False               | None
             B    | True                  | True                | pic.['id']
             C    | True                  | False               | pic.['id']
             D    | False                 | False               | None
         """
 
-        returnIsPhotoUploaded = False
-        returnPhotoUploaded = 0
-        returnPhotoID = None
-        returnUploadedNoSet = False
+        ret_is_photo_uploaded = False
+        ret_photos_uploaded = 0
+        ret_photo_id = None
+        ret_uploaded_no_set = False
 
         logging.info('Is Already Uploaded:[checksum:%s] [album:%s]?',
                      xchecksum, NP.strunicodeout(xsetname))
@@ -2933,29 +2934,29 @@ class Uploadr(object):
                          fname='isuploaded', verbosity=3)
             logging.warning(' IS_UPLOADED:[ERROR#1]')
 
-            return returnIsPhotoUploaded, returnPhotoUploaded, \
-                returnPhotoID, returnUploadedNoSet
+            return ret_is_photo_uploaded, ret_photos_uploaded, \
+                ret_photo_id, ret_uploaded_no_set
 
         # Number of pics with specified checksum
         # CODING: Protect issue #66. Flickr returns attrib == '' instead of 0
         # Set 'Number of pics with specified checksum' to 0 and return.
         if not searchIsUploaded.find('photos').attrib['total']:
-            returnPhotoUploaded = 0
+            ret_photos_uploaded = 0
             logging.error(' IS_UPLOADED:[ERROR#3]: Invalid return. Confinuing')
             NP.niceprint(' IS_UPLOADED:[ERROR#3]: Invalid return. Confinuing',
                          fname='isuploaded',
                          verbosity=3)
         else:
-            returnPhotoUploaded = int(searchIsUploaded
+            ret_photos_uploaded = int(searchIsUploaded
                                       .find('photos').attrib['total'])
 
-        if returnPhotoUploaded == 0:
+        if ret_photos_uploaded == 0:
             # A) checksum,                             Count=0  THEN NOT EXISTS
-            returnIsPhotoUploaded = False
-        elif returnPhotoUploaded >= 1:
+            ret_is_photo_uploaded = False
+        elif ret_photos_uploaded >= 1:
             logging.warning('+++#190: '
                             'Found [%s] images with checksum:[%s]',
-                            returnPhotoUploaded, xchecksum)
+                            ret_photos_uploaded, xchecksum)
             # Get title from filepath as filename without extension
             # NOTE: not compatible with use of the -i option
             xtitle_filename = os.path.split(xfile)[1]
@@ -3008,8 +3009,8 @@ class Uploadr(object):
                                  fname='isuploaded', verbosity=3)
                     logging.warning(' IS_UPLOADED:[ERROR#2]')
 
-                    return returnIsPhotoUploaded, returnPhotoUploaded, \
-                        returnPhotoID, returnUploadedNoSet
+                    return ret_is_photo_uploaded, ret_photos_uploaded, \
+                        ret_photo_id, ret_uploaded_no_set
 
                 logging.info('len(resp.findall(''set'')):[%s]',
                              len(resp.findall('set')))
@@ -3031,11 +3032,11 @@ class Uploadr(object):
                                      fname='isuploaded', verbosity=2)
                         logging.warning(' IS_UPLOADED:[UPLOADED WITHOUT'
                                         ' SET WITH ALBUM TAG]')
-                        returnIsPhotoUploaded = True
-                        returnPhotoID = pic.attrib['id']
-                        returnUploadedNoSet = True
-                        return returnIsPhotoUploaded, returnPhotoUploaded, \
-                            returnPhotoID, returnUploadedNoSet
+                        ret_is_photo_uploaded = True
+                        ret_photo_id = pic.attrib['id']
+                        ret_uploaded_no_set = True
+                        return ret_is_photo_uploaded, ret_photos_uploaded, \
+                            ret_photo_id, ret_uploaded_no_set
                     else:
                         NP.niceprint('IS_UPLOADED:[UPLOADED WITHOUT'
                                      ' SET WITHOUT ALBUM TAG]',
@@ -3074,11 +3075,11 @@ class Uploadr(object):
                         NP.niceprint(' IS_UPLOADED:[TRUE WITH SET]',
                                      fname='isuploaded', verbosity=2)
                         logging.warning(' IS_UPLOADED:[TRUE WITH SET]')
-                        returnIsPhotoUploaded = True
-                        returnPhotoID = pic.attrib['id']
-                        returnUploadedNoSet = False
-                        return returnIsPhotoUploaded, returnPhotoUploaded, \
-                            returnPhotoID, returnUploadedNoSet
+                        ret_is_photo_uploaded = True
+                        ret_photo_id = pic.attrib['id']
+                        ret_uploaded_no_set = False
+                        return ret_is_photo_uploaded, ret_photos_uploaded, \
+                            ret_photo_id, ret_uploaded_no_set
                     else:
                         # D) checksum, title, other setname,       Count>=1
                         #                                       THEN NOT EXISTS
@@ -3089,8 +3090,8 @@ class Uploadr(object):
                                         'CONTINUING SEARCH IN SETS]')
                         continue
 
-        return returnIsPhotoUploaded, returnPhotoUploaded, \
-            returnPhotoID, returnUploadedNoSet
+        return ret_is_photo_uploaded, ret_photos_uploaded, \
+            ret_photo_id, ret_uploaded_no_set
 
     # -------------------------------------------------------------------------
     # photos_find_tag

@@ -173,10 +173,10 @@ def parse_arguments():
     # Verbose related options -------------------------------------------------
     vgrpparser = parser.add_argument_group('Verbose and dry-run options')
     vgrpparser.add_argument('-v', '--verbose', action='count',
-                            help='Verbose output. Use -vv for more verbosity.'
+                            help='Verbose output. Use -vv for more verbosity. '
                                  'See also LOGGING_LEVEL value in INI file.')
     vgrpparser.add_argument('-x', '--verbose-progress', action='store_true',
-                            help='Provides progress indicator on each upload.'
+                            help='Provides progress indicator on each upload. '
                                  'See also LOGGING_LEVEL value in INI file.')
     vgrpparser.add_argument('-n', '--dry-run', action='store_true',
                             help='Dry run. No changes are actually performed.')

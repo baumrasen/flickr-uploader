@@ -1,7 +1,12 @@
 # vim : fileencoding=UTF-8 :
+"""
+    https://github.com/jruere/multiprocessing-logging
+    under **GNU LESSER GENERAL PUBLIC LICENSE**
 
-# https://github.com/jruere/multiprocessing-logging
-# under **GNU LESSER GENERAL PUBLIC LICENSE**
+    mprocessing_logging  = Helper function to allow multiprocessing looging
+                           into a single file (not for Windows?)
+
+"""
 
 from __future__ import absolute_import, division, unicode_literals
 
@@ -39,6 +44,8 @@ def install_mp_handler(logger=None):
 
 
 class MultiProcessingHandler(logging.Handler):
+    """ MultiProcessingHandler
+    """
 
     def __init__(self, name, sub_handler=None):
         super(MultiProcessingHandler, self).__init__()
@@ -79,8 +86,8 @@ class MultiProcessingHandler(logging.Handler):
         self.queue.close()
         self.queue.join_thread()
 
-    def _send(self, s):
-        self.queue.put_nowait(s)
+    def _send(self, astr):
+        self.queue.put_nowait(astr)
 
     def _format_record(self, record):
         # ensure that exc_info and args
@@ -98,8 +105,8 @@ class MultiProcessingHandler(logging.Handler):
 
     def emit(self, record):
         try:
-            s = self._format_record(record)
-            self._send(s)
+            astr = self._format_record(record)
+            self._send(astr)
         except (KeyboardInterrupt, SystemExit):
             raise
         except Exception:

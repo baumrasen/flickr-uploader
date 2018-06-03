@@ -52,7 +52,7 @@ class NicePrint:
     # -------------------------------------------------------------------------
     # Class Global Variables
     #   class variable shared by all instances
-    #     
+    #
     #   verbosity = Verbosity Level defined: 0, 1, 2, ...
 
     verbosity = 0
@@ -79,6 +79,18 @@ class NicePrint:
         """
 
         cls.verbosity = averbosity
+
+    # -------------------------------------------------------------------------
+    # get_verbosity
+    #
+    @classmethod
+    def set_verbosity(cls, averbosity=0):
+        """ get_verbosity
+
+            returns Class verbosity setting
+        """
+
+        return cls.verbosity
 
     # -------------------------------------------------------------------------
     # is_str_unicode
@@ -145,7 +157,7 @@ class NicePrint:
             Accounts for UTF-8 Messages
         """
         logging.critical('self.verbosity=%s', self.verbosity)
-        if verbosity <= NicePrint.verbosity:
+        if verbosity <= self.get_verbosity:
             print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
                   .format(UPLDR_K.Gre,
                           UPLDR_K.Run,

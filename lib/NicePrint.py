@@ -145,7 +145,7 @@ class NicePrint:
             Accounts for UTF-8 Messages
         """
         logging.critical('self.verbosity=%s', self.verbosity)
-        if verbosity <= self.verbosity:
+        if verbosity <= NicePrint.verbosity:
             print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
                   .format(UPLDR_K.Gre,
                           UPLDR_K.Run,

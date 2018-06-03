@@ -50,26 +50,35 @@ class NicePrint:
     """
 
     # -------------------------------------------------------------------------
+    # Class Global Variables
+    #   class variable shared by all instances
+    #     
+    #   verbosity = Verbosity Level defined: 0, 1, 2, ...
+
+    verbosity = 0
+
+    # -------------------------------------------------------------------------
     # class NicePrint __init__
     #
-    def __init__(self, verbosity=0):
+    def __init__(self, averbosity=0):
         """ class NicePrint __init__
 
             verbosity = Verbosity Level defined: 0, 1, 2, ...
         """
 
-        self.verbosity = verbosity
+        self.set_verbosity(averbosity)
 
     # -------------------------------------------------------------------------
     # set_verbosity
     #
-    def set_verbosity(self, verbosity=0):
+    @classmethod
+    def set_verbosity(cls, averbosity=0):
         """ set_verbosity
 
             verbosity = Verbosity Level defined: 0, 1, 2, ...
         """
 
-        self.verbosity = verbosity
+        cls.verbosity = averbosity
 
     # -------------------------------------------------------------------------
     # is_str_unicode

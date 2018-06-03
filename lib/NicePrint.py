@@ -78,7 +78,7 @@ class NicePrint:
             verbosity = Verbosity Level defined: 0, 1, 2, ...
         """
 
-        cls.verbosity = averbosity
+        cls.verbosity = averbosity if averbosity is not None else 0
 
     # -------------------------------------------------------------------------
     # get_verbosity

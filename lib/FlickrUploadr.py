@@ -748,7 +748,7 @@ class Uploadr(object):
             return success
 
         if os.path.exists(NP.strunicodeout(
-            os.path.join(a_dirpath, a_fbasename)) + ".JPG"):
+                os.path.join(a_dirpath, a_fbasename)) + ".JPG"):
             NP.niceprint('...Copying tags:[{!s}]'
                          .format(NP.strunicodeout(a_fname)))
 
@@ -1716,10 +1716,12 @@ class Uploadr(object):
                                     logging.info('Removing tag_id:[%s]',
                                                  tag_id)
                                     if self.photos_remove_tag(tag_id):
-                                        NP.niceprint('    Tag removed:[{!s}]'
+                                        NP.niceprint(
+                                            '    Tag removed:[{!s}]'
                                             .format(NP.strunicodeout(file)))
                                     else:
-                                        NP.niceprint('Tag Not removed:[{!s}]'
+                                        NP.niceprint(
+                                            'Tag Not removed:[{!s}]'
                                             .format(NP.strunicodeout(file)))
 
                     break

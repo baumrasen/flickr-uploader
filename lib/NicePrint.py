@@ -44,7 +44,9 @@ class NicePrint:
         False
         >>> np.verbosity == 0
         True
-        >>> np.set_verbosity( 3)
+        >>> np.set_verbosity(3)
+        >>> np.get_verbosity()
+        3
         >>> np.verbosity == 3
         True
     """
@@ -156,9 +158,6 @@ class NicePrint:
             [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
             Accounts for UTF-8 Messages
         """
-        logging.critical('get.verbosity=%s', self.get_verbosity())
-        logging.critical('verbosity(arg?)=%s',
-                         None if verbosity is None else verbosity)
 
         if verbosity <= self.get_verbosity():
             print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'

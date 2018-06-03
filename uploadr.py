@@ -293,24 +293,34 @@ def run_uploadr(args):
             Exits from program otherwise.
         """
         logging.warning('FILES_DIR: [%s]', NPR.strunicodeout(MY_CFG.FILES_DIR))
-        if args.verbose:
-            NPR.niceprint('FILES_DIR: [{!s}]'
-                          .format(NPR.strunicodeout(MY_CFG.FILES_DIR)))
+        NPR.niceprint('FILES_DIR: [{!s}]'
+                      .format(NPR.strunicodeout(MY_CFG.FILES_DIR)),
+                      verbosity=1)
 
         if MY_CFG.FILES_DIR == "":
-            NPR.niceprint('Please configure in INI file [normally uploadr.ini]'
-                          ' the name of the folder [FILES_DIR] '
-                          'with media available to sync with Flickr.')
+            NPR.niceerror(
+                caught=True,
+                caughtprefix='xxx',
+                caughtcode='630',
+                caughtmsg='Please configure in INI file [normally uploadr.ini]'
+                ' the name of the folder [FILES_DIR] '
+                'with media available to sync with Flickr.',
+                useniceprint=True)
+
             sys.exit(8)
         else:
             if not os.path.isdir(MY_CFG.FILES_DIR):
-                logging.critical('FILES_DIR: [%s] is not valid.',
-                                 NPR.strunicodeout(MY_CFG.FILES_DIR))
-                NPR.niceprint('Please configure the name of an existant folder'
-                              ' in INI file [normally uploadr.ini] '
-                              'with media available to sync with Flickr. '
-                              'FILES_DIR: [{!s}] is not valid.'
-                              .format(NPR.strunicodeout(MY_CFG.FILES_DIR)))
+                NPR.niceerror(
+                    caught=True,
+                    caughtprefix='xxx',
+                    caughtcode='631',
+                    caughtmsg='FILES_DIR: [{!s}] is not valid.'
+                    'Please configure the name of an existant folder'
+                    ' in INI file [normally uploadr.ini] '
+                    'with media available to sync with Flickr. '
+                    .format(NPR.strunicodeout(MY_CFG.FILES_DIR)),
+                    useniceprint=True)
+
                 sys.exit(8)
 
     def check_flickr_key_secret():
@@ -321,12 +331,14 @@ def run_uploadr(args):
         """
 
         if MY_CFG.FLICKR["api_key"] == "" or MY_CFG.FLICKR["secret"] == "":
-            logging.critical('Please enter an API key and secret in the '
-                             'configuration '
-                             'file [normaly uploadr.ini] (see README).')
-            NPR.niceprint('Please enter an API key and secret in the '
-                          'configuration'
-                          'file [normaly uploadr.ini] (see README).')
+            NPR.niceerror(
+                caught=True,
+                caughtprefix='xxx',
+                caughtcode='635',
+                caughtmsg='Please enter an API key and secret in the '
+                'configuration file [normaly uploadr.ini] (see README).',
+                useniceprint=True)
+
             sys.exit(9)
 
     # Initial checks
@@ -343,12 +355,15 @@ def run_uploadr(args):
         myflick.cleanDBbadfiles()
 
     if args.authenticate:
+        logging.warning('Checking if token is available... '
+                        'if not, will authenticate')
         NPR.niceprint('Checking if token is available... '
                       'if not, will authenticate')
         if not myflick.check_token():
             # authenticate sys.exits in case of failure
             myflick.authenticate()
         else:
+            logging.info('Token is available.')
             NPR.niceprint('Token is available.')
 
     elif args.daemon:
@@ -362,10 +377,14 @@ def run_uploadr(args):
                           .format(MY_CFG.SLEEP_TIME))
             myflick.run()
         else:
-            logging.warning('Not able to connect to Flickr.'
-                            'Make sure you have previously authenticated!')
-            NPR.niceprint('Not able to connect to Flickr.'
-                          'Make sure you have previously authenticated!')
+            NPR.niceerror(
+                caught=True,
+                caughtprefix='xxx',
+                caughtcode='641',
+                caughtmsg='Not able to connect to Flickr.'
+                'Make sure you have previously authenticated!',
+                useniceprint=True)
+
             sys.exit(8)
     else:
         NPR.niceprint('Checking if token is available... '
@@ -385,17 +404,16 @@ def run_uploadr(args):
                               'on upload.',
                               fname='addAlbumsMigrate')
             else:
-                logging.warning('Failed adding album tags to pics '
-                                'on upload. '
-                                'Please check logs, correct, and retry.')
+                logging.error('Failed adding album tags to pics '
+                              'on upload. '
+                              'Please check logs, correct, and retry.')
                 NPR.niceprint('Failed adding album tags to pics '
                               'on upload. '
                               'Please check logs, correct, and retry.',
                               fname='addAlbumsMigrate')
                 sys.exit(10)
         elif args.list_bad_files:
-            NPR.niceprint('Listing badfiles: Start.',
-                          fname='listBadFiles')
+            NPR.niceprint('Listing badfiles: Start.', fname='listBadFiles')
             myflick.listBadFiles()
             NPR.niceprint('Listing badfiles: End. No more options will run.',
                           fname='listBadFiles')
@@ -520,7 +538,7 @@ if __name__ == "__main__":
                                    UPLDR_K.ini_file):
             NPR.niceerror(caught=True,
                           caughtprefix='+++ ',
-                          caughtcode='601',
+                          caughtcode='661',
                           caughtmsg='Invalid -C parameter INI file. '
                           'Exiting...',
                           useniceprint=True)
@@ -530,7 +548,7 @@ if __name__ == "__main__":
                                    UPLDR_K.ini_file):
             NPR.niceerror(caught=True,
                           caughtprefix='+++ ',
-                          caughtcode='602',
+                          caughtcode='662',
                           caughtmsg='Invalid sys.argv INI file. Exiting...',
                           useniceprint=True)
             sys.exit(2)
@@ -551,7 +569,7 @@ if __name__ == "__main__":
         if not os.path.isdir(os.path.dirname(MY_CFG.ROTATING_LOGGING_PATH)):
             NPR.niceerror(caught=True,
                           caughtprefix='+++ ',
-                          caughtcode='603',
+                          caughtcode='663',
                           caughtmsg='Invalid ROTATING_LOGGING config.',
                           useniceprint=True)
         else:

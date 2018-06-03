@@ -267,6 +267,9 @@ class Uploadr(object):
             Adds .3gp mimetime as video.
         """
 
+        # Set verbosity level as per -v count
+        # NP.set_verbosity(args.verbose)
+
         self.xcfg = a_cfg
         self.args = args
 

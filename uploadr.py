@@ -172,7 +172,7 @@ def parse_arguments():
 
     # Verbose related options -------------------------------------------------
     vgrpparser = parser.add_argument_group('Verbose and dry-run options')
-    vgrpparser.add_argument('-v', '--verbose', action='store_true',
+    vgrpparser.add_argument('-v', '--verbose', action='count',
                             help='Provides some more verbose output. '
                                  'See also -x option. '
                                  'See also LOGGING_LEVEL value in INI file.')
@@ -503,8 +503,8 @@ if __name__ == "__main__":
     # Parse the arguments options
     PARSED_ARGS = parse_arguments()
 
-    # Save -v --config-file overrides configuration filename.
-    UPLDR_K.verbosity = PARSED_ARGS.verbose
+    # Set verbosity level as per -v count
+    NPR.set_verbosity(PARSED_ARGS.verbose)
 
     # Print/show arguments
     if MY_CFG.LOGGING_LEVEL <= logging.INFO:

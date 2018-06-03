@@ -4,6 +4,7 @@
 
 ## Pending improvements
 -----------------------
+* Verbosity control 0 = None, 1 = Some, 2 = More, 3 = mayhem
 * Test use of library https://github.com/jruere/multiprocessing-logging in Windows
 * Pypi test install:
   `pip2.7 install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple flickr-uploader --prefix=~/apps/Python`

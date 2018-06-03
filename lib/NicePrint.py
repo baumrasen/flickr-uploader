@@ -42,15 +42,34 @@ class NicePrint:
         True
         >>> np.is_str_unicode(245)
         False
+        >>> np.verbosity == 0
+        True
+        >>> np.set_verbosity( 3)
+        >>> np.verbosity == 3
+        True
     """
 
     # -------------------------------------------------------------------------
     # class NicePrint __init__
     #
-    def __init__(self):
+    def __init__(self, verbosity=0):
         """ class NicePrint __init__
+
+            verbosity = Verbosity Level defined: 0, 1, 2, ...
         """
-        pass
+
+        self.verbosity = verbosity
+
+    # -------------------------------------------------------------------------
+    # set_verbosity
+    #
+    def set_verbosity(self, verbosity=0):
+        """ set_verbosity
+
+            verbosity = Verbosity Level defined: 0, 1, 2, ...
+        """
+
+        self.verbosity = verbosity
 
     # -------------------------------------------------------------------------
     # is_str_unicode
@@ -58,7 +77,7 @@ class NicePrint:
     # Returns true if String is Unicode
     #
     def is_str_unicode(self, astr):
-        """
+        """ is_str_unicode
         Determines if a string is Unicode (return True) or not (returns False)
         to allow correct print operations.
 
@@ -92,7 +111,7 @@ class NicePrint:
     # Returns true if String is Unicode
     #
     def strunicodeout(self, astr):
-        """
+        """ strunicodeout
         Outputs s.encode('utf-8') if is_str_unicode(s) else s
             NicePrint('Checking file:[{!s}]...'.format(strunicodeout(file))
 
@@ -111,14 +130,13 @@ class NicePrint:
     #   [2017.10.25 22:32:03]:[PRINT   ]:[uploadr] Some Message
     #
     def niceprint(self, astr, fname='uploadr', verbosity=0):
-        """
+        """ niceprint
         Print a message with the format:
             [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
             Accounts for UTF-8 Messages
-
         """
-        logging.critical('UPLDR_K.verbosity=%s', UPLDR_K.verbosity)
-        if verbosity <= UPLDR_K.verbosity:
+        logging.critical('self.verbosity=%s', self.verbosity)
+        if verbosity <= self.verbosity:
             print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
                   .format(UPLDR_K.Gre,
                           UPLDR_K.Run,
@@ -133,14 +151,14 @@ class NicePrint:
     # niceassert
     #
     def niceassert(self, astr):
-        """
-         Returns a message with the format:
-             [2017.11.19 01:53:57]:[PID       ][ASSERT  ]:[uploadr] Message
-             Accounts for UTF-8 Messages
+        """ niceassert
+        Returns a message with the format:
+            [2017.11.19 01:53:57]:[PID       ][ASSERT  ]:[uploadr] Message
+            Accounts for UTF-8 Messages
 
-         Usage:
-             assert param1 >= 0, niceassert('param1 is not >= 0:'
-                                            .format(param1))
+        Usage:
+            assert param1 >= 0, niceassert('param1 is not >= 0:'
+                                           .format(param1))
         """
         return('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
                .format(UPLDR_K.Red,

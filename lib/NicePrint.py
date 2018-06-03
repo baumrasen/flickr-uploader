@@ -156,7 +156,7 @@ class NicePrint:
             [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
             Accounts for UTF-8 Messages
         """
-        logging.critical('self.verbosity=%s', self.verbosity)
+        logging.critical('get.verbosity=%s', self.get_verbosity())
         if verbosity <= self.get_verbosity():
             print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
                   .format(UPLDR_K.Gre,

@@ -919,11 +919,11 @@ class Uploadr(object):
                                          NUTIME.localtime(xlast_modified))
             logging.info('video_date:[%s]', video_date)
 
-            if self.args.verbose:
-                NP.niceprint('   Setting Date:[{!s}] for file:[{!s}] Id=[{!s}]'
-                             .format(video_date,
-                                     strunicodeout(xfile),
-                                     xfile_id))
+            NP.niceprint('   Setting Date:[{!s}] for file:[{!s}] Id=[{!s}]'
+                         .format(video_date,
+                                 strunicodeout(xfile),
+                                 xfile_id),
+                         verbosity=1)
 
             res_set_date = self.photos_set_dates(xfile_id,
                                                  str(video_date))
@@ -1071,9 +1071,8 @@ class Uploadr(object):
                          .format(strunicodeout(file)))
             return True
 
-        if self.args.verbose:
-            NP.niceprint('  Checking file:[{!s}]...'
-                         .format(strunicodeout(file)))
+        NP.niceprint('  Checking file:[{!s}]...'.format(strunicodeout(file)),
+                     verbosity=1)
 
         setname = set_name_from_file(file,
                                      self.xcfg.FILES_DIR,
@@ -1168,11 +1167,11 @@ class Uploadr(object):
 
             # B) Not loaded. Not recorded on DB. Upload file to FLickr.
             elif row is None:
-                if self.args.verbose:
-                    NP.niceprint(' Uploading file:[{!s}]...'
-                                 'On Album:[{!s}]...'
-                                 .format(strunicodeout(file),
-                                         strunicodeout(setname)))
+                NP.niceprint(' Uploading file:[{!s}]...'
+                             'On Album:[{!s}]...'
+                             .format(strunicodeout(file),
+                                     strunicodeout(setname)),
+                             verbosity=1)
 
                 logging.warning(' Uploading file:[%s]... On Album:[%s]...',
                                 strunicodeout(file), strunicodeout(setname))
@@ -1189,10 +1188,10 @@ class Uploadr(object):
                 # Tags Handling
                 if self.args.tags:  # Append a space to later add -t TAGS
                     self.xcfg.FLICKR["tags"] += " "
-                    if self.args.verbose:
-                        NP.niceprint('TAGS:[{} {}]'
-                                     .format(self.xcfg.FLICKR["tags"],
-                                             self.args.tags).replace(',', ''))
+                    NP.niceprint('TAGS:[{} {}]'
+                                 .format(self.xcfg.FLICKR["tags"],
+                                         self.args.tags).replace(',', ''),
+                                 verbosity=1)
 
                 # if FLICKR["title"] is empty...
                 # if filename's exif title is empty...
@@ -1280,12 +1279,12 @@ class Uploadr(object):
                                          'duplicates/wrong checksum...',
                                          strunicodeout(file),
                                          photo_id)
-                            if self.args.verbose:
-                                NP.niceprint('  Uploaded file:[{!s}] '
-                                             'ID=[{!s}]. Check for '
-                                             'duplicates/wrong checksum...'
-                                             .format(strunicodeout(file),
-                                                     photo_id))
+                            NP.niceprint('  Uploaded file:[{!s}] '
+                                         'ID=[{!s}]. Check for '
+                                         'duplicates/wrong checksum...'
+                                         .format(strunicodeout(file),
+                                                 photo_id),
+                                         verbosity=1)
 
                             break
                         else:
@@ -1629,9 +1628,8 @@ class Uploadr(object):
                          .format(strunicodeout(file)))
             return True
 
-        if self.args.verbose:
-            NP.niceprint(' Replacing file:[{!s}]...'
-                         .format(strunicodeout(file)))
+        NP.niceprint(' Replacing file:[{!s}]...'.format(strunicodeout(file)),
+                     verbosity=1)
 
         success = False
         try:
@@ -1991,9 +1989,8 @@ class Uploadr(object):
         """
 
         logging.warning('  Add set to DB:[%s]', strunicodeout(setname))
-        if self.args.verbose:
-            NP.niceprint('  Add set to DB:[{!s}]'
-                         .format(strunicodeout(setname)))
+        NP.niceprint('  Add set to DB:[{!s}]'.format(strunicodeout(setname)),
+                     verbosity=1)
 
         try:
             # Acquire DBlock if in multiprocessing mode
@@ -2642,10 +2639,10 @@ class Uploadr(object):
                 pass
 
             for row in unusedsets:
-                if self.args.verbose:
-                    NP.niceprint('Removing set [{!s}] ({!s}).'
-                                 .format(strunicodeout(row[0]),
-                                         strunicodeout(row[1])))
+                NP.niceprint('Removing set [{!s}] ({!s}).'
+                             .format(strunicodeout(row[0]),
+                                     strunicodeout(row[1])),
+                             verbosity=1)
 
                 try:
                     # Acquire DB lock if running in multiprocessing mode
@@ -2759,14 +2756,14 @@ class Uploadr(object):
                 setname = aset.find('title').text
                 primary_photo_id = aset.attrib['primary']
 
-                if self.args.verbose:
-                    NP.niceprint('  Add Set to DB:[{!s}] set_id=[{!s}] '
-                                 'primaryId=[{!s}]'
-                                 .format('None'
-                                         if setname is None
-                                         else strunicodeout(setname),
-                                         set_id,
-                                         primary_photo_id))
+                NP.niceprint('  Add Set to DB:[{!s}] set_id=[{!s}] '
+                             'primaryId=[{!s}]'
+                             .format('None'
+                                     if setname is None
+                                     else strunicodeout(setname),
+                                     set_id,
+                                     primary_photo_id),
+                             verbosity=1)
 
                 # On ocasions flickr returns a setname (title) as None.
                 # For instance, while simultaneously performing massive
@@ -2826,9 +2823,8 @@ class Uploadr(object):
                 else:
                     logging.info('Set found on DB:[%s]',
                                  strunicodeout(setname))
-                    if self.args.verbose:
-                        NP.niceprint('Set found on DB:[{!s}]'
-                                     .format(strunicodeout(setname)))
+                    NP.niceprint('Set found on DB:[{!s}]'
+                                 .format(strunicodeout(setname)), verbosity=1)
         else:
             niceerror(caught=True,
                       caughtprefix='xxx',
@@ -3218,9 +3214,8 @@ class Uploadr(object):
 
             logging.warning('       Find Tag:[%s] TagId:[%s]',
                             tfind, tid)
-            if self.args.verbose:
-                NP.niceprint('       Find Tag:[{!s}] TagId:[{!s}]'
-                             .format(tfind, tid))
+            NP.niceprint('       Find Tag:[{!s}] TagId:[{!s}]'
+                         .format(tfind, tid), verbosity=1)
 
             if not tfind:
                 get_success, _, get_errcode = faw.flickrapi_fn(
@@ -3248,9 +3243,8 @@ class Uploadr(object):
             else:
                 logging.warning('      Found Tag:[%s] TagId:[{%s]',
                                 tfind, tid)
-                if self.args.verbose:
-                    NP.niceprint('      Found Tag:[{!s}] TagId:[{!s}]'
-                                 .format(tfind, tid))
+                NP.niceprint('      Found Tag:[{!s}] TagId:[{!s}]'
+                             .format(tfind, tid), verbosity=1)
 
             logging.debug('===Multiprocessing=== in.mutex.acquire(w)')
             mutex.acquire()
@@ -3361,9 +3355,8 @@ class Uploadr(object):
 
                     logging.warning('       Find Tag:[%s] TagId:[%s]',
                                     tfind, tid)
-                    if self.args.verbose:
-                        NP.niceprint('       Find Tag:[{!s}] TagId:[{!s}]'
-                                     .format(tfind, tid))
+                    NP.niceprint('       Find Tag:[{!s}] TagId:[{!s}]'
+                                 .format(tfind, tid), verbosity=1)
 
                     if not tfind:
                         get_success, _, get_errcode = \
@@ -3393,9 +3386,8 @@ class Uploadr(object):
                     else:
                         logging.warning('      Found Tag:[%s] TagId:[{%s]',
                                         tfind, tid)
-                        if self.args.verbose:
-                            NP.niceprint('      Found Tag:[{!s}] TagId:[{!s}]'
-                                         .format(tfind, tid))
+                        NP.niceprint('      Found Tag:[{!s}] TagId:[{!s}]'
+                                     .format(tfind, tid), verbosity=1)
 
                     NP.niceprocessedfiles(count, count_total, False)
 

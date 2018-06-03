@@ -84,7 +84,7 @@ class NicePrint:
     # get_verbosity
     #
     @classmethod
-    def set_verbosity(cls, averbosity=0):
+    def get_verbosity(cls, averbosity=0):
         """ get_verbosity
 
             returns Class verbosity setting

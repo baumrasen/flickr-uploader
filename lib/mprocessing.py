@@ -132,17 +132,20 @@ def mprocessing(args_verbose, args_verbose_progress,
         logging.debug('===Job/Task Process:  [%s] Started with pid:[%s]',
                       proc_task.name,
                       proc_task.pid)
-        if args_verbose_progress:
-            npr.niceprint('===Job/Task Process: [{!s}] Started '
-                          'with pid:[{!s}]'
-                          .format(proc_task.name,
-                                  proc_task.pid))
+        npr.niceprint('===Job/Task Process: [{!s}] Started '
+                      'with pid:[{!s}]'
+                      .format(proc_task.name,
+                              proc_task.pid),
+                      verbosity=3)
 
     # Check status of jobs/tasks in the Process Pool
     if log_level <= logging.DEBUG:
         logging.debug('===Checking Processes launched/status:')
+        npr.niceprint('===Checking Processes launched/status:', verbosity=3)
         for j in proc_pool:
-            npr.niceprint('{!s}.is_alive = {!s}'.format(j.name, j.is_alive()))
+            npr.niceprint('{!s}.is_alive = {!s}'.format(j.name, j.is_alive()),
+                          verbosity=3)
+            logging.debug('%s.is_alive = %s', j.name, j.is_alive())
 
     # Regularly print status of jobs/tasks in the Process Pool
     # Prints status while there are processes active
@@ -157,29 +160,29 @@ def mprocessing(args_verbose, args_verbose_progress,
         logging.info('===Will wait for 60 on %s.is_alive = %s',
                      proc_task_active.name,
                      proc_task_active.is_alive())
-        if args_verbose_progress:
-            npr.niceprint('===Will wait for 60 on '
-                          '{!s}.is_alive = {!s}'
-                          .format(proc_task_active.name,
-                                  proc_task_active.is_alive()))
+        npr.niceprint('===Will wait for 60 on '
+                      '{!s}.is_alive = {!s}'
+                      .format(proc_task_active.name,
+                              proc_task_active.is_alive()),
+                      verbosity=3)
 
         proc_task_active.join(timeout=60)
         logging.info('===Waited for 60s on %s.is_alive = %s',
                      proc_task_active.name,
                      proc_task_active.is_alive())
-        if args_verbose:
-            npr.niceprint('===Waited for 60s on '
-                          '{!s}.is_alive = {!s}'
-                          .format(proc_task_active.name,
-                                  proc_task_active.is_alive()))
+        npr.niceprint('===Waited for 60s on '
+                      '{!s}.is_alive = {!s}'
+                      .format(proc_task_active.name,
+                              proc_task_active.is_alive()),
+                      verbosity=3)
 
     # Wait for join all jobs/tasks in the Process Pool
     # All should be done by now!
     for j in proc_pool:
         j.join()
-        if args_verbose_progress:
-            npr.niceprint('==={!s} (is alive: {!s}).exitcode = {!s}'
-                          .format(j.name, j.is_alive(), j.exitcode))
+        npr.niceprint('==={!s} (is alive: {!s}).exitcode = {!s}'
+                      .format(j.name, j.is_alive(), j.exitcode),
+                      verbosity=2)
 
     logging.warning('===Multiprocessing=== pool joined! '
                     'All processes finished.')

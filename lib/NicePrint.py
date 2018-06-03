@@ -110,22 +110,24 @@ class NicePrint:
     # Print a message with the format:
     #   [2017.10.25 22:32:03]:[PRINT   ]:[uploadr] Some Message
     #
-    def niceprint(self, astr, fname='uploadr'):
+    def niceprint(self, astr, fname='uploadr', verbosity=0):
         """
         Print a message with the format:
             [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
             Accounts for UTF-8 Messages
 
         """
-        print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
-              .format(UPLDR_K.Gre,
-                      UPLDR_K.Run,
-                      time.strftime(UPLDR_K.TimeFormat),
-                      os.getpid(),
-                      UPLDR_K.Std,
-                      'PRINT',
-                      self.strunicodeout(fname),
-                      self.strunicodeout(astr)))
+        logging.critical('UPLDR_K.verbosity=%s', UPLDR_K.verbosity)
+        if verbosity <= UPLDR_K.verbosity:
+            print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
+                  .format(UPLDR_K.Gre,
+                          UPLDR_K.Run,
+                          time.strftime(UPLDR_K.TimeFormat),
+                          os.getpid(),
+                          UPLDR_K.Std,
+                          'PRINT',
+                          self.strunicodeout(fname),
+                          self.strunicodeout(astr)))
 
     # -------------------------------------------------------------------------
     # niceassert

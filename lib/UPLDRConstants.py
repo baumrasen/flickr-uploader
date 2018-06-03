@@ -40,11 +40,13 @@ class UPLDRConstants:
     #   TimeFormat   = Format to display date and time. Used with strftime
     #   Version      = Version Major.Minor.Fix
     #   Run          = Unique identifier for the execution Run of this process.
-    #   media_count = Counter of total files to initially upload
+    #   media_count  = Counter of total files to initially upload
+    #   verbosity    = Verbosity Level defined: 0, 1, 2, ...    
     #
     media_count = None
     TimeFormat = '%Y.%m.%d %H:%M:%S'
     Run = eval(time.strftime('int("%j")+int("%H")*100+int("%M")*10+int("%S")'))
+    verbosity = 0
     try:
         if __version__.__version__ is not None:
             Version = __version__.__version__

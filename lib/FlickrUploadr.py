@@ -1150,12 +1150,12 @@ class Uploadr(object):
                     file_checksum = md5checksum(file)
 
                 # Insert into DB files
-                logging.warning(' Already loaded:[%s]...'
-                                'On Album:[%s]... UPDATING LOCAL DATABASE.',
+                logging.warning(' Already loaded:[%s] '
+                                'On Album:[%s]: UPDATING LOCAL DATABASE.',
                                 strunicodeout(file),
                                 strunicodeout(setname))
-                NP.niceprint(' Already loaded:[{!s}]...'
-                             'On Album:[{!s}]... UPDATING LOCAL DATABASE.'
+                NP.niceprint(' Already loaded:[{!s}] '
+                             'On Album:[{!s}]: UPDATING LOCAL DATABASE.'
                              .format(strunicodeout(file),
                                      strunicodeout(setname)))
                 dbInsertIntoFiles(lock, isfile_id, file,
@@ -2928,9 +2928,8 @@ class Uploadr(object):
             # CODING: how to indicate an error... different from False?
             # Possibly raising an exception?
             # raise Exception('photos.search: Max attempts exhausted.')
-            if self.args.verbose:
-                NP.niceprint(' IS_UPLOADED:[ERROR#1]',
-                             fname='isuploaded')
+            NP.niceprint(' IS_UPLOADED:[ERROR#1]',
+                         fname='isuploaded', verbosity=3)
             logging.warning(' IS_UPLOADED:[ERROR#1]')
 
             return returnIsPhotoUploaded, returnPhotoUploaded, \
@@ -2943,7 +2942,8 @@ class Uploadr(object):
             returnPhotoUploaded = 0
             logging.error(' IS_UPLOADED:[ERROR#3]: Invalid return. Confinuing')
             NP.niceprint(' IS_UPLOADED:[ERROR#3]: Invalid return. Confinuing',
-                         fname='isuploaded')
+                         fname='isuploaded',
+                         verbosity=3)
         else:
             returnPhotoUploaded = int(searchIsUploaded
                                       .find('photos').attrib['total'])
@@ -3003,9 +3003,8 @@ class Uploadr(object):
                     # Possibly raising an exception?
                     # raise Exception('photos_getAllContexts: '
                     #                 'Max attempts exhausted.')
-                    if self.args.verbose:
-                        NP.niceprint(' IS_UPLOADED:[ERROR#2]',
-                                     fname='isuploaded')
+                    NP.niceprint(' IS_UPLOADED:[ERROR#2]',
+                                 fname='isuploaded', verbosity=3)
                     logging.warning(' IS_UPLOADED:[ERROR#2]')
 
                     return returnIsPhotoUploaded, returnPhotoUploaded, \
@@ -3026,10 +3025,9 @@ class Uploadr(object):
                         intag='album:{}'
                         .format(xsetname))
                     if tfind:
-                        if self.args.verbose:
-                            NP.niceprint(' IS_UPLOADED:[UPLOADED WITHOUT'
-                                         ' SET WITH ALBUM TAG]',
-                                         fname='isuploaded')
+                        NP.niceprint(' IS_UPLOADED:[UPLOADED WITHOUT'
+                                     ' SET WITH ALBUM TAG]',
+                                     fname='isuploaded', verbosity=2)
                         logging.warning(' IS_UPLOADED:[UPLOADED WITHOUT'
                                         ' SET WITH ALBUM TAG]')
                         returnIsPhotoUploaded = True
@@ -3038,10 +3036,9 @@ class Uploadr(object):
                         return returnIsPhotoUploaded, returnPhotoUploaded, \
                             returnPhotoID, returnUploadedNoSet
                     else:
-                        if self.args.verbose_progress:
-                            NP.niceprint('IS_UPLOADED:[UPLOADED WITHOUT'
-                                         ' SET WITHOUT ALBUM TAG]',
-                                         fname='isuploaded')
+                        NP.niceprint('IS_UPLOADED:[UPLOADED WITHOUT'
+                                     ' SET WITHOUT ALBUM TAG]',
+                                     fname='isuploaded', verbosity=2)
                         logging.warning('IS_UPLOADED:[UPLOADED WITHOUT'
                                         ' SET WITHOUT ALBUM TAG]')
 
@@ -3073,11 +3070,9 @@ class Uploadr(object):
                     #                                               THEN EXISTS
                     if (strunicodeout(xsetname) ==
                             strunicodeout(setinlist.attrib['title'])):
-                        if self.args.verbose:
-                            NP.niceprint(' IS_UPLOADED:[TRUE WITH SET]',
-                                         fname='isuploaded')
-                        logging.warning(
-                            ' IS_UPLOADED:[TRUE WITH SET]')
+                        NP.niceprint(' IS_UPLOADED:[TRUE WITH SET]',
+                                     fname='isuploaded', verbosity=2)
+                        logging.warning(' IS_UPLOADED:[TRUE WITH SET]')
                         returnIsPhotoUploaded = True
                         returnPhotoID = pic.attrib['id']
                         returnUploadedNoSet = False
@@ -3086,10 +3081,9 @@ class Uploadr(object):
                     else:
                         # D) checksum, title, other setname,       Count>=1
                         #                                       THEN NOT EXISTS
-                        if self.args.verbose_progress:
-                            NP.niceprint(' IS_UPLOADED:[FALSE OTHER SET, '
-                                         'CONTINUING SEARCH IN SETS]',
-                                         fname='isuploaded')
+                        NP.niceprint(' IS_UPLOADED:[FALSE OTHER SET, '
+                                     'CONTINUING SEARCH IN SETS]',
+                                     fname='isuploaded', verbosity=2)
                         logging.warning(' IS_UPLOADED:[FALSE OTHER SET, '
                                         'CONTINUING SEARCH IN SETS]')
                         continue

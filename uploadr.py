@@ -503,6 +503,9 @@ if __name__ == "__main__":
     # Parse the arguments options
     PARSED_ARGS = parse_arguments()
 
+    # Save -v --config-file overrides configuration filename.
+    UPLDR_K.verbosity = PARSED_ARGS.verbose
+
     # Print/show arguments
     if MY_CFG.LOGGING_LEVEL <= logging.INFO:
         NPR.niceprint('Output for arguments(args):')

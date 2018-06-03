@@ -84,7 +84,7 @@ class NicePrint:
     # get_verbosity
     #
     @classmethod
-    def get_verbosity(cls, averbosity=0):
+    def get_verbosity(cls):
         """ get_verbosity
 
             returns Class verbosity setting
@@ -157,6 +157,9 @@ class NicePrint:
             Accounts for UTF-8 Messages
         """
         logging.critical('get.verbosity=%s', self.get_verbosity())
+        logging.critical('verbosity(arg?)=%s',
+                         None if verbosity is None else verbosity)
+
         if verbosity <= self.get_verbosity():
             print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
                   .format(UPLDR_K.Gre,

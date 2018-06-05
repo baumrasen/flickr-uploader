@@ -637,7 +637,8 @@ logging.warning('----------- (V%s) End -----------(Log:%s)',
                 UPLDR_K.Version,
                 MY_CFG.LOGGING_LEVEL)
 
-handlers = logging.handlers[:]
+# Close logging handlers
+handlers = logging.getLogger().handlers[:]
 for handler in handlers:
     handler.close()
-    logging.removeHandler(handler)
+    logging.getLogger().removeHandler(handler)

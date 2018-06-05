@@ -636,3 +636,4 @@ NPR.niceprint('----------- (V{!s}) End -----------(Log:{!s})'
 logging.warning('----------- (V%s) End -----------(Log:%s)',
                 UPLDR_K.Version,
                 MY_CFG.LOGGING_LEVEL)
+logging.close()

@@ -457,6 +457,23 @@ def check_base_ini_file(base_dir, ini_file):
     return result_check
 
 
+# -----------------------------------------------------------------------------
+# check_base_ini_file
+#
+# Close logging handlers
+#
+def logging_close_handlers():
+    """ logging_close_handlers
+
+    Close logging handlers
+
+    """
+    handlers = logging.getLogger().handlers[:]
+    for handler in handlers:
+        handler.close()
+        logging.getLogger().removeHandler(handler)
+
+
 # =============================================================================
 # Global Variables
 #
@@ -637,8 +654,4 @@ logging.warning('----------- (V%s) End -----------(Log:%s)',
                 UPLDR_K.Version,
                 MY_CFG.LOGGING_LEVEL)
 
-# Close logging handlers
-handlers = logging.getLogger().handlers[:]
-for handler in handlers:
-    handler.close()
-    logging.getLogger().removeHandler(handler)
+logging_close_handlers()

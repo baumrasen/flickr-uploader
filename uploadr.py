@@ -636,4 +636,8 @@ NPR.niceprint('----------- (V{!s}) End -----------(Log:{!s})'
 logging.warning('----------- (V%s) End -----------(Log:%s)',
                 UPLDR_K.Version,
                 MY_CFG.LOGGING_LEVEL)
-logging.close()
+
+handlers = logging.handlers[:]
+for handler in handlers:
+    handler.close()
+    logging.removeHandler(handler)

@@ -1052,7 +1052,7 @@ class Uploadr(object):
                                      caughtprefix='+++ DB',
                                      caughtcode='032',
                                      caughtmsg='Succeed at retry SQL...'
-                                      '[{!s}/{!s} attempts]'
+                                     '[{!s}/{!s} attempts]'
                                      .format(x, self.xcfg.MAX_SQL_ATTEMPTS),
                                      useniceprint=True)
                     logging.info(
@@ -1304,7 +1304,7 @@ class Uploadr(object):
                                      caughtcode='039',
                                      caughtmsg='Sleep 10 and check if file is'
                                      'already uploaded.',
-                                     useniceprint=True)                           
+                                     useniceprint=True)
                         NUTIME.sleep(10)
 
                         ZisLoaded, ZisCount, photo_id, ZisNoSet = \
@@ -1408,7 +1408,7 @@ class Uploadr(object):
                                          caughtcode='042',
                                          caughtmsg='Sleep 10 and check if '
                                          'file is already uploaded.',
-                                         useniceprint=True)                                                       
+                                         useniceprint=True)
                             NUTIME.sleep(10)
 
                             ZisLoaded, ZisCount, photo_id, ZisNoSet = \
@@ -1734,13 +1734,13 @@ class Uploadr(object):
                                  caughtcode='060',
                                  caughtmsg='Caught IOError, ValueError, '
                                  'HTTP exception',
-                                  useniceprint=True,
+                                 useniceprint=True,
                                  exceptsysinfo=True)
                     NP.niceerror(caught=True,
                                  caughtprefix='xxx',
                                  caughtcode='061',
                                  caughtmsg='Sleep 10 and try to replace again',
-                                 useniceprint=True)                                               
+                                 useniceprint=True)
                     NUTIME.sleep(10)
 
                     if x == self.xcfg.MAX_UPLOAD_ATTEMPTS - 1:
@@ -2824,7 +2824,7 @@ class Uploadr(object):
                         NP.niceerror(caught=True,
                                      caughtprefix='+++ DB',
                                      caughtcode='165',
-                                      caughtmsg='DB error on INSERT INTO '
+                                     caughtmsg='DB error on INSERT INTO '
                                      'sets: [{!s}]'
                                      .format(err.args[0]),
                                      useniceprint=True)
@@ -2838,7 +2838,8 @@ class Uploadr(object):
             NP.niceerror(caught=True,
                          caughtprefix='xxx',
                          caughtcode='089',
-                         caughtmsg='Failed to list photosets (photosets.getList)',
+                         caughtmsg='Failed to list photosets '
+                         '(photosets.getList)',
                          exceptuse=True,
                          exceptcode=get_result['code']
                          if 'code' in get_result
@@ -2853,7 +2854,8 @@ class Uploadr(object):
             NP.niceerror(caught=True,
                          caughtprefix='+++ DB',
                          caughtcode='121',
-                         caughtmsg='Closing DB connection on photosets.getList',
+                         caughtmsg='Closing DB connection on '
+                         'photosets.getList',
                          useniceprint=True)
             con.close()
 

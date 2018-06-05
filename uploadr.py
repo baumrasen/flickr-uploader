@@ -401,13 +401,14 @@ def run_uploadr(args):
                               'on upload.',
                               fname='addAlbumsMigrate')
             else:
-                logging.error('Failed adding album tags to pics '
-                              'on upload. '
-                              'Please check logs, correct, and retry.')
-                NPR.niceprint('Failed adding album tags to pics '
-                              'on upload. '
-                              'Please check logs, correct, and retry.',
-                              fname='addAlbumsMigrate')
+                NPR.niceerror(
+                    caught=True,
+                    caughtprefix='xxx',
+                    caughtcode='642',
+                    caughtmsg='Failed adding album tags to pics uploaded. '
+                    'Please check logs, correct, and retry.',
+                    useniceprint=True)
+
                 sys.exit(10)
         elif args.list_bad_files:
             NPR.niceprint('Listing badfiles: Start.', fname='listBadFiles')

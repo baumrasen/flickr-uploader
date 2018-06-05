@@ -471,22 +471,22 @@ class Uploadr(object):
 
         with con:
             # Search for  media files to load including raw files to convert
-            allMedia, rawfiles = self.grabNewFiles()
+            all_media, rawfiles = self.grabNewFiles()
 
             # If managing changes, consider all files
             if self.xcfg.MANAGE_CHANGES:
-                logging.warning('MANAGE_CHANGES is True. Reviewing allMedia.')
-                changedMedia = allMedia
+                logging.warning('MANAGE_CHANGES is True. Reviewing all_media.')
+                changed_media = all_media
 
             # If not, then get just the new and missing files
             else:
                 logging.warning('MANAGE_CHANGES is False. Reviewing only '
-                                'changedMedia.')
+                                'changed_media.')
                 cur = con.cursor()
                 try:
                     cur.execute("SELECT path FROM files")
-                    existingMedia = set(file[0] for file in cur.fetchall())
-                    changedMedia = set(allMedia) - existingMedia
+                    existing_media = set(file[0] for file in cur.fetchall())
+                    changed_media = set(all_media) - existing_media
                 except lite.Error as err:
                     NP.niceerror(caught=True,
                                  caughtprefix='+++ DB',
@@ -495,15 +495,15 @@ class Uploadr(object):
                                  .format(err.args[0]),
                                  useniceprint=True,
                                  exceptsysinfo=True)
-                    changedMedia = allMedia
+                    changed_media = all_media
 
-        changedMedia_count = len(changedMedia)
-        UPLDRConstantsClass.media_count = changedMedia_count
+        changed_media_count = len(changed_media)
+        UPLDRConstantsClass.media_count = changed_media_count
         NP.niceprint('Found [{!s:>6s}] files to upload.'
-                     .format(str(changedMedia_count)))
+                     .format(str(changed_media_count)))
 
         # Convert Raw files
-        self.convertRawFiles(rawfiles, changedMedia)
+        self.convertRawFiles(rawfiles, changed_media)
 
         if self.args.bad_files:
             # Cater for bad files
@@ -512,14 +512,14 @@ class Uploadr(object):
             with con:
                 cur = con.cursor()
                 cur.execute("SELECT path FROM badfiles")
-                badMedia = set(file[0] for file in cur.fetchall())
-                changedMedia = set(changedMedia) - badMedia
-                logging.debug('len(badMedia)=[%s]', len(badMedia))
+                bad_media = set(file[0] for file in cur.fetchall())
+                changed_media = set(changed_media) - bad_media
+                logging.debug('len(bad_media)=[%s]', len(bad_media))
 
-            changedMedia_count = len(changedMedia)
+            changed_media_count = len(changed_media)
             NP.niceprint('Removing {!s} badfiles. Found {!s} files to upload.'
-                         .format(len(badMedia),
-                                 changedMedia_count))
+                         .format(len(bad_media),
+                                 changed_media_count))
 
         # running in multi processing mode
         if self.args.processes and self.args.processes > 0:
@@ -539,7 +539,7 @@ class Uploadr(object):
                            nulockDB,
                            nurunning,
                            numutex,
-                           changedMedia,
+                           changed_media,
                            self.uploadFileX,
                            cur)
             con.commit()
@@ -547,14 +547,14 @@ class Uploadr(object):
         # running in single processing mode
         else:
             count = 0
-            for i, file in enumerate(changedMedia):
+            for i, file in enumerate(changed_media):
                 logging.debug('file:[%s] type(file):[%s]',
                               file, type(file))
                 # lock parameter not used (set to None) under single processing
                 success = self.uploadFile(lock=None, file=file)
                 if (self.args.drip_feed and
                         success and
-                        i != changedMedia_count - 1):
+                        i != changed_media_count - 1):
                     NP.niceprint('Waiting [{!s}] seconds before next upload'
                                  .format(str(self.xcfg.DRIP_TIME)))
                     NUTIME.sleep(self.xcfg.DRIP_TIME)
@@ -2970,12 +2970,12 @@ class Uploadr(object):
             logging.info('Title:[%s]', NP.strunicodeout(xtitle_filename))
 
             # For each pic found on Flickr 1st check title and then Sets
-            freturnPhotoUploaded = 0
+            pic_index = 0
             for pic in searchIsUploaded.find('photos').findall('photo'):
-                freturnPhotoUploaded += 1
+                pic_index += 1
                 logging.debug('idx=[%s] pic.id=[%s] '
                               'pic.title=[%s] pic.tags=[%s]',
-                              freturnPhotoUploaded,
+                              pic_index,
                               pic.attrib['id'],
                               NP.strunicodeout(pic.attrib['title']),
                               NP.strunicodeout(pic.attrib['tags']))
@@ -3303,9 +3303,9 @@ class Uploadr(object):
                 cur.execute('SELECT files_id, path, sets.name, sets.set_id '
                             'FROM files LEFT OUTER JOIN sets ON '
                             'files.set_id = sets.set_id')
-                existingMedia = cur.fetchall()
-                logging.info('len(existingMedia)=[%s]',
-                             len(existingMedia))
+                existing_media = cur.fetchall()
+                logging.info('len(existing_media)=[%s]',
+                             len(existing_media))
             except lite.Error as err:
                 NP.niceerror(caught=True,
                              caughtprefix='+++ DB',
@@ -3315,7 +3315,7 @@ class Uploadr(object):
                              useniceprint=True)
                 return False
 
-            count_total = len(existingMedia)
+            count_total = len(existing_media)
             # running in multi processing mode
             if self.args.processes and self.args.processes > 0:
                 logging.debug('Running [%s] processes pool.',
@@ -3332,7 +3332,7 @@ class Uploadr(object):
                                mlockDB,
                                mrunning,
                                mmutex,
-                               existingMedia,
+                               existing_media,
                                self.maddAlbumsMigrate,
                                cur)
 
@@ -3341,8 +3341,8 @@ class Uploadr(object):
             # running in single processing mode
             else:
                 count = 0
-                count_total = len(existingMedia)
-                for row in existingMedia:
+                count_total = len(existing_media)
+                for row in existing_media:
                     count += 1
                     # row[0] = files_id
                     # row[1] = path

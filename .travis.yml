@@ -85,9 +85,9 @@ env:
 # Badfiles
     #- TestScenario=BadFiles UploadrOptions="$VerboseVar $BadFilesVar"
 # Multiprocessing
-    - TestScenario=MultiProcessing UploadrOptions="$VerboseVar $BadFilesVar -p 30"
+    - TestScenario=MultiProcessing UploadrOptions="$VerboseVar $BadFilesVar -p 20"
 # addAlbumsMigrate. Option --add-albums-migrate is added on SECOND RUN. No badfiles handling
-    - TestScenario=addAlbumsMigrate UploadrOptions="$VerboseVar -p 30"
+    - TestScenario=addAlbumsMigrate UploadrOptions="$VerboseVar -p 20"
 # RemoveReplace, Multiprocessing, Clean BadFiles, ListPhotosNotInSet
     - TestScenario=RemoveReplace UploadrOptions="$VerboseVar $BadFilesVar $ListPhotosNotInSet -p 10 -c"
 # ExcludedFolders+IgnoredFiles in Single Processing mode.

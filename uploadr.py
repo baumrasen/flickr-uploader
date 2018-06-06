@@ -605,10 +605,11 @@ if __name__ == "__main__":
                                   MY_CFG.LOGGING_LEVEL <= logging.DEBUG
                                   else MY_CFG.LOGGING_LEVEL - 10)
 
-    # Allow multiprocessing looging into a single file (not for Windows)
-    logging.info('multiprocessing logging handlers: Activating...')
-    multiprocessing_logging.install_mp_handler()
-    logging.info('multiprocessing logging handlers: Activated.')
+    # Allow multiprocessing logging into a single file (not for Windows)
+    if PARSED_ARGS.args.processes and PARSED_ARGS.processes > 0:
+        logging.debug('multiprocessing logging handlers: Activating...')
+        multiprocessing_logging.install_mp_handler()
+        logging.info('multiprocessing logging handlers: Activated.')
 
     if MY_CFG.LOGGING_LEVEL <= logging.INFO:
         NPR.niceprint('Output for FLICKR Configuration:')

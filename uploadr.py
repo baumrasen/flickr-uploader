@@ -624,7 +624,7 @@ if __name__ == "__main__":
                                   else MY_CFG.LOGGING_LEVEL - 10)
 
     # Allow multiprocessing logging into a single file (not for Windows)
-    if PARSED_ARGS.args.processes and PARSED_ARGS.processes > 0:
+    if PARSED_ARGS.processes and PARSED_ARGS.processes > 0:
         logging.debug('multiprocessing logging handlers: Activating...')
         multiprocessing_logging.install_mp_handler()
         logging.info('multiprocessing logging handlers: Activated.')

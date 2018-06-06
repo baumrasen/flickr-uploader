@@ -401,13 +401,14 @@ def run_uploadr(args):
                               'on upload.',
                               fname='addAlbumsMigrate')
             else:
-                logging.error('Failed adding album tags to pics '
-                              'on upload. '
-                              'Please check logs, correct, and retry.')
-                NPR.niceprint('Failed adding album tags to pics '
-                              'on upload. '
-                              'Please check logs, correct, and retry.',
-                              fname='addAlbumsMigrate')
+                NPR.niceerror(
+                    caught=True,
+                    caughtprefix='xxx',
+                    caughtcode='642',
+                    caughtmsg='Failed adding album tags to pics uploaded. '
+                    'Please check logs, correct, and retry.',
+                    useniceprint=True)
+
                 sys.exit(10)
         elif args.list_bad_files:
             NPR.niceprint('Listing badfiles: Start.', fname='listBadFiles')
@@ -455,6 +456,23 @@ def check_base_ini_file(base_dir, ini_file):
 
     logging.debug('check_base_ini_file=[%s]', result_check)
     return result_check
+
+
+# -----------------------------------------------------------------------------
+# check_base_ini_file
+#
+# Close logging handlers
+#
+def logging_close_handlers():
+    """ logging_close_handlers
+
+    Close logging handlers
+
+    """
+    handlers = logging.getLogger().handlers[:]
+    for handler in handlers:
+        handler.close()
+        logging.getLogger().removeHandler(handler)
 
 
 # =============================================================================
@@ -637,3 +655,5 @@ NPR.niceprint('----------- (V{!s}) End -----------(Log:{!s})'
 logging.warning('----------- (V%s) End -----------(Log:%s)',
                 UPLDR_K.Version,
                 MY_CFG.LOGGING_LEVEL)
+
+logging_close_handlers()

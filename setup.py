@@ -39,6 +39,7 @@ VERSION = None  # Load from LIB/__version__.py dictionary
 # What packages are required for this module to be executed?
 REQUIRED = [
     'flickrapi',
+    'portalocker;platform_system=="Windows"',
 ]
 # What data_files are required for this applicaiton to be configured?
 DATA_FILES = [('etc', ['uploadr.ini', 'uploadr.cron'])]

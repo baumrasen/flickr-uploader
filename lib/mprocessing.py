@@ -49,7 +49,7 @@ def use_lock(a_db_Lock, operation, nprocs=0):
     if operation is None:
         return use_dblock_return
 
-    if (nproc is not None) and (nprocs) and (nprocs > 0):
+    if (nprocs is not None) and (nprocs) and (nprocs > 0):
         if operation:
             # Control for when running multiprocessing set locking
             logging.debug('===Multiprocessing=== -->[ ].lock.acquire')
@@ -57,12 +57,12 @@ def use_lock(a_db_Lock, operation, nprocs=0):
                 if a_db_Lock.acquire():
                     use_dblock_return = True
             except Exception:
-                NP.niceerror(caught=True,
-                             caughtprefix='+++ ',
-                             caughtcode='002',
-                             caughtmsg='Caught an exception lock.acquire',
-                             useniceprint=True,
-                             exceptsysinfo=True)
+                npr.niceerror(caught=True,
+                              caughtprefix='+++ ',
+                              caughtcode='002',
+                              caughtmsg='Caught an exception lock.acquire',
+                              useniceprint=True,
+                              exceptsysinfo=True)
                 raise
             logging.info('===Multiprocessing=== --->[v].lock.acquire')
         else:
@@ -72,12 +72,12 @@ def use_lock(a_db_Lock, operation, nprocs=0):
                 a_db_Lock.release()
                 use_dblock_return = True
             except Exception:
-                NP.niceerror(caught=True,
-                             caughtprefix='+++ ',
-                             caughtcode='003',
-                             caughtmsg='Caught an exception lock.release',
-                             useniceprint=True,
-                             exceptsysinfo=True)
+                npr.niceerror(caught=True,
+                              caughtprefix='+++ ',
+                              caughtcode='003',
+                              caughtmsg='Caught an exception lock.release',
+                              useniceprint=True,
+                              exceptsysinfo=True)
                 # Raise aborts execution
                 raise
             logging.info('===Multiprocessing=== <--[v].lock.release')

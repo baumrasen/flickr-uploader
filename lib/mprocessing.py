@@ -20,6 +20,79 @@ from itertools import islice
 import lib.NicePrint as NicePrint
 
 
+# -------------------------------------------------------------------------
+# use_lock
+#
+# Control use of DB lock. acquire/release
+#
+def use_lock(a_db_Lock, operation, nprocs=0):
+    """ use_lock
+
+        a_db_Lock  = lock to be used
+        operation  = True => Lock
+                   = False => Release
+        nprocs     = >0 when in multiprocessing mode
+
+        >>> use_lock
+    """
+
+    use_dblock_return = False
+
+    logging.debug('Entering use_lock with operation:[%s].', operation)
+
+    if a_db_Lock is None:
+        logging.debug('use_lock: a_db_Lock is [None].')
+        return use_dblock_return
+
+    logging.debug('use_lock: a_db_Lock.semlock:[%s].', a_db_Lock._semlock)
+
+    if operation is None:
+        return use_dblock_return
+
+    if (nproc is not None) and (nprocs) and (nprocs > 0):
+        if operation:
+            # Control for when running multiprocessing set locking
+            logging.debug('===Multiprocessing=== -->[ ].lock.acquire')
+            try:
+                if a_db_Lock.acquire():
+                    use_dblock_return = True
+            except Exception:
+                NP.niceerror(caught=True,
+                             caughtprefix='+++ ',
+                             caughtcode='002',
+                             caughtmsg='Caught an exception lock.acquire',
+                             useniceprint=True,
+                             exceptsysinfo=True)
+                raise
+            logging.info('===Multiprocessing=== --->[v].lock.acquire')
+        else:
+            # Control for when running multiprocessing release locking
+            logging.debug('===Multiprocessing=== <--[ ].lock.release')
+            try:
+                a_db_Lock.release()
+                use_dblock_return = True
+            except Exception:
+                NP.niceerror(caught=True,
+                             caughtprefix='+++ ',
+                             caughtcode='003',
+                             caughtmsg='Caught an exception lock.release',
+                             useniceprint=True,
+                             exceptsysinfo=True)
+                # Raise aborts execution
+                raise
+            logging.info('===Multiprocessing=== <--[v].lock.release')
+
+        logging.info('Exiting use_lock with operation:[%s]. Result:[%s]',
+                     operation, use_dblock_return)
+    else:
+        use_dblock_return = True
+        logging.warning('(No multiprocessing. Nothing to do) '
+                        'Exiting use_lock with operation:[%s]. Result:[%s]',
+                        operation, use_dblock_return)
+
+    return use_dblock_return
+
+
 # -----------------------------------------------------------------------------
 # mprocessing
 #
@@ -189,7 +262,7 @@ def mprocessing(args_verbose, args_verbose_progress,
 
     # Will release (set to None) the lockdb lock control
     # this prevents subsequent calls to
-    # useDBLock( nuLockDB, False)
+    # use_lock( nuLockDB, False)
     # to raise exception:
     #   ValueError('semaphore or lock released too many times')
     logging.info('===Multiprocessing=== pool joined! '

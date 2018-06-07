@@ -217,9 +217,6 @@ class NicePrint:
     #               caughtmsg='DB error on INSERT: [{!s}]'
     #                         .format(e.args[0]),
     #               useniceprint=True)
-    #     # Release the lock on error.
-    #     self.useDBLock(lock, False)
-    #     success = False
     # except:
     #     niceerror(caught=True,
     #               caughtprefix='+++',

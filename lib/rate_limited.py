@@ -277,10 +277,8 @@ def retry(attempts=3, waittime=5, randtime=False):
                     logging.error('___Retry f():[%s]: Error code B: [%s]',
                                   a_fn.__name__, err)
                     error = err
-                    # Release the lock on error.
-                    # CODING: Check how to handle this particular scenario.
-                    # flick.useDBLock(nulockDB, False)
-                    # self.useDBLock( lock, True)
+                    # CODING: Release existing locks on error?
+                    # Check how to handle this particular scenario.
                 except Exception as err:
                     logging.error('___Retry f():[%s]: Error code C: Catchall',
                                   a_fn.__name__)

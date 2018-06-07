@@ -1015,7 +1015,7 @@ class Uploadr(object):
                 db_exception = False
                 try:
                     # Acquire DBlock if in multiprocessing mode
-                    self.useDBLock(lock, True)
+                    mp.use_lock(lock, True, self.args.processes)
                     cur.execute(
                         'INSERT INTO files '
                         '(files_id, path, md5, '
@@ -1035,7 +1035,7 @@ class Uploadr(object):
                 finally:
                     con.commit()
                     # Release DBlock if in multiprocessing mode
-                    self.useDBLock(lock, False)
+                    mp.use_lock(lock, False, self.args.processes)
 
                 if db_exception:
                     NP.niceerror(caught=True,
@@ -1091,7 +1091,7 @@ class Uploadr(object):
 
             try:
                 # Acquire DB lock if running in multiprocessing mode
-                self.useDBLock(lock, True)
+                mp.use_lock(lock, True, self.args.processes)
                 cur.execute('SELECT rowid, files_id, path, set_id, md5, '
                             'tagged, last_modified FROM files WHERE path = ?',
                             (file,))
@@ -1104,7 +1104,7 @@ class Uploadr(object):
                              useniceprint=True)
             finally:
                 # Release DB lock if running in multiprocessing mode
-                self.useDBLock(lock, False)
+                mp.use_lock(lock, False, self.args.processes)
 
             row = cur.fetchone()
             logging.debug('row: %s', row)
@@ -1377,7 +1377,7 @@ class Uploadr(object):
                                          NP.strunicodeout(file))
 
                             try:
-                                self.useDBLock(lock, True)
+                                mp.use_lock(lock, True, self.args.processes)
                                 # files_id is autoincrement. No need to mention
                                 cur.execute(
                                     'INSERT INTO badfiles '
@@ -1395,7 +1395,7 @@ class Uploadr(object):
                             finally:
                                 # Control for when running multiprocessing
                                 # release locking
-                                self.useDBLock(lock, False)
+                                mp.use_lock(lock, False, self.args.processes)
 
                             # Break for ATTEMPTS cycle
                             break
@@ -1513,7 +1513,7 @@ class Uploadr(object):
                     logging.info('Will UPDATE files SET set_id = null '
                                  'for pic:[%s] ', row[1])
                     try:
-                        self.useDBLock(lock, True)
+                        mp.use_lock(lock, True, self.args.processes)
                         cur.execute('UPDATE files SET set_id = null '
                                     'WHERE files_id = ?', (row[1],))
                     except lite.Error as err:
@@ -1525,7 +1525,7 @@ class Uploadr(object):
                                      useniceprint=True)
                     finally:
                         con.commit()
-                        self.useDBLock(lock, False)
+                        mp.use_lock(lock, False, self.args.processes)
 
                     logging.info('Did UPDATE files SET set_id = null '
                                  'for pic:[%s]',
@@ -1551,12 +1551,12 @@ class Uploadr(object):
                         # Update db the last_modified time of file
 
                         # Control for when running multiprocessing set locking
-                        self.useDBLock(lock, True)
+                        mp.use_lock(lock, True, self.args.processes)
                         cur.execute('UPDATE files SET last_modified = ? '
                                     'WHERE files_id = ?', (last_modified,
                                                            row[1]))
                         con.commit()
-                        self.useDBLock(lock, False)
+                        mp.use_lock(lock, False, self.args.processes)
 
                     logging.warning('CHANGES row[6]!=last_modified: [%s]',
                                     row[6] != last_modified)
@@ -1579,7 +1579,7 @@ class Uploadr(object):
                                  .format(err.args[0]),
                                  useniceprint=True)
 
-                    self.useDBLock(lock, False)
+                    mp.use_lock(lock, False, self.args.processes)
                     if self.args.processes and self.args.processes > 0:
                         logging.debug('===Multiprocessing==='
                                       'lock.release (in Error)')
@@ -1770,7 +1770,7 @@ class Uploadr(object):
 
             # Update the db the file uploaded
             # Control for when running multiprocessing set locking
-            self.useDBLock(lock, True)
+            mp.use_lock(lock, True, self.args.processes)
             try:
                 cur.execute('UPDATE files SET md5 = ?,last_modified = ? '
                             'WHERE files_id = ?',
@@ -1785,7 +1785,7 @@ class Uploadr(object):
                              useniceprint=True)
             finally:
                 # Release DB lock if running in multiprocessing mode
-                self.useDBLock(lock, False)
+                mp.use_lock(lock, False, self.args.processes)
 
             # Update the Video Date Taken
             self.updatedVideoDate(file_id, file, last_modified)
@@ -1841,7 +1841,7 @@ class Uploadr(object):
                          caughtmsg='DB error: [{!s}]'.format(err.args[0]),
                          useniceprint=True)
             # Release the lock on error.
-            self.useDBLock(lock, False)
+            mp.use_lock(lock, False, self.args.processes)
             success = False
         except Exception:
             NP.niceerror(caught=True,
@@ -1869,7 +1869,7 @@ class Uploadr(object):
         file  = row of database with (files_id, path)
         cur   = represents the control database cursor to allow, for example,
                 deleting empty sets
-        lock  = for use with useDBLock to control access to DB
+        lock  = for use with use_lock to control access to DB
         """
 
         # ---------------------------------------------------------------------
@@ -1881,7 +1881,7 @@ class Uploadr(object):
             Find out if the file is the last item in a set, if so,
             remove the set from the local db
 
-            lock  = for use with useDBLock to control access to DB
+            lock  = for use with use_lock to control access to DB
             file  = row of database with (files_id, path)
 
             Use new connection and nucur cursor to ensure commit
@@ -1893,7 +1893,7 @@ class Uploadr(object):
                 try:
                     nucur = con.cursor()
                     # Acquire DBlock if in multiprocessing mode
-                    self.useDBLock(lock, True)
+                    mp.use_lock(lock, True, self.args.processes)
                     nucur.execute("SELECT set_id FROM files "
                                   "WHERE files_id = ?",
                                   (file[0],))
@@ -1937,7 +1937,7 @@ class Uploadr(object):
                     logging.debug('deleteFile.dbDeleteRecordLocalDB: '
                                   'After COMMIT')
                     # Release DBlock if in multiprocessing mode
-                    self.useDBLock(lock, False)
+                    mp.use_lock(lock, False, self.args.processes)
 
             # Closing DB connection
             if con is not None:
@@ -2000,7 +2000,7 @@ class Uploadr(object):
 
         try:
             # Acquire DBlock if in multiprocessing mode
-            self.useDBLock(lock, True)
+            mp.use_lock(lock, True, self.args.processes)
             cur.execute('INSERT INTO sets (set_id, name, primary_photo_id) '
                         'VALUES (?,?,?)',
                         (set_id, setname, primary_photo_id))
@@ -2014,11 +2014,11 @@ class Uploadr(object):
         finally:
             con.commit()
             # Release DBlock if in multiprocessing mode
-            self.useDBLock(lock, False)
+            mp.use_lock(lock, False, self.args.processes)
 
         try:
             # Acquire DBlock if in multiprocessing mode
-            self.useDBLock(lock, True)
+            mp.use_lock(lock, True, self.args.processes)
             cur.execute('UPDATE files SET set_id = ? WHERE files_id = ?',
                         (set_id, primary_photo_id))
         except lite.Error as err:
@@ -2031,7 +2031,7 @@ class Uploadr(object):
         finally:
             con.commit()
             # Release DBlock if in multiprocessing mode
-            self.useDBLock(lock, False)
+            mp.use_lock(lock, False, self.args.processes)
 
         return True
 
@@ -2085,7 +2085,7 @@ class Uploadr(object):
                 aset = None
                 try:
                     # Acquire DBlock if in multiprocessing mode
-                    self.useDBLock(lockDB, True)
+                    mp.use_lock(lockDB, True, self.args.processes)
                     acur.execute('SELECT set_id, name '
                                  'FROM sets WHERE name = ?',
                                  (setname,))
@@ -2100,7 +2100,7 @@ class Uploadr(object):
                                  exceptsysinfo=True)
                 finally:
                     # Release DBlock if in multiprocessing mode
-                    self.useDBLock(lockDB, False)
+                    mp.use_lock(lockDB, False, self.args.processes)
 
                 if aset is not None:
                     set_id = aset[0]
@@ -2305,7 +2305,7 @@ class Uploadr(object):
 
             try:
                 # Acquire DBlock if in multiprocessing mode
-                self.useDBLock(lock, True)
+                mp.use_lock(lock, True, self.args.processes)
                 bcur.execute("UPDATE files SET set_id = ? "
                              "WHERE files_id = ?",
                              (set_id, file[0]))
@@ -2319,7 +2319,7 @@ class Uploadr(object):
                              useniceprint=True)
             finally:
                 # Release DBlock if in multiprocessing mode
-                self.useDBLock(lock, False)
+                mp.use_lock(lock, False, self.args.processes)
         elif not get_success and get_errcode == 1:
             # Error: 1: Photoset not found
             NP.niceprint('Photoset not found, creating new set...')
@@ -2335,7 +2335,7 @@ class Uploadr(object):
                              'set_id=[{!s}] photo_id=[{!s}]'
                              .format(set_id, file[0]))
                 # Acquire DBlock if in multiprocessing mode
-                self.useDBLock(lock, True)
+                mp.use_lock(lock, True, self.args.processes)
                 bcur.execute('UPDATE files SET set_id = ? '
                              'WHERE files_id = ?', (set_id, file[0]))
             except lite.Error as err:
@@ -2348,7 +2348,7 @@ class Uploadr(object):
             finally:
                 con.commit()
                 # Release DBlock if in multiprocessing mode
-                self.useDBLock(lock, False)
+                mp.use_lock(lock, False, self.args.processes)
         else:
             NP.niceerror(caught=True,
                          caughtprefix='xxx',
@@ -2629,7 +2629,7 @@ class Uploadr(object):
             try:
                 unusedsets = None
                 # Acquire DB lock if running in multiprocessing mode
-                # self.useDBLock( lock, True)
+                # mp.use_lock( lock, True, self.args.processes)
                 cur.execute("SELECT set_id, name FROM sets WHERE set_id NOT IN\
                             (SELECT set_id FROM files)")
                 unusedsets = cur.fetchall()
@@ -2642,7 +2642,7 @@ class Uploadr(object):
                              useniceprint=True)
             finally:
                 # Release DB lock if running in multiprocessing mode
-                # self.useDBLock( lock, False)
+                # mp.use_lock( lock, False, self.args.processes)
                 pass
 
             for row in unusedsets:
@@ -2653,7 +2653,7 @@ class Uploadr(object):
 
                 try:
                     # Acquire DB lock if running in multiprocessing mode
-                    # self.useDBLock( lock, True)
+                    # mp.use_lock( lock, True, self.args.processes)
                     cur.execute("DELETE FROM sets WHERE set_id = ?", (row[0],))
                 except lite.Error as err:
                     NP.niceerror(caught=True,
@@ -2664,7 +2664,7 @@ class Uploadr(object):
                                  useniceprint=True)
                 finally:
                     # Release DB lock if running in multiprocessing mode
-                    # self.useDBLock( lock, False)
+                    # mp.use_lock( lock, False, self.args.processes)
                     pass
 
             con.commit()
@@ -3600,81 +3600,6 @@ class Uploadr(object):
 
             NP.niceprint('*****Completed Listing Photos not in a set '
                          'in Flickr******')
-
-    # -------------------------------------------------------------------------
-    # useDBLock
-    #
-    # Control use of DB lock. acquire/release
-    #
-    def useDBLock(self, useDBthisLock, useDBoperation):
-        """ useDBLock
-
-            useDBthisLock  = lock to be used
-            useDBoperation = True => Lock
-                           = False => Release
-        """
-
-        use_dblock_return = False
-
-        logging.debug('Entering useDBLock with useDBoperation:[%s].',
-                      useDBoperation)
-
-        if useDBthisLock is None:
-            logging.debug('useDBLock: useDBthisLock is [None].')
-            return use_dblock_return
-
-        logging.debug('useDBLock: useDBthisLock.semlock:[%s].',
-                      useDBthisLock._semlock)
-
-        if useDBoperation is None:
-            return use_dblock_return
-
-        if (self.args.processes is not None) and\
-           (self.args.processes) and \
-           (self.args.processes > 0):
-            if useDBoperation:
-                # Control for when running multiprocessing set locking
-                logging.debug('===Multiprocessing=== -->[ ].lock.acquire')
-                try:
-                    if useDBthisLock.acquire():
-                        use_dblock_return = True
-                except Exception:
-                    NP.niceerror(caught=True,
-                                 caughtprefix='+++ ',
-                                 caughtcode='002',
-                                 caughtmsg='Caught an exception lock.acquire',
-                                 useniceprint=True,
-                                 exceptsysinfo=True)
-                    raise
-                logging.info('===Multiprocessing=== --->[v].lock.acquire')
-            else:
-                # Control for when running multiprocessing release locking
-                logging.debug('===Multiprocessing=== <--[ ].lock.release')
-                try:
-                    useDBthisLock.release()
-                    use_dblock_return = True
-                except Exception:
-                    NP.niceerror(caught=True,
-                                 caughtprefix='+++ ',
-                                 caughtcode='003',
-                                 caughtmsg='Caught an exception lock.release',
-                                 useniceprint=True,
-                                 exceptsysinfo=True)
-                    # Raise aborts execution
-                    raise
-                logging.info('===Multiprocessing=== <--[v].lock.release')
-
-            logging.info('Exiting useDBLock with useDBoperation:[%s]. '
-                         'Result:[%s]',
-                         useDBoperation, use_dblock_return)
-        else:
-            use_dblock_return = True
-            logging.warning('(No multiprocessing. Nothing to do) '
-                            'Exiting useDBLock with useDBoperation:[%s]. '
-                            'Result:[%s]',
-                            useDBoperation, use_dblock_return)
-
-        return use_dblock_return
 
 
 # -----------------------------------------------------------------------------

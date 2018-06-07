@@ -1766,8 +1766,7 @@ class Uploadr(object):
 
             NP.niceprint('  Replaced file:[{!s}]'
                          .format(NP.strunicodeout(file)))
-            logging.warning('  Replaced file:[%s]',
-                            NP.strunicodeout(file))
+            logging.warning('  Replaced file:[%s]', NP.strunicodeout(file))
 
             # Update the db the file uploaded
             # Control for when running multiprocessing set locking

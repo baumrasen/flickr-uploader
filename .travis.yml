@@ -149,7 +149,7 @@ script:
 
 # First RUN -------------------------------------------------------------------
   # stdout to file, stderr to file
-  - coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log 2> /home/travis/build/oPromessa/flickr-uploader/nohup.lst
+  - travis_wait coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log 2> /home/travis/build/oPromessa/flickr-uploader/nohup.lst
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst
 
@@ -189,9 +189,9 @@ script:
   - if [[ $TestScenario == NoVerbose ]]; then cp ./tests/uploadr_NoVerbose.ini ./uploadr.ini; cp ./tests/uploadr_NoVerbose.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini; fi
 
 # Run coverage uploadr.ini
-  - if [[ $TestScenario == Old273INI ]]; then coverage run -a --concurrency multiprocessing ./uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst; fi
-  - if [[ $TestScenario == DryRunNoToken ]]; then coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst < /home/travis/build/oPromessa/flickr-uploader/verifiercode.txt || echo ok; fi
-  - if [[ $TestScenario != Old273INI && $TestScenario != DryRunNoToken ]]; then coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst; fi
+  - if [[ $TestScenario == Old273INI ]]; then travis_wait coverage run -a --concurrency multiprocessing ./uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst; fi
+  - if [[ $TestScenario == DryRunNoToken ]]; then travis_wait coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst < /home/travis/build/oPromessa/flickr-uploader/verifiercode.txt || echo ok; fi
+  - if [[ $TestScenario != Old273INI && $TestScenario != DryRunNoToken ]]; then travis_wait coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst; fi
 
   #- coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log

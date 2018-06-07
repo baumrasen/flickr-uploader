@@ -19,6 +19,13 @@ import multiprocessing
 from itertools import islice
 import lib.NicePrint as NicePrint
 
+# =========================================================================
+# Functions aliases
+#
+#   NPR.NicePrint = from NicePrint module
+# -------------------------------------------------------------------------
+NPR = NicePrint.NicePrint()
+
 
 # -------------------------------------------------------------------------
 # use_lock
@@ -33,7 +40,11 @@ def use_lock(a_db_Lock, operation, nprocs=0):
                    = False => Release
         nprocs     = >0 when in multiprocessing mode
 
-        >>> use_lock
+        >>> alock = multiprocessing.Lock()
+        >>> use_lock(alock, True, 2)
+        True
+        >>> use_lock.release(alock, False, 2)
+        True
     """
 
     use_dblock_return = False
@@ -57,7 +68,7 @@ def use_lock(a_db_Lock, operation, nprocs=0):
                 if a_db_Lock.acquire():
                     use_dblock_return = True
             except Exception:
-                npr.niceerror(caught=True,
+                NPR.niceerror(caught=True,
                               caughtprefix='+++ ',
                               caughtcode='002',
                               caughtmsg='Caught an exception lock.acquire',
@@ -72,7 +83,7 @@ def use_lock(a_db_Lock, operation, nprocs=0):
                 a_db_Lock.release()
                 use_dblock_return = True
             except Exception:
-                npr.niceerror(caught=True,
+                NPR.niceerror(caught=True,
                               caughtprefix='+++ ',
                               caughtcode='003',
                               caughtmsg='Caught an exception lock.release',
@@ -121,13 +132,6 @@ def mprocessing(args_verbose, args_verbose_progress,
     # log_level   = log_level
     # count_total = Total counter of items to distribute/play/indicate progress
     #               len(itemslist)
-
-    # =========================================================================
-    # Functions aliases
-    #
-    #   npr.NicePrint = from NicePrint module
-    # -------------------------------------------------------------------------
-    npr = NicePrint.NicePrint()
 
     log_level = logging.getLogger().getEffectiveLevel()
     logging.info('===mprocessing [%s] target_fn():[%s] nprocs:[%s]',
@@ -178,12 +182,8 @@ def mprocessing(args_verbose, args_verbose_progress,
         if ((len(itemslist) // int(nprocs)) > 0) \
         else 1
 
-    logging.debug('len(itemslist):[%s] '
-                  'int(nprocs):[%s] '
-                  'size per process:[%s]',
-                  len(itemslist),
-                  int(nprocs),
-                  size)
+    logging.debug('len(itemslist):[%s] int(nprocs):[%s] size per process:[%s]',
+                  len(itemslist), int(nprocs), size)
 
     # Split itemslist in chunks to distribute accross Processes
     for splititemslist in chunk(itemslist, size):
@@ -205,7 +205,7 @@ def mprocessing(args_verbose, args_verbose_progress,
         logging.debug('===Job/Task Process:  [%s] Started with pid:[%s]',
                       proc_task.name,
                       proc_task.pid)
-        npr.niceprint('===Job/Task Process: [{!s}] Started '
+        NPR.niceprint('===Job/Task Process: [{!s}] Started '
                       'with pid:[{!s}]'
                       .format(proc_task.name,
                               proc_task.pid),
@@ -214,9 +214,9 @@ def mprocessing(args_verbose, args_verbose_progress,
     # Check status of jobs/tasks in the Process Pool
     if log_level <= logging.DEBUG:
         logging.debug('===Checking Processes launched/status:')
-        npr.niceprint('===Checking Processes launched/status:', verbosity=3)
+        NPR.niceprint('===Checking Processes launched/status:', verbosity=3)
         for j in proc_pool:
-            npr.niceprint('{!s}.is_alive = {!s}'.format(j.name, j.is_alive()),
+            NPR.niceprint('{!s}.is_alive = {!s}'.format(j.name, j.is_alive()),
                           verbosity=3)
             logging.debug('%s.is_alive = %s', j.name, j.is_alive())
 
@@ -233,8 +233,7 @@ def mprocessing(args_verbose, args_verbose_progress,
         logging.info('===Will wait for 60 on %s.is_alive = %s',
                      proc_task_active.name,
                      proc_task_active.is_alive())
-        npr.niceprint('===Will wait for 60 on '
-                      '{!s}.is_alive = {!s}'
+        NPR.niceprint('===Will wait for 60 on {!s}.is_alive = {!s}'
                       .format(proc_task_active.name,
                               proc_task_active.is_alive()),
                       verbosity=3)
@@ -243,7 +242,7 @@ def mprocessing(args_verbose, args_verbose_progress,
         logging.info('===Waited for 60s on %s.is_alive = %s',
                      proc_task_active.name,
                      proc_task_active.is_alive())
-        npr.niceprint('===Waited for 60s on '
+        NPR.niceprint('===Waited for 60s on '
                       '{!s}.is_alive = {!s}'
                       .format(proc_task_active.name,
                               proc_task_active.is_alive()),
@@ -253,7 +252,7 @@ def mprocessing(args_verbose, args_verbose_progress,
     # All should be done by now!
     for j in proc_pool:
         j.join()
-        npr.niceprint('==={!s} (is alive: {!s}).exitcode = {!s}'
+        NPR.niceprint('==={!s} (is alive: {!s}).exitcode = {!s}'
                       .format(j.name, j.is_alive(), j.exitcode),
                       verbosity=2)
 
@@ -271,7 +270,7 @@ def mprocessing(args_verbose, args_verbose_progress,
     lockdb = None
 
     # Show number of total files processed
-    npr.niceprocessedfiles(running.value, count_total, True)
+    NPR.niceprocessedfiles(running.value, count_total, True)
 
     return True
 

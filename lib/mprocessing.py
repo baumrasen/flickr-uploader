@@ -43,7 +43,7 @@ def use_lock(a_db_Lock, operation, nprocs=0):
         >>> alock = multiprocessing.Lock()
         >>> use_lock(alock, True, 2)
         True
-        >>> use_lock.release(alock, False, 2)
+        >>> use_lock(alock, False, 2)
         True
     """
 

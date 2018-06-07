@@ -585,7 +585,7 @@ if __name__ == "__main__":
             NPR.niceerror(caught=True,
                           caughtprefix='+++ ',
                           caughtcode='663',
-                          caughtmsg='Invalid ROTATING_LOGGING config.',
+                          caughtmsg='Invalid ROTATING_LOGGING_PATH config.',
                           useniceprint=True)
         else:
             # Define a rotating file Handler which writes DEBUG messages
@@ -594,6 +594,7 @@ if __name__ == "__main__":
                 MY_CFG.ROTATING_LOGGING_PATH,
                 maxBytes=MY_CFG.ROTATING_LOGGING_FILE_SIZE,
                 backupCount=MY_CFG.ROTATING_LOGGING_FILE_COUNT)
+            # Update rotating logging level as per LOGGING_LEVEL from INI file
             ROTATING_LOGGING.setLevel(MY_CFG.ROTATING_LOGGING_LEVEL)
             ROTATING_LOGGING.setFormatter(logging.Formatter(
                 fmt='[' + str(UPLDR_K.Run) + ']' +
@@ -602,6 +603,13 @@ if __name__ == "__main__":
                 datefmt=UPLDR_K.TimeFormat))
             logging.getLogger().addHandler(ROTATING_LOGGING)
 
+            # Allow multiprocessing rotating logging into a single file
+            # CODING: may not work on Windows
+            if PARSED_ARGS.processes and PARSED_ARGS.processes > 0:
+                logging.debug('multiprocessing logging handler: Activating...')
+                multiprocessing_logging.install_mp_handler()
+                logging.info('multiprocessing logging handler: Activated.')
+
             logging.warning('----------- (V%s) Init Rotating '
                             '-----------(Log:%s)\n'
                             'Python version on this system: [%s]',
@@ -609,7 +617,8 @@ if __name__ == "__main__":
                             MY_CFG.LOGGING_LEVEL,
                             sys.version)
 
-    # Update console/rotating logging level as per LOGGING_LEVEL from INI file
+    # Update console logging level as per LOGGING_LEVEL from INI file
+    CONSOLE_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL)
     logging.warning('CONSOLE_LOGGING.setLevel=[%s] '
                     'ROTATING_LOGGING.setLevel/enabled?=[%s/%s] '
                     'MY_CFG.LOGGING_LEVEL=[%s]',
@@ -617,17 +626,6 @@ if __name__ == "__main__":
                     MY_CFG.ROTATING_LOGGING_LEVEL,
                     MY_CFG.ROTATING_LOGGING,
                     MY_CFG.LOGGING_LEVEL)
-    CONSOLE_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL)
-    if MY_CFG.ROTATING_LOGGING:
-        ROTATING_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL if
-                                  MY_CFG.LOGGING_LEVEL <= logging.DEBUG
-                                  else MY_CFG.LOGGING_LEVEL - 10)
-
-    # Allow multiprocessing logging into a single file (not for Windows)
-    if PARSED_ARGS.processes and PARSED_ARGS.processes > 0:
-        logging.debug('multiprocessing logging handlers: Activating...')
-        multiprocessing_logging.install_mp_handler()
-        logging.info('multiprocessing logging handlers: Activated.')
 
     if MY_CFG.LOGGING_LEVEL <= logging.INFO:
         NPR.niceprint('Output for FLICKR Configuration:')

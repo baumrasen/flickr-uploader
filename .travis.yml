@@ -97,7 +97,7 @@ env:
 # Old273INI to test previous INI config file format using os.path.dirname(sys.argv[0]) vs os.getcwd()
     - TestScenario=Old273INI UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -p 10"
 # NoVerbose
-    - TestScenario=NoVerbose UploadrOptions="-p 30"
+    - TestScenario=NoVerbose UploadrOptions="-p 20"
 
 # =============================================================================
 # before_script

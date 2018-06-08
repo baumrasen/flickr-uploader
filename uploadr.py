@@ -352,17 +352,12 @@ def run_uploadr(args):
         myflick.cleanDBbadfiles()
 
     if args.authenticate:
-        logging.warning('Checking if token is available... '
-                        'if not, will authenticate')
-        NPR.niceprint('Checking if token is available... '
-                      'if not, will authenticate')
         if not myflick.check_token():
             # authenticate sys.exits in case of failure
             myflick.authenticate()
         else:
             logging.info('Token is available.')
             NPR.niceprint('Token is available.')
-
     elif args.daemon:
         # Will run in daemon mode every SLEEP_TIME seconds
         if myflick.check_token():
@@ -393,7 +388,7 @@ def run_uploadr(args):
             NPR.niceprint('Token is available.')
 
         if args.add_albums_migrate:
-            NPR.niceprint('Performing preparation for migration to 2.7.0',
+            NPR.niceprint('Preparation migration to 2.7.0',
                           fname='addAlbumsMigrate')
 
             if myflick.addAlbumsMigrate():
@@ -411,10 +406,7 @@ def run_uploadr(args):
 
                 sys.exit(10)
         elif args.list_bad_files:
-            NPR.niceprint('Listing badfiles: Start.', fname='listBadFiles')
-            myflick.listBadFiles()
-            NPR.niceprint('Listing badfiles: End. No more options will run.',
-                          fname='listBadFiles')
+            myflick.list_bad_files()
         else:
             myflick.removeUselessSetsTable()
             myflick.getFlickrSets()

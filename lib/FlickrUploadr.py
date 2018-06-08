@@ -299,15 +299,16 @@ class Uploadr(object):
             Returns True if self.token has been defined in class __init__
             via get_cached_token
         """
+
         logging.warning(
-            'check_token:(self.token is None):[%s]'
+            'Checking if token is available... if not, will authenticate '
             'check_token:(nuflickr is None):[%s]'
             'check_token:(nuflickr.token_cache.token is None):[%s]',
-            self.token is None,
             self.nuflickr is None,
             self.nuflickr.token_cache.token is None
             if self.nuflickr is not None
             else 'Not valid as nuflickr is None')
+        NP.niceprint('Checking if token is available... ')
 
         return self.nuflickr.token_cache.token is not None\
             if self.nuflickr is not None\
@@ -326,6 +327,7 @@ class Uploadr(object):
         """
 
         # Instantiate nuflickr for connection to flickr via flickrapi
+        NP.niceprint('Authenticating...')
         self.nuflickr = faw.nu_authenticate(
             self.xcfg.FLICKR["api_key"],
             self.xcfg.FLICKR["secret"],
@@ -3407,16 +3409,17 @@ class Uploadr(object):
         return True
 
     # -------------------------------------------------------------------------
-    # listBadFiles
+    # list_bad_files
     #
     # List badfiles recorded on Local DB from previous loads
     #
-    def listBadFiles(self):
-        """ listBadFiles
+    def list_bad_files(self):
+        """ list_bad_files
 
             List badfiles recorded on Local DB from previous loads
         """
 
+        NP.niceprint('Listing badfiles: Start.', fname='list_bad_files')
         con = lite.connect(self.xcfg.DB_PATH)
         con.text_factory = str
         with con:
@@ -3458,6 +3461,9 @@ class Uploadr(object):
                 sys.stdout.flush()
 
             NP.niceprocessedfiles(count, count_total, True)
+
+        NP.niceprint('Listing badfiles: End. No more options will run.',
+                     fname='list_bad_files')
 
         return True
 

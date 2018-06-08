@@ -5,6 +5,6 @@
     __version__ = Semantic Versioning number Major.Minor.Patch
                   Check https://semver.org
 """
-VERSION = (2, 8, '6-alpha', 4)
+VERSION = (2, 8, '6-alpha', 5)
 
 __version__ = '.'.join(map(str, VERSION))

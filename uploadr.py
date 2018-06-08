@@ -194,7 +194,7 @@ def parse_arguments():
     igrpparser.add_argument('-t', '--tags', action='store',
                             help='Space-separated tags for uploaded files. '
                                  'It appends to the tags defined in INI file.')
-    # used in printStat function
+    # used in pics_status function
     igrpparser.add_argument('-l', '--list-photos-not-in-set',
                             metavar='N', type=int,
                             help='List as many as N photos (with tags) '
@@ -417,7 +417,7 @@ def run_uploadr(args):
                 myflick.remove_excluded_media()
 
             myflick.createSets()
-            myflick.printStat(UPLDRConstantsClass.media_count)
+            myflick.pics_status(UPLDRConstantsClass.media_count)
     # Run Uploadr -------------------------------------------------------------
 
 

@@ -535,9 +535,7 @@ class Uploadr(object):
 
             # To prevent recursive calling, check if __name__ == '__main__'
             # if __name__ == '__main__':
-            mp.mprocessing(self.args.verbose,
-                           self.args.verbose_progress,
-                           self.args.processes,
+            mp.mprocessing(self.args.processes,
                            nulockDB,
                            nurunning,
                            numutex,
@@ -2229,9 +2227,7 @@ class Uploadr(object):
 
                 # To prevent recursive calling, check if __name__ == '__main__'
                 # if __name__ == '__main__':
-                mp.mprocessing(self.args.verbose,
-                               self.args.verbose_progress,
-                               self.args.processes,
+                mp.mprocessing(self.args.processes,
                                slockDB,
                                srunning,
                                smutex,
@@ -3327,9 +3323,7 @@ class Uploadr(object):
 
                 # To prevent recursive calling, check if __name__ == '__main__'
                 # if __name__ == '__main__':
-                mp.mprocessing(self.args.verbose,
-                               self.args.verbose_progress,
-                               self.args.processes,
+                mp.mprocessing(self.args.processes,
                                mlockDB,
                                mrunning,
                                mmutex,

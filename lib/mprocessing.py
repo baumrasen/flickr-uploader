@@ -107,12 +107,9 @@ def use_lock(a_db_Lock, operation, nprocs=0):
 # -----------------------------------------------------------------------------
 # mprocessing
 #
-def mprocessing(args_verbose, args_verbose_progress,
-                nprocs, lockdb, running, mutex, itemslist, a_fn, cur):
+def mprocessing(nprocs, lockdb, running, mutex, itemslist, a_fn, cur):
     """ mprocessing Function
 
-    verbose          = verbose info (bool)
-    verbose_progress = further verbose (bool)
     nprocs           = Number of processes to launch (int)
     lockdb           = lock for access to Database (lock obj to be created)
     running          = Value to count processed items (count obj to be created)

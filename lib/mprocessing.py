@@ -32,10 +32,10 @@ NPR = NicePrint.NicePrint()
 #
 # Control use of DB lock. acquire/release
 #
-def use_lock(adb_Lock, operation, nprocs=0):
+def use_lock(adb_lock, operation, nprocs=0):
     """ use_lock
 
-        adb_Lock  = lock to be used
+        adb_lock  = lock to be used
         operation = True => Lock
                   = False => Release
         nprocs    = >0 when in multiprocessing mode
@@ -51,11 +51,11 @@ def use_lock(adb_Lock, operation, nprocs=0):
 
     logging.debug('Entering use_lock with operation:[%s].', operation)
 
-    if adb_Lock is None:
-        logging.debug('use_lock: adb_Lock is [None].')
+    if adb_lock is None:
+        logging.debug('use_lock: adb_lock is [None].')
         return use_dblock_return
 
-    logging.debug('use_lock: adb_Lock.semlock:[%s].', adb_Lock._semlock)
+    logging.debug('use_lock: adb_lock.semlock:[%s].', adb_lock._semlock)
 
     if operation is None:
         return use_dblock_return
@@ -65,7 +65,7 @@ def use_lock(adb_Lock, operation, nprocs=0):
             # Control for when running multiprocessing set locking
             logging.debug('===Multiprocessing=== -->[ ].lock.acquire')
             try:
-                if adb_Lock.acquire():
+                if adb_lock.acquire():
                     use_dblock_return = True
             except Exception:
                 NPR.niceerror(caught=True,
@@ -80,7 +80,7 @@ def use_lock(adb_Lock, operation, nprocs=0):
             # Control for when running multiprocessing release locking
             logging.debug('===Multiprocessing=== <--[ ].lock.release')
             try:
-                adb_Lock.release()
+                adb_lock.release()
                 use_dblock_return = True
             except Exception:
                 NPR.niceerror(caught=True,

@@ -3468,51 +3468,46 @@ class Uploadr(object):
         return True
 
     # -------------------------------------------------------------------------
-    # printStat
+    # pics_status
     #
     # List Local pics, loaded pics into Flickr, pics not in sets on Flickr
     #
-    def printStat(self, InitialFoundFiles):
-        """ printStat
+    def pics_status(self, InitialFoundFiles):
+        """ pics_status
 
             Shows Total photos and Photos Not in Sets on Flickr
             InitialFoundFiles = shows the Found files prior to processing
         """
+
+        def db_count_rows(atable):
+            """ db_count_rows
+
+                Returns SELECT Count(*) from atable
+            """
+            con = lite.connect(self.xcfg.DB_PATH)
+            con.text_factory = str
+            acount = -1
+            with con:
+                try:
+                    cur = con.cursor()
+                    cur.execute("SELECT Count(*) FROM {!s}".format(atable))
+                    acount = cur.fetchone()[0]
+                    logging.info('Count=[%s] from table=[%s]', acount, atable)
+                except lite.Error as err:
+                    NP.niceerror(caught=True,
+                                 caughtprefix='+++ DB',
+                                 caughtcode='220',
+                                 caughtmsg='DB error on '
+                                 'SELECT FROM {!s}: [{!s}]'
+                                 .format(atable, err.args[0]),
+                                 useniceprint=True)
+            return acount
+
         # Total Local photos count --------------------------------------------
-        con = lite.connect(self.xcfg.DB_PATH)
-        con.text_factory = str
-        countlocal = 0
-        with con:
-            try:
-                cur = con.cursor()
-                cur.execute("SELECT Count(*) FROM files")
-                countlocal = cur.fetchone()[0]
-                logging.info('Total photos on local: %s', countlocal)
-            except lite.Error as err:
-                NP.niceerror(caught=True,
-                             caughtprefix='+++ DB',
-                             caughtcode='220',
-                             caughtmsg='DB error on SELECT FROM files: [{!s}]'
-                             .format(err.args[0]),
-                             useniceprint=True)
+        countlocal = db_count_rows('files')
 
         # Total Local badfiles photos count -----------------------------------
-        bad_files_count = 0
-        with con:
-            try:
-                cur = con.cursor()
-                cur.execute("SELECT Count(*) FROM badfiles")
-                bad_files_count = cur.fetchone()[0]
-                logging.info('Total badfiles count on local: %s',
-                             bad_files_count)
-            except lite.Error as err:
-                NP.niceerror(caught=True,
-                             caughtprefix='+++ DB',
-                             caughtcode='230',
-                             caughtmsg='DB error on SELECT FROM '
-                             'badfiles: [{!s}]'
-                             .format(err.args[0]),
-                             useniceprint=True)
+        bad_files_count =  db_count_rows('badfiles')
 
         # Total FLickr photos count: find('photos').attrib['total'] -----------
         get_success, get_result, get_errcode = faw.flickrapi_fn(

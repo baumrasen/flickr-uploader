@@ -3507,7 +3507,7 @@ class Uploadr(object):
         countlocal = db_count_rows('files')
 
         # Total Local badfiles photos count -----------------------------------
-        bad_files_count =  db_count_rows('badfiles')
+        bad_files_count = db_count_rows('badfiles')
 
         # Total FLickr photos count: find('photos').attrib['total'] -----------
         get_success, get_result, get_errcode = faw.flickrapi_fn(

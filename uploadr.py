@@ -488,7 +488,8 @@ def logging_close_handlers():
 #   3. If not, os.path.dirname(sys.argv[0]), '..', 'etc', 'uploadr.ini'
 # Set appropriate configuration within INI file for support files
 UPLDR_K.base_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
-UPLDR_K.ini_file = os.path.abspath(os.path.join(UPLDR_K.base_dir, 'uploadr.ini'))
+UPLDR_K.ini_file = os.path.abspath(os.path.join(UPLDR_K.base_dir,
+                                                'uploadr.ini'))
 UPLDR_K.etc_ini_file = os.path.abspath(
     os.path.join(UPLDR_K.base_dir, os.path.pardir, 'etc', 'uploadr.ini'))
 UPLDR_K.media_count = 0

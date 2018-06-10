@@ -498,15 +498,19 @@ UPLDR_K.media_count = 0
 logging.critical('      base_dir:[%s]', UPLDR_K.base_dir)
 logging.critical('           cwd:[%s]', os.getcwd())
 logging.critical('    prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
-logging.critical('   sys.argv[0]:[%s]', os.path.dirname(sys.argv[0]))
+logging.critical('       argv[0]:[%s]', os.path.dirname(sys.argv[0]))
+logging.critical('  abs(argv[0]):[%s]', os.path.abspath(
+    os.path.dirname(sys.argv[0])))
 logging.critical('      __file__:[%s]', __file__)
-logging.critical('path(__file__):[%s]',
+logging.critical(' abs(__file__):[%s]',
                  os.path.abspath(os.path.dirname(__file__)))
-logging.critical('sysargv/../etc:[%s]', os.path.abspath(
+logging.critical('argv[0]/../etc:[%s]', os.path.abspath(
     os.path.join(os.path.dirname(sys.argv[0]),
                  os.path.pardir,
                  'etc',
                  'uploadr.ini')))
+logging.critical('      ini_file:[%s]', UPLDR_K.ini_file)
+logging.critical('  etc_ini_file:[%s]', UPLDR_K.etc_ini_file)
 # -----------------------------------------------------------------------------
 
 # =============================================================================
@@ -569,8 +573,8 @@ if __name__ == "__main__":
                 NPR.niceerror(caught=True,
                               caughtprefix='+++ ',
                               caughtcode='663',
-                              caughtmsg='Invalid sys.argv/etc INI file. '
-                              'Exiting...'.format(UPLDR_K.etc_ini_file),
+                              caughtmsg='Invalid sys.argv/etc INI file [{!s}].'
+                              ' Exiting...'.format(UPLDR_K.etc_ini_file),
                               useniceprint=True)
                 sys.exit(2)
             else:

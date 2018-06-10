@@ -1,14 +1,15 @@
 # flickr-uploader
 -----------------
-by oPromessa, 2017, V2.8.0 [![Master Build Status](https://travis-ci.org/oPromessa/flickr-uploader.svg?branch=master)](https://travis-ci.org/oPromessa/flickr-uploader)
-Published on [https://github.com/oPromessa/flickr-uploader/](https://github.com/oPromessa/flickr-uploader/)
+by oPromessa, 2017, V2.8.6 [![Master Build Status](https://travis-ci.org/oPromessa/flickr-uploader.svg?branch=master)](https://travis-ci.org/oPromessa/flickr-uploader)
+* Published on [https://github.com/oPromessa/flickr-uploader/](https://github.com/oPromessa/flickr-uploader/)
 
 ## Description
 --------------
-* flickr-uploader designed for Synology Devices.
-* Upload a directory of media to Flickr to use as a backup to your
-local storage.
+* Upload a directory of media (pics/videos) to Flickr for showing off your pics
+on the WEB and as a backup of your local storage.
 * Check Features, Requirements and Setup remarks.
+* flickr-uploader designed primarly for Synology Devices. 
+   * Also works on Linux, Mac and Windows systems.
 
 ## Features
 -----------

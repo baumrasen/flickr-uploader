@@ -100,9 +100,8 @@ logging.getLogger().addHandler(CONSOLE_LOGGING)
 
 # Inits with default configuration value, namely LOGGING_LEVEL
 MY_CFG = MyConfig.MyConfig()
-MY_CFG.LOGGING_LEVEL = int(str(MY_CFG.LOGGING_LEVEL))
 # Update console logging level as per LOGGING_LEVEL from default config
-CONSOLE_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL)
+CONSOLE_LOGGING.setLevel(int(MY_CFG.LOGGING_LEVEL))
 # -----------------------------------------------------------------------------
 
 
@@ -539,7 +538,7 @@ if __name__ == "__main__":
     NPR.set_verbosity(PARSED_ARGS.verbose)
 
     # Print/show arguments
-    if MY_CFG.LOGGING_LEVEL <= logging.INFO:
+    if int(MY_CFG.LOGGING_LEVEL) <= logging.INFO:
         NPR.niceprint('Output for arguments(args):')
         pprint.pprint(PARSED_ARGS)
 

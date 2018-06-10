@@ -94,7 +94,7 @@ before_script:
   - pwd
   - pythonVersion=`python -V 2>&1 | cut -d\  -f2`
   - echo $pythonVersion
-  - echo Travis Python Version: ${TRAVIS_PYTHON_VERSION}
+  - echo "Travis Python Version:" ${TRAVIS_PYTHON_VERSION}
   - cp tests/uploadr.ini .
   - cp tests/uploadr.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini || cp tests/uploadr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/etc/uploadr.ini
   - grep PATH uploadr.ini

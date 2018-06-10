@@ -566,7 +566,6 @@ if __name__ == "__main__":
                           caughtmsg='Invalid sys.argv INI file [{!s}].'
                           .format(UPLDR_K.ini_file),
                           useniceprint=True)
-        else:
             # INI file config (3/3)
             #   3. If not, os.path.dirname(sys.argv[0]), '../etc/uploadr.ini'
             if not check_base_ini_file(UPLDR_K.base_dir, UPLDR_K.etc_ini_file):

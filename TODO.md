@@ -37,10 +37,10 @@
       does not work!)...
    * `python3 setup.py install --prefix=~/apps/Python
    * `python3 setup.py installcfg --folder=~/apps/Python` to install config
-  From v2.7.4 uploadr.ini is searched form CWD (current working directory)
+  From v2.7.4 uploadr.ini is searched from CWD (current working directory)
   which allows to run upload.py form the --prefix/bin folder as it is
   installed wiht "python setup.py install". Note that uploadr.ini definition
-  for DB_PATH, LOCK_PATH, TOKEN_CACHE and TOKEN_PATH as to be changed.
+  for DB_PATH, LOCK_PATH and TOKEN_CACHE has to be changed.
 * When QPS (Queries per second) are very high during a certain period, Flickr
   does not provide back reliable information. For instance, photos.search
   may return X pics but not actually list them.

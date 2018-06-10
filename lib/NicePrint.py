@@ -18,8 +18,8 @@ import sys
 import os
 import logging
 import time
-import lib.UPLDRConstants as UPLDRConstantsClass
-UPLDR_K = UPLDRConstantsClass.UPLDRConstants()
+import lib.Konstants as KonstantsClass
+UPLDR_K = KonstantsClass.Konstants()
 
 
 # -----------------------------------------------------------------------------

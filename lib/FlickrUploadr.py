@@ -45,7 +45,7 @@ from itertools import islice
 import flickrapi
 # -----------------------------------------------------------------------------
 # Helper class and functions for UPLoaDeR Global Constants.
-import lib.UPLDRConstants as UPLDRConstantsClass
+import lib.Konstants as KonstantsClass
 # -----------------------------------------------------------------------------
 # Helper class and functions to print messages.
 import lib.NicePrint as NicePrint
@@ -66,7 +66,7 @@ import lib.FlickrApiWrapper as faw
 #
 #   NUTIME = time
 # -----------------------------------------------------------------------------
-UPLDR_K = UPLDRConstantsClass.UPLDRConstants()
+UPLDR_K = KonstantsClass.Konstants()
 NP = NicePrint.NicePrint()
 NUTIME = time
 # -----------------------------------------------------------------------------
@@ -500,7 +500,7 @@ class Uploadr(object):
                     changed_media = all_media
 
         changed_media_count = len(changed_media)
-        UPLDRConstantsClass.media_count = changed_media_count
+        KonstantsClass.media_count = changed_media_count
         NP.niceprint('Found [{!s:>6s}] files to upload.'
                      .format(str(changed_media_count)))
 
@@ -560,11 +560,11 @@ class Uploadr(object):
                     NUTIME.sleep(self.xcfg.DRIP_TIME)
                 count = count + 1
                 NP.niceprocessedfiles(count,
-                                      UPLDRConstantsClass.media_count,
+                                      KonstantsClass.media_count,
                                       False)
 
             # Show number of total files processed
-            NP.niceprocessedfiles(count, UPLDRConstantsClass.media_count, True)
+            NP.niceprocessedfiles(count, KonstantsClass.media_count, True)
 
         # Closing DB connection
         if con is not None:

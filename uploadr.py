@@ -68,7 +68,7 @@ import pprint
 import lib.FlickrUploadr as FlickrUploadr
 # -----------------------------------------------------------------------------
 # Helper class and functions for UPLoaDeR Global Constants.
-import lib.UPLDRConstants as UPLDRConstantsClass
+import lib.Konstants as KonstantsClass
 # -----------------------------------------------------------------------------
 # Helper class and functions to print messages.
 import lib.NicePrint as NicePrint
@@ -83,8 +83,8 @@ import lib.multiprocessing_logging as multiprocessing_logging
 # =============================================================================
 # Logging init code
 #
-# Getting definitions from UPLDRConstants
-UPLDR_K = UPLDRConstantsClass.UPLDRConstants()
+# Getting definitions from Konstants
+UPLDR_K = KonstantsClass.Konstants()
 # Sets LOGGING_LEVEL to allow logging even if everything else is wrong!
 # Parent logger is set to Maximum (DEBUG) so that suns will log as appropriate
 logging.getLogger().setLevel(logging.DEBUG)
@@ -417,7 +417,7 @@ def run_uploadr(args):
                 myflick.remove_excluded_media()
 
             myflick.createSets()
-            myflick.pics_status(UPLDRConstantsClass.media_count)
+            myflick.pics_status(KonstantsClass.media_count)
     # Run Uploadr -------------------------------------------------------------
 
 
@@ -435,6 +435,10 @@ def check_base_ini_file(base_dir, ini_file):
     ini_file = INI File path
     """
 
+    logging.info('check_base_ini_file: base_dir=[%s] ini_file=[%s]',
+                 NPR.strunicodeout(base_dir),
+                 NPR.strunicodeout(ini_file))
+
     result_check = True
     try:
         if not ((base_dir == '' or os.path.isdir(base_dir)) and
@@ -446,12 +450,12 @@ def check_base_ini_file(base_dir, ini_file):
             'Config folder [%s] and/or INI file: [%s] not found or '
             'incorrect format: [%s]!', base_dir, ini_file, str(err))
 
-    logging.debug('check_base_ini_file=[%s]', result_check)
+    logging.debug('check_base_ini_file: result=[%s]', result_check)
     return result_check
 
 
 # -----------------------------------------------------------------------------
-# check_base_ini_file
+# logging_close_handlers
 #
 # Close logging handlers
 #
@@ -473,22 +477,21 @@ def logging_close_handlers():
 # -----------------------------------------------------------------------------
 # Class UPLDReConstants
 #
+#   base_dir    = Base configuration directory location
+#   ini_file    = Configuration file
 #   media_count = Counter of total files to initially upload
-#   base_dir      = Base configuration directory location
-#   ini_file      = Configuration file
 # -----------------------------------------------------------------------------
-# UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
+# Base_dir set to os.path.abspat(os.path.dirname(sys.argv[0]))
+# INI file config:
+#   1. Use --config-file argument option [after PARSED_ARGS]
+#   2. If not, os.path.dirname(sys.argv[0])
+#   3. If not, os.path.dirname(sys.argv[0]), '..', 'etc', 'uploadr.ini'
+# Set appropriate configuration within INI file for support files
+UPLDR_K.base_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
+UPLDR_K.ini_file = os.path.abspath(os.path.join(UPLDR_K.base_dir, 'uploadr.ini'))
+UPLDR_K.etc_ini_file = os.path.abspath(
+    os.path.join(UPLDR_K.base_dir, os.path.pardir, 'etc', 'uploadr.ini'))
 UPLDR_K.media_count = 0
-# Base dir for config and support files.
-#   Will use --config-file argument option [after PARSED_ARGS]
-#   If not, first try os.path.abspath(os.path.dirname(__file__))
-#   If not, then try sys.prefix/etc folder [not operational]
-#   If not, then try Current Working Directory (getcwd) [not operational]
-#   If not, then try folder where uploadr.py is located (dirname(sys.argv[0]))
-# UPLDR_K.base_dir = os.path.join(sys.prefix, 'etc')
-# UPLDR_K.base_dir = os.getcwd()
-UPLDR_K.base_dir = os.path.dirname(sys.argv[0])
-UPLDR_K.ini_file = os.path.join(UPLDR_K.base_dir, "uploadr.ini")
 
 # CODING: Debug a series of control values
 logging.critical('      base_dir:[%s]', UPLDR_K.base_dir)
@@ -503,7 +506,6 @@ logging.critical('sysargv/../etc:[%s]', os.path.abspath(
                  os.path.pardir,
                  'etc',
                  'uploadr.ini')))
-logging.critical('      ini_file:[%s]', UPLDR_K.ini_file)
 # -----------------------------------------------------------------------------
 
 # =============================================================================
@@ -536,29 +538,42 @@ if __name__ == "__main__":
         NPR.niceprint('Output for arguments(args):')
         pprint.pprint(PARSED_ARGS)
 
-    # Argument --config-file overrides configuration filename.
+    # INI file config (1/3)
+    #   1. Use --config-file argument option [after PARSED_ARGS]
     if PARSED_ARGS.config_file:
-        UPLDR_K.ini_file = PARSED_ARGS.config_file
-        logging.info('UPLDR_K.ini_file:[%s]',
-                     NPR.strunicodeout(UPLDR_K.ini_file))
-        if not check_base_ini_file(UPLDR_K.base_dir,
-                                   UPLDR_K.ini_file):
+        if not check_base_ini_file(UPLDR_K.base_dir, PARSED_ARGS.config_file):
             NPR.niceerror(caught=True,
                           caughtprefix='+++ ',
                           caughtcode='661',
-                          caughtmsg='Invalid -C parameter INI file. '
-                          'Exiting...',
+                          caughtmsg='Invalid -C argument INI file [{!s}]. '
+                          'Exiting...'.format(UPLDR_K.ini_file),
                           useniceprint=True)
             sys.exit(2)
+        else:
+            UPLDR_K.ini_file = PARSED_ARGS.config_file
+    # INI file config (2/3)
+    #   2. If not, os.path.dirname(sys.argv[0])
     else:
-        if not check_base_ini_file(UPLDR_K.base_dir,
-                                   UPLDR_K.ini_file):
+        if not check_base_ini_file(UPLDR_K.base_dir, UPLDR_K.ini_file):
             NPR.niceerror(caught=True,
                           caughtprefix='+++ ',
                           caughtcode='662',
-                          caughtmsg='Invalid sys.argv INI file. Exiting...',
+                          caughtmsg='Invalid sys.argv INI file [{!s}].'
+                          .format(UPLDR_K.ini_file),
                           useniceprint=True)
-            sys.exit(2)
+        else:
+            # INI file config (3/3)
+            #   3. If not, os.path.dirname(sys.argv[0]), '../etc/uploadr.ini'
+            if not check_base_ini_file(UPLDR_K.base_dir, UPLDR_K.etc_ini_file):
+                NPR.niceerror(caught=True,
+                              caughtprefix='+++ ',
+                              caughtcode='663',
+                              caughtmsg='Invalid sys.argv/etc INI file. '
+                              'Exiting...'.format(UPLDR_K.etc_ini_file),
+                              useniceprint=True)
+                sys.exit(2)
+            else:
+                UPLDR_K.ini_file = UPLDR_K.etc_ini_file
 
     # Source configuration from ini_file
     MY_CFG.readconfig(UPLDR_K.ini_file, ['Config'])

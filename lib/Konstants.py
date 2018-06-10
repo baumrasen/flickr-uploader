@@ -19,17 +19,17 @@ import lib.__version__ as __version__
 
 
 # -----------------------------------------------------------------------------
-# class UPLDRConstants wiht Global Constants and Variables for flickr-uploadr.
+# class Konstants wiht Global Constants and Variables for flickr-uploadr.
 #
-class UPLDRConstants:
-    """ UPLDRConstants class
+class Konstants:
+    """ Konstants class
 
-        >>> import lib.UPLDRConstants as UPLDRConstantsClass
-        >>> UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
-        >>> UPLDRConstants.media_count = 999
-        >>> print(UPLDRConstants.media_count)
+        >>> import lib.Konstants as KonstantsClass
+        >>> Konstants = KonstantsClass.Konstants()
+        >>> Konstants.media_count = 999
+        >>> print(Konstants.media_count)
         999
-        >>> print(0 < UPLDRConstants.Run < 10000 )
+        >>> print(0 < Konstants.Run < 10000 )
         True
     """
 
@@ -63,10 +63,10 @@ class UPLDRConstants:
     Pur = '\033[35m'   # purple
 
     # -------------------------------------------------------------------------
-    # class UPLDRConstants __init__
+    # class Konstants __init__
     #
     def __init__(self):
-        """ class UPLDRConstants __init__
+        """ class Konstants __init__
         """
         # ---------------------------------------------------------------------
         # Instance Global Variables
@@ -74,11 +74,11 @@ class UPLDRConstants:
         #
         #   base_dir      = Base configuration directory for files
         #   ini_file      = Location of INI file, normally named "uploadr.ini"
-        #   err_file      = Location of ERR file, normally named "uploadr.err"
+        #   etc_ini_file  = Location of INI "uploadr.ini" from ../etc folder
         #
         self.base_dir = str('.')
         self.ini_file = str('uploadr.ini')
-        self.err_file = str('uploadr.err')
+        self.etc_ini_file = str('../etc/uploadr.ini')
 
 
 # -----------------------------------------------------------------------------

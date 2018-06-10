@@ -94,7 +94,6 @@ class MyConfig(object):
         'DB_PATH',
         'LOCK_PATH',
         'TOKEN_CACHE',
-        'TOKEN_PATH',
         'EXCLUDED_FOLDERS',
         'IGNORED_REGEX',
         'ALLOWED_EXT',
@@ -137,8 +136,6 @@ class MyConfig(object):
         "os.path.join(os.path.dirname(sys.argv[0]), '.flickrlock')",
         # TOKEN_CACHE
         "os.path.join(os.path.dirname(sys.argv[0]), 'token')",
-        # TOKEN_PATH
-        "os.path.join(os.path.dirname(sys.argv[0]), '.flickrToken')",
         # EXCLUDED_FOLDERS (need to process for unicode support)
         "['@eaDir','#recycle','.picasaoriginals','_ExcludeSync',\
           'Corel Auto-Preserve','Originals',\
@@ -276,7 +273,6 @@ class MyConfig(object):
             'str',   # 'DB_PATH',
             'str',   # 'LOCK_PATH',
             'str',   # 'TOKEN_CACHE',
-            'str',   # 'TOKEN_PATH',
             'list',  # 'EXCLUDED_FOLDERS',
             'list',  # 'IGNORED_REGEX',
             'list',  # 'ALLOWED_EXT',
@@ -421,14 +417,12 @@ class MyConfig(object):
                       DB_PATH
                       LOCK_PATH
                       TOKEN_CACHE
-                      TOKEN_PATH
             """
 
             result = True
             for item in ['DB_PATH',  # Check if basedir exists. Unicode Support
                          'LOCK_PATH',
-                         'TOKEN_CACHE',
-                         'TOKEN_PATH']:
+                         'TOKEN_CACHE']:
 
                 logging.debug('verifyconfig for [%s]', item)
                 if not self.is_str_unicode(self.__dict__[item]):

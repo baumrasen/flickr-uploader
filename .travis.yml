@@ -136,6 +136,10 @@ script:
   # stdout to file, stderr to file
   #- travis_wait coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log 2> /home/travis/build/oPromessa/flickr-uploader/nohup.lst
   - which uploadr.py
+  - pwd
+  - ls -l uploadr.py || echo ok
+  - rm -f uploadr.py || echo ok
+  - ls -l uploadr.py || echo ok
   - uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log 2> /home/travis/build/oPromessa/flickr-uploader/nohup.lst
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst

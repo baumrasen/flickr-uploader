@@ -135,7 +135,6 @@ script:
 # First RUN -------------------------------------------------------------------
   # stdout to file, stderr to file
   #- travis_wait coverage run -a --concurrency multiprocessing uploadr.py $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log 2> /home/travis/build/oPromessa/flickr-uploader/nohup.lst
-  - rm -f uploadr.py || echo Force execution of bin/uploadr.py
   - travis_wait coverage run -a --concurrency multiprocessing `which uploadr.py` $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log 2> /home/travis/build/oPromessa/flickr-uploader/nohup.lst
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst

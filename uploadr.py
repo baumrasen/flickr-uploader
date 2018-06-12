@@ -351,7 +351,6 @@ def run_uploadr(args):
             logging.info('Token is available.')
             NPR.niceprint('Token is available.')
 
-
     # Initial checks
     check_files_dir()
     check_flickr_key_secret()

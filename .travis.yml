@@ -140,9 +140,9 @@ script:
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst
   
   - coverage combine 
-  - coverage html --include=lib,uploadr.py --omit=tests,build -d coverage_html
+  #- coverage html --include=lib,uploadr.py --omit=tests,build -d coverage_html
   - coverage html
-  - tar cvf coverage_html.tar htmlcov
+  - tar czvf coverage_html.tar.gz htmlcov
   - python tests/drop.py --token $DROPBOX_TOKEN coverage_html.tar $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   
 # DB OUTPUT for REFERENCE RUN#1

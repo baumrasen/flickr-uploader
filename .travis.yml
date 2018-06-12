@@ -141,7 +141,8 @@ script:
   
   - coverage combine 
   - coverage html --include=lib,uploadr.py --omit=tests,build -d coverage_html
-  - tar cvf coverage_html.tar coverage_html
+  - coverage html
+  - tar cvf coverage_html.tar htmlcov
   - python tests/drop.py --token $DROPBOX_TOKEN coverage_html.tar $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   
 # DB OUTPUT for REFERENCE RUN#1

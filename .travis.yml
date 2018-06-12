@@ -140,9 +140,9 @@ script:
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst
   
   - coverage combine 
-  - coverage report -m --include=lib,uploadr.py --omit=tests,build -d coverage_html
-  - tar czvf coverage_html.tar.gz coverage_html
-  - python tests/drop.py --token $DROPBOX_TOKEN coverage_html.tar.gz $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - coverage html -m --include=lib,uploadr.py --omit=tests,build -d coverage_html
+  - tar cvf coverage_html.tar coverage_html
+  - python tests/drop.py --token $DROPBOX_TOKEN coverage_html.tar $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   
 # DB OUTPUT for REFERENCE RUN#1
   - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb "SELECT *, datetime( last_modified, 'unixepoch', 'localtime') FROM files ORDER BY path;"; fi

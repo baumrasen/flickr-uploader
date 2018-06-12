@@ -337,6 +337,21 @@ def run_uploadr(args):
 
             sys.exit(9)
 
+    def check_token_authenticate():
+        """ check_token_authenticate
+
+            Checks if token is available... if not will authenticate
+        """
+        NPR.niceprint('Checking if token is available... '
+                      'if not will authenticate')
+        if not myflick.check_token():
+            # authenticate sys.exits in case of failure
+            myflick.authenticate()
+        else:
+            logging.info('Token is available.')
+            NPR.niceprint('Token is available.')
+
+
     # Initial checks
     check_files_dir()
     check_flickr_key_secret()
@@ -351,12 +366,7 @@ def run_uploadr(args):
         myflick.cleanDBbadfiles()
 
     if args.authenticate:
-        if not myflick.check_token():
-            # authenticate sys.exits in case of failure
-            myflick.authenticate()
-        else:
-            logging.info('Token is available.')
-            NPR.niceprint('Token is available.')
+        check_token_authenticate()
     elif args.daemon:
         # Will run in daemon mode every SLEEP_TIME seconds
         if myflick.check_token():
@@ -378,13 +388,7 @@ def run_uploadr(args):
 
             sys.exit(8)
     else:
-        NPR.niceprint('Checking if token is available... '
-                      'if not will authenticate')
-        if not myflick.check_token():
-            # authenticate sys.exits in case of failure
-            myflick.authenticate()
-        else:
-            NPR.niceprint('Token is available.')
+        check_token_authenticate()
 
         if args.add_albums_migrate:
             NPR.niceprint('Preparation migration to 2.7.0',

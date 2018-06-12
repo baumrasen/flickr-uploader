@@ -858,9 +858,10 @@ class Uploadr(object):
         logging.debug('Pretty Print Output for [rawfiles]-------\n%s',
                       pprint.pformat(rawfiles))
 
-    NPR.niceprint('Output for FLICKR Configuration:\n%s'
-              .format(pprint.pformat(MY_CFG.FLICKR)),
-              verbosity=3)
+        NPR.niceprint('Output for FLICKR Configuration:\n%s'
+                      .format(pprint.pformat(MY_CFG.FLICKR)),
+                      verbosity=3)
+
         return files, rawfiles
 
     # -------------------------------------------------------------------------

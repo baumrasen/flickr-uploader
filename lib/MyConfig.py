@@ -60,8 +60,6 @@ class MyConfig(object):
         >>> ELog = CFG.LOGGING_LEVEL
         >>> CFG.verifyconfig()
         True
-        >>> CFG.verifyconfig()
-        True
         >>> CFG.LOGGING_LEVEL = 'a'
         >>> CFG.verifyconfig()
         True

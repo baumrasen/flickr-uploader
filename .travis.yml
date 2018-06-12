@@ -138,10 +138,12 @@ script:
   - travis_wait coverage run -a --concurrency multiprocessing `which uploadr.py` $VerboseVar $UploadrOptions > /home/travis/build/oPromessa/flickr-uploader/nohup.log 2> /home/travis/build/oPromessa/flickr-uploader/nohup.lst
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst
-
-  - coverage combine
-  - coverage report -m
-
+  
+  - coverage combine 
+  - coverage report -m --include=lib,uploadr.py --ommit=tests,build -d coverage_html
+  - tar czvf coverage_html.tar.gz coverage_html
+  - python tests/drop.py --token $DROPBOX_TOKEN coverage_html.tar.gz $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  
 # DB OUTPUT for REFERENCE RUN#1
   - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb "SELECT *, datetime( last_modified, 'unixepoch', 'localtime') FROM files ORDER BY path;"; fi
   - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT * FROM badfiles ORDER BY path;'; fi
@@ -184,7 +186,7 @@ script:
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst
 
   - coverage combine
-  - coverage report -m
+  - coverage report -m 
   - sleep $WAIT_TIME
 
 # Deleted Pics Non existant on FLickr -----------------------------------------

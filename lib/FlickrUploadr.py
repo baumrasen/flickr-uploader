@@ -556,7 +556,8 @@ class Uploadr(object):
                         success and
                         i != changed_media_count - 1):
                     NP.niceprint('Waiting [{!s}] seconds before next upload'
-                                 .format(str(self.xcfg.DRIP_TIME)))
+                                 .format(str(self.xcfg.DRIP_TIME)),
+                                 verbosity=1)
                     NUTIME.sleep(self.xcfg.DRIP_TIME)
                 count = count + 1
                 NP.niceprocessedfiles(count,
@@ -852,11 +853,14 @@ class Uploadr(object):
                                         NP.strunicodeout(afile))
         rawfiles.sort()
         files.sort()
-        if self.xcfg.LOGGING_LEVEL <= logging.DEBUG:
-            NP.niceprint('Pretty Print Output for [files]-------')
-            pprint.pprint(files)
-            NP.niceprint('Pretty Print Output for [rawfiles]----')
-            pprint.pprint(rawfiles)
+        logging.debug('Pretty Print Output for [files]-------\n%s',
+                      pprint.pformat(files))
+        logging.debug('Pretty Print Output for [rawfiles]-------\n%s',
+                      pprint.pformat(rawfiles))
+
+    NPR.niceprint('Output for FLICKR Configuration:\n%s'
+              .format(pprint.pformat(MY_CFG.FLICKR)),
+              verbosity=3)
         return files, rawfiles
 
     # -------------------------------------------------------------------------
@@ -1190,7 +1194,7 @@ class Uploadr(object):
                     NP.niceprint('TAGS:[{} {}]'
                                  .format(self.xcfg.FLICKR["tags"],
                                          self.args.tags).replace(',', ''),
-                                 verbosity=1)
+                                 verbosity=2)
 
                 # if FLICKR["title"] is empty...
                 # if filename's exif title is empty...
@@ -1656,7 +1660,8 @@ class Uploadr(object):
                                      '[{!s}]...[{!s}/{!s} attempts].'
                                      .format(NP.strunicodeout(file),
                                              x,
-                                             self.xcfg.MAX_UPLOAD_ATTEMPTS))
+                                             self.xcfg.MAX_UPLOAD_ATTEMPTS),
+                                     verbosity=1)
 
                     # Use fileobj with filename='dummy'to accept unicode file.
                     replace_resp = self.nuflickr.replace(
@@ -2471,7 +2476,8 @@ class Uploadr(object):
             row = cur.fetchone()
             if row[0] == 0:
                 # Database version 1 <=========================DB VERSION: 1===
-                NP.niceprint('Adding last_modified column to database')
+                NP.niceprint('Adding last_modified column to database',
+                             verbosity=1)
                 cur = con.cursor()
                 cur.execute('PRAGMA user_version="1"')
                 cur.execute('ALTER TABLE files ADD COLUMN last_modified REAL')
@@ -2483,7 +2489,8 @@ class Uploadr(object):
             if row[0] == 1:
                 # Database version 2 <=========================DB VERSION: 2===
                 # Cater for badfiles
-                NP.niceprint('Adding table badfiles to database')
+                NP.niceprint('Adding table badfiles to database',
+                             verbosity=1)
                 cur.execute('PRAGMA user_version="2"')
                 cur.execute('CREATE TABLE IF NOT EXISTS badfiles '
                             '(files_id INTEGER PRIMARY KEY AUTOINCREMENT, '

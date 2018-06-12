@@ -4,8 +4,11 @@
 
 ## Pending improvements
 -----------------------
-* Verbosity control 0 = None, 1 = Some, 2 = More, 3 = mayhem
-  replace if args.verbose: by niceprint(..., verbosity=1)
+* Done: Set PATHS based on a BASE Dir variable in INI file... all others to depend on this onw. How?
+  os.path.abspath(os.path.join(os.getcwd(), os.path.pardir, "etc", "uploadr.ini"))
+* Verbosity control in niceprint(..., verbosity=1): 0 = None, 1 = Some, 2 = More, 3 = mayhem
+* Old INI style with sysargv[0] file location fails if PATHs are specified
+  with sysargv[0] instead of getcwd. 
 * Dual logging_levels??? afer... multiprocessing_logging.install_mp_handler()
 * Test use of library https://github.com/jruere/multiprocessing-logging in Windows
 * Pypi test install:
@@ -14,8 +17,6 @@
 * python setup.py install: use --old-and-unmanageable option to data copy files.
   `python2.7 setup.py install --prefix=~/apps/Python --old-and-unmanageable`
 * drop installcfg option? May still be usable to place files in a user specific folder
-* Set PATHS based on a BASE Dir variable in INI file... all others to depend on this onw. How?
-  os.path.abspath(os.path.join(os.getcwd(), os.path.pardir, "etc", "uploadr.ini"))
 * Reconfirm the uploading sequence when -u option is set which
   affects isLoaded = False control variable
 * "Check for duplicates/wrong checksum" on upload may not be working fully!

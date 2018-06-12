@@ -87,6 +87,7 @@ class MyConfig(object):
     INISections = ['Config']
     # Default configuration keys/values pairs ---------------------------------
     ini_keys = [
+        'FOLDER',
         'FILES_DIR',
         'FLICKR',
         'SLEEP_TIME',
@@ -114,6 +115,8 @@ class MyConfig(object):
     ]
     # Default configuration keys/values pairs ---------------------------------
     INIvalues = [
+        # FOLDER
+        "os.path.abspath(os.getcwd())",
         # FILES_DIR
         "'.'",  # Other possible default: "'photos'",
         # FLICKR
@@ -223,6 +226,7 @@ class MyConfig(object):
         try:
             ini_file = None
             ini_file = config.read(cfg_filename)
+            # Parse Configuration file and overwrite any values
             for name in cfg_sections:
                 self.__dict__.update(config.items(name))
 
@@ -244,9 +248,6 @@ class MyConfig(object):
             if not ini_file:
                 raise ValueError('No config file or unrecoverable error!')
 
-        # Parse Configuration file and overwrite any values -------------------
-        # pprint.pprint(config.items(cfg_sections[0]))
-
         if logging.getLogger().getEffectiveLevel() <= logging.INFO:
             logging.info('\t\t\t\tActive INI key/values pairs...')
             for item in sorted(self.__dict__):
@@ -266,6 +267,7 @@ class MyConfig(object):
         """
         # Default types for keys/values pairs ---------------------------------
         ini_types = [
+            'str',   # 'FOLDER',
             'str',   # 'FILES_DIR',
             'dict',  # 'FLICKR',
             'int',   # 'SLEEP_TIME',
@@ -391,8 +393,9 @@ class MyConfig(object):
             """
 
             result = True
-            # Further specific processing... FILES_DIR
-            for item in ['FILES_DIR']:  # Check if dir exists. Unicode Support
+            # Further specific processing... FOLDER, FILES_DIR
+            #     Check if dir exists. Unicode Support
+            for item in ['FOLDER', 'FILES_DIR']:
 
                 logging.debug('verifyconfig for [%s]', item)
                 if not self.is_str_unicode(self.__dict__[item]):

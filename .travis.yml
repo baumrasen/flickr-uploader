@@ -143,7 +143,6 @@ script:
   #- coverage html --include=lib,uploadr.py --omit=tests,build -d coverage_html
   - coverage html
   - tar czf coverage_html.tar.gz htmlcov || echo ok
-  - python tests/drop.py --token $DROPBOX_TOKEN coverage_html.tar.gz $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario} || echo ok
   
 # DB OUTPUT for REFERENCE RUN#1
   - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb "SELECT *, datetime( last_modified, 'unixepoch', 'localtime') FROM files ORDER BY path;"; fi
@@ -178,7 +177,8 @@ script:
   - if [[ $TestScenario == NoVerbose ]]; then cp ./tests/uploadr_NoVerbose.ini ./uploadr.ini; cp ./tests/uploadr_NoVerbose.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini; fi
 
 # Run coverage uploadr.ini
-  - if [[ $TestScenario == Old273INI ]]; then travis_wait coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst; fi
+# Scenario Old273INI: run ./uploadr.py instead of `which uploadr.py`
+  - if [[ $TestScenario == Old273INI ]]; then travis_wait coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst; fi
   - if [[ $TestScenario == DryRunNoToken ]]; then travis_wait coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst < /home/travis/build/oPromessa/flickr-uploader/tests/verifiercode.txt || echo ok; fi
   - if [[ $TestScenario != Old273INI && $TestScenario != DryRunNoToken ]]; then travis_wait coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst; fi
 
@@ -239,6 +239,7 @@ after_script:
   - python tests/drop.py --token $DROPBOX_TOKEN dbrun1.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   - python tests/drop.py --token $DROPBOX_TOKEN dbrun2.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   - python tests/drop.py --token $DROPBOX_TOKEN uploadr.err $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN coverage_html.tar.gz $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario} || echo ok  
 
 # -----------------------------------------------------------------------------
 # Deploy to Heroku

@@ -140,7 +140,7 @@ script:
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst
 
   - coverage combine
-  - coverage report -m uploadr.py
+  - coverage report -m
 
 # DB OUTPUT for REFERENCE RUN#1
   - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb "SELECT *, datetime( last_modified, 'unixepoch', 'localtime') FROM files ORDER BY path;"; fi
@@ -184,7 +184,7 @@ script:
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.lst
 
   - coverage combine
-  - coverage report -m uploadr.py
+  - coverage report -m
   - sleep $WAIT_TIME
 
 # Deleted Pics Non existant on FLickr -----------------------------------------

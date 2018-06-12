@@ -2443,12 +2443,12 @@ class Uploadr(object):
         return success
 
     # -------------------------------------------------------------------------
-    # setupDB
+    # setup_db
     #
     # Creates the control database
     #
-    def setupDB(self):
-        """ setupDB
+    def setup_db(self):
+        """ setup_db
 
             Creates the control database
         """

@@ -360,7 +360,7 @@ def run_uploadr(args):
     myflick = FlickrUploadr.Uploadr(MY_CFG, args)
 
     # Setup the database. Clean badfiles entries if asked
-    myflick.setupDB()
+    myflick.setup_db()
     if args.clean_bad_files:
         myflick.cleanDBbadfiles()
 
@@ -495,24 +495,22 @@ UPLDR_K.ini_file = os.path.abspath(os.path.join(UPLDR_K.base_dir,
 UPLDR_K.etc_ini_file = os.path.abspath(
     os.path.join(UPLDR_K.base_dir, os.path.pardir, 'etc', 'uploadr.ini'))
 UPLDR_K.media_count = 0
-
-# CODING: Debug a series of control values
-logging.critical('      base_dir:[%s]', UPLDR_K.base_dir)
-logging.critical('           cwd:[%s]', os.getcwd())
-logging.critical('    prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
-logging.critical('       argv[0]:[%s]', os.path.dirname(sys.argv[0]))
-logging.critical('  abs(argv[0]):[%s]', os.path.abspath(
-    os.path.dirname(sys.argv[0])))
-logging.critical('      __file__:[%s]', __file__)
-logging.critical(' abs(__file__):[%s]',
-                 os.path.abspath(os.path.dirname(__file__)))
-logging.critical('argv[0]/../etc:[%s]', os.path.abspath(
-    os.path.join(os.path.dirname(sys.argv[0]),
-                 os.path.pardir,
-                 'etc',
-                 'uploadr.ini')))
-logging.critical('      ini_file:[%s]', UPLDR_K.ini_file)
-logging.critical('  etc_ini_file:[%s]', UPLDR_K.etc_ini_file)
+# -----------------------------------------------------------------------------
+# Debug folder locations and INI files
+logging.debug('      base_dir:[%s]', UPLDR_K.base_dir)
+logging.debug('           cwd:[%s]', os.getcwd())
+logging.debug('sys.prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
+logging.debug('  abs(argv[0]):[%s]',
+              os.path.abspath(os.path.dirname(sys.argv[0])))
+logging.debug(' abs(__file__):[%s]',
+              os.path.abspath(os.path.dirname(__file__)))
+logging.debug('argv[0]/../etc:[%s]',
+              os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]),
+                                           os.path.pardir,
+                                           'etc',
+                                           'uploadr.ini')))
+logging.debug('      ini_file:[%s]', UPLDR_K.ini_file)
+logging.debug('  etc_ini_file:[%s]', UPLDR_K.etc_ini_file)
 # -----------------------------------------------------------------------------
 
 # =============================================================================

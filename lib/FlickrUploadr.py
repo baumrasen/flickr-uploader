@@ -301,9 +301,8 @@ class Uploadr(object):
         """
 
         logging.warning(
-            'Checking if token is available... if not, will authenticate '
-            'check_token:(nuflickr is None):[%s]'
-            'check_token:(nuflickr.token_cache.token is None):[%s]',
+            'Checking token: '
+            'nuflickr is None:[%s] nuflickr.token_cache.token is None:[%s]',
             self.nuflickr is None,
             self.nuflickr.token_cache.token is None
             if self.nuflickr is not None

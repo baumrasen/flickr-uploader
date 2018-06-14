@@ -539,10 +539,12 @@ if __name__ == "__main__":
     NPR.set_verbosity(PARSED_ARGS.verbose)
 
     # Print/show arguments
-    if int(MY_CFG.LOGGING_LEVEL) <= logging.INFO:
-        NPR.niceprint('Output for arguments(args):')
-        pprint.pprint(PARSED_ARGS)
-
+    logging.info('Output for arguments(args):\n%s',
+                 pprint.pformat(PARSED_ARGS))
+    NPR.niceprint('Output for arguments(args):\n{!s}',
+                  .format(pprint.pformat(PARSED_ARGS)),
+                  verbosity=3)
+        
     # INI file config (1/3)
     #   1. Use --config-file argument option [after PARSED_ARGS]
     if PARSED_ARGS.config_file:
@@ -639,9 +641,11 @@ if __name__ == "__main__":
                     MY_CFG.ROTATING_LOGGING,
                     MY_CFG.LOGGING_LEVEL)
 
-    if MY_CFG.LOGGING_LEVEL <= logging.INFO:
-        NPR.niceprint('Output for FLICKR Configuration:')
-        pprint.pprint(MY_CFG.FLICKR)
+    logging.info('Output for FLICKR Configuration:\n%s',
+                 pprint.pformat(MY_CFG.FLICKR))
+    NPR.niceprint('Output for FLICKR Configuration:\n{!s}',
+                  .format(pprint.pformat(MY_CFG.FLICKR)),
+                  verbosity=3)
 
     # Ensure that only one instance of this script is running
     try:

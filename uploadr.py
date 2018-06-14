@@ -541,10 +541,10 @@ if __name__ == "__main__":
     # Print/show arguments
     logging.info('Output for arguments(args):\n%s',
                  pprint.pformat(PARSED_ARGS))
-    NPR.niceprint('Output for arguments(args):\n{!s}',
+    NPR.niceprint('Output for arguments(args):\n{!s}'
                   .format(pprint.pformat(PARSED_ARGS)),
                   verbosity=3)
-        
+
     # INI file config (1/3)
     #   1. Use --config-file argument option [after PARSED_ARGS]
     if PARSED_ARGS.config_file:

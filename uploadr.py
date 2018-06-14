@@ -643,7 +643,7 @@ if __name__ == "__main__":
 
     logging.info('Output for FLICKR Configuration:\n%s',
                  pprint.pformat(MY_CFG.FLICKR))
-    NPR.niceprint('Output for FLICKR Configuration:\n{!s}',
+    NPR.niceprint('Output for FLICKR Configuration:\n{!s}'
                   .format(pprint.pformat(MY_CFG.FLICKR)),
                   verbosity=3)
 

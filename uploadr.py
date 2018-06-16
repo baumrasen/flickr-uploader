@@ -413,7 +413,7 @@ def run_uploadr(args):
             myflick.removeUselessSetsTable()
             myflick.getFlickrSets()
             myflick.upload()
-            myflick.removeDeletedMedia()
+            myflick.remove_deleted_media()
 
             if args.remove_excluded:
                 myflick.remove_excluded_media()

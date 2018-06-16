@@ -162,7 +162,7 @@ def chunk(itlist, size):
 def md5checksum(afilepath):
     """ md5checksum
 
-        Calculates the MD5 checksum for filePath
+        Calculates the MD5 checksum for afilepath
     """
     with open(afilepath, 'rb') as filehandler:
         calc_md5 = hashlib.md5()
@@ -386,8 +386,8 @@ class Uploadr(object):
     #
     # Remove files deleted at the local source
     #
-    def removeDeletedMedia(self):
-        """ removeDeletedMedia
+    def remove_deleted_media(self):
+        """ remove_deleted_media
 
         Remove files deleted at the local source
             loop through database
@@ -806,13 +806,13 @@ class Uploadr(object):
                              NP.strunicodeout(os.path.normpath(dirpath)))
 
             for afile in filenames:
-                filePath = os.path.join(NP.strunicodeout(dirpath),
-                                        NP.strunicodeout(afile))
+                file_path = os.path.join(NP.strunicodeout(dirpath),
+                                         NP.strunicodeout(afile))
                 # Ignore filenames wihtin IGNORED_REGEX
                 if any(ignored.search(afile)
                        for ignored in self.xcfg.IGNORED_REGEX):
                     logging.debug('File %s in IGNORED_REGEX:',
-                                  NP.strunicodeout(filePath))
+                                  NP.strunicodeout(file_path))
                     continue
                 ext = os.path.splitext(os.path.basename(afile))[1][1:].lower()
                 if ext in self.xcfg.ALLOWED_EXT:

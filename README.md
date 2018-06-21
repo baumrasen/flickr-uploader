@@ -187,8 +187,18 @@ Finished processing dependencies for flickrapi==2.4.0
 ```
 
 ###  5. Download and install flickr-uploader
-- Soon to be available on Pypi.org for installation also via PIP.
-- For now you can download it from GitHub [flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest).
+#### 5.1 OPTION #1 (recommended): With PIP (installed in step #3 above)
+- Now available on Pypi.org for installation also via PIP.
+```bash
+$ cd
+$ cd dev
+dev$ export PYTHONPATH=~/apps/Python/lib/python2.7/site-packages
+dev$ pip install flickr-uploader --prefix=~/apps/Python
+```
+   * Installation also copies to '~/apps/Python/etc' folder the data files `uploadr.ini` and `uploadr.cron`
+
+#### 5.2 OPTION #2: Mannually to be run from local folder
+- Download mannually from GitHub [flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest).
 - You can find under **Assets**:
    * the source code packages;
    * a distribution package Published on [https://github.com/oPromessa/flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest)
@@ -204,10 +214,29 @@ apps$ cd flickr-uploader-2.8.5
 apps$ ./uplaodr.py -a
 ```
 
+#### 5.3 OPTION #3: Mannually to be run from `~/apps/Python/bin`
+- Download mannually from GitHub [flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest).
+- You can find under **Assets**:
+   * the source code packages;
+   * a distribution package Published on [https://github.com/oPromessa/flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest)
+- Extract the contents of the elected tar file.
+   * You can then run it from the current folder.
+   * Edit the uploadr.ini as appropriate (check Configuration section)
+```bash
+$ cd
+$ cd apps
+apps$ wget https://github.com/oPromessa/flickr-uploader/releases/download/2.8.5/flickr-uploader-2.8.5.tar.gz
+apps$ tar xzvf flickr-uploader-2.8.5.tar.gz
+apps$ cd flickr-uploader-2.8.5
+apps$ python2.7 setup.py install --prefix=~/apps/Python --old-and-unmanageable`
+```
+   * Installation also copies to '~/apps/Python/etc' folder the data files `uploadr.ini` and `uploadr.cron`
+
 ## Configuration
 ----------------
 Go to http://www.flickr.com/services/apps/create/apply and apply for an API
-key Edit the following variables in the uploadr.ini
+key.
+* Edit the following variables in the uploadr.ini
 
 * FILES_DIR = "YourDir"
 * FLICKR = {

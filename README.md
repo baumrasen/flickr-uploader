@@ -306,7 +306,7 @@ script with option `--dry-run`:
 ```bash
 $ ./uploadr.py --dry-run
 ```
-Run `./uploadrd.py --help` for up to the minute information on arguments:
+Run `./uploadr.py --help` for up to the minute information on arguments:
 ```bash
 [910][2018.06.22 01:58:57]:[5834       ][PRINT   ]:[uploadr] ----------- (V2.8.6) Start -----------(Log:40)
 usage: uploadr.py [-h] [-C filename.ini] [-a] [-v] [-x] [-n] [-i TITLE]

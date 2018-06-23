@@ -69,6 +69,8 @@ else:
 class UploadCommand(Command):
     """Support setup.py upload."""
 
+    testpypi = False
+    pypi_repository = ''
     description = 'Build and publish the package.'
     # Show options for 'python setup.py upload --help'
     user_options = [

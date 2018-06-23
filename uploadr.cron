@@ -6,7 +6,7 @@
 #
 
 # Edit the following line to refer to the folder where uploadr.py is located
-FOLDER="~/apps/flickr-uploader-2.8.6"
+FOLDER=~/apps/flickr-uploader-2.8.6
 
 # Compatible with different installation modes of uploadr.py: PIP or Mannual
 RUNCMD=`which uploadr.py`

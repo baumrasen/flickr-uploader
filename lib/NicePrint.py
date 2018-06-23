@@ -18,8 +18,8 @@ import sys
 import os
 import logging
 import time
-import lib.UPLDRConstants as UPLDRConstantsClass
-UPLDR_K = UPLDRConstantsClass.UPLDRConstants()
+import lib.Konstants as KonstantsClass
+UPLDR_K = KonstantsClass.Konstants()
 
 
 # -----------------------------------------------------------------------------
@@ -42,15 +42,57 @@ class NicePrint:
         True
         >>> np.is_str_unicode(245)
         False
+        >>> np.verbosity == 0
+        True
+        >>> np.set_verbosity(3)
+        >>> np.get_verbosity()
+        3
+        >>> np.verbosity == 3
+        True
     """
+
+    # -------------------------------------------------------------------------
+    # Class Global Variables
+    #   class variable shared by all instances
+    #
+    #   verbosity = Verbosity Level defined: 0, 1, 2, ...
+
+    verbosity = 0
 
     # -------------------------------------------------------------------------
     # class NicePrint __init__
     #
-    def __init__(self):
+    def __init__(self, averbosity=0):
         """ class NicePrint __init__
+
+            verbosity = Verbosity Level defined: 0, 1, 2, ...
         """
-        pass
+
+        self.set_verbosity(averbosity)
+
+    # -------------------------------------------------------------------------
+    # set_verbosity
+    #
+    @classmethod
+    def set_verbosity(cls, averbosity=0):
+        """ set_verbosity
+
+            verbosity = Verbosity Level defined: 0, 1, 2, ...
+        """
+
+        cls.verbosity = averbosity if averbosity is not None else 0
+
+    # -------------------------------------------------------------------------
+    # get_verbosity
+    #
+    @classmethod
+    def get_verbosity(cls):
+        """ get_verbosity
+
+            returns Class verbosity setting
+        """
+
+        return cls.verbosity
 
     # -------------------------------------------------------------------------
     # is_str_unicode
@@ -58,7 +100,7 @@ class NicePrint:
     # Returns true if String is Unicode
     #
     def is_str_unicode(self, astr):
-        """
+        """ is_str_unicode
         Determines if a string is Unicode (return True) or not (returns False)
         to allow correct print operations.
 
@@ -92,7 +134,7 @@ class NicePrint:
     # Returns true if String is Unicode
     #
     def strunicodeout(self, astr):
-        """
+        """ strunicodeout
         Outputs s.encode('utf-8') if is_str_unicode(s) else s
             NicePrint('Checking file:[{!s}]...'.format(strunicodeout(file))
 
@@ -110,35 +152,36 @@ class NicePrint:
     # Print a message with the format:
     #   [2017.10.25 22:32:03]:[PRINT   ]:[uploadr] Some Message
     #
-    def niceprint(self, astr, fname='uploadr'):
-        """
+    def niceprint(self, astr, fname='uploadr', verbosity=0):
+        """ niceprint
         Print a message with the format:
             [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
             Accounts for UTF-8 Messages
-
         """
-        print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
-              .format(UPLDR_K.Gre,
-                      UPLDR_K.Run,
-                      time.strftime(UPLDR_K.TimeFormat),
-                      os.getpid(),
-                      UPLDR_K.Std,
-                      'PRINT',
-                      self.strunicodeout(fname),
-                      self.strunicodeout(astr)))
+
+        if verbosity <= self.get_verbosity():
+            print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
+                  .format(UPLDR_K.Gre,
+                          UPLDR_K.Run,
+                          time.strftime(UPLDR_K.TimeFormat),
+                          os.getpid(),
+                          UPLDR_K.Std,
+                          'PRINT',
+                          self.strunicodeout(fname),
+                          self.strunicodeout(astr)))
 
     # -------------------------------------------------------------------------
     # niceassert
     #
     def niceassert(self, astr):
-        """
-         Returns a message with the format:
-             [2017.11.19 01:53:57]:[PID       ][ASSERT  ]:[uploadr] Message
-             Accounts for UTF-8 Messages
+        """ niceassert
+        Returns a message with the format:
+            [2017.11.19 01:53:57]:[PID       ][ASSERT  ]:[uploadr] Message
+            Accounts for UTF-8 Messages
 
-         Usage:
-             assert param1 >= 0, niceassert('param1 is not >= 0:'
-                                            .format(param1))
+        Usage:
+            assert param1 >= 0, niceassert('param1 is not >= 0:'
+                                           .format(param1))
         """
         return('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
                .format(UPLDR_K.Red,
@@ -174,9 +217,6 @@ class NicePrint:
     #               caughtmsg='DB error on INSERT: [{!s}]'
     #                         .format(e.args[0]),
     #               useniceprint=True)
-    #     # Release the lock on error.
-    #     self.useDBLock(lock, False)
-    #     success = False
     # except:
     #     niceerror(caught=True,
     #               caughtprefix='+++',

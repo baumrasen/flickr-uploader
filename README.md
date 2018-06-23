@@ -1,15 +1,15 @@
 # flickr-uploader
 -----------------
-by oPromessa, 2017, V2.8.0 [![Master Build Status](https://travis-ci.org/oPromessa/flickr-uploader.svg?branch=master)](https://travis-ci.org/oPromessa/flickr-uploader)
-Published on [https://github.com/oPromessa/flickr-uploader/](https://github.com/oPromessa/flickr-uploader/)
-
+by oPromessa, 2017, V2.8.6 [![Master Build Status](https://travis-ci.org/oPromessa/flickr-uploader.svg?branch=master)](https://travis-ci.org/oPromessa/flickr-uploader)
+* Published on [https://github.com/oPromessa/flickr-uploader/](https://github.com/oPromessa/flickr-uploader/)
 
 ## Description
 --------------
-* flickr-uploader designed for Synology Devices.
-* Upload a directory of media to Flickr to use as a backup to your
-local storage.
+* Upload a directory of media (pics/videos) to Flickr for showing off your pics
+on the WEB and as a backup of your local storage.
 * Check Features, Requirements and Setup remarks.
+* flickr-uploader designed primarly for Synology Devices. 
+   * Also works on Linux, Mac and Windows systems.
 
 ## Features
 -----------
@@ -187,8 +187,18 @@ Finished processing dependencies for flickrapi==2.4.0
 ```
 
 ###  5. Download and install flickr-uploader
-- Soon to be available on Pypi.org for installation also via PIP.
-- For now you can download it from GitHub [flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest).
+#### 5.1 OPTION #1 (recommended): With PIP (installed in step #3 above)
+- Now available on Pypi.org for installation also via PIP.
+```bash
+$ cd
+$ cd dev
+dev$ export PYTHONPATH=~/apps/Python/lib/python2.7/site-packages
+dev$ pip install flickr-uploader --prefix=~/apps/Python
+```
+   * Installation also copies to '~/apps/Python/etc' folder the data files `uploadr.ini` and `uploadr.cron`
+
+#### 5.2 OPTION #2: Mannually to be run from local folder
+- Download mannually from GitHub [flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest).
 - You can find under **Assets**:
    * the source code packages;
    * a distribution package Published on [https://github.com/oPromessa/flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest)
@@ -201,16 +211,35 @@ $ cd apps
 apps$ wget https://github.com/oPromessa/flickr-uploader/releases/download/2.8.5/flickr-uploader-2.8.5.tar.gz
 apps$ tar xzvf flickr-uploader-2.8.5.tar.gz
 apps$ cd flickr-uploader-2.8.5
-apps$ ./uplaodr.py -a
+apps$ ./uploadr.py -a
 ```
+
+#### 5.3 OPTION #3: Mannually to be run from `~/apps/Python/bin`
+- Download mannually from GitHub [flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest).
+- You can find under **Assets**:
+   * the source code packages;
+   * a distribution package Published on [https://github.com/oPromessa/flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest)
+- Extract the contents of the elected tar file.
+   * You can then run it from the current folder.
+   * Edit the uploadr.ini as appropriate (check Configuration section)
+```bash
+$ cd
+$ cd apps
+apps$ wget https://github.com/oPromessa/flickr-uploader/releases/download/2.8.5/flickr-uploader-2.8.5.tar.gz
+apps$ tar xzvf flickr-uploader-2.8.5.tar.gz
+apps$ cd flickr-uploader-2.8.5
+apps$ python2.7 setup.py install --prefix=~/apps/Python --old-and-unmanageable
+```
+   * Installation also copies to '~/apps/Python/etc' folder the data files `uploadr.ini` and `uploadr.cron`
 
 ## Configuration
 ----------------
 Go to http://www.flickr.com/services/apps/create/apply and apply for an API
-key Edit the following variables in the uploadr.ini
-
-* FILES_DIR = "YourDir"
-* FLICKR = {
+key.
+* Edit the following variables in the uploadr.ini
+```
+FILES_DIR = "YourDir"
+FLICKR = {
         "title"                 : "",
         "description"           : "",
         "tags"                  : "auto-upload",
@@ -220,13 +249,14 @@ key Edit the following variables in the uploadr.ini
         "api_key"               : "Yourkey",
         "secret"                : "YourSecret"
         }
-* FLICKR["api_key"] = ""
-* FLICKR["secret"] = ""
-* EXCLUDED_FOLDERS = ["@eaDir","#recycle"]
-* IGNORED_REGEX = ['*[Ii][Gg][Nn][Oo][Rr][Ee]*', 'Private*']
-* ALLOWED_EXT = ["jpg","png","avi","mov","mpg","mp4","3gp"]
-* MANAGE_CHANGES = True
-* FULL_SET_NAME = False
+FLICKR["api_key"] = ""
+FLICKR["secret"] = ""
+EXCLUDED_FOLDERS = ["@eaDir","#recycle"]
+IGNORED_REGEX = ['*[Ii][Gg][Nn][Oo][Rr][Ee]*', 'Private*']
+ALLOWED_EXT = ["jpg","png","avi","mov","mpg","mp4","3gp"]
+MANAGE_CHANGES = True
+FULL_SET_NAME = False
+```
 
 Refer to https://www.flickr.com/services/api/upload.api.html for what each
 of the upload arguments above correspond to for Flickr's API.
@@ -276,9 +306,9 @@ script with option `--dry-run`:
 ```bash
 $ ./uploadr.py --dry-run
 ```
-Run `./uploadrd.py --help` for up to the minute information on arguments:
+Run `./uploadr.py --help` for up to the minute information on arguments:
 ```bash
-[2554][2018.05.26 18:59:19]:[3916       ][PRINT   ]:[uploadr] ----------- (V2.8.5-r1) Start -----------(Log:40)
+[910][2018.06.22 01:58:57]:[5834       ][PRINT   ]:[uploadr] ----------- (V2.8.6) Start -----------(Log:40)
 usage: uploadr.py [-h] [-C filename.ini] [-a] [-v] [-x] [-n] [-i TITLE]
                   [-e DESCRIPTION] [-t TAGS] [-l N] [-r] [-p P] [-u] [-d] [-b]
                   [-c] [-s] [-g] [--add-albums-migrate]
@@ -291,16 +321,16 @@ optional arguments:
 Configuration related options:
   -C filename.ini, --config-file filename.ini
                         Optional configuration file. Default
-                        is:[/home/ruler/uploader/bin/uploadr.ini]
+                        is:[/home/ruler/Documents/GitHub/flickr-
+                        uploader/uploadr.ini]
   -a, --authenticate    Performs/Verifies authentication with Flickr. To be
                         run on initial setup.Does not run any other option.
 
 Verbose and dry-run options:
-  -v, --verbose         Provides some more verbose output. See also -x option.
-                        See also LOGGING_LEVEL value in INI file.
+  -v, --verbose         Verbose output. Use -vv for more verbosity. See also
+                        LOGGING_LEVEL value in INI file.
   -x, --verbose-progress
-                        Provides progress indicator on each upload. Normally
-                        used in conjunction with -v option. See also
+                        Provides progress indicator on each upload. See also
                         LOGGING_LEVEL value in INI file.
   -n, --dry-run         Dry run. No changes are actually performed.
 
@@ -396,6 +426,9 @@ Inspired by:
 * http://micampe.it/things/flickruploadr
 * https://github.com/joelmx/flickrUploadr
 
+Makes dynamic use of the following libraries:
+* https://github.com/jruere/multiprocessing-logging under **GNU LESSER GENERAL PUBLIC LICENSE**
+
 ## Final remarks
 ---------------
 You may use this code however you see fit in any form whatsoever.
@@ -470,3 +503,6 @@ Photos count:
                Flickr:[   750]
 Not in sets on Flickr:[     0]
 ```
+
+* Q: What happens if the local control Database (flickrdb) is deleted?
+  - By re-running the program **without the -u opiotn** it will go thru your local files and check/search for already loaded pics with same checksum+Set and re-builds the local database.

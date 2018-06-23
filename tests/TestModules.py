@@ -11,7 +11,7 @@ import unittest
 import test.support
 # -----------------------------------------------------------------------------
 import lib.NicePrint as NicePrint
-import lib.UPLDRConstants as UPLDRConstantsClass
+import lib.Konstants as KonstantsClass
 # -----------------------------------------------------------------------------
 
 
@@ -91,7 +91,7 @@ class TestMethods(unittest.TestCase):
     def test_run(self):
         """ test_run
 
-            Unit tests for UPLDRConstantsClass.Run formula
+            Unit tests for KonstantsClass.Run formula
 
         """
         print(eval(time.strftime('int("%j")+int("%H")*100'
@@ -109,13 +109,13 @@ class TestMethods(unittest.TestCase):
                                         j+h_hour*100+m_min*10+s_secs <= 3415)
 
 
-class TestUPLDRConstantsMethods(unittest.TestCase):
-    """ TestUPLDRConstantsMethods
+class TestKonstantsMethods(unittest.TestCase):
+    """ TestKonstantsMethods
     """
     def test_media_count(self):
         """ test_media_count
         """
-        upldr_k = UPLDRConstantsClass.UPLDRConstants()
+        upldr_k = KonstantsClass.Konstants()
 
         for j in range(1, 20):
             upldr_k.media_count = j
@@ -132,5 +132,5 @@ if __name__ == '__main__':
     unittest.TextTestRunner(verbosity=2).run(SUITE)
 
     SUITE = unittest.TestLoader().loadTestsFromTestCase(
-        TestUPLDRConstantsMethods)
+        TestKonstantsMethods)
     unittest.TextTestRunner(verbosity=2).run(SUITE)

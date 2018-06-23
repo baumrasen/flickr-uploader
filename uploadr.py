@@ -68,20 +68,23 @@ import pprint
 import lib.FlickrUploadr as FlickrUploadr
 # -----------------------------------------------------------------------------
 # Helper class and functions for UPLoaDeR Global Constants.
-import lib.UPLDRConstants as UPLDRConstantsClass
+import lib.Konstants as KonstantsClass
 # -----------------------------------------------------------------------------
 # Helper class and functions to print messages.
 import lib.NicePrint as NicePrint
 # -----------------------------------------------------------------------------
 # Helper class and functions to load, process and verify INI configuration.
 import lib.MyConfig as MyConfig
+# -----------------------------------------------------------------------------
+# Helper class to allow multiprocessing looging into a single file
+import lib.multiprocessing_logging as multiprocessing_logging
 
 
 # =============================================================================
 # Logging init code
 #
-# Getting definitions from UPLDRConstants
-UPLDR_K = UPLDRConstantsClass.UPLDRConstants()
+# Getting definitions from Konstants
+UPLDR_K = KonstantsClass.Konstants()
 # Sets LOGGING_LEVEL to allow logging even if everything else is wrong!
 # Parent logger is set to Maximum (DEBUG) so that suns will log as appropriate
 logging.getLogger().setLevel(logging.DEBUG)
@@ -97,9 +100,8 @@ logging.getLogger().addHandler(CONSOLE_LOGGING)
 
 # Inits with default configuration value, namely LOGGING_LEVEL
 MY_CFG = MyConfig.MyConfig()
-MY_CFG.LOGGING_LEVEL = int(str(MY_CFG.LOGGING_LEVEL))
 # Update console logging level as per LOGGING_LEVEL from default config
-CONSOLE_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL)
+CONSOLE_LOGGING.setLevel(int(MY_CFG.LOGGING_LEVEL))
 # -----------------------------------------------------------------------------
 
 
@@ -169,14 +171,11 @@ def parse_arguments():
 
     # Verbose related options -------------------------------------------------
     vgrpparser = parser.add_argument_group('Verbose and dry-run options')
-    vgrpparser.add_argument('-v', '--verbose', action='store_true',
-                            help='Provides some more verbose output. '
-                                 'See also -x option. '
+    vgrpparser.add_argument('-v', '--verbose', action='count',
+                            help='Verbose output. Use -vv for more verbosity. '
                                  'See also LOGGING_LEVEL value in INI file.')
     vgrpparser.add_argument('-x', '--verbose-progress', action='store_true',
-                            help='Provides progress indicator on each upload.'
-                                 ' Normally used in conjunction with '
-                                 '-v option. '
+                            help='Provides progress indicator on each upload. '
                                  'See also LOGGING_LEVEL value in INI file.')
     vgrpparser.add_argument('-n', '--dry-run', action='store_true',
                             help='Dry run. No changes are actually performed.')
@@ -194,7 +193,7 @@ def parse_arguments():
     igrpparser.add_argument('-t', '--tags', action='store',
                             help='Space-separated tags for uploaded files. '
                                  'It appends to the tags defined in INI file.')
-    # used in printStat function
+    # used in pics_status function
     igrpparser.add_argument('-l', '--list-photos-not-in-set',
                             metavar='N', type=int,
                             help='List as many as N photos (with tags) '
@@ -290,24 +289,34 @@ def run_uploadr(args):
             Exits from program otherwise.
         """
         logging.warning('FILES_DIR: [%s]', NPR.strunicodeout(MY_CFG.FILES_DIR))
-        if args.verbose:
-            NPR.niceprint('FILES_DIR: [{!s}]'
-                          .format(NPR.strunicodeout(MY_CFG.FILES_DIR)))
+        NPR.niceprint('FILES_DIR: [{!s}]'
+                      .format(NPR.strunicodeout(MY_CFG.FILES_DIR)),
+                      verbosity=1)
 
         if MY_CFG.FILES_DIR == "":
-            NPR.niceprint('Please configure in INI file [normally uploadr.ini]'
-                          ' the name of the folder [FILES_DIR] '
-                          'with media available to sync with Flickr.')
+            NPR.niceerror(
+                caught=True,
+                caughtprefix='xxx',
+                caughtcode='630',
+                caughtmsg='Please configure in INI file [normally uploadr.ini]'
+                ' the name of the folder [FILES_DIR] '
+                'with media available to sync with Flickr.',
+                useniceprint=True)
+
             sys.exit(8)
         else:
             if not os.path.isdir(MY_CFG.FILES_DIR):
-                logging.critical('FILES_DIR: [%s] is not valid.',
-                                 NPR.strunicodeout(MY_CFG.FILES_DIR))
-                NPR.niceprint('Please configure the name of an existant folder'
-                              ' in INI file [normally uploadr.ini] '
-                              'with media available to sync with Flickr. '
-                              'FILES_DIR: [{!s}] is not valid.'
-                              .format(NPR.strunicodeout(MY_CFG.FILES_DIR)))
+                NPR.niceerror(
+                    caught=True,
+                    caughtprefix='xxx',
+                    caughtcode='631',
+                    caughtmsg='FILES_DIR: [{!s}] is not valid.'
+                    'Please configure the name of an existant folder'
+                    ' in INI file [normally uploadr.ini] '
+                    'with media available to sync with Flickr. '
+                    .format(NPR.strunicodeout(MY_CFG.FILES_DIR)),
+                    useniceprint=True)
+
                 sys.exit(8)
 
     def check_flickr_key_secret():
@@ -318,13 +327,29 @@ def run_uploadr(args):
         """
 
         if MY_CFG.FLICKR["api_key"] == "" or MY_CFG.FLICKR["secret"] == "":
-            logging.critical('Please enter an API key and secret in the '
-                             'configuration '
-                             'file [normaly uploadr.ini] (see README).')
-            NPR.niceprint('Please enter an API key and secret in the '
-                          'configuration'
-                          'file [normaly uploadr.ini] (see README).')
+            NPR.niceerror(
+                caught=True,
+                caughtprefix='xxx',
+                caughtcode='635',
+                caughtmsg='Please enter an API key and secret in the '
+                'configuration file [normaly uploadr.ini] (see README).',
+                useniceprint=True)
+
             sys.exit(9)
+
+    def check_token_authenticate():
+        """ check_token_authenticate
+
+            Checks if token is available... if not will authenticate
+        """
+        NPR.niceprint('Checking if token is available... '
+                      'if not will authenticate')
+        if not myflick.check_token():
+            # authenticate sys.exits in case of failure
+            myflick.authenticate()
+        else:
+            logging.info('Token is available.')
+            NPR.niceprint('Token is available.')
 
     # Initial checks
     check_files_dir()
@@ -335,19 +360,12 @@ def run_uploadr(args):
     myflick = FlickrUploadr.Uploadr(MY_CFG, args)
 
     # Setup the database. Clean badfiles entries if asked
-    myflick.setupDB()
+    myflick.setup_db()
     if args.clean_bad_files:
         myflick.cleanDBbadfiles()
 
     if args.authenticate:
-        NPR.niceprint('Checking if token is available... '
-                      'if not, will authenticate')
-        if not myflick.check_token():
-            # authenticate sys.exits in case of failure
-            myflick.authenticate()
-        else:
-            NPR.niceprint('Token is available.')
-
+        check_token_authenticate()
     elif args.daemon:
         # Will run in daemon mode every SLEEP_TIME seconds
         if myflick.check_token():
@@ -359,22 +377,20 @@ def run_uploadr(args):
                           .format(MY_CFG.SLEEP_TIME))
             myflick.run()
         else:
-            logging.warning('Not able to connect to Flickr.'
-                            'Make sure you have previously authenticated!')
-            NPR.niceprint('Not able to connect to Flickr.'
-                          'Make sure you have previously authenticated!')
+            NPR.niceerror(
+                caught=True,
+                caughtprefix='xxx',
+                caughtcode='641',
+                caughtmsg='Not able to connect to Flickr.'
+                'Make sure you have previously authenticated!',
+                useniceprint=True)
+
             sys.exit(8)
     else:
-        NPR.niceprint('Checking if token is available... '
-                      'if not will authenticate')
-        if not myflick.check_token():
-            # authenticate sys.exits in case of failure
-            myflick.authenticate()
-        else:
-            NPR.niceprint('Token is available.')
+        check_token_authenticate()
 
         if args.add_albums_migrate:
-            NPR.niceprint('Performing preparation for migration to 2.7.0',
+            NPR.niceprint('Preparation migration to 2.7.0',
                           fname='addAlbumsMigrate')
 
             if myflick.addAlbumsMigrate():
@@ -382,31 +398,28 @@ def run_uploadr(args):
                               'on upload.',
                               fname='addAlbumsMigrate')
             else:
-                logging.warning('Failed adding album tags to pics '
-                                'on upload. '
-                                'Please check logs, correct, and retry.')
-                NPR.niceprint('Failed adding album tags to pics '
-                              'on upload. '
-                              'Please check logs, correct, and retry.',
-                              fname='addAlbumsMigrate')
+                NPR.niceerror(
+                    caught=True,
+                    caughtprefix='xxx',
+                    caughtcode='642',
+                    caughtmsg='Failed adding album tags to pics uploaded. '
+                    'Please check logs, correct, and retry.',
+                    useniceprint=True)
+
                 sys.exit(10)
         elif args.list_bad_files:
-            NPR.niceprint('Listing badfiles: Start.',
-                          fname='listBadFiles')
-            myflick.listBadFiles()
-            NPR.niceprint('Listing badfiles: End. No more options will run.',
-                          fname='listBadFiles')
+            myflick.list_bad_files()
         else:
             myflick.removeUselessSetsTable()
             myflick.getFlickrSets()
             myflick.upload()
-            myflick.removeDeletedMedia()
+            myflick.remove_deleted_media()
 
             if args.remove_excluded:
                 myflick.remove_excluded_media()
 
             myflick.createSets()
-            myflick.printStat(UPLDRConstantsClass.media_count)
+            myflick.pics_status(KonstantsClass.media_count)
     # Run Uploadr -------------------------------------------------------------
 
 
@@ -416,11 +429,17 @@ def run_uploadr(args):
 # Check if base_dir folder exists and ini_file exists and is a file
 #
 def check_base_ini_file(base_dir, ini_file):
-    """check_base_ini_file
+    """ check_base_ini_file
+
+    Returns True if base_dir is a directory and ini_file is a regular file.
 
     base_dir = Folder
     ini_file = INI File path
     """
+
+    logging.info('check_base_ini_file: base_dir=[%s] ini_file=[%s]',
+                 NPR.strunicodeout(base_dir),
+                 NPR.strunicodeout(ini_file))
 
     result_check = True
     try:
@@ -433,8 +452,25 @@ def check_base_ini_file(base_dir, ini_file):
             'Config folder [%s] and/or INI file: [%s] not found or '
             'incorrect format: [%s]!', base_dir, ini_file, str(err))
 
-    logging.debug('check_base_ini_file=[%s]', result_check)
+    logging.debug('check_base_ini_file: result=[%s]', result_check)
     return result_check
+
+
+# -----------------------------------------------------------------------------
+# logging_close_handlers
+#
+# Close logging handlers
+#
+def logging_close_handlers():
+    """ logging_close_handlers
+
+    Close logging handlers
+
+    """
+    handlers = logging.getLogger().handlers[:]
+    for handler in handlers:
+        handler.close()
+        logging.getLogger().removeHandler(handler)
 
 
 # =============================================================================
@@ -443,30 +479,38 @@ def check_base_ini_file(base_dir, ini_file):
 # -----------------------------------------------------------------------------
 # Class UPLDReConstants
 #
+#   base_dir    = Base configuration directory location
+#   ini_file    = Configuration file
 #   media_count = Counter of total files to initially upload
-#   base_dir      = Base configuration directory location
-#   ini_file      = Configuration file
 # -----------------------------------------------------------------------------
-# UPLDRConstants = UPLDRConstantsClass.UPLDRConstants()
+# Base_dir set to os.path.abspat(os.path.dirname(sys.argv[0]))
+# INI file config:
+#   1. Use --config-file argument option [after PARSED_ARGS]
+#   2. If not, os.path.dirname(sys.argv[0])
+#   3. If not, os.path.dirname(sys.argv[0]), '..', 'etc', 'uploadr.ini'
+# Set appropriate configuration within INI file for support files
+UPLDR_K.base_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
+UPLDR_K.ini_file = os.path.abspath(os.path.join(UPLDR_K.base_dir,
+                                                'uploadr.ini'))
+UPLDR_K.etc_ini_file = os.path.abspath(
+    os.path.join(UPLDR_K.base_dir, os.path.pardir, 'etc', 'uploadr.ini'))
 UPLDR_K.media_count = 0
-# Base dir for config and support files.
-#   Will use --config-file argument option [after PARSED_ARGS]
-#   If not, first try sys.prefix/etc folder [not operational]
-#   If not, then try Current Working Directory (getcwd) [not operational]
-#   If not, then try folder where uploadr.py is located (dirname(sys.argv[0]))
-# UPLDR_K.base_dir = os.path.join(sys.prefix, 'etc')
-# UPLDR_K.base_dir = os.getcwd()
-UPLDR_K.base_dir = os.path.dirname(sys.argv[0])
-UPLDR_K.ini_file = os.path.join(UPLDR_K.base_dir, "uploadr.ini")
-UPLDR_K.err_file = os.path.join(UPLDR_K.base_dir, "uploadr.err")
-
-# CODING: Debug a series of control values
-logging.info('      base_dir:[%s]', UPLDR_K.base_dir)
-logging.info('           cwd:[%s]', os.getcwd())
-logging.info('    prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
-logging.info('   sys.argv[0]:[%s]', os.path.dirname(sys.argv[0]))
-logging.info('      ini_file:[%s]', UPLDR_K.ini_file)
-logging.info('      err_file:[%s]', UPLDR_K.err_file)
+# -----------------------------------------------------------------------------
+# Debug folder locations and INI files
+logging.debug('      base_dir:[%s]', UPLDR_K.base_dir)
+logging.debug('           cwd:[%s]', os.getcwd())
+logging.debug('sys.prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
+logging.debug('  abs(argv[0]):[%s]',
+              os.path.abspath(os.path.dirname(sys.argv[0])))
+logging.debug(' abs(__file__):[%s]',
+              os.path.abspath(os.path.dirname(__file__)))
+logging.debug('argv[0]/../etc:[%s]',
+              os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]),
+                                           os.path.pardir,
+                                           'etc',
+                                           'uploadr.ini')))
+logging.debug('      ini_file:[%s]', UPLDR_K.ini_file)
+logging.debug('  etc_ini_file:[%s]', UPLDR_K.etc_ini_file)
 # -----------------------------------------------------------------------------
 
 # =============================================================================
@@ -491,36 +535,54 @@ if __name__ == "__main__":
     # Parse the arguments options
     PARSED_ARGS = parse_arguments()
 
-    # Print/show arguments
-    if MY_CFG.LOGGING_LEVEL <= logging.INFO:
-        NPR.niceprint('Output for arguments(args):')
-        pprint.pprint(PARSED_ARGS)
+    # Set verbosity level as per -v count
+    NPR.set_verbosity(PARSED_ARGS.verbose)
 
-    # Argument --config-file overrides configuration filename.
+    # Print/show arguments
+    logging.info('Output for arguments(args):\n%s',
+                 pprint.pformat(PARSED_ARGS))
+    NPR.niceprint('Output for arguments(args):\n{!s}'
+                  .format(pprint.pformat(PARSED_ARGS)),
+                  verbosity=3)
+
+    # INI file config (1/3)
+    #   1. Use --config-file argument option [after PARSED_ARGS]
     if PARSED_ARGS.config_file:
-        UPLDR_K.ini_file = PARSED_ARGS.config_file
-        logging.info('UPLDR_K.ini_file:[%s]',
-                     NPR.strunicodeout(UPLDR_K.ini_file))
-        if not check_base_ini_file(UPLDR_K.base_dir,
-                                   UPLDR_K.ini_file):
+        if not check_base_ini_file(UPLDR_K.base_dir, PARSED_ARGS.config_file):
             NPR.niceerror(caught=True,
                           caughtprefix='+++ ',
-                          caughtcode='601',
-                          caughtmsg='Invalid -C parameter INI file. '
-                          'Exiting...',
+                          caughtcode='661',
+                          caughtmsg='Invalid -C argument INI file [{!s}]. '
+                          'Exiting...'.format(UPLDR_K.ini_file),
                           useniceprint=True)
             sys.exit(2)
+        else:
+            UPLDR_K.ini_file = PARSED_ARGS.config_file
+    # INI file config (2/3)
+    #   2. If not, os.path.dirname(sys.argv[0])
     else:
-        if not check_base_ini_file(UPLDR_K.base_dir,
-                                   UPLDR_K.ini_file):
+        if not check_base_ini_file(UPLDR_K.base_dir, UPLDR_K.ini_file):
             NPR.niceerror(caught=True,
                           caughtprefix='+++ ',
-                          caughtcode='602',
-                          caughtmsg='Invalid sys.argv INI file. Exiting...',
+                          caughtcode='662',
+                          caughtmsg='Invalid sys.argv INI file [{!s}].'
+                          .format(UPLDR_K.ini_file),
                           useniceprint=True)
-            sys.exit(2)
+            # INI file config (3/3)
+            #   3. If not, os.path.dirname(sys.argv[0]), '../etc/uploadr.ini'
+            if not check_base_ini_file(UPLDR_K.base_dir, UPLDR_K.etc_ini_file):
+                NPR.niceerror(caught=True,
+                              caughtprefix='+++ ',
+                              caughtcode='663',
+                              caughtmsg='Invalid sys.argv/etc INI file [{!s}].'
+                              ' Exiting...'.format(UPLDR_K.etc_ini_file),
+                              useniceprint=True)
+                sys.exit(2)
+            else:
+                UPLDR_K.ini_file = UPLDR_K.etc_ini_file
 
     # Source configuration from ini_file
+    logging.critical('FINAL ini_file:[%s]', UPLDR_K.ini_file)
     MY_CFG.readconfig(UPLDR_K.ini_file, ['Config'])
     if MY_CFG.processconfig():
         if MY_CFG.verifyconfig():
@@ -536,8 +598,8 @@ if __name__ == "__main__":
         if not os.path.isdir(os.path.dirname(MY_CFG.ROTATING_LOGGING_PATH)):
             NPR.niceerror(caught=True,
                           caughtprefix='+++ ',
-                          caughtcode='603',
-                          caughtmsg='Invalid ROTATING_LOGGING config.',
+                          caughtcode='663',
+                          caughtmsg='Invalid ROTATING_LOGGING_PATH config.',
                           useniceprint=True)
         else:
             # Define a rotating file Handler which writes DEBUG messages
@@ -546,6 +608,7 @@ if __name__ == "__main__":
                 MY_CFG.ROTATING_LOGGING_PATH,
                 maxBytes=MY_CFG.ROTATING_LOGGING_FILE_SIZE,
                 backupCount=MY_CFG.ROTATING_LOGGING_FILE_COUNT)
+            # Update rotating logging level as per LOGGING_LEVEL from INI file
             ROTATING_LOGGING.setLevel(MY_CFG.ROTATING_LOGGING_LEVEL)
             ROTATING_LOGGING.setFormatter(logging.Formatter(
                 fmt='[' + str(UPLDR_K.Run) + ']' +
@@ -554,6 +617,13 @@ if __name__ == "__main__":
                 datefmt=UPLDR_K.TimeFormat))
             logging.getLogger().addHandler(ROTATING_LOGGING)
 
+            # Allow multiprocessing rotating logging into a single file
+            # CODING: may not work on Windows
+            if PARSED_ARGS.processes and PARSED_ARGS.processes > 0:
+                logging.debug('multiprocessing logging handler: Activating...')
+                multiprocessing_logging.install_mp_handler()
+                logging.info('multiprocessing logging handler: Activated.')
+
             logging.warning('----------- (V%s) Init Rotating '
                             '-----------(Log:%s)\n'
                             'Python version on this system: [%s]',
@@ -561,7 +631,8 @@ if __name__ == "__main__":
                             MY_CFG.LOGGING_LEVEL,
                             sys.version)
 
-    # Update console/rotating logging level as per LOGGING_LEVEL from INI file
+    # Update console logging level as per LOGGING_LEVEL from INI file
+    CONSOLE_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL)
     logging.warning('CONSOLE_LOGGING.setLevel=[%s] '
                     'ROTATING_LOGGING.setLevel/enabled?=[%s/%s] '
                     'MY_CFG.LOGGING_LEVEL=[%s]',
@@ -569,15 +640,12 @@ if __name__ == "__main__":
                     MY_CFG.ROTATING_LOGGING_LEVEL,
                     MY_CFG.ROTATING_LOGGING,
                     MY_CFG.LOGGING_LEVEL)
-    CONSOLE_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL)
-    if MY_CFG.ROTATING_LOGGING:
-        ROTATING_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL if
-                                  MY_CFG.LOGGING_LEVEL <= logging.DEBUG
-                                  else MY_CFG.LOGGING_LEVEL - 10)
 
-    if MY_CFG.LOGGING_LEVEL <= logging.INFO:
-        NPR.niceprint('Output for FLICKR Configuration:')
-        pprint.pprint(MY_CFG.FLICKR)
+    logging.info('Output for FLICKR Configuration:\n%s',
+                 pprint.pformat(MY_CFG.FLICKR))
+    NPR.niceprint('Output for FLICKR Configuration:\n{!s}'
+                  .format(pprint.pformat(MY_CFG.FLICKR)),
+                  verbosity=3)
 
     # Ensure that only one instance of this script is running
     try:
@@ -601,3 +669,5 @@ NPR.niceprint('----------- (V{!s}) End -----------(Log:{!s})'
 logging.warning('----------- (V%s) End -----------(Log:%s)',
                 UPLDR_K.Version,
                 MY_CFG.LOGGING_LEVEL)
+
+logging_close_handlers()

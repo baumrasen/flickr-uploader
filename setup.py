@@ -45,10 +45,6 @@ REQUIRED = [
 # What data_files are required for this applicaiton to be configured?
 DATA_FILES = [('etc', ['uploadr.ini', 'uploadr.cron'])]
 
-# Use with upload command for PYPI test url: test.pypi.org
-# PYPI_REPOSITORY = ''
-PYPI_REPOSITORY = '--repository-url https://test.pypi.org/legacy/'
-
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
 # Except, perhaps the License and Trove Classifiers!
@@ -74,7 +70,12 @@ class UploadCommand(Command):
     """Support setup.py upload."""
 
     description = 'Build and publish the package.'
-    user_options = []
+    # Show options for 'python setup.py upload --help'
+    user_options = [
+        ('testpypi',
+         None,
+         'Use test PyPI repository.'),
+    ]
 
     @staticmethod
     def bstatus(astr):
@@ -88,7 +89,7 @@ class UploadCommand(Command):
 
     def initialize_options(self):
         """initialize_options"""
-        pass
+        self.testpypi = False
 
     def finalize_options(self):
         """finalize_options"""
@@ -96,6 +97,14 @@ class UploadCommand(Command):
 
     def run(self):
         """run"""
+
+        # Use with upload command for PYPI test url: test.pypi.org
+        if self.testpypi:
+            self.pypi_repository = '--repository-url '\
+                'https://test.pypi.org/legacy/'
+        else:
+            self.pypi_repository = ''
+
         try:
             self.bstatus('Removing previous builds…')
             rmtree(os.path.join(HERE, 'dist'))
@@ -106,9 +115,10 @@ class UploadCommand(Command):
         os.system('{0} setup.py sdist bdist_wheel --universal'
                   .format(sys.executable))
 
-        self.bstatus('Uploading the package to PyPi via Twine...')
+        self.bstatus('Uploading the package to PyPi via Twine... to [%s]'
+                     % self.pypi_repository)
         # os.system('twine upload dist/*')
-        os.system('twine upload {!s} dist/*'.format(PYPI_REPOSITORY))
+        os.system('twine upload {!s} dist/*'.format(self.pypi_repository))
 
         # upload to GitHub disabled for now
         # self.bstatus('Pushing git tags...')
@@ -126,7 +136,7 @@ class InstallCfg(Command):
     """
 
     folder = None
-    # Show files to be coopied under 'python setup.py installcfg --help'
+    # Show files to be coppied under 'python setup.py installcfg --help'
     str_user_options = ''
     dcnt = 0
     for atuple in DATA_FILES:

@@ -5,8 +5,12 @@
 # For use with https://github.com/oPromessa/flickr-uploader
 #
 
-# Edit the following line to refer to the folder where uploadr.py is located:
-FOLDER=/full/path/to/apps/flickr-uploader
+# Edit the following line to refer to the folder where uploadr.py is located
+FOLDER="~/apps/flickr-uploader-2.8.6"
+
+# Compatible with different installation modes of uploadr.py: PIP or Mannual
+RUNCMD=`which uploadr.py`
+RUNCMD=${RUNCMD:=$FOLDER/uploadr.py}
 
 # I've used this setting to allow support for international characters in
 # folders and file names
@@ -20,8 +24,7 @@ export PYTHONPATH=~/apps/Python/lib/python2.7/site-packages
 echo Start
 date +"[%F %T] Start ----"
 # Set parameters as appropriate to your system
-# python2.7 $FOLDER/uploadr.py -v -b -p 10 >>$FOLDER/uploadr.out 2>&1
-python2.7 $FOLDER/uploadr.py -v -b -p 10 >>$FOLDER/uploadr.out 2>>$FOLDER/uploadr.err
+python2.7 $RUNCMD -v -b -p 10 >>$FOLDER/uploadr.out 2>>$FOLDER/uploadr.err
 echo Result: $?
 echo End
 date +"[%F %T] End ----"

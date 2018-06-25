@@ -4,21 +4,17 @@
 
 ## Pending improvements
 -----------------------
-* Done: Set PATHS based on a BASE Dir variable in INI file... all others to depend on this onw. How?
-  os.path.abspath(os.path.join(os.getcwd(), os.path.pardir, "etc", "uploadr.ini"))
-* Verbosity control in niceprint(..., verbosity=1): 0 = None, 1 = Some, 2 = More, 3 = mayhem
-* Old INI style with sysargv[0] file location fails if PATHs are specified
-  with sysargv[0] instead of getcwd. 
+
 * Dual logging_levels??? afer... multiprocessing_logging.install_mp_handler()
 * Test use of library https://github.com/jruere/multiprocessing-logging in Windows
 * Pypi test install:
   `pip2.7 install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple flickr-uploader --prefix=~/apps/Python`
   Use flickr-uploader==2.8.6a1 to install a specific version (alpha1 in this case)
-* python setup.py install: use --old-and-unmanageable option to data copy files.
+* setup.py install: use --old-and-unmanageable option to copy data files.
   `python2.7 setup.py install --prefix=~/apps/Python --old-and-unmanageable`
 * drop installcfg option? May still be usable to place files in a user specific folder
-* Reconfirm the uploading sequence when -u option is set which
-  affects isLoaded = False control variable
+* Reconfirm the uploading sequence when -u option is set which affects
+  isLoaded = False control variable
 * "Check for duplicates/wrong checksum" on upload may not be working fully!
 * Consider using python module exiftool?
 * Would be nice to update ALL tags on replacePhoto and not only the
@@ -32,20 +28,9 @@
   has changed while the actual checksum/album of the file is actually the same)
 * Consider new option --remove-ignored to address IGNORED_REGEX changes
   similar to how --remove-excluded handles changes in EXCLUDED_FOLDERS.
-* **[NOT FULLY TESTED YET]** You can try and run (Let me know if it works!)
-   * pip install flickr-uploader --prefix=~/apps/Python
-      * this will copy to 'PREFIX/etc' the data files uploadr.ini and uploadr.cron
-      * uploadr.ini PATH setting must be switched from argv (as sys.prefix
-      does not work!)...
-   * `python3 setup.py install --prefix=~/apps/Python
-   * `python3 setup.py installcfg --folder=~/apps/Python` to install config
-  From v2.7.4 uploadr.ini is searched from CWD (current working directory)
-  which allows to run upload.py form the --prefix/bin folder as it is
-  installed wiht "python setup.py install". Note that uploadr.ini definition
-  for DB_PATH, LOCK_PATH and TOKEN_CACHE has to be changed.
 * When QPS (Queries per second) are very high during a certain period, Flickr
   does not provide back reliable information. For instance, photos.search
-  may return X pics but not actually list them.
+  may return X pics but not actually list them. Some controls are applied:
   ```python
   # CODING
         if (len(searchIsUploaded.find('photos').findall('photo')) == 0):

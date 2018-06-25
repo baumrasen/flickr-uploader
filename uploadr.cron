@@ -5,7 +5,14 @@
 # For use with https://github.com/oPromessa/flickr-uploader
 #
 
-# Edit the following line to refer to the folder where uploadr.py is located
+# Python PREFIX Folder: Adjust as appropriate to your system
+PREFIX=~/apps/Python
+
+# Update PATH to include PREFIX/bin where uploadr.py is installed via PIP
+PATH=$PATH:${PREFIX}/bin
+
+# Edit line to to reference folder where uploadr.py is located when mannually
+# installed. Also where logs will be saved.
 FOLDER=~/apps/flickr-uploader-2.8.6
 
 # Compatible with different installation modes of uploadr.py: PIP or Mannual
@@ -18,7 +25,7 @@ export LC_ALL=en_US.utf8
 export LANG=en_US.utf8
 
 # Adjust as appropriate to your system
-export PYTHONPATH=~/apps/Python/lib/python2.7/site-packages
+export PYTHONPATH=${PREFIX}/lib/python2.7/site-packages
 
 # Some Logging...
 echo Start
@@ -29,9 +36,9 @@ echo Result: $?
 echo End
 date +"[%F %T] End ----"
 echo --------- uploadr.err
-tail -20 $FOLDER/uploadr.err
+[ -f $FOLDER/logs/uploadr.err ] && tail -20 $FOLDER/logs/uploadr.err
 echo --------- uploadr.out
-tail -100 $FOLDER/uploadr.out
+[ -f $FOLDER/logs/uploadr.out ] && tail -100 $FOLDER/logs/uploadr.out
 echo ---------
 echo ---------
 echo Further output on file: $FOLDER/uploadr.out and $FOLDER/uploadr.err

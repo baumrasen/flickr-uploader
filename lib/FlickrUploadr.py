@@ -73,90 +73,6 @@ NUTIME = time
 
 
 # -----------------------------------------------------------------------------
-# FileWithCallback class
-#
-# For use with flickrapi upload for showing callback progress information
-# Check function callback definition
-#
-class FileWithCallback(object):
-    """ FileWithCallback
-
-        For use with flickrapi upload for showing callback progress information
-        Check function callback definition
-    """
-
-    def __init__(self, filename, fn_callback, verbose_progress):
-        """ class FileWithCallback __init__
-        """
-        self.file = open(filename, 'rb')
-        self.callback = fn_callback
-        self.verbose_progress = verbose_progress
-        # the following attributes and methods are required
-        self.len = os.path.getsize(filename)
-        self.fileno = self.file.fileno
-        self.tell = self.file.tell
-
-    # -------------------------------------------------------------------------
-    # class FileWithCallback read
-    #
-    def read(self, size):
-        """ read
-
-            Read file to upload into Flickr with FileWithCallback
-        """
-        if self.callback:
-            self.callback(self.tell() * 100 // self.len, self.verbose_progress)
-        return self.file.read(size)
-
-
-# -----------------------------------------------------------------------------
-# callback
-#
-# For use with flickrapi upload for showing callback progress information
-# Check function FileWithCallback definition
-# Set verbose-progress True to display progress
-#
-def callback(progress, verbose_progress):
-    """ callback
-
-        Print progress % while uploading into Flickr.
-        Valid only if argument verbose_progress is True
-    """
-    # only print rounded percentages: 0, 10, 20, 30, up to 100
-    # adapt as required
-    # if (progress % 10) == 0:
-    # if verbose_progress option is set
-    if verbose_progress:
-        if (progress % 40) == 0:
-            print(progress)
-
-
-# -----------------------------------------------------------------------------
-# chunk
-#
-# Divides an iterable in slices/chunks of size size
-#
-def chunk(itlist, size):
-    """ chunk
-
-        Divides an iterable in slices/chunks of size size
-
-        >>> for a in chunk([ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 3):
-        ...     len(a)
-        3
-        3
-        3
-        1
-    """
-    itlist = iter(itlist)
-    # lambda: creates a returning expression function
-    # which returns slices
-    # iter, with the second argument () stops creating
-    # iterators when it reaches the end
-    return iter(lambda: tuple(islice(itlist, size)), ())
-
-
-# -----------------------------------------------------------------------------
 # md5checksum
 #
 def md5checksum(afilepath):
@@ -217,21 +133,6 @@ def set_name_from_file(afile, afiles_dir, afull_set_name):
                   NP.strunicodeout(asetname))
 
     return asetname
-
-
-# -------------------------------------------------------------------------
-# rate_5_callspersecond
-#
-@rate_limited.rate_limited(5)  # 5 calls per second
-def rate_5_callspersecond():
-    """ rate_5_callspersecond
-
-        Pace the calls rate within a specific function
-
-          n   = n calls per second  (ex. 3 means 3 calls per second)
-          1/n = n seconds per call (ex. 0.5 means 4 seconds in between calls)
-    """
-    logging.debug('rate_limit timestamp:[%s]', time.strftime('%T'))
 
 
 # -----------------------------------------------------------------------------
@@ -1249,9 +1150,9 @@ class Uploadr(object):
                     try:
                         uploadResp = self.nuflickr.upload(
                             filename=file,
-                            fileobj=FileWithCallback(
+                            fileobj=faw.FileWithCallback(
                                 file,
-                                callback,
+                                faw.callback,
                                 self.args.verbose_progress),
                             title=title_filename
                             if self.xcfg.FLICKR["title"] == ""
@@ -1670,8 +1571,8 @@ class Uploadr(object):
                     replace_resp = self.nuflickr.replace(
                         filename='dummy',
                         fileobj=photo,
-                        # fileobj=FileWithCallback(
-                        #     file, callback, self.args.verbose_progress),
+                        # fileobj=faw.FileWithCallback(
+                        #     file, faw.callback, self.args.verbose_progress),
                         photo_id=file_id
                     )
 
@@ -3276,7 +3177,7 @@ class Uploadr(object):
             NP.niceprocessedfiles(xcount, c_total, False)
 
             # Control pace (rate limit)of each proceess
-            rate_5_callspersecond()
+            rate_limited.rate_5_callspersecond()
 
     # -------------------------------------------------------------------------
     # addAlbumsMigrate

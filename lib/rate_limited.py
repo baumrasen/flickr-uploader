@@ -315,6 +315,21 @@ def retry(attempts=3, waittime=5, randtime=False):
 # retry_reportError(nargslist)
 
 
+# -------------------------------------------------------------------------
+# rate_5_callspersecond
+#
+@rate_limited(5)  # 5 calls per second
+def rate_5_callspersecond():
+    """ rate_5_callspersecond
+
+        Pace the calls rate within a specific function
+
+          n   = n calls per second  (ex. 3 means 3 calls per second)
+          1/n = n seconds per call (ex. 0.5 means 4 seconds in between calls)
+    """
+    logging.debug('rate_limit (5 calls/s) timestamp:[%s]', time.strftime('%T'))
+
+
 # -----------------------------------------------------------------------------
 # If called directly run doctests
 #

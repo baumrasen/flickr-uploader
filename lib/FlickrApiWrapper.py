@@ -369,6 +369,65 @@ def get_cached_token(api_key,
 
 
 # -----------------------------------------------------------------------------
+# FileWithCallback class
+#
+# For use with flickrapi upload for showing callback progress information
+# Check function callback definition
+#
+class FileWithCallback(object):
+    """ FileWithCallback
+
+        For use with flickrapi upload for showing callback progress information
+        Check function callback definition
+    """
+
+    def __init__(self, filename, fn_callback, verbose_progress):
+        """ class FileWithCallback __init__
+        """
+        self.file = open(filename, 'rb')
+        self.callback = fn_callback
+        self.verbose_progress = verbose_progress
+        # the following attributes and methods are required
+        self.len = os.path.getsize(filename)
+        self.fileno = self.file.fileno
+        self.tell = self.file.tell
+
+    # -------------------------------------------------------------------------
+    # class FileWithCallback read
+    #
+    def read(self, size):
+        """ read
+
+            Read file to upload into Flickr with FileWithCallback
+        """
+        if self.callback:
+            self.callback(self.tell() * 100 // self.len, self.verbose_progress)
+        return self.file.read(size)
+
+
+# -----------------------------------------------------------------------------
+# callback
+#
+# For use with flickrapi upload for showing callback progress information
+# Check function FileWithCallback definition
+# Set verbose-progress True to display progress
+#
+def callback(progress, verbose_progress):
+    """ callback
+
+        Print progress % while uploading into Flickr.
+        Valid only if argument verbose_progress is True
+    """
+    # only print rounded percentages: 0, 10, 20, 30, up to 100
+    # adapt as required
+    # if (progress % 10) == 0:
+    # if verbose_progress option is set
+    if verbose_progress:
+        if (progress % 40) == 0:
+            print(progress)
+
+
+# -----------------------------------------------------------------------------
 # If called directly run doctests
 #
 if __name__ == "__main__":

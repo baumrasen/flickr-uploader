@@ -156,11 +156,12 @@ def mprocessing(nprocs, lockdb, running, mutex, itemslist, a_fn, cur):
         """
             Divides an iterable in slices/chunks of size size
 
-            >>> for a in chunk([ 1, 2, 3, 4, 5, 6], 2):
+            >>> for a in chunk([ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 3):
             ...     len(a)
-            2
-            2
             3
+            3
+            3
+            1
         """
         iter_list = iter(iter_list)
         # lambda: creates a returning expression function

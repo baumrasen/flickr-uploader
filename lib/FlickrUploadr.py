@@ -41,7 +41,6 @@ except AttributeError:
     except ImportError:
         raise
 import pprint
-from itertools import islice
 import flickrapi
 # -----------------------------------------------------------------------------
 # Helper class and functions for UPLoaDeR Global Constants.

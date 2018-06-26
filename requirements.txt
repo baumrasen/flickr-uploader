@@ -8,3 +8,4 @@ dropbox
 portalocker
 # This is a neccessary dependency for portalocker on Windows
 # pypiwin32==223
+coveralls

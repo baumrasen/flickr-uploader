@@ -250,3 +250,8 @@ after_script:
 #  on:
 #    branch: master
 #    #repo: oPromessa/flickr-uploadr
+
+# -----------------------------------------------------------------------------
+# after_succes
+after_success:
+  - coveralls

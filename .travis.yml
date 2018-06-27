@@ -130,7 +130,7 @@ script:
 # Comaptible with Python 2.7 only!
   - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then cp flickr-deletr-master/tests/deletr.ini flickr-deletr-master/deletr.ini; fi
   - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then cp token/oauth-tokens.sqlite flickr-deletr-master/token/oauth-tokens.sqlite; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then ./flickr-deletr-master/delete.py; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then python ./flickr-deletr-master/delete.py; fi
 
 # First RUN -------------------------------------------------------------------
   # stdout to file, stderr to file

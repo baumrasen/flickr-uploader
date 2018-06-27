@@ -470,7 +470,7 @@ def set_name_from_file(afile, afiles_dir, afull_set_name):
     """
 
     assert afile, NPR.niceassert('[{!s}] is empty!'
-                                 .format(NP.strunicodeout(afile)))
+                                 .format(NPR.strunicodeout(afile)))
 
     logging.debug('set_name_from_file in: '
                   'afile:[%s] afiles_dir=[%s] afull_set_name:[%s]',

@@ -26,7 +26,6 @@ import os
 import os.path
 import time
 import sqlite3 as lite
-import hashlib
 import subprocess
 import xml
 # Prevents error "AttributeError: 'module' object has no attribute 'etree'"
@@ -69,69 +68,6 @@ UPLDR_K = KonstantsClass.Konstants()
 NP = NicePrint.NicePrint()
 NUTIME = time
 # -----------------------------------------------------------------------------
-
-
-# -----------------------------------------------------------------------------
-# md5checksum
-#
-def md5checksum(afilepath):
-    """ md5checksum
-
-        Calculates the MD5 checksum for afilepath
-    """
-    with open(afilepath, 'rb') as filehandler:
-        calc_md5 = hashlib.md5()
-        while True:
-            data = filehandler.read(8192)
-            if not data:
-                break
-            calc_md5.update(data)
-        return calc_md5.hexdigest()
-
-
-# -------------------------------------------------------------------------
-# set_name_from_file
-#
-def set_name_from_file(afile, afiles_dir, afull_set_name):
-    """set_name_from_file
-
-       Return setname for a file path depending on FULL_SET_NAME True/False
-       Example:
-       File to upload: /home/user/media/2014/05/05/photo.jpg
-            FILES_DIR: /home/user/media
-        FULL_SET_NAME:
-               False=> 05
-                True=> 2014/05/05
-
-        >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
-        '/some/photos', False)
-        'Album'
-        >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
-        '/some/photos', True)
-        'Parent/Album'
-    """
-
-    assert afile, NP.niceassert('[{!s}] is empty!'
-                                .format(NP.strunicodeout(afile)))
-
-    logging.debug('set_name_from_file in: '
-                  'afile:[%s] afiles_dir=[%s] afull_set_name:[%s]',
-                  NP.strunicodeout(afile),
-                  NP.strunicodeout(afiles_dir),
-                  NP.strunicodeout(afull_set_name))
-    if afull_set_name:
-        asetname = os.path.relpath(os.path.dirname(afile), afiles_dir)
-    else:
-        _, asetname = os.path.split(os.path.dirname(afile))
-    logging.debug('set_name_from_file out: '
-                  'afile:[%s] afiles_dir=[%s] afull_set_name:[%s]'
-                  ' asetname:[%s]',
-                  NP.strunicodeout(afile),
-                  NP.strunicodeout(afiles_dir),
-                  NP.strunicodeout(afull_set_name),
-                  NP.strunicodeout(asetname))
-
-    return asetname
 
 
 # -----------------------------------------------------------------------------
@@ -980,9 +916,9 @@ class Uploadr(object):
                      .format(NP.strunicodeout(file)),
                      verbosity=1)
 
-        setname = set_name_from_file(file,
-                                     self.xcfg.FILES_DIR,
-                                     self.xcfg.FULL_SET_NAME)
+        setname = faw.set_name_from_file(file,
+                                         self.xcfg.FILES_DIR,
+                                         self.xcfg.FULL_SET_NAME)
 
         success = False
         con = lite.connect(self.xcfg.DB_PATH)
@@ -1027,7 +963,7 @@ class Uploadr(object):
                 isNoSet = None
                 logging.info('not_is_already_uploaded:[%s]', isLoaded)
             else:
-                file_checksum = md5checksum(file)
+                file_checksum = faw.md5checksum(file)
                 isLoaded, isCount, isfile_id, isNoSet = \
                     self.is_already_uploaded(file,
                                              file_checksum,
@@ -1052,7 +988,7 @@ class Uploadr(object):
             # A) File loaded. Not recorded on DB. Update local DB.
             if isLoaded and row is None:
                 if file_checksum is None:
-                    file_checksum = md5checksum(file)
+                    file_checksum = faw.md5checksum(file)
 
                 # Insert into DB files
                 logging.warning(' Already loaded:[%s] '
@@ -1083,7 +1019,7 @@ class Uploadr(object):
                                 NP.strunicodeout(setname))
 
                 if file_checksum is None:
-                    file_checksum = md5checksum(file)
+                    file_checksum = faw.md5checksum(file)
 
                 # Title Handling
                 if self.args.title:
@@ -1472,7 +1408,7 @@ class Uploadr(object):
                         # last_modified time of file by by calling replacePhoto
 
                         if file_checksum is None:
-                            file_checksum = md5checksum(file)
+                            file_checksum = faw.md5checksum(file)
                         if file_checksum != str(row[4]):
                             self.replacePhoto(lock, file, row[1], row[4],
                                               file_checksum, last_modified,
@@ -1884,15 +1820,15 @@ class Uploadr(object):
         return success
 
     # -------------------------------------------------------------------------
-    # logSetCreation
+    # log_set_creation
     #
     #   Creates on flickrdb local database a SetName(Album)
     #
-    def logSetCreation(self, lock,
-                       set_id, setname,
-                       primary_photo_id,
-                       cur, con):
-        """ logSetCreation
+    def log_set_creation(self, lock,
+                         set_id, setname,
+                         primary_photo_id,
+                         cur, con):
+        """ log_set_creation
 
         Creates on flickrdb local database a SetName(Album)
         with Primary photo Id.
@@ -1987,9 +1923,9 @@ class Uploadr(object):
             for filepic in sfiles:
                 # filepic[1] = path for the file from table files
                 # filepic[2] = set_id from files table
-                setname = set_name_from_file(filepic[1],
-                                             self.xcfg.FILES_DIR,
-                                             self.xcfg.FULL_SET_NAME)
+                setname = faw.set_name_from_file(filepic[1],
+                                                 self.xcfg.FILES_DIR,
+                                                 self.xcfg.FULL_SET_NAME)
                 aset = None
                 try:
                     # Acquire DBlock if in multiprocessing mode
@@ -2069,7 +2005,7 @@ class Uploadr(object):
 
         con = lite.connect(self.xcfg.DB_PATH)
         con.text_factory = str
-        con.create_function("getSet", 3, set_name_from_file)
+        con.create_function("getSet", 3, faw.set_name_from_file)
         # Enable traceback return from create_function.
         lite.enable_callback_tracebacks(True)
 
@@ -2151,9 +2087,9 @@ class Uploadr(object):
                 for filepic in files:
                     # filepic[1] = path for the file from table files
                     # filepic[2] = set_id from files table
-                    setname = set_name_from_file(filepic[1],
-                                                 self.xcfg.FILES_DIR,
-                                                 self.xcfg.FULL_SET_NAME)
+                    setname = faw.set_name_from_file(filepic[1],
+                                                     self.xcfg.FILES_DIR,
+                                                     self.xcfg.FULL_SET_NAME)
 
                     cur.execute('SELECT set_id, name '
                                 'FROM sets WHERE name = ?',
@@ -2229,9 +2165,9 @@ class Uploadr(object):
         elif not get_success and get_errcode == 1:
             # Error: 1: Photoset not found
             NP.niceprint('Photoset not found, creating new set...')
-            setname = set_name_from_file(file[1],
-                                         self.xcfg.FILES_DIR,
-                                         self.xcfg.FULL_SET_NAME)
+            setname = faw.set_name_from_file(file[1],
+                                             self.xcfg.FILES_DIR,
+                                             self.xcfg.FULL_SET_NAME)
             # CODING: cur vs bcur! Check!
             self.createSet(lock, setname, file[0], cur, con)
         elif not get_success and get_errcode == 3:
@@ -2280,7 +2216,7 @@ class Uploadr(object):
         """ createSet
 
         Creates an Album in Flickr.
-        Calls logSetCreation to create Album on local database.
+        Calls log_set_creation to create Album on local database.
         """
 
         logging.info('   Creating set:[%s]', NP.strunicodeout(setname))
@@ -2300,12 +2236,12 @@ class Uploadr(object):
         if get_success and get_errcode == 0:
             logging.warning('get_result["photoset"]["id"]:[%s]',
                             get_result.find('photoset').attrib['id'])
-            self.logSetCreation(lock,
-                                get_result.find('photoset').attrib['id'],
-                                setname,
-                                primary_photo_id,
-                                cur,
-                                con)
+            self.log_set_creation(lock,
+                                  get_result.find('photoset').attrib['id'],
+                                  setname,
+                                  primary_photo_id,
+                                  cur,
+                                  con)
             return get_result.find('photoset').attrib['id']
         elif not get_success and get_errcode == 2:
             # Add to db the file NOT uploaded
@@ -2516,14 +2452,14 @@ class Uploadr(object):
             con.close()
 
     # -------------------------------------------------------------------------
-    # removeUselessSetsTable
+    # remove_useless_sets_table
     #
     # Method to clean unused sets (Sets are Albums)
     #
-    def removeUselessSetsTable(self):
-        """ removeUselessSetsTable
+    def remove_useless_sets_table(self):
+        """ remove_useless_sets_table
 
-        Remove unused Sets (Sets not listed on Flickr) form local DB
+        Remove unused Sets (Sets not listed on Flickr) from local DB
         """
         NP.niceprint('*****Removing empty Sets from DB*****')
         if self.args.dry_run:
@@ -2536,8 +2472,6 @@ class Uploadr(object):
 
             try:
                 unusedsets = None
-                # Acquire DB lock if running in multiprocessing mode
-                # mp.use_lock( lock, True, self.args.processes)
                 cur.execute("SELECT set_id, name FROM sets WHERE set_id NOT IN\
                             (SELECT set_id FROM files)")
                 unusedsets = cur.fetchall()
@@ -2549,8 +2483,6 @@ class Uploadr(object):
                              .format(err.args[0]),
                              useniceprint=True)
             finally:
-                # Release DB lock if running in multiprocessing mode
-                # mp.use_lock( lock, False, self.args.processes)
                 pass
 
             for row in unusedsets:
@@ -2560,8 +2492,6 @@ class Uploadr(object):
                              verbosity=1)
 
                 try:
-                    # Acquire DB lock if running in multiprocessing mode
-                    # mp.use_lock( lock, True, self.args.processes)
                     cur.execute("DELETE FROM sets WHERE set_id = ?", (row[0],))
                 except lite.Error as err:
                     NP.niceerror(caught=True,
@@ -2571,8 +2501,6 @@ class Uploadr(object):
                                  .format(err.args[0]),
                                  useniceprint=True)
                 finally:
-                    # Release DB lock if running in multiprocessing mode
-                    # mp.use_lock( lock, False, self.args.processes)
                     pass
 
             con.commit()
@@ -3122,9 +3050,9 @@ class Uploadr(object):
                          fname='addAlbumMigrate')
 
             # row[1] = path for the file from table files
-            setname = set_name_from_file(f[1],
-                                         self.xcfg.FILES_DIR,
-                                         self.xcfg.FULL_SET_NAME)
+            setname = faw.set_name_from_file(f[1],
+                                             self.xcfg.FILES_DIR,
+                                             self.xcfg.FULL_SET_NAME)
             tfind, tid = self.photos_find_tag(
                 photo_id=f[0],
                 intag='album:{}'.format(f[2]
@@ -3260,9 +3188,9 @@ class Uploadr(object):
                                  fname='addAlbumMigrate')
 
                     # row[1] = path for the file from table files
-                    setname = set_name_from_file(row[1],
-                                                 self.xcfg.FILES_DIR,
-                                                 self.xcfg.FULL_SET_NAME)
+                    setname = faw.set_name_from_file(row[1],
+                                                     self.xcfg.FILES_DIR,
+                                                     self.xcfg.FULL_SET_NAME)
 
                     tfind, tid = self.photos_find_tag(
                         photo_id=row[0],

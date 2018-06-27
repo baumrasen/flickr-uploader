@@ -23,6 +23,7 @@ from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 import sys
 import os.path
 import logging
+import hashlib
 try:
     import httplib as httplib      # Python 2
 except ImportError:
@@ -426,6 +427,69 @@ def callback(progress, verbose_progress):
     if verbose_progress:
         if (progress % 40) == 0:
             print(progress)
+
+
+# -----------------------------------------------------------------------------
+# md5checksum
+#
+def md5checksum(afilepath):
+    """ md5checksum
+
+        Calculates the MD5 checksum for afilepath
+    """
+    with open(afilepath, 'rb') as filehandler:
+        calc_md5 = hashlib.md5()
+        while True:
+            data = filehandler.read(8192)
+            if not data:
+                break
+            calc_md5.update(data)
+        return calc_md5.hexdigest()
+
+
+# -------------------------------------------------------------------------
+# set_name_from_file
+#
+def set_name_from_file(afile, afiles_dir, afull_set_name):
+    """set_name_from_file
+
+       Return setname for a file path depending on FULL_SET_NAME True/False
+       Example:
+       File to upload: /home/user/media/2014/05/05/photo.jpg
+            FILES_DIR: /home/user/media
+        FULL_SET_NAME:
+               False=> 05
+                True=> 2014/05/05
+
+        >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
+        '/some/photos', False)
+        'Album'
+        >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
+        '/some/photos', True)
+        'Parent/Album'
+    """
+
+    assert afile, NPR.niceassert('[{!s}] is empty!'
+                                 .format(NP.strunicodeout(afile)))
+
+    logging.debug('set_name_from_file in: '
+                  'afile:[%s] afiles_dir=[%s] afull_set_name:[%s]',
+                  NPR.strunicodeout(afile),
+                  NPR.strunicodeout(afiles_dir),
+                  NPR.strunicodeout(afull_set_name))
+    if afull_set_name:
+        asetname = os.path.relpath(os.path.dirname(afile), afiles_dir)
+    else:
+        _, asetname = os.path.split(os.path.dirname(afile))
+    logging.debug('set_name_from_file out: '
+                  'afile:[%s] afiles_dir=[%s] afull_set_name:[%s]'
+                  ' asetname:[%s]',
+                  NPR.strunicodeout(afile),
+                  NPR.strunicodeout(afiles_dir),
+                  NPR.strunicodeout(afull_set_name),
+                  NPR.strunicodeout(asetname))
+
+    return asetname
 
 
 # -----------------------------------------------------------------------------

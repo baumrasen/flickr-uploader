@@ -1,6 +1,6 @@
 # flickr-uploader
 -----------------
-by oPromessa, 2017, V2.8.6 [![Master Build Status](https://travis-ci.org/oPromessa/flickr-uploader.svg?branch=master)](https://travis-ci.org/oPromessa/flickr-uploader)
+by oPromessa, 2017, V2.8.6 [![Master Build Status](https://travis-ci.org/oPromessa/flickr-uploader.svg?branch=master)](https://travis-ci.org/oPromessa/flickr-uploader) [![Coverage Status](https://coveralls.io/repos/github/oPromessa/flickr-uploader/badge.svg)](https://coveralls.io/github/oPromessa/flickr-uploader)
 * Published on [https://github.com/oPromessa/flickr-uploader/](https://github.com/oPromessa/flickr-uploader/)
 
 ## Description

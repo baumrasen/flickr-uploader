@@ -3371,13 +3371,14 @@ class Uploadr(object):
                      'longer exist!\n'
                      'Photos count:\n'
                      '                Local:[{!s:>6s}]\n'
-                     '               Flickr:[{!s:>6s}]\n'
+                     '               Flickr:[{!s:>6s}]\t[{!s:>6s}]\n'
                      'Not in sets on Flickr:[{!s:>6s}]'
                      .format(InitialFoundFiles,
                              bad_files_count,
                              InitialFoundFiles - bad_files_count,
                              countlocal,
                              countflickr,
+                             countflickr - countlocal,
                              countnotinsets))
 
         # List pics not in sets (if within a parameter) -----------------------

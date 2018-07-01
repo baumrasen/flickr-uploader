@@ -3378,7 +3378,7 @@ class Uploadr(object):
                              InitialFoundFiles - bad_files_count,
                              countlocal,
                              countflickr,
-                             countflickr - countlocal,
+                             int(countflickr) - int(countlocal),
                              countnotinsets))
 
         # List pics not in sets (if within a parameter) -----------------------

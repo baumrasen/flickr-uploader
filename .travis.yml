@@ -116,15 +116,15 @@ before_script:
 # run script for tests
 script:
 # pytest --flakes (Code analysis)
-  - pytest -v --flakes
+  - if [[ $TestScenario == Help ]]; then pytest -v --flakes; fi
 # pytest
-  - pytest -v
+  - if [[ $TestScenario == Help ]]; then pytest -v; fi
 # pytest --doctest-modules
-  - pytest --doctest-modules
+  - if [[ $TestScenario == Help ]]; then pytest --doctest-modules; fi
 # flake8
-  - flake8
+  - if [[ $TestScenario == Help ]]; then flake8; fi
 # unittests
-  - python tests/TestModules.py
+  - if [[ $TestScenario == Help ]]; then python tests/TestModules.py; fi
 
 # DELETE RUN: DeleteAllFromFlickr ==1 -----------------------------------------
 # Comaptible with Python 2.7 only!

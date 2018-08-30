@@ -142,7 +142,7 @@ def rate_limited(max_per_second):
         last_time.acquire()
         if last_time.get_last_time_called() == 0:
             last_time.set_last_time_called()
-        # last_time.debug('DECORATE')
+        last_time.debug('DECORATE')
         last_time.release()
 
         @wraps(func)
@@ -157,8 +157,14 @@ def rate_limited(max_per_second):
                          'Max_per_Second:[%s]',
                          func.__name__, max_per_second)
 
+            print('Issue.73: [on try acquire...]')
+            NPR.niceprint('Issue.73: [on try acquire...]')
+            acquired = False
             try:
-                last_time.acquire()
+                if last_time.acquire():
+                    NPR.niceprint('Issue.73: [try acquire...True] ')
+                    print('Issue.73: [on try acquire...True] ')
+                    acquired = True
                 last_time.add_cnt()
                 xfrom = time.time()
 
@@ -192,6 +198,8 @@ def rate_limited(max_per_second):
                 last_time.debug('NEXT')
 
             except Exception as ex:
+                print('Issue.73: [on except...]')
+                NPR.niceprint('Issue.73: [on except...]')
                 NPR.niceerror(caught=True,
                               caughtprefix='+++Rate',
                               caughtcode='001',
@@ -203,7 +211,13 @@ def rate_limited(max_per_second):
                               exceptsysinfo=True)
                 raise
             finally:
-                last_time.release()
+                print('Issue.73: [on finally release...]')
+                NPR.niceprint('Issue.73: [on finally release...]')
+                if acquired:
+                    print('Issue.73: [acquired is True...]')
+                    NPR.niceprint('Issue.73: [acquired is True...]')
+                    last_time.release()
+                    acquired = False
             return ret
 
         return rate_limited_function

@@ -75,14 +75,14 @@ class LastTime:
             acquired = self.ratelock.acquire()
         except Exception as ex:
             NPR.niceerror(caught=True,
-               caughtprefix='+++LastTime',
-               caughtcode='001',
-               caughtmsg='Exception on LastTime class: acquire',
-               exceptuse=True,
-               # exceptCode=ex.code,
-               exceptmsg=ex,
-               useniceprint=False,
-               exceptsysinfo=True)
+                          caughtprefix='+++LastTime',
+                          caughtcode='001',
+                          caughtmsg='Exception on LastTime class: acquire',
+                          exceptuse=True,
+                          # exceptCode=ex.code,
+                          exceptmsg=ex,
+                          useniceprint=False,
+                          exceptsysinfo=True)
             raise
         return acquired
 
@@ -95,14 +95,14 @@ class LastTime:
             self.ratelock.release()
         except Exception as ex:
             NPR.niceerror(caught=True,
-               caughtprefix='+++LastTime',
-               caughtcode='002',
-               caughtmsg='Exception on LastTime class: release',
-               exceptuse=True,
-               # exceptCode=ex.code,
-               exceptmsg=ex,
-               useniceprint=False,
-               exceptsysinfo=True)
+                          caughtprefix='+++LastTime',
+                          caughtcode='002',
+                          caughtmsg='Exception on LastTime class: release',
+                          exceptuse=True,
+                          # exceptCode=ex.code,
+                          exceptmsg=ex,
+                          useniceprint=False,
+                          exceptsysinfo=True)
             raise
 
     def set_last_time_called(self):

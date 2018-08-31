@@ -68,8 +68,8 @@ class LastTime:
     def acquire(self):
         """ acquire
         """
-        # Issue#73
-        NPR.niceprint('#73: [on acquire...]')
+
+        logging.debug('LastTime: [on acquire...]')
         acquired = False
         try:
             acquired = self.ratelock.acquire()
@@ -89,8 +89,8 @@ class LastTime:
     def release(self):
         """ release
         """
-        # Issue#73
-        NPR.niceprint('#73: [on release...]')
+
+        logging.debug('LastTime: [on release...]')
         try:
             self.ratelock.release()
         except Exception as ex:
@@ -225,8 +225,6 @@ def rate_limited(max_per_second):
                 last_time.debug('NEXT')
 
             except Exception as ex:
-                # Issue#73
-                NPR.niceprint('#73: [except acquired:{!s}]'.format(acquired))
                 NPR.niceerror(caught=True,
                               caughtprefix='+++Rate',
                               caughtcode='001',
@@ -238,13 +236,11 @@ def rate_limited(max_per_second):
                               exceptsysinfo=True)
                 raise
             finally:
-                # Issue#73
-                NPR.niceprint('#73: [finally acquired:{!s}]'.format(acquired))
+                logging.debug('LastTime: [finally acquired:{!s}]', acquired)
                 if acquired:
                     last_time.release()
                     acquired = False
-                    NPR.niceprint('#73: [relesed acquired:{!s}]'
-                                  .format(acquired))
+                    logging.debug('LastTime: [released acquired:%s]', acquired)
             return ret
 
         return rate_limited_function
@@ -368,8 +364,7 @@ def rate_5_callspersecond():
           n   = n calls per second  (ex. 3 means 3 calls per second)
           1/n = n seconds per call (ex. 0.5 means 4 seconds in between calls)
     """
-    # Issue#73 debug -> info
-    logging.info('rate_limit (5 calls/s) timestamp:[%s]', time.strftime('%T'))
+    logging.debug('rate_limit (5 calls/s) timestamp:[%s]', time.strftime('%T'))
 
 
 # -----------------------------------------------------------------------------

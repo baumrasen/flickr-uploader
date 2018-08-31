@@ -191,7 +191,7 @@ def rate_limited(max_per_second):
                          func.__name__, max_per_second)
 
             try:
-                acquired = last_time.acquire():
+                acquired = last_time.acquire()
                 last_time.add_cnt()
                 xfrom = time.time()
 

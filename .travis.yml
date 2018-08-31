@@ -141,7 +141,7 @@ script:
 # First RUN -------------------------------------------------------------------
   # stdout to LOG file, stderr to LST file
   - travis_wait coverage run -a --concurrency multiprocessing `which uploadr.py` $VerboseVar $UploadrOptions > $NOHUPLOGFILE 2> $NOHUPLSTFILE
-  - tail -$TAIL_LINES $NOHUPLOGFILE $NOHUPLSTFILE
+  - tail -n $TAIL_LINES $NOHUPLOGFILE $NOHUPLSTFILE
 
   - coverage combine
   - coverage html
@@ -184,7 +184,7 @@ script:
   - if [[ $TestScenario == DryRunNoToken ]]; then travis_wait coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> $NOHUPLOGFILE 2>> $NOHUPLSTFILE < /home/travis/build/oPromessa/flickr-uploader/tests/verifiercode.txt || echo ok; fi
   - if [[ $TestScenario != Old273INI && $TestScenario != DryRunNoToken ]]; then travis_wait coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> $NOHUPLOGFILE 2>> $NOHUPLSTFILE; fi
 
-  - tail -$TAIL_LINES $NOHUPLOGFILE $NOHUPLSTFILE
+  - tail -n $TAIL_LINES $NOHUPLOGFILE $NOHUPLSTFILE
 
   - coverage combine
   - sleep $WAIT_TIME
@@ -211,7 +211,7 @@ after_failure:
   - python tests/drop.py --token $DROPBOX_TOKEN dbrun2.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   - python tests/drop.py --token $DROPBOX_TOKEN uploadr.err $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
 
-  - tail -$TAIL_LINES $NOHUPLSTFILE
+  - tail -n $TAIL_LINES $NOHUPLSTFILE
 
 # -----------------------------------------------------------------------------
 # after_script

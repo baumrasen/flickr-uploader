@@ -68,12 +68,42 @@ class LastTime:
     def acquire(self):
         """ acquire
         """
-        self.ratelock.acquire()
+        # Issue#73
+        NPR.niceprint('#73: [on acquire...]')
+        acquired = False
+        try:
+            acquired = self.ratelock.acquire()
+        except Exception as ex:
+            NPR.niceerror(caught=True,
+              caughtprefix='+++LastTime',
+              caughtcode='001',
+              caughtmsg='Exception on LastTime class: acquire',
+              exceptuse=True,
+              # exceptCode=ex.code,
+              exceptmsg=ex,
+              useniceprint=False,
+              exceptsysinfo=True)
+            raise
+        return acquired
 
     def release(self):
         """ release
         """
-        self.ratelock.release()
+        # Issue#73
+        NPR.niceprint('#73: [on release...]')
+        try:
+            self.ratelock.release()
+        except Exception as ex:
+            NPR.niceerror(caught=True,
+              caughtprefix='+++LastTime',
+              caughtcode='002',
+              caughtmsg='Exception on LastTime class: release',
+              exceptuse=True,
+              # exceptCode=ex.code,
+              exceptmsg=ex,
+              useniceprint=False,
+              exceptsysinfo=True)
+            raise
 
     def set_last_time_called(self):
         """ set_last_time_called
@@ -139,11 +169,14 @@ def rate_limited(max_per_second):
     def decorate(func):
         """ decorate
         """
-        last_time.acquire()
+
+        acquired = last_time.acquire()
         if last_time.get_last_time_called() == 0:
             last_time.set_last_time_called()
         # last_time.debug('DECORATE')
-        last_time.release()
+        if acquired:
+            last_time.release()
+            acquired = False
 
         @wraps(func)
         def rate_limited_function(*args, **kwargs):
@@ -157,12 +190,8 @@ def rate_limited(max_per_second):
                          'Max_per_Second:[%s]',
                          func.__name__, max_per_second)
 
-            NPR.niceprint('Issue.73: [on try acquire...]')
-            acquired = False
             try:
-                if last_time.acquire():
-                    NPR.niceprint('Issue.73: [try acquire...True] ')
-                    acquired = True
+                acquired = last_time.acquire():
                 last_time.add_cnt()
                 xfrom = time.time()
 
@@ -196,7 +225,8 @@ def rate_limited(max_per_second):
                 last_time.debug('NEXT')
 
             except Exception as ex:
-                NPR.niceprint('Issue.73: [on except...]')
+                # Issue#73
+                NPR.niceprint('#73: [except acquired:{!s}]'.format(acquired))
                 NPR.niceerror(caught=True,
                               caughtprefix='+++Rate',
                               caughtcode='001',
@@ -208,11 +238,13 @@ def rate_limited(max_per_second):
                               exceptsysinfo=True)
                 raise
             finally:
-                NPR.niceprint('Issue.73: [on finally release...]')
+                # Issue#73
+                NPR.niceprint('#73: [finally acquired:{!s}]'.format(acquired))
                 if acquired:
-                    NPR.niceprint('Issue.73: [acquired is True...]')
                     last_time.release()
                     acquired = False
+                    NPR.niceprint('#73: [relesed acquired:{!s}]'
+                                  .format(acquired))
             return ret
 
         return rate_limited_function
@@ -336,7 +368,8 @@ def rate_5_callspersecond():
           n   = n calls per second  (ex. 3 means 3 calls per second)
           1/n = n seconds per call (ex. 0.5 means 4 seconds in between calls)
     """
-    logging.debug('rate_limit (5 calls/s) timestamp:[%s]', time.strftime('%T'))
+    # Issue#73 debug -> info
+    logging.info('rate_limit (5 calls/s) timestamp:[%s]', time.strftime('%T'))
 
 
 # -----------------------------------------------------------------------------

@@ -19,7 +19,8 @@ language: python
 python:
   - "2.7"
   - "3.6"
-  - "3.7"
+  - "3.7-dev"  
+#  - "3.7"
 #  - "nightly"
 
 # -----------------------------------------------------------------------------
@@ -181,7 +182,7 @@ script:
   - if [[ $TestScenario == Old273INI ]]; then travis_wait coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst; fi
   - if [[ $TestScenario == DryRunNoToken ]]; then travis_wait coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst < /home/travis/build/oPromessa/flickr-uploader/tests/verifiercode.txt || echo ok; fi
   #issue.73:- if [[ $TestScenario != Old273INI && $TestScenario != DryRunNoToken ]]; then travis_wait coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst; fi
-  - if [[ $TestScenario != Old273INI && $TestScenario != DryRunNoToken ]]; then travis_wait coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions 2>&1 | tee -a /home/travis/build/oPromessa/flickr-uploader/nohup.lst; fi
+  - if [[ $TestScenario != Old273INI && $TestScenario != DryRunNoToken ]]; then travis_wait coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions ; fi
 
   #- coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> /home/travis/build/oPromessa/flickr-uploader/nohup.log 2>> /home/travis/build/oPromessa/flickr-uploader/nohup.lst
   - tail -$TAIL_LINES /home/travis/build/oPromessa/flickr-uploader/nohup.log

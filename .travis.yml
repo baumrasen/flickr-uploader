@@ -172,11 +172,11 @@ script:
   - if [[ $TestScenario == RemoveReplace ]]; then cp "./tests/Test Photo Library/ReplaceTest/file_35.jpg.ForReplace" "./tests/Test Photo Library/Pics.Replaced/file_35.jpg"; fi
   - if [[ $TestScenario == RemoveReplace ]]; then cp "./tests/Test Photo Library/ReplaceTest/Video03.ToReplace.MP4.ForReplace" "./tests/Test Photo Library/Pics.Replaced/Video03.ToReplace.MP4"; fi
 
-  - if [[ $TestScenario == ExcludedFolders ]]; then cp ./tests/uploadr_excluded.ini ./uploadr.ini; cp ./tests/uploadr_excluded.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini; fi
+  - if [[ $TestScenario == ExcludedFolders ]]; then cp ./tests/uploadr_excluded.ini ./uploadr.ini; cp ./tests/uploadr_excluded.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini || cp ./tests/uploadr_excluded.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/etc/uploadr.ini; fi
 
-  - if [[ $TestScenario == Old273INI ]]; then cp ./tests/uploadr_excluded_2.7.3.ini ./uploadr.ini; cp ./tests/uploadr_excluded_2.7.3.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini; fi
+  - if [[ $TestScenario == Old273INI ]]; then cp ./tests/uploadr_excluded_2.7.3.ini ./uploadr.ini; cp ./tests/uploadr_excluded_2.7.3.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini || cp ./tests/uploadr_excluded_2.7.3.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/etc/uploadr.ini; fi
 
-  - if [[ $TestScenario == NoVerbose ]]; then cp ./tests/uploadr_NoVerbose.ini ./uploadr.ini; cp ./tests/uploadr_NoVerbose.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini; fi
+  - if [[ $TestScenario == NoVerbose ]]; then cp ./tests/uploadr_NoVerbose.ini ./uploadr.ini; cp ./tests/uploadr_NoVerbose.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini || cp ./tests/uploadr_NoVerbose.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/etc/uploadr.ini; fi
 
   # Actual RUN
   # Scenario Old273INI: run ./uploadr.py instead of `which uploadr.py`

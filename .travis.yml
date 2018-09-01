@@ -127,11 +127,15 @@ script:
 #     pytest --doctest-modules
 #     flake8
 #     unittests
-  - if [[ $TestScenario == Help ]]; then pytest -v --flakes; fi
-  - if [[ $TestScenario == Help ]]; then pytest -v; fi
-  - if [[ $TestScenario == Help ]]; then pytest --doctest-modules; fi
-  - if [[ $TestScenario == Help ]]; then flake8; fi
-  - if [[ $TestScenario == Help ]]; then python tests/TestModules.py; fi
+  - |
+    if [[ $TestScenario == Help ]]
+    then
+      pytest -v --flakes
+      pytest -v
+      pytest --doctest-modules
+      flake8
+      python tests/TestModules.py
+    fi
 
 # DELETE RUN: DeleteAllFromFlickr == 1 (Python 2.7 compatible only)------------
   - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then cp flickr-deletr-master/tests/deletr.ini flickr-deletr-master/deletr.ini; fi

@@ -138,9 +138,13 @@ script:
     fi
 
 # DELETE RUN: DeleteAllFromFlickr == 1 (Python 2.7 compatible only)------------
-  - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then cp flickr-deletr-master/tests/deletr.ini flickr-deletr-master/deletr.ini; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then cp token/oauth-tokens.sqlite flickr-deletr-master/token/oauth-tokens.sqlite; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]; then coverage run -a --concurrency multiprocessing ./flickr-deletr-master/delete.py; fi
+  - |
+    if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]
+    then
+      cp flickr-deletr-master/tests/deletr.ini flickr-deletr-master/deletr.ini
+      cp token/oauth-tokens.sqlite flickr-deletr-master/token/oauth-tokens.sqlite
+      coverage run -a --concurrency multiprocessing ./flickr-deletr-master/delete.py
+    fi
 
 # First RUN -------------------------------------------------------------------
   # stdout to LOG file, stderr to LST file
@@ -152,12 +156,17 @@ script:
   - tar czf coverage_html.tar.gz htmlcov || echo ok
 
 # DB OUTPUT for First RUN -----------------------------------------------------
-  - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb "SELECT *, datetime( last_modified, 'unixepoch', 'localtime') FROM files ORDER BY path;"; fi
-  - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT * FROM badfiles ORDER BY path;'; fi
-  - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT * FROM sets ORDER BY name;'; fi
-  - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;'; fi
-  - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;' > dbrun1.log; fi
-  - if [[ $TestScenario != Help ]]; then sqlite3 flickrdb 'SELECT sets.set_id, sets.name, files_id, path FROM sets, files WHERE sets.set_id = files.set_id ORDER BY sets.name, path;'; fi
+  - |
+    if [[ $TestScenario != Help ]]
+    then
+      sqlite3 flickrdb "SELECT *, datetime( last_modified, 'unixepoch', 'localtime') FROM files ORDER BY path;"
+      sqlite3 flickrdb 'SELECT * FROM badfiles ORDER BY path;'
+      sqlite3 flickrdb 'SELECT * FROM sets ORDER BY name;'
+      sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;'
+      sqlite3 flickrdb 'SELECT sets.set_id, sets.name, count(*) FROM sets, files WHERE sets.set_id = files.set_id GROUP BY 1, 2 ORDER BY 2;' > dbrun1.log
+      sqlite3 flickrdb 'SELECT sets.set_id, sets.name, files_id, path FROM sets, files WHERE sets.set_id = files.set_id ORDER BY sets.name, path;'
+    fi
+
   - echo DBRUN1------------------------------Start DB sets check
   - diff <(sed -r 's/^[0-9]{17}\|/REPLACE\|/' dbrun1.log) <(sed -r 's/^[0-9]{17}\|/REPLACE\|/' tests/dbrunok.log) || echo ok
   - echo DBRUN1--------------------------------End DB sets check
@@ -167,20 +176,35 @@ script:
   - sleep $WAIT_TIME
   - if [[ $TestScenario == DryRunNoToken ]]; then rm -fr token; fi
 
-  - if [[ $TestScenario == addAlbumsMigrate ]]; then sqlite3 flickrdb 'PRAGMA user_version="2"'; fi
-  - if [[ $TestScenario == addAlbumsMigrate ]]; then export UploadrOptions="$UploadrOptions --add-albums-migrate"; echo $UploadrOptions; fi
+  - |
+    if [[ $TestScenario == addAlbumsMigrate ]]
+    then
+      sqlite3 flickrdb 'PRAGMA user_version="2"'
+      export UploadrOptions="$UploadrOptions --add-albums-migrate"
+      echo $UploadrOptions
+    fi
 
-  - if [[ $TestScenario == RemoveReplace ]]; then rm "./tests/Test Photo Library/photo.jpg"; fi
-  - if [[ $TestScenario == RemoveReplace ]]; then rm "./tests/Test Photo Library/photo_Excepção.jpg"; fi
-  - if [[ $TestScenario == RemoveReplace ]]; then cp "./tests/Test Photo Library/ReplaceTest/file_34_Substituição.ForReplace" "./tests/Test Photo Library/Pics.Replaced/file_34_Substituição.jpg"; fi
-  - if [[ $TestScenario == RemoveReplace ]]; then cp "./tests/Test Photo Library/ReplaceTest/file_35.jpg.ForReplace" "./tests/Test Photo Library/Pics.Replaced/file_35.jpg"; fi
-  - if [[ $TestScenario == RemoveReplace ]]; then cp "./tests/Test Photo Library/ReplaceTest/Video03.ToReplace.MP4.ForReplace" "./tests/Test Photo Library/Pics.Replaced/Video03.ToReplace.MP4"; fi
-
-  - if [[ $TestScenario == ExcludedFolders ]]; then cp ./tests/uploadr_excluded.ini ./uploadr.ini; cp ./tests/uploadr_excluded.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini || cp ./tests/uploadr_excluded.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/etc/uploadr.ini; fi
-
-  - if [[ $TestScenario == Old273INI ]]; then cp ./tests/uploadr_excluded_2.7.3.ini ./uploadr.ini; cp ./tests/uploadr_excluded_2.7.3.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini || cp ./tests/uploadr_excluded_2.7.3.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/etc/uploadr.ini; fi
-
-  - if [[ $TestScenario == NoVerbose ]]; then cp ./tests/uploadr_NoVerbose.ini ./uploadr.ini; cp ./tests/uploadr_NoVerbose.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini || cp ./tests/uploadr_NoVerbose.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/etc/uploadr.ini; fi
+  - |
+    if [[ $TestScenario == RemoveReplace ]]
+    then
+      rm "./tests/Test Photo Library/photo.jpg"
+      rm "./tests/Test Photo Library/photo_Excepção.jpg"
+      cp "./tests/Test Photo Library/ReplaceTest/file_34_Substituição.ForReplace" "./tests/Test Photo Library/Pics.Replaced/file_34_Substituição.jpg"
+      cp "./tests/Test Photo Library/ReplaceTest/file_35.jpg.ForReplace" "./tests/Test Photo Library/Pics.Replaced/file_35.jpg"
+      cp "./tests/Test Photo Library/ReplaceTest/Video03.ToReplace.MP4.ForReplace" "./tests/Test Photo Library/Pics.Replaced/Video03.ToReplace.MP4"
+    elif [[ $TestScenario == ExcludedFolders ]]
+    then
+      cp ./tests/uploadr_excluded.ini ./uploadr.ini
+      cp ./tests/uploadr_excluded.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini || cp ./tests/uploadr_excluded.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/etc/uploadr.ini
+    elif [[ $TestScenario == Old273INI ]]
+    then
+      cp ./tests/uploadr_excluded_2.7.3.ini ./uploadr.ini
+      cp ./tests/uploadr_excluded_2.7.3.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini || cp ./tests/uploadr_excluded_2.7.3.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/etc/uploadr.ini
+    elif [[ $TestScenario == NoVerbose ]]
+    then
+      cp ./tests/uploadr_NoVerbose.ini ./uploadr.ini
+      cp ./tests/uploadr_NoVerbose.ini /home/travis/virtualenv/python$pythonVersion/etc/uploadr.ini || cp ./tests/uploadr_NoVerbose.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/etc/uploadr.ini
+    fi
 
   # Actual RUN
   # Scenario Old273INI: run ./uploadr.py instead of `which uploadr.py`

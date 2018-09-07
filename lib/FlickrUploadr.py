@@ -3371,7 +3371,8 @@ class Uploadr(object):
                      'longer exist!\n'
                      'Photos count:\n'
                      '                Local:[{!s:>6s}]\n'
-                     '               Flickr:[{!s:>6s}]\t[{!s:>6s}]\n'
+                     '               Flickr:[{!s:>6s}]\t[{!s:>6s}] '
+                     ':Flickr-Local\n'
                      'Not in sets on Flickr:[{!s:>6s}]'
                      .format(InitialFoundFiles,
                              bad_files_count,

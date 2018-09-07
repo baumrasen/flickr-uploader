@@ -82,7 +82,7 @@ You should get the following depending on how the setting FULL_SET_NAME is set:
 ## Setup on Synology
 --------------------
 - Might work on other platforms like Windows also.
-- *Side note:* don't be overwhelmed with this setup. They are quite straitghtforward.
+- *Side note:* don't be overwhelmed with this setup. Steps are quite straitghtforward.
 - Summary steps:
 
 1. Enable SSH access to Synology DSM Server. (Optionally) install Python 3.
@@ -447,6 +447,12 @@ And enjoy!!!
 
 * Q: Is this script feature complete and fully tested?
    - Nope. It's a work in progress. I've tested it as needed for my needs, but it's possible to build additional features by contributing to the script.
+   - Have a few starsand feedback that it is being used by several people.
+
+* Q: Do I need to install the "Python Module" from DSM Installation Package?
+   - No.
+   - The standard out-of-the-box python 2.7 installed with Synology (on versions up to DSM 6.2 a the time of writing this) is more than enough.
+   - In fact,in one particular report I received, this package was causing several conflicts so, please, don't install it.
 
 * Q: How to automate it with a Synology NAS ?
    - First you will need to run script at least one time in a ssh client to get the token file.
@@ -492,15 +498,16 @@ getting existing sets from Flickr is managed also
          - The remark "some Bad files may no longer exist!" indicates that previously recorded badfiles may already been deleted from the local filesystem. Check possible use of "-c" option.
    - Photos count:
       - Local: Number of local pics found.
-      - Flickr: Number of pics indicated by Flickr (may be off by 1)
+      - Flickr: Number of pics indicated by Flickr (may be off by 1 immediately after upload due to Flickr refres)
+      - Flickr-Local: Difference of Flickr to Local pics (for easier reading/tracking)
       - Not in sets on Flickr: Indicates just that. It may indicate errors if it is bigger than 0, as all uploaded pics by uploadr should be on an Album. What I do normally, is to delete such pics from Flickr directly from the flickr/organize interface. But I've seen other users which have other tools uploading pics to Flickr to ignore this number.
 ```
- Initial Found Files:[   757]
+  Initial Found Files:[   757]
           - Bad Files:[     7] = [   750]
           Note: some Bad files may no longer exist!
 Photos count:
                 Local:[   750]
-               Flickr:[   750]
+               Flickr:[   755]	[     5] Flickr-Local
 Not in sets on Flickr:[     0]
 ```
 

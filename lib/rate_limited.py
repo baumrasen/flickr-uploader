@@ -68,12 +68,42 @@ class LastTime:
     def acquire(self):
         """ acquire
         """
-        self.ratelock.acquire()
+
+        logging.debug('LastTime: [on acquire...]')
+        acquired = False
+        try:
+            acquired = self.ratelock.acquire()
+        except Exception as ex:
+            NPR.niceerror(caught=True,
+                          caughtprefix='+++LastTime',
+                          caughtcode='001',
+                          caughtmsg='Exception on LastTime class: acquire',
+                          exceptuse=True,
+                          # exceptCode=ex.code,
+                          exceptmsg=ex,
+                          useniceprint=False,
+                          exceptsysinfo=True)
+            raise
+        return acquired
 
     def release(self):
         """ release
         """
-        self.ratelock.release()
+
+        logging.debug('LastTime: [on release...]')
+        try:
+            self.ratelock.release()
+        except Exception as ex:
+            NPR.niceerror(caught=True,
+                          caughtprefix='+++LastTime',
+                          caughtcode='002',
+                          caughtmsg='Exception on LastTime class: release',
+                          exceptuse=True,
+                          # exceptCode=ex.code,
+                          exceptmsg=ex,
+                          useniceprint=False,
+                          exceptsysinfo=True)
+            raise
 
     def set_last_time_called(self):
         """ set_last_time_called
@@ -139,11 +169,14 @@ def rate_limited(max_per_second):
     def decorate(func):
         """ decorate
         """
-        last_time.acquire()
+
+        acquired = last_time.acquire()
         if last_time.get_last_time_called() == 0:
             last_time.set_last_time_called()
         # last_time.debug('DECORATE')
-        last_time.release()
+        if acquired:
+            last_time.release()
+            acquired = False
 
         @wraps(func)
         def rate_limited_function(*args, **kwargs):
@@ -158,7 +191,7 @@ def rate_limited(max_per_second):
                          func.__name__, max_per_second)
 
             try:
-                last_time.acquire()
+                acquired = last_time.acquire()
                 last_time.add_cnt()
                 xfrom = time.time()
 
@@ -203,7 +236,11 @@ def rate_limited(max_per_second):
                               exceptsysinfo=True)
                 raise
             finally:
-                last_time.release()
+                logging.debug('LastTime: [finally acquired:{!s}]', acquired)
+                if acquired:
+                    last_time.release()
+                    acquired = False
+                    logging.debug('LastTime: [released acquired:%s]', acquired)
             return ret
 
         return rate_limited_function

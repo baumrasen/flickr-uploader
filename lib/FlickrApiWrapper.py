@@ -261,7 +261,7 @@ def nu_authenticate(api_key,
     # Ensure this output message also gets to stderr/logging location
     logging.critical('Copy and paste following authorization URL '
                      'in your browser to obtain Verifier Code.\n %s',
-                     autorize_url)
+                     authorize_url)
 
     # Prompt for verifier code from the user.
     # Python 2.7 and 3.6

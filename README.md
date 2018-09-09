@@ -8,7 +8,7 @@ by oPromessa, 2017, V2.8.6 [![Master Build Status](https://travis-ci.org/oPromes
 * Upload a directory of media (pics/videos) to Flickr for showing off your pics
 on the WEB and as a backup of your local storage.
 * Check Features, Requirements and Setup remarks.
-* flickr-uploader designed primarly for Synology Devices. 
+* flickr-uploader designed primarly for Synology Devices.
    * Also works on Linux, Mac and Windows systems.
 
 ## Features
@@ -72,6 +72,7 @@ You should get the following depending on how the setting FULL_SET_NAME is set:
 ---------------
 * Python 2.7+ (should work on DSM from Synology (v6.1), Windows and MAC)
 * Also compatile with Python 3.6
+* Recommendation on Synology DSM: **do not install/use** the "Python Module" from the DSM Packages.
 * flicrkapi module. May need to install get-pip.py. (Instructions for
   Synology DSM below.)
 * portalocker module for Windows systems. Not mandatory for Synology.

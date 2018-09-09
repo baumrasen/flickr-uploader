@@ -255,9 +255,13 @@ def nu_authenticate(api_key,
     # Show url. Copy and paste it in your browser
     # Adjust parameter "perms" to to your needs
     authorize_url = flickrobj.auth_url(perms=perms)
-    print('Copy and paste following authorizaiton URL '
+    print('Copy and paste following authorization URL '
           'in your browser to obtain Verifier Code.')
     print(NPR.strunicodeout(authorize_url))
+    # Ensure this output message also gets to stderr/logging location
+    logging.critical('Copy and paste following authorization URL '
+                     'in your browser to obtain Verifier Code.\n %s',
+                     autorize_url)
 
     # Prompt for verifier code from the user.
     # Python 2.7 and 3.6

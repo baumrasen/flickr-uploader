@@ -282,7 +282,7 @@ Python version on this system: 3.6.3 (default, Oct  3 2017, 21:45:48)
 [2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] Completed database setup
 [2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] Checking if token is available... if not will authenticate
 [2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] Getting new token.
-[2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] Copy and paste following authorizaiton URL in your browser to obtain Verifier Code.
+[2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] Copy and paste following authorization URL in your browser to obtain Verifier Code.
 https://www.flickr.com/services/oauth/authorize?oauth_token=xxxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx&perms=delete
 Verifier code (NNN-NNN-NNN):
 ```

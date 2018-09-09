@@ -134,9 +134,9 @@ script:
       pytest -v;                   ec2=$?
       pytest --doctest-modules;    ec3=$?
       python tests/TestModules.py; ec4=$?
-      flake8;                      ec5=$?      
+      flake8;                      ec5=$?
+      echo $ec1 $ec2 $ec3 $ec4 $ec5
     fi; (( ! ( ec1 + ec2 + ec3 + ec4 + ec5 ) ))
-  - echo $ec1 $ec2 $ec3 $ec4 $ec5
 
 # DELETE RUN: DeleteAllFromFlickr == 1 (Python 2.7 compatible only)------------
   - |

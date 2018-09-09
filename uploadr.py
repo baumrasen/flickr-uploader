@@ -672,4 +672,3 @@ logging.warning('----------- (V%s) End -----------(Log:%s)',
                 MY_CFG.LOGGING_LEVEL)
 
 logging_close_handlers()
-print(somenonexistantvariable)

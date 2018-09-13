@@ -28,10 +28,11 @@
    * Control additional specific output to stderr depending on level
    ```python
    if LOGGING_LEVEL <= logging.INFO:
-       logging.info('Output for {!s}:'.format('uploadResp'))
-       logging.info(xml.etree.ElementTree.tostring(addPhotoResp,
-                                                  encoding='utf-8',
-                                                  method='xml'))
+       logging.info('Output for [%s] is: %s',
+                    'uploadResp',
+                    xml.etree.ElementTree.tostring(uploadPhotoResp,
+                                                   encoding='utf-8',
+                                                   method='xml'))
        # <generate any further output>
    ```
    * Control additional specific output to stdout depending on level

@@ -1202,7 +1202,8 @@ class Uploadr(object):
                         if ZisCount == 0:
                             ZuploadError = True
                             continue
-                        elif ZisCount == 1:
+                        # CODING On Issue #77 Confirm everything else is ok!
+                        elif ZisCount == 1 and ZisLoaded:
                             ZuploadOK = True
                             ZuploadError = False
                             NP.niceprint('Found, '
@@ -2728,6 +2729,8 @@ class Uploadr(object):
     # A) checksum,                             Count=0  THEN NOT EXISTS
     # B) checksum, title, empty setname,       Count=1  THEN EXISTS, ASSIGN SET
     #                                                   IF tag album IS FOUND
+    # B1) checksum, title, empty setname,       Count=1 THEN NOT EXISTS, IGNORE
+    #                                                   IF tag album NOT FOUND
     # C) checksum, title, setname (1 or more), Count>=1 THEN EXISTS
     # D) checksum, title, other setname,       Count>=1 THEN NOT EXISTS
     # E) checksum, title, setname & ALSO checksum, title, other setname => N/A
@@ -2753,12 +2756,13 @@ class Uploadr(object):
 
             ret_is_photo_uploaded = True (already loaded)/False(not loaded)
             ret_photos_uploaded   = Number of found Images
-            ret_photo_id         = Pic ID on Flickr
-            ret_uploaded_no_set   = True , B, C, D, E or F
+            ret_photo_id          = Pic ID on Flickr
+            ret_uploaded_no_set   = True for B), B1) and D)
 
             Case | ret_is_photo_uploaded | ret_uploaded_no_set | ret_photo_id
             A    | False                 | False               | None
             B    | True                  | True                | pic.['id']
+            B1   | False                 | True                | None
             C    | True                  | False               | pic.['id']
             D    | False                 | False               | None
         """
@@ -2902,12 +2906,16 @@ class Uploadr(object):
                         ret_uploaded_no_set = True
                         return ret_is_photo_uploaded, ret_photos_uploaded, \
                             ret_photo_id, ret_uploaded_no_set
+                    # B1) checksum, title, empty setname,       Count=1
+                    #           THEN NOT EXISTS, IGNORE IF tag album NOT FOUND
                     else:
                         NP.niceprint('IS_UPLOADED:[UPLOADED WITHOUT'
                                      ' SET WITHOUT ALBUM TAG]',
                                      fname='isuploaded', verbosity=2)
                         logging.warning('IS_UPLOADED:[UPLOADED WITHOUT'
                                         ' SET WITHOUT ALBUM TAG]')
+                        ret_is_photo_uploaded = False
+                        ret_uploaded_no_set = True
 
                 for setinlist in resp.findall('set'):
                     logging.warning('Output for setinlist: %s',

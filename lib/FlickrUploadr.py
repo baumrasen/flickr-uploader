@@ -833,11 +833,11 @@ class Uploadr(object):
         """
 
         # ---------------------------------------------------------------------
-        # dbInsertIntoFiles
+        # db_insert_files
         #
-        def dbInsertIntoFiles(lock,
-                              file_id, file, file_checksum, last_modified):
-            """ dbInsertIntoFiles
+        def db_insert_files(lock,
+                            file_id, file, file_checksum, last_modified):
+            """ db_insert_files
 
             Insert into local DB files table.
 
@@ -905,6 +905,43 @@ class Uploadr(object):
                         self.xcfg.MAX_SQL_ATTEMPTS)
                     # Break the cycle of SQL_ATTEMPTS and continue
                     break
+        # ---------------------------------------------------------------------
+
+        # ---------------------------------------------------------------------
+        # db_insert_badfiles
+        #
+        def db_insert_badfiles(lock,
+                               file, file_checksum, last_modified):
+            """ db_insert_badfiles
+
+            Insert into local DB Bad files table.
+
+            lock          = for multiprocessing access control to DB
+            file          = filename
+            file_checksum = md5 checksum
+            last_modified = Last modified time
+            """
+
+            try:
+                mp.use_lock(lock, True, self.args.processes)
+                # files_id is autoincrement. No need to mention
+                cur.execute(
+                    'INSERT INTO badfiles '
+                    '(path, md5, last_modified, tagged) '
+                    'VALUES (?, ?, ?, 1)',
+                    (file, file_checksum, last_modified))
+            except lite.Error as err:
+                NP.niceerror(caught=True,
+                             caughtprefix='+++ DB',
+                             caughtcode='041',
+                             caughtmsg='DB error on INSERT: '
+                             '[{!s}]'
+                             .format(err.args[0]),
+                             useniceprint=True)
+            finally:
+                # Control for when running multiprocessing
+                # release locking
+                mp.use_lock(lock, False, self.args.processes)
         # ---------------------------------------------------------------------
 
         if self.args.dry_run:
@@ -999,8 +1036,8 @@ class Uploadr(object):
                              'On Album:[{!s}]: UPDATING LOCAL DATABASE.'
                              .format(NP.strunicodeout(file),
                                      NP.strunicodeout(setname)))
-                dbInsertIntoFiles(lock, isfile_id, file,
-                                  file_checksum, last_modified)
+                db_insert_files(lock, isfile_id, file,
+                                file_checksum, last_modified)
 
                 # Update the Video Date Taken
                 self.updatedVideoDate(isfile_id, file, last_modified)
@@ -1219,26 +1256,10 @@ class Uploadr(object):
                             logging.info('Bad file:[%s]',
                                          NP.strunicodeout(file))
 
-                            try:
-                                mp.use_lock(lock, True, self.args.processes)
-                                # files_id is autoincrement. No need to mention
-                                cur.execute(
-                                    'INSERT INTO badfiles '
-                                    '( path, md5, last_modified, tagged) '
-                                    'VALUES (?, ?, ?, 1)',
-                                    (file, file_checksum, last_modified))
-                            except lite.Error as err:
-                                NP.niceerror(caught=True,
-                                             caughtprefix='+++ DB',
-                                             caughtcode='041',
-                                             caughtmsg='DB error on INSERT: '
-                                             '[{!s}]'
-                                             .format(err.args[0]),
-                                             useniceprint=True)
-                            finally:
-                                # Control for when running multiprocessing
-                                # release locking
-                                mp.use_lock(lock, False, self.args.processes)
+                            db_insert_badfiles(lock,
+                                               file,
+                                               file_checksum,
+                                               last_modified)
 
                             # Break for ATTEMPTS cycle
                             break
@@ -1327,8 +1348,11 @@ class Uploadr(object):
                     file_id = photo_id
 
                     # Insert into DB files
-                    dbInsertIntoFiles(lock, file_id, file,
-                                      file_checksum, last_modified)
+                    db_insert_files(lock,
+                                    file_id,
+                                    file,
+                                    file_checksum,
+                                    last_modified)
 
                     # Update the Video Date Taken
                     self.updatedVideoDate(file_id, file, last_modified)

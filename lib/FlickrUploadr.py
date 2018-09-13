@@ -2959,7 +2959,7 @@ class Uploadr(object):
 
             tag_id = None
             for tag in tag_result.find('photo').find('tags').findall('tag'):
-                logging.info(tag.attrib['raw'])
+                logging.info('photos_find_tag tag:[%s]', tag.attrib['raw'])
                 if (NP.strunicodeout(tag.attrib['raw']) ==
                         NP.strunicodeout(intag)):
                     tag_id = tag.attrib['id']

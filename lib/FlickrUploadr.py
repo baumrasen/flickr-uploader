@@ -1105,12 +1105,12 @@ class Uploadr(object):
                             is_friend=str(self.xcfg.FLICKR["is_friend"])
                         )
 
-                        logging.info('Output for uploadResp:[%s]',
-                                     faw.is_good(uploadResp))
-                        logging.debug(xml.etree.ElementTree.tostring(
-                            uploadResp,
-                            encoding='utf-8',
-                            method='xml'))
+                        logging.info('is_good:[%s] Output for uploadResp:[%s]',
+                                     faw.is_good(uploadResp),
+                                     xml.etree.ElementTree.tostring(
+                                         uploadResp,
+                                         encoding='utf-8',
+                                         method='xml'))
 
                         if faw.is_good(uploadResp):
                             ZuploadOK = True
@@ -1511,11 +1511,11 @@ class Uploadr(object):
                         photo_id=file_id
                     )
 
-                    logging.debug('Output for replace_resp:')
-                    logging.debug(xml.etree.ElementTree.tostring(
-                        replace_resp,
-                        encoding='utf-8',
-                        method='xml'))
+                    logging.debug('Output for replace_resp: %s',
+                                  xml.etree.ElementTree.tostring(
+                                      replace_resp,
+                                      encoding='utf-8',
+                                      method='xml'))
                     logging.info('replace_resp:[%s]',
                                  faw.is_good(replace_resp))
 
@@ -2886,11 +2886,11 @@ class Uploadr(object):
                                         ' SET WITHOUT ALBUM TAG]')
 
                 for setinlist in resp.findall('set'):
-                    logging.warning('Output for setinlist:')
-                    logging.warning(xml.etree.ElementTree.tostring(
-                        setinlist,
-                        encoding='utf-8',
-                        method='xml'))
+                    logging.warning('Output for setinlist: %s',
+                                    xml.etree.ElementTree.tostring(
+                                        setinlist,
+                                        encoding='utf-8',
+                                        method='xml'))
 
                     logging.warning(
                         '\nCheck : id=[%s] File=[%s]\n'

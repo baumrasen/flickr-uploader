@@ -160,12 +160,11 @@ def flickrapi_fn(fn_name,
     if is_good(fn_result):
         fn_success = True
 
-        logging.info('fn:[%s] Output for fn_result:',
-                     fn_name.__name__)
-        logging.info(xml.etree.ElementTree.tostring(
-            fn_result,
-            encoding='utf-8',
-            method='xml'))
+        logging.info('fn:[%s] Output for fn_result: %s',
+                     fn_name.__name__,
+                     xml.etree.ElementTree.tostring(fn_result,
+                                                    encoding='utf-8',
+                                                    method='xml'))
     else:
         logging.error('fn:[%s] is_good(fn_result):[%s]',
                       fn_name.__name__,

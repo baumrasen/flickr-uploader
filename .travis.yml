@@ -81,7 +81,7 @@ env:
     - TestScenario=DryRunNoToken UploadrOptions="$VerboseVar -n -p 10"
     #- TestScenario=BadFiles UploadrOptions="$VerboseVar $BadFilesVar"
     - TestScenario=MultiProcessing UploadrOptions="$VerboseVar $BadFilesVar -p 20"
-    - TestScenario=addAlbumsMigrate UploadrOptions="$VerboseVar -p 20"
+    #- TestScenario=addAlbumsMigrate UploadrOptions="$VerboseVar -p 20"
     - TestScenario=RemoveReplace UploadrOptions="$VerboseVar $BadFilesVar $ListPhotosNotInSet -p 10 -c"
     - TestScenario=ExcludedFolders UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -c -l 50"
     - TestScenario=Old273INI UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -p 10"

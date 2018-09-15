@@ -70,6 +70,7 @@ def execute(qry_name, adb_lock, nprocs,
         ...                'CREATE TABLE IF NOT EXISTS files '
         ...                '(files_id INT, path TEXT, set_id INT, '
         ...                'md5 TEXT, tagged INT)')
+        >>> litedb.execute('PRAGMA', None,0, cur, 'PRAGMA user_version="1"')
         >>> litedb.execute('ALTER', None, 0, cur,
         ...                'ALTER TABLE files ADD COLUMN last_modified REAL')
         >>> litedb.execute('INSERT', None, 0, cur,
@@ -82,6 +83,9 @@ def execute(qry_name, adb_lock, nprocs,
         ...                'SELECT count(*) FROM %s' % 'files')
         >>> cur.fetchall()
         [(1,)]
+        >>> litedb.close(con)
+        >>> if con is not None:
+        ...     con.close()
 
     """
 

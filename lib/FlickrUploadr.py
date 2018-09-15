@@ -1694,45 +1694,44 @@ class Uploadr(object):
             """
             con, nucur = litedb.connect(self.xcfg.DB_PATH)
 
-            with con:
+            litedb.execute(con,
+                           'SELECT#030:dbDeleteRecordLocalDB',
+                           lock, self.args.processes,
+                           nucur,
+                           'SELECT set_id FROM files WHERE files_id = ?',
+                           qmarkargs=(file[0],),
+                           caughtcode='087')
+            row = nucur.fetchone()
+            if row is not None:
                 litedb.execute(con,
-                               'SELECT#030:dbDeleteRecordLocalDB',
+                               'SELECT#031:dbDeleteRecordLocalDB',
                                lock, self.args.processes,
                                nucur,
-                               'SELECT set_id FROM files WHERE files_id = ?',
-                               qmarkargs=(file[0],),
-                               caughtcode='087')
-                row = nucur.fetchone()
-                if row is not None:
-                    litedb.execute(con,
-                                   'SELECT#031:dbDeleteRecordLocalDB',
-                                   lock, self.args.processes,
-                                   nucur,
-                                   'SELECT set_id FROM files WHERE set_id = ?',
-                                   qmarkargs=(row[0],),
-                                   caughtcode='088')
-                    rows = nucur.fetchall()
-                    if len(rows) == 1:
-                        NP.niceprint('File is the last of the set, '
-                                     'deleting the set ID: [{!s}]'
-                                     .format(str(row[0])))
-                        litedb.execute(
-                            con, 'DELETE#032:dbDeleteRecordLocalDB',
-                            lock, self.args.processes,
-                            nucur,
-                            'DELETE FROM sets WHERE set_id = ?',
-                            qmarkargs=(row[0],),
-                            caughtcode='089')
+                               'SELECT set_id FROM files WHERE set_id = ?',
+                               qmarkargs=(row[0],),
+                               caughtcode='088')
+                rows = nucur.fetchall()
+                if len(rows) == 1:
+                    NP.niceprint('File is the last of the set, '
+                                 'deleting the set ID: [{!s}]'
+                                 .format(str(row[0])))
+                    litedb.execute(
+                        con, 'DELETE#032:dbDeleteRecordLocalDB',
+                        lock, self.args.processes,
+                        nucur,
+                        'DELETE FROM sets WHERE set_id = ?',
+                        qmarkargs=(row[0],),
+                        caughtcode='089')
 
-                litedb.execute(
-                    con, 'DELETE#032:dbDeleteRecordLocalDB',
-                    lock, self.args.processes,
-                    nucur,
-                    'DELETE FROM files WHERE files_id = ?',
-                    qmarkargs=(file[0],),
-                    caughtcode='090')
+            litedb.execute(
+                con, 'DELETE#032:dbDeleteRecordLocalDB',
+                lock, self.args.processes,
+                nucur,
+                'DELETE FROM files WHERE files_id = ?',
+                qmarkargs=(file[0],),
+                caughtcode='090')
 
-                litedb.close(con)
+            litedb.close(con)
         # ---------------------------------------------------------------------
 
         if self.args.dry_run:

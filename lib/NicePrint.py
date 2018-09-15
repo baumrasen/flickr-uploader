@@ -18,7 +18,17 @@ import sys
 import os
 import logging
 import time
+import re
+import hashlib
+# -----------------------------------------------------------------------------
+# Helper class and functions for UPLoaDeR Global Constants.
 import lib.Konstants as KonstantsClass
+
+# =============================================================================
+# Functions aliases
+#
+#   UPLDR_K = KonstantsClass.Konstants
+# -----------------------------------------------------------------------------
 UPLDR_K = KonstantsClass.Konstants()
 
 
@@ -306,7 +316,8 @@ class RedactingFormatter(logging.Formatter):
     def _hashrepl(self, matchobj):
         return '=' + hashlib.sha1(matchobj.group(0)).hexdigest() + '='
         # Debugging
-        return '\n>' + matchobj.group(0) + '<\n' + '=' + hashlib.sha224(matchobj.group(0)).hexdigest() + '=\n'
+        # return '\n>' + matchobj.group(0) + '<\n' + '=' + \
+        # hashlib.sha224(matchobj.group(0)).hexdigest() + '=\n'
 
         for grp in matchobj.groups():
             # return hashlib.sha224(matchobj.group(0)).hexdigest()

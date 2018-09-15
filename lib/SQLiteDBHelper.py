@@ -124,6 +124,7 @@ def execute(aconn, qry_name, adb_lock, nprocs,
                   qry_name,
                   statement, qmarkargs, type(qmarkargs))
 
+
 def close(conn):
     """ Commit changes and close connection to the database """
     # conn.commit()

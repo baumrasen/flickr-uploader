@@ -57,12 +57,16 @@ import lib.mprocessing as mp
 # -----------------------------------------------------------------------------
 # Helper module functions to wrap FlickrAPI with retry/try/exception/debug
 import lib.FlickrApiWrapper as faw
-
+# -----------------------------------------------------------------------------
+# Helper module functions to wrap sqlite3 DB operations
+import lib.SQLiteDBHelper as litedb
 
 # =============================================================================
 # Functions aliases
 #
-#   NUTIME = time
+#   UPLDR_K = KonstantsClass.Konstants
+#   NP      = NicePrint.NicePrin
+#   NUTIME  = time
 # -----------------------------------------------------------------------------
 UPLDR_K = KonstantsClass.Konstants()
 NP = NicePrint.NicePrint()
@@ -958,33 +962,18 @@ class Uploadr(object):
                                          self.xcfg.FULL_SET_NAME)
 
         success = False
-        con = lite.connect(self.xcfg.DB_PATH)
-        con.text_factory = str
-        with con:
-            cur = con.cursor()
-            logging.debug('uploadFILE SELECT: {%s}: {%s}',
-                          'SELECT rowid, files_id, path, '
-                          'set_id, md5, tagged, '
-                          'last_modified FROM '
-                          'files WHERE path = ?',
-                          file)
+        con, cur = litedb.connect(self.xcfg.DB_PATH)
 
-            try:
-                # Acquire DB lock if running in multiprocessing mode
-                mp.use_lock(lock, True, self.args.processes)
-                cur.execute('SELECT rowid, files_id, path, set_id, md5, '
-                            'tagged, last_modified FROM files WHERE path = ?',
-                            (file,))
-            except lite.Error as err:
-                NP.niceerror(caught=True,
-                             caughtprefix='+++ DB',
-                             caughtcode='035',
-                             caughtmsg='DB error on SELECT: [{!s}]'
-                             .format(err.args[0]),
-                             useniceprint=True)
-            finally:
-                # Release DB lock if running in multiprocessing mode
-                mp.use_lock(lock, False, self.args.processes)
+        # con = lite.connect(self.xcfg.DB_PATH)
+        # con.text_factory = str
+        with con:
+            # cur = con.cursor()
+            litedb.execute('SELECT#001', lock, self.args.processes,
+                           cur,
+                           'SELECT rowid, files_id, path, set_id, md5, '
+                           'tagged, last_modified FROM files WHERE path = ?',
+                           qmarkargs=(file,),
+                           caughtcode='035')
 
             row = cur.fetchone()
             logging.debug('row: %s', row)
@@ -1202,7 +1191,7 @@ class Uploadr(object):
                         if ZisCount == 0:
                             ZuploadError = True
                             continue
-                        # CODING On Issue #77 Confirm everything else is ok!
+                        # CODING On Issue #77 Confirm everything is ok!
                         elif ZisCount == 1 and ZisLoaded:
                             ZuploadOK = True
                             ZuploadError = False
@@ -1291,7 +1280,8 @@ class Uploadr(object):
                             if ZisCount == 0:
                                 ZuploadError = True
                                 continue
-                            elif ZisCount == 1:
+                            # CODING On Issue #77 Confirm everything is ok!
+                            elif ZisCount == 1 and ZisLoaded:
                                 ZuploadOK = True
                                 ZuploadError = False
                                 NP.niceprint('Found, '

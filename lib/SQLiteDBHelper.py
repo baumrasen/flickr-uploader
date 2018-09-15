@@ -136,18 +136,3 @@ if __name__ == "__main__":
 
     import doctest
     doctest.testmod()
-
-    # sqlite_file = 'flickrdb'
-    # table_name = 'files'
-    #
-    # conn, c = connect(sqlite_file)
-    # total_rows(c, table_name, print_out=True)
-    # info, cinfo = table_col_info(c, table_name, print_out=True)
-    # print('type(info): %s', type(cinfo))
-    # row = cinfo.fetchone()
-    # print('type(row): %s', type(row))
-    # print('row is: %s', row)
-    # # next line might be slow on large databases
-    # values_in_col(c, table_name, print_out=True)
-    # close(conn)
-

@@ -964,11 +964,8 @@ class Uploadr(object):
         success = False
         con, cur = litedb.connect(self.xcfg.DB_PATH)
 
-        # con = lite.connect(self.xcfg.DB_PATH)
-        # con.text_factory = str
         with con:
-            # cur = con.cursor()
-            litedb.execute('SELECT#001', lock, self.args.processes,
+            litedb.execute(con, 'SELECT#001', lock, self.args.processes,
                            cur,
                            'SELECT rowid, files_id, path, set_id, md5, '
                            'tagged, last_modified FROM files WHERE path = ?',
@@ -1370,20 +1367,12 @@ class Uploadr(object):
 
                     logging.info('Will UPDATE files SET set_id = null '
                                  'for pic:[%s] ', row[1])
-                    try:
-                        mp.use_lock(lock, True, self.args.processes)
-                        cur.execute('UPDATE files SET set_id = null '
-                                    'WHERE files_id = ?', (row[1],))
-                    except lite.Error as err:
-                        NP.niceerror(caught=True,
-                                     caughtprefix='+++ DB',
-                                     caughtcode='045',
-                                     caughtmsg='DB error on UPDATE: [{!s}]'
-                                     .format(err.args[0]),
-                                     useniceprint=True)
-                    finally:
-                        con.commit()
-                        mp.use_lock(lock, False, self.args.processes)
+                    litedb.execute(
+                        con, 'UPDATE#001', lock, self.args.processes,
+                        cur,
+                        'UPDATE files SET set_id = null WHERE files_id = ?',
+                        qmarkargs=(row[1],),
+                        caughtcode='045')
 
                     logging.info('Did UPDATE files SET set_id = null '
                                  'for pic:[%s]',
@@ -1399,51 +1388,35 @@ class Uploadr(object):
                 #   if DB/lastmodified is different from file/lastmodified
                 #   then: if md5 has changed then perform replacePhoto
                 #   operation on Flickr
-                try:
-                    logging.warning('CHANGES row[6]=[%s-(%s)]',
-                                    NUTIME.strftime(
-                                        UPLDR_K.TimeFormat,
-                                        NUTIME.localtime(row[6])),
-                                    row[6])
-                    if row[6] is None:
-                        # Update db the last_modified time of file
+                logging.warning('CHANGES row[6]=[%s-(%s)]',
+                                NUTIME.strftime(
+                                    UPLDR_K.TimeFormat,
+                                    NUTIME.localtime(row[6])),
+                                row[6])
+                if row[6] is None:
+                    # Update db the last_modified time of file
 
-                        # Control for when running multiprocessing set locking
-                        mp.use_lock(lock, True, self.args.processes)
-                        cur.execute('UPDATE files SET last_modified = ? '
-                                    'WHERE files_id = ?', (last_modified,
-                                                           row[1]))
-                        con.commit()
-                        mp.use_lock(lock, False, self.args.processes)
+                    # Control for when running multiprocessing set locking
+                    litedb.execute(
+                         con, 'UPDATE#002', lock, self.args.processes,
+                         cur,
+                         'UPDATE files SET last_modified = ?'
+                         'WHERE files_id = ?',
+                         qmarkargs=(last_modified, row[1]),
+                         caughtcode='050')
 
-                    logging.warning('CHANGES row[6]!=last_modified: [%s]',
-                                    row[6] != last_modified)
-                    if row[6] != last_modified:
-                        # Update db both the new file/md5 and the
-                        # last_modified time of file by by calling replacePhoto
+                logging.warning('CHANGES row[6]!=last_modified: [%s]',
+                                row[6] != last_modified)
+                if row[6] != last_modified:
+                    # Update db both the new file/md5 and the
+                    # last_modified time of file by by calling replacePhoto
 
-                        if file_checksum is None:
-                            file_checksum = faw.md5checksum(file)
-                        if file_checksum != str(row[4]):
-                            self.replacePhoto(lock, file, row[1], row[4],
-                                              file_checksum, last_modified,
-                                              cur, con)
-                except lite.Error as err:
-                    NP.niceerror(caught=True,
-                                 caughtprefix='+++ DB',
-                                 caughtcode='050',
-                                 caughtmsg='Error: UPDATE files '
-                                 'SET last_modified: [{!s}]'
-                                 .format(err.args[0]),
-                                 useniceprint=True)
-
-                    mp.use_lock(lock, False, self.args.processes)
-                    if self.args.processes and self.args.processes > 0:
-                        logging.debug('===Multiprocessing==='
-                                      'lock.release (in Error)')
-                        lock.release()
-                        logging.debug('===Multiprocessing==='
-                                      'lock.release (in Error)')
+                    if file_checksum is None:
+                        file_checksum = faw.md5checksum(file)
+                    if file_checksum != str(row[4]):
+                        self.replacePhoto(lock, file, row[1], row[4],
+                                          file_checksum, last_modified,
+                                          cur, con)
 
         # Closing DB connection
         if con is not None:

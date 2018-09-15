@@ -54,7 +54,7 @@ def connect(sqlite_file):
     return conn, acursor
 
 
-def execute(qry_name, adb_lock, nprocs,
+def execute(aconn, qry_name, adb_lock, nprocs,
             cursor, statement, qmarkargs=(),
             caughtcode='000'):
     """
@@ -66,20 +66,25 @@ def execute(qry_name, adb_lock, nprocs,
 
         >>> import lib.SQLiteDBHelper as litedb
         >>> con, cur = litedb.connect("file::memory:?cache=shared")
-        >>> litedb.execute('CREATE', None, 0, cur,
+        >>> litedb.execute(con,
+        ...                'CREATE', None, 0, cur,
         ...                'CREATE TABLE IF NOT EXISTS files '
         ...                '(files_id INT, path TEXT, set_id INT, '
         ...                'md5 TEXT, tagged INT)')
-        >>> litedb.execute('PRAGMA', None,0, cur, 'PRAGMA user_version="1"')
-        >>> litedb.execute('ALTER', None, 0, cur,
+        >>> litedb.execute(con,
+        ...                'PRAGMA', None, 0, cur, 'PRAGMA user_version="1"')
+        >>> litedb.execute(con,
+        ...                'ALTER', None, 0, cur,
         ...                'ALTER TABLE files ADD COLUMN last_modified REAL')
-        >>> litedb.execute('INSERT', None, 0, cur,
+        >>> litedb.execute(con,
+        ...                'INSERT', None, 0, cur,
         ...                'INSERT INTO files '
         ...                '(files_id, path, md5, '
         ...                'last_modified, tagged) '
         ...                 'VALUES (?, ?, ?, CURRENT_TIMESTAMP, 1)',
         ...                 qmarkargs=(1001, 'filepath', '0x1001'))
-        >>> litedb.execute('SELECT', None, 0, cur,
+        >>> litedb.execute(con,
+        ...                'SELECT', None, 0, cur,
         ...                'SELECT count(*) FROM %s' % 'files')
         >>> cur.fetchall()
         [(1,)]
@@ -89,7 +94,7 @@ def execute(qry_name, adb_lock, nprocs,
 
     """
 
-    logging.debug('DBHelper.execute [%s] '
+    logging.debug('--> DBHelper.execute [%s] '
                   'statement:[%s] qmarkargs:[%s] type(qmarkargs):[%s]',
                   qry_name,
                   statement, qmarkargs, type(qmarkargs))
@@ -109,9 +114,15 @@ def execute(qry_name, adb_lock, nprocs,
                       .format(qry_name, err.args[0]),
                       useniceprint=True)
     finally:
+        # Commit for UPDATE tasks
+        aconn.commit()
         # Release DB lock if running in multiprocessing mode
         mp.use_lock(adb_lock, False, nprocs)
 
+    logging.debug('<-- DBHelper.execute [%s] '
+                  'statement:[%s] qmarkargs:[%s] type(qmarkargs):[%s]',
+                  qry_name,
+                  statement, qmarkargs, type(qmarkargs))
 
 def close(conn):
     """ Commit changes and close connection to the database """

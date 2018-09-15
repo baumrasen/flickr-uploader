@@ -551,9 +551,9 @@ if __name__ == "__main__":
                   verbosity=3)
 
     # Enables mask  sensitive data on log files.
-    if PARSED_ARGS.mask-sensitive:
+    if PARSED_ARGS.mask_sensitive:
         NPR.niceprint('Mask-Sensitive Argument')
-        
+
     # INI file config (1/3)
     #   1. Use --config-file argument option [after PARSED_ARGS]
     if PARSED_ARGS.config_file:

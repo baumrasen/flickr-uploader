@@ -48,10 +48,10 @@ def connect(sqlite_file):
     conn = lite.connect(sqlite_file)
     conn.text_factory = str
 
-    c = conn.cursor()
+    acursor = conn.cursor()
     logging.debug('Opened DB [%s]', sqlite_file)
 
-    return conn, c
+    return conn, acursor
 
 
 def execute(qry_name, adb_lock, nprocs,
@@ -89,14 +89,13 @@ def execute(qry_name, adb_lock, nprocs,
 
     """
 
-    logging.debug('DBHelper.execute [{!s}] '
+    logging.debug('DBHelper.execute [%s] '
                   'statement:[%s] qmarkargs:[%s] type(qmarkargs):[%s]',
-                  qry_name, statement, qmarkargs, type(qmarkargs))
+                  qry_name,
+                  statement, qmarkargs, type(qmarkargs))
     assert isinstance(qmarkargs, tuple), NPR.niceassert(
-                                             'DBHelper.execute '
-                                             '[{!s}] {!s} is not a tuple!!'
-                                             .format(qry_name,
-                                                     'qmarkargs'))
+        'DBHelper.execute [{!s}] {!s} is not a tuple!!'
+        .format(qry_name, 'qmarkargs'))
 
     try:
         # Acquire DB lock if running in multiprocessing mode

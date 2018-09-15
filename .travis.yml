@@ -78,7 +78,7 @@ env:
   matrix:
 # TestScenario: Help, DryRunNoToken, BadFiles, MultiProcessing, Remove, Replace, RemoveReplace, Old273INI
     - TestScenario=Help UploadrOptions="$VerboseVar --help" DeleteAllFromFlickr=1
-    - TestScenario=DryRunNoToken UploadrOptions="$VerboseVar -n -p 10"
+    - TestScenario=DryRunNoToken UploadrOptions="$VerboseVar -n -p 10 -m"
     #- TestScenario=BadFiles UploadrOptions="$VerboseVar $BadFilesVar"
     - TestScenario=MultiProcessing UploadrOptions="$VerboseVar $BadFilesVar -p 20"
     #- TestScenario=addAlbumsMigrate UploadrOptions="$VerboseVar -p 20"

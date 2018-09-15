@@ -296,6 +296,33 @@ class NicePrint:
 
 
 # -----------------------------------------------------------------------------
+# class RedactingFormatter wrapps logging.Formatter to mask logging messages.
+#
+class RedactingFormatter(logging.Formatter):
+    def __init__(self, orig_formatter, patterns):
+        self.orig_formatter = orig_formatter
+        self._patterns = patterns
+
+    def _hashrepl(self, matchobj):
+        return '=' + hashlib.sha1(matchobj.group(0)).hexdigest() + '='
+        # Debugging
+        return '\n>' + matchobj.group(0) + '<\n' + '=' + hashlib.sha224(matchobj.group(0)).hexdigest() + '=\n'
+
+        for grp in matchobj.groups():
+            # return hashlib.sha224(matchobj.group(0)).hexdigest()
+            return '@' + hashlib.sha224(grp).hexdigest() + '@'
+
+    def format(self, record):
+        msg = self.orig_formatter.format(record)
+        for pattern in self._patterns:
+            msg = re.sub(pattern, self._hashrepl, msg, re.IGNORECASE)
+        return msg
+
+    def __getattr__(self, attr):
+        return getattr(self.orig_formatter, attr)
+
+
+# -----------------------------------------------------------------------------
 # If called directly run doctests
 #
 if __name__ == "__main__":

@@ -553,6 +553,19 @@ if __name__ == "__main__":
     # Enables mask  sensitive data on log files.
     if PARSED_ARGS.mask_sensitive:
         NPR.niceprint('Mask-Sensitive Argument')
+        # Patterns to filter
+        patts = (
+            # Non-greedy "[filename]" preceeded by "Title:[" & followed by "]"
+            r'(?<=Title:\[).+?(?=\])',
+            r'(?<=file:\[).+?(?=\])',
+
+            # Non-greedy "[setName]" preceeded by "Set:[" & followed by "]"
+            r'(?<=Set:\[).+?(?=\])',
+            r'(?<=Album:\[).+?(?=\])')
+        logging.debug('Setting Masking Logging Formatter')
+        for hnd in logging.root.handlers:
+            hnd.setFormatter(NicePrint.RedactingFormatter(hnd.formatter,
+                                                          patts))
 
     # INI file config (1/3)
     #   1. Use --config-file argument option [after PARSED_ARGS]

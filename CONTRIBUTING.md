@@ -106,3 +106,8 @@
           FILES_DIR = unicode(  # noqa
                             '', 'utf-8') if sys.version_info < (3, ) else str('')
     ```
+* Pypi test install:
+  `pip2.7 install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple flickr-uploader --prefix=~/apps/Python`
+  Use flickr-uploader==2.8.6a1 to install a specific version (alpha1 in this case)
+* setup.py install: use --old-and-unmanageable option to copy data files.
+  `python2.7 setup.py install --prefix=~/apps/Python --old-and-unmanageable`

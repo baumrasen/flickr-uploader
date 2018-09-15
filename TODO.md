@@ -7,12 +7,8 @@
 
 * Dual logging_levels??? afer... multiprocessing_logging.install_mp_handler()
 * Test use of library https://github.com/jruere/multiprocessing-logging in Windows
-* Pypi test install:
-  `pip2.7 install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple flickr-uploader --prefix=~/apps/Python`
-  Use flickr-uploader==2.8.6a1 to install a specific version (alpha1 in this case)
-* setup.py install: use --old-and-unmanageable option to copy data files.
-  `python2.7 setup.py install --prefix=~/apps/Python --old-and-unmanageable`
-* drop installcfg option? May still be usable to place files in a user specific folder
+* Mask sensitive data on NicePrint.niceprint()
+* setup.py: drop installcfg option? May still be usable to place files in a user specific folder
 * Reconfirm the uploading sequence when -u option is set which affects
   isLoaded = False control variable
 * "Check for duplicates/wrong checksum" on upload may not be working fully!

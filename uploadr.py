@@ -178,6 +178,10 @@ def parse_arguments():
     vgrpparser.add_argument('-x', '--verbose-progress', action='store_true',
                             help='Provides progress indicator on each upload. '
                                  'See also LOGGING_LEVEL value in INI file.')
+    vgrpparser.add_argument('-m', '--mask-sensitive', action='store_true',
+                            help='Masks sensitive data on log files like '
+                                 'your pics filenames and set/albums names. '
+                                 '(Uses SHA1 hashing algorithm)')
     vgrpparser.add_argument('-n', '--dry-run', action='store_true',
                             help='Dry run. No changes are actually performed.')
 

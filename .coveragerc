@@ -4,5 +4,6 @@
 omit =
     flickr-deletr-master/*
     /home/travis/virtualenv/python2.7.14/lib/*
+    /home/travis/virtualenv/python3.6.3/lib/*    
     /home/travis/virtualenv/python3.6.4/lib/*
     /home/travis/virtualenv/python3.7-dev/lib/*

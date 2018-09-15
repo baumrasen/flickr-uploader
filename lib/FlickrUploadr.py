@@ -860,8 +860,8 @@ class Uploadr(object):
                              x,
                              self.xcfg.MAX_SQL_ATTEMPTS)
 
-                db_exception = False
-                db_exception = litedb.execute(
+                db_success = False
+                db_success = litedb.execute(
                     con, 'INSERT#002', lock, self.args.processes,
                     cur,
                     'INSERT INTO files '
@@ -870,7 +870,7 @@ class Uploadr(object):
                     qmarkargs=(file_id, file, file_checksum, last_modified),
                     caughtcode='030')
 
-                if db_exception:
+                if not db_success:
                     NP.niceerror(caught=True,
                                  caughtprefix='+++ DB',
                                  caughtcode='031',

@@ -1398,12 +1398,12 @@ class Uploadr(object):
 
                     # Control for when running multiprocessing set locking
                     litedb.execute(
-                         con, 'UPDATE#002', lock, self.args.processes,
-                         cur,
-                         'UPDATE files SET last_modified = ?'
-                         'WHERE files_id = ?',
-                         qmarkargs=(last_modified, row[1]),
-                         caughtcode='050')
+                        con, 'UPDATE#002', lock, self.args.processes,
+                        cur,
+                        'UPDATE files SET last_modified = ?'
+                        'WHERE files_id = ?',
+                        qmarkargs=(last_modified, row[1]),
+                        caughtcode='050')
 
                 logging.warning('CHANGES row[6]!=last_modified: [%s]',
                                 row[6] != last_modified)

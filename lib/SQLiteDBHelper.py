@@ -63,7 +63,7 @@ def execute(aconn, qry_name, adb_lock, nprocs,
         nprocs    = >0 when in multiprocessing mode
         cursor    = Cursor to use
         statement = SQL Statement to execute
-        
+
         Returns False on sqlite3 exception
 
         >>> import lib.SQLiteDBHelper as litedb
@@ -132,13 +132,13 @@ def execute(aconn, qry_name, adb_lock, nprocs,
                   'statement:[%s] qmarkargs:[%s] type(qmarkargs):[%s]',
                   qry_name,
                   statement, qmarkargs, type(qmarkargs))
-    
+
     return _success
 
 
 def close(conn):
     """ close
-    
+
     Commit changes and close connection to the database
     """
     # conn.commit()

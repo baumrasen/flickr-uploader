@@ -859,30 +859,16 @@ class Uploadr(object):
                              'INSERT INTO files',
                              x,
                              self.xcfg.MAX_SQL_ATTEMPTS)
+
                 db_exception = False
-                try:
-                    # Acquire DBlock if in multiprocessing mode
-                    mp.use_lock(lock, True, self.args.processes)
-                    cur.execute(
-                        'INSERT INTO files '
-                        '(files_id, path, md5, '
-                        'last_modified, tagged) '
-                        'VALUES (?, ?, ?, ?, 1)',
-                        (file_id, file, file_checksum,
-                         last_modified))
-                except lite.Error as err:
-                    db_exception = True
-                    NP.niceerror(caught=True,
-                                 caughtprefix='+++ DB',
-                                 caughtcode='030',
-                                 caughtmsg='DB error on INSERT: [{!s}]'
-                                 .format(err.args[0]),
-                                 useniceprint=True,
-                                 exceptsysinfo=True)
-                finally:
-                    con.commit()
-                    # Release DBlock if in multiprocessing mode
-                    mp.use_lock(lock, False, self.args.processes)
+                db_exception = litedb.execute(
+                    con, 'INSERT#002', lock, self.args.processes,
+                    cur,
+                    'INSERT INTO files '
+                    '(files_id, path, md5, last_modified, tagged) '
+                    'VALUES (?, ?, ?, ?, 1)',
+                    qmarkargs=(file_id, file, file_checksum, last_modified),
+                    caughtcode='030')
 
                 if db_exception:
                     NP.niceerror(caught=True,
@@ -926,26 +912,13 @@ class Uploadr(object):
             last_modified = Last modified time
             """
 
-            try:
-                mp.use_lock(lock, True, self.args.processes)
-                # files_id is autoincrement. No need to mention
-                cur.execute(
-                    'INSERT INTO badfiles '
-                    '(path, md5, last_modified, tagged) '
-                    'VALUES (?, ?, ?, 1)',
-                    (file, file_checksum, last_modified))
-            except lite.Error as err:
-                NP.niceerror(caught=True,
-                             caughtprefix='+++ DB',
-                             caughtcode='041',
-                             caughtmsg='DB error on INSERT: '
-                             '[{!s}]'
-                             .format(err.args[0]),
-                             useniceprint=True)
-            finally:
-                # Control for when running multiprocessing
-                # release locking
-                mp.use_lock(lock, False, self.args.processes)
+            litedb.execute(con, 'INSERT#003', lock, self.args.processes,
+                           cur,
+                           'INSERT INTO badfiles '
+                           '(path, md5, last_modified, tagged) '
+                           'VALUES (?, ?, ?, 1)',
+                           qmarkargs=(file, file_checksum, last_modified),
+                           caughtcode='041')
         # ---------------------------------------------------------------------
 
         if self.args.dry_run:
@@ -1719,61 +1692,47 @@ class Uploadr(object):
             Use new connection and nucur cursor to ensure commit
 
             """
-            con = lite.connect(self.xcfg.DB_PATH)
-            con.text_factory = str
-            with con:
-                try:
-                    nucur = con.cursor()
-                    # Acquire DBlock if in multiprocessing mode
-                    mp.use_lock(lock, True, self.args.processes)
-                    nucur.execute("SELECT set_id FROM files "
-                                  "WHERE files_id = ?",
-                                  (file[0],))
-                    row = nucur.fetchone()
-                    if row is not None:
-                        nucur.execute("SELECT set_id FROM files "
-                                      "WHERE set_id = ?",
-                                      (row[0],))
-                        rows = nucur.fetchall()
-                        if len(rows) == 1:
-                            NP.niceprint('File is the last of the set, '
-                                         'deleting the set ID: [{!s}]'
-                                         .format(str(row[0])))
-                            nucur.execute("DELETE FROM sets WHERE set_id = ?",
-                                          (row[0],))
-                    # Delete file record from the local db
-                    logging.debug('deleteFile.dbDeleteRecordLocalDB: '
-                                  'DELETE FROM files WHERE files_id = %s',
-                                  file[0])
-                    nucur.execute("DELETE FROM files WHERE files_id = ?",
-                                  (file[0],))
-                except lite.Error as err:
-                    NP.niceerror(caught=True,
-                                 caughtprefix='+++ DB',
-                                 caughtcode='087',
-                                 caughtmsg='DB error on SELECT/DELETE: [{!s}]'
-                                 .format(err.args[0]),
-                                 useniceprint=True,
-                                 exceptsysinfo=True)
-                except Exception:
-                    NP.niceerror(caught=True,
-                                 caughtprefix='+++',
-                                 caughtcode='088',
-                                 caughtmsg='Caught exception in '
-                                 'dbDeleteRecordLocalDB',
-                                 useniceprint=True,
-                                 exceptsysinfo=True)
-                    raise
-                finally:
-                    con.commit()
-                    logging.debug('deleteFile.dbDeleteRecordLocalDB: '
-                                  'After COMMIT')
-                    # Release DBlock if in multiprocessing mode
-                    mp.use_lock(lock, False, self.args.processes)
+            con, nucur = litedb.connect(self.xcfg.DB_PATH)
 
-            # Closing DB connection
-            if con is not None:
-                con.close()
+            with con:
+                litedb.execute(con,
+                               'SELECT#030:dbDeleteRecordLocalDB',
+                               lock, self.args.processes,
+                               nucur,
+                               'SELECT set_id FROM files WHERE files_id = ?',
+                               qmarkargs=(file[0],),
+                               caughtcode='087')
+                row = nucur.fetchone()
+                if row is not None:
+                    litedb.execute(con,
+                                   'SELECT#031:dbDeleteRecordLocalDB',
+                                   lock, self.args.processes,
+                                   nucur,
+                                   'SELECT set_id FROM files WHERE set_id = ?',
+                                   qmarkargs=(row[0],),
+                                   caughtcode='088')
+                    rows = nucur.fetchall()
+                    if len(rows) == 1:
+                        NP.niceprint('File is the last of the set, '
+                                     'deleting the set ID: [{!s}]'
+                                     .format(str(row[0])))
+                        litedb.execute(
+                            con, 'DELETE#032:dbDeleteRecordLocalDB',
+                            lock, self.args.processes,
+                            nucur,
+                            'DELETE FROM sets WHERE set_id = ?',
+                            qmarkargs=(row[0],),
+                            caughtcode='089')
+
+                litedb.execute(
+                    con, 'DELETE#032:dbDeleteRecordLocalDB',
+                    lock, self.args.processes,
+                    nucur,
+                    'DELETE FROM files WHERE files_id = ?',
+                    qmarkargs=(file[0],),
+                    caughtcode='090')
+
+                litedb.close(con)
         # ---------------------------------------------------------------------
 
         if self.args.dry_run:

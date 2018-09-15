@@ -63,6 +63,8 @@ def execute(aconn, qry_name, adb_lock, nprocs,
         nprocs    = >0 when in multiprocessing mode
         cursor    = Cursor to use
         statement = SQL Statement to execute
+        
+        Returns False on sqlite3 exception
 
         >>> import lib.SQLiteDBHelper as litedb
         >>> con, cur = litedb.connect("file::memory:?cache=shared")
@@ -71,11 +73,14 @@ def execute(aconn, qry_name, adb_lock, nprocs,
         ...                'CREATE TABLE IF NOT EXISTS files '
         ...                '(files_id INT, path TEXT, set_id INT, '
         ...                'md5 TEXT, tagged INT)')
+        True
         >>> litedb.execute(con,
         ...                'PRAGMA', None, 0, cur, 'PRAGMA user_version="1"')
+        True
         >>> litedb.execute(con,
         ...                'ALTER', None, 0, cur,
         ...                'ALTER TABLE files ADD COLUMN last_modified REAL')
+        True
         >>> litedb.execute(con,
         ...                'INSERT', None, 0, cur,
         ...                'INSERT INTO files '
@@ -83,9 +88,11 @@ def execute(aconn, qry_name, adb_lock, nprocs,
         ...                'last_modified, tagged) '
         ...                 'VALUES (?, ?, ?, CURRENT_TIMESTAMP, 1)',
         ...                 qmarkargs=(1001, 'filepath', '0x1001'))
+        True
         >>> litedb.execute(con,
         ...                'SELECT', None, 0, cur,
         ...                'SELECT count(*) FROM %s' % 'files')
+        True
         >>> cur.fetchall()
         [(1,)]
         >>> litedb.close(con)
@@ -94,6 +101,7 @@ def execute(aconn, qry_name, adb_lock, nprocs,
 
     """
 
+    _success = True
     logging.debug('--> DBHelper.execute [%s] '
                   'statement:[%s] qmarkargs:[%s] type(qmarkargs):[%s]',
                   qry_name,
@@ -107,6 +115,7 @@ def execute(aconn, qry_name, adb_lock, nprocs,
         mp.use_lock(adb_lock, True, nprocs)
         cursor.execute(statement, qmarkargs)
     except lite.Error as err:
+        _success = False
         NPR.niceerror(caught=True,
                       caughtprefix='+++ DB',
                       caughtcode=caughtcode,
@@ -123,12 +132,18 @@ def execute(aconn, qry_name, adb_lock, nprocs,
                   'statement:[%s] qmarkargs:[%s] type(qmarkargs):[%s]',
                   qry_name,
                   statement, qmarkargs, type(qmarkargs))
+    
+    return _success
 
 
 def close(conn):
-    """ Commit changes and close connection to the database """
+    """ close
+    
+    Commit changes and close connection to the database
+    """
     # conn.commit()
-    conn.close()
+    if conn is not None:
+        conn.close()
 
 
 def total_rows(cursor, table_name, print_out=False):

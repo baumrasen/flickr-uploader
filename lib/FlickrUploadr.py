@@ -692,17 +692,18 @@ class Uploadr(object):
                                         NP.strunicodeout(afile))
         rawfiles.sort()
         files.sort()
-        logging.debug('Pretty Print Output for [files]-------\n%s',
-                      pprint.pformat(files))
-        logging.debug('Pretty Print Output for [rawfiles]-------\n%s',
-                      pprint.pformat(rawfiles))
+        if not self.args.mask_sensitive:
+            logging.debug('Pretty Print Output for [files]-------\n%s',
+                          pprint.pformat(files))
+            logging.debug('Pretty Print Output for [rawfiles]-------\n%s',
+                          pprint.pformat(rawfiles))
 
-        NP.niceprint('Pretty Print Output for [files]-------\n{!s}'
-                     .format(pprint.pformat(files)),
-                     verbosity=3)
-        NP.niceprint('Pretty Print Output for [rawfiles]-------\n{!s}'
-                     .format(pprint.pformat(rawfiles)),
-                     verbosity=3)
+            NP.niceprint('Pretty Print Output for [files]-------\n{!s}'
+                         .format(pprint.pformat(files)),
+                         verbosity=3)
+            NP.niceprint('Pretty Print Output for [rawfiles]-------\n{!s}'
+                         .format(pprint.pformat(rawfiles)),
+                         verbosity=3)
 
         return files, rawfiles
 

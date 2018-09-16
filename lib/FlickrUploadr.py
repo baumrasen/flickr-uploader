@@ -355,11 +355,6 @@ class Uploadr(object):
             logging.debug('__name__:[%s] to prevent recursive calling)!',
                           __name__)
 
-            # CODING: with litedb.connect stil valid no need to reconnect?
-            # con = lite.connect(self.xcfg.DB_PATH)
-            # con.text_factory = str
-            # cur = con.cursor
-
             # To prevent recursive calling, check if __name__ == '__main__'
             # if __name__ == '__main__':
             mp.mprocessing(self.args.processes,
@@ -1575,22 +1570,14 @@ class Uploadr(object):
 
             # Update the db the file uploaded
             # Control for when running multiprocessing set locking
-            mp.use_lock(lock, True, self.args.processes)
-            try:
-                cur.execute('UPDATE files SET md5 = ?,last_modified = ? '
-                            'WHERE files_id = ?',
-                            (file_md5, last_modified, file_id))
-                con.commit()
-            except lite.Error as err:
-                NP.niceerror(caught=True,
-                             caughtprefix='+++ DB',
-                             caughtcode='070',
-                             caughtmsg='DB error on UPDATE: [{!s}]'
-                             .format(err.args[0]),
-                             useniceprint=True)
-            finally:
-                # Release DB lock if running in multiprocessing mode
-                mp.use_lock(lock, False, self.args.processes)
+            litedb.execute(con,
+                           'UPDATE#070',
+                           lock, self.args.processes,
+                           cur,
+                           'UPDATE files SET md5 = ?,last_modified = ? '
+                           'WHERE files_id = ?',
+                           qmarkargs=(file_md5, last_modified, file_id),
+                           dbcaughtcode='070')
 
             # Update the Video Date Taken
             self.updatedVideoDate(file_id, file, last_modified)
@@ -1862,63 +1849,49 @@ class Uploadr(object):
         """
 
         # CODING Use a different conn and cur to avoid error +++096
-        fn_con = lite.connect(self.xcfg.DB_PATH)
-        fn_con.text_factory = str
+        fn_con, acur = litedb.connect(self.xcfg.DB_PATH)
 
-        with fn_con:
-            acur = fn_con.cursor()
-            for filepic in sfiles:
-                # filepic[1] = path for the file from table files
-                # filepic[2] = set_id from files table
-                setname = faw.set_name_from_file(filepic[1],
-                                                 self.xcfg.FILES_DIR,
-                                                 self.xcfg.FULL_SET_NAME)
-                aset = None
-                try:
-                    # Acquire DBlock if in multiprocessing mode
-                    mp.use_lock(lockdb, True, self.args.processes)
-                    acur.execute('SELECT set_id, name '
-                                 'FROM sets WHERE name = ?',
-                                 (setname,))
-                    aset = acur.fetchone()
-                except lite.Error as err:
-                    NP.niceerror(caught=True,
-                                 caughtprefix='+++ DB',
-                                 caughtcode='098',
-                                 caughtmsg='DB error on DB create: [{!s}]'
-                                 .format(err.args[0]),
-                                 useniceprint=True,
-                                 exceptsysinfo=True)
-                finally:
-                    # Release DBlock if in multiprocessing mode
-                    mp.use_lock(lockdb, False, self.args.processes)
+        for filepic in sfiles:
+            # filepic[1] = path for the file from table files
+            # filepic[2] = set_id from files table
+            setname = faw.set_name_from_file(filepic[1],
+                                             self.xcfg.FILES_DIR,
+                                             self.xcfg.FULL_SET_NAME)
+            aset = None
 
-                if aset is not None:
-                    set_id = aset[0]
+            litedb.execute(fn_con,
+                           'SELECT#098:dbDeleteRecordLocalDB',
+                           lockdb, self.args.processes,
+                           acur,
+                           'SELECT set_id, name FROM sets WHERE name = ?',
+                           qmarkargs=(setname,),
+                           dbcaughtcode='098')
 
-                    NP.niceprint('Add file to set:[{!s}] '
-                                 'set:[{!s}] set_id=[{!s}]'
-                                 .format(NP.strunicodeout(filepic[1]),
-                                         NP.strunicodeout(setname),
-                                         set_id))
-                    self.addFileToSet(lockdb, set_id, filepic, acur)
-                else:
-                    NP.niceprint('Not able to assign pic to set')
-                    logging.error('Not able to assign pic to set')
+            if aset is not None:
+                set_id = aset[0]
 
-                logging.debug('===Multiprocessing=== in.mutex.acquire(w)')
-                mutex.acquire()
-                running.value += 1
-                xcount = running.value
-                mutex.release()
-                logging.info('===Multiprocessing=== out.mutex.release(w)')
+                NP.niceprint('Add file to set:[{!s}] '
+                             'set:[{!s}] set_id=[{!s}]'
+                             .format(NP.strunicodeout(filepic[1]),
+                                     NP.strunicodeout(setname),
+                                     set_id))
+                self.addFileToSet(lockdb, set_id, filepic, acur)
+            else:
+                NP.niceprint('Not able to assign pic to set')
+                logging.error('Not able to assign pic to set')
 
-                # Show number of files processed so far
-                NP.niceprocessedfiles(xcount, c_total, False)
+            logging.debug('===Multiprocessing=== in.mutex.acquire(w)')
+            mutex.acquire()
+            running.value += 1
+            xcount = running.value
+            mutex.release()
+            logging.info('===Multiprocessing=== out.mutex.release(w)')
+
+            # Show number of files processed so far
+            NP.niceprocessedfiles(xcount, c_total, False)
 
         # Closing DB connection
-        if fn_con is not None:
-            fn_con.close()
+        litedb.close(fn_con)
     # -------------------------------------------------------------------------
 
     # -------------------------------------------------------------------------
@@ -2349,54 +2322,49 @@ class Uploadr(object):
         """
         NP.niceprint('Cleaning up badfiles table from the database: [{!s}]'
                      .format(self.xcfg.DB_PATH))
-        con = None
-        try:
-            con = lite.connect(self.xcfg.DB_PATH)
-            con.text_factory = str
-            cur = con.cursor()
-            cur.execute('PRAGMA user_version')
-            row = cur.fetchone()
-            if row[0] >= 2:
-                # delete from badfiles table and reset SEQUENCE
-                NP.niceprint('Deleting from badfiles table. '
-                             'Reseting sequence.')
-                try:
-                    cur.execute('DELETE FROM badfiles')
-                    cur.execute('DELETE FROM SQLITE_SEQUENCE '
-                                'WHERE name="badfiles"')
-                    con.commit()
-                except lite.Error as err:
-                    NP.niceerror(caught=True,
-                                 caughtprefix='+++ DB',
-                                 caughtcode='147',
-                                 caughtmsg='DB error on SELECT FROM '
-                                 'badfiles: [{!s}]'
-                                 .format(err.args[0]),
-                                 useniceprint=True)
-                    raise
-            else:
-                NP.niceprint('Wrong DB version. Expected 2 or higher '
-                             'and not:[{!s}]'.format(row[0]))
-            # Closing DB connection
-            if con is not None:
-                con.close()
-        except lite.Error as err:
-            NP.niceerror(caught=True,
-                         caughtprefix='+++ DB',
-                         caughtcode='148',
-                         caughtmsg='DB error on SELECT: [{!s}]'
-                         .format(err.args[0]),
-                         useniceprint=True)
-            if con is not None:
-                con.close()
-            sys.exit(7)
-        finally:
-            NP.niceprint('Completed cleaning up badfiles table '
-                         'from the database.')
+
+        con, cur = litedb.connect(self.xcfg.DB_PATH)
+
+        litedb.execute(con, 'PRAGMA#147',
+                       None, self.args.processes,  # No need for lock
+                       cur,
+                       'PRAGMA user_version',
+                       dbcaughtcode='147')
+        row = cur.fetchone()
+
+        if row[0] >= 2:
+            # delete from badfiles table and reset SEQUENCE
+            NP.niceprint('Deleting from badfiles table. '
+                         'Reseting sequence.')
+            _success = litedb.execute(
+                con, 'DELETE#148',
+                None, self.args.processes,  # No need for lock
+                cur,
+                'DELETE FROM badfiles',
+                dbcaughtcode='148')
+            if not _success:
+                litedb.close(con)
+                sys.exit(7)
+
+            _success =  litedb.execute(
+                con, 'DELETE#149',
+                None, self.args.processes,  # No need for lock
+                cur,
+                'DELETE FROM SQLITE_SEQUENCE '
+                'WHERE name="badfiles"',
+                dbcaughtcode='149')
+            if not _success:
+                litedb.close(con)
+                sys.exit(7)
+        else:
+            NP.niceprint('Wrong DB version. Expected 2 or higher '
+                         'and not:[{!s}]'.format(row[0]))
+
+        NP.niceprint('Completed cleaning up badfiles table '
+                     'from the database.')
 
         # Closing DB connection
-        if con is not None:
-            con.close()
+        litedb.close(con)
 
     # -------------------------------------------------------------------------
     # remove_useless_sets_table

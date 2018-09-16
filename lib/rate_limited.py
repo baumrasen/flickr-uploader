@@ -238,7 +238,7 @@ def rate_limited(max_per_second):
                               exceptsysinfo=True)
                 raise
             finally:
-                logging.debug('LastTime: [finally acquired:{!s}]', acquired)
+                logging.debug('LastTime: [finally acquired:%s]', acquired)
                 if acquired:
                     last_time.release()
                     acquired = False

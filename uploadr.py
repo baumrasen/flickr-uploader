@@ -88,7 +88,7 @@ UPLDR_K = KonstantsClass.Konstants()
 # Sets LOGGING_LEVEL to allow logging even if everything else is wrong!
 # Parent logger is set to Maximum (DEBUG) so that suns will log as appropriate
 # Produces too much ouput info on MyConfig. Setting it to WARNING
-logging.getLogger().setLevel(logging.WARNING)
+logging.getLogger().setLevel(logging.DEBUG)
 # define a Handler which writes WARNING messages or higher to the sys.stderr
 CONSOLE_LOGGING = logging.StreamHandler()
 CONSOLE_LOGGING.setLevel(logging.WARNING)

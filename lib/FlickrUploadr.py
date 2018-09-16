@@ -1866,6 +1866,7 @@ class Uploadr(object):
                            'SELECT set_id, name FROM sets WHERE name = ?',
                            qmarkargs=(setname,),
                            dbcaughtcode='098')
+            aset = acur.fetchone()
 
             if aset is not None:
                 set_id = aset[0]

@@ -849,10 +849,10 @@ class Uploadr(object):
 
             # Database Locked is returned often on this INSERT
             # Will try MAX_SQL_ATTEMPTS...
-            for x in range(0, self.xcfg.MAX_SQL_ATTEMPTS):
+            for attempts in range(0, self.xcfg.MAX_SQL_ATTEMPTS):
                 logging.info('BEGIN SQL:[%s]...[%s}/%s attempts].',
                              'INSERT INTO files',
-                             x,
+                             attempts,
                              self.xcfg.MAX_SQL_ATTEMPTS)
 
                 db_success = False
@@ -871,22 +871,23 @@ class Uploadr(object):
                                  caughtcode='031',
                                  caughtmsg='Sleep 2 and retry SQL...'
                                  '[{!s}/{!s} attempts]'
-                                 .format(x, self.xcfg.MAX_SQL_ATTEMPTS),
+                                 .format(attempts, self.xcfg.MAX_SQL_ATTEMPTS),
                                  useniceprint=True)
                     NUTIME.sleep(2)
                 else:
-                    if x > 0:
+                    if attempts > 0:
                         NP.niceerror(caught=True,
                                      caughtprefix='+++ DB',
                                      caughtcode='032',
                                      caughtmsg='Succeed at retry SQL...'
                                      '[{!s}/{!s} attempts]'
-                                     .format(x, self.xcfg.MAX_SQL_ATTEMPTS),
+                                     .format(attempts,
+                                             self.xcfg.MAX_SQL_ATTEMPTS),
                                      useniceprint=True)
                     logging.info(
                         'END SQL:[%s]...[%s/%s attempts].',
                         'INSERT INTO files',
-                        x,
+                        attempts,
                         self.xcfg.MAX_SQL_ATTEMPTS)
                     # Break the cycle of SQL_ATTEMPTS and continue
                     break
@@ -1055,7 +1056,7 @@ class Uploadr(object):
                 ZuploadOK = False
                 ZbadFile = False
                 ZuploadError = False
-                for x in range(0, self.xcfg.MAX_UPLOAD_ATTEMPTS):
+                for attempts in range(0, self.xcfg.MAX_UPLOAD_ATTEMPTS):
                     # Reset variables on each iteration
                     uploadResp = None
                     photo_id = None
@@ -1063,12 +1064,12 @@ class Uploadr(object):
                     ZbadFile = False
                     ZuploadError = False
                     logging.warning('Up/Reuploading:[%s/%s attempts].',
-                                    x, self.xcfg.MAX_UPLOAD_ATTEMPTS)
-                    if x > 0:
+                                    attempts, self.xcfg.MAX_UPLOAD_ATTEMPTS)
+                    if attempts > 0:
                         NP.niceprint('    Reuploading:[{!s}] '
                                      '[{!s}/{!s} attempts].'
                                      .format(NP.strunicodeout(file),
-                                             x,
+                                             attempts,
                                              self.xcfg.MAX_UPLOAD_ATTEMPTS))
                     # Upload file to Flickr
                     # replace commas from tags and checksum tags
@@ -1271,11 +1272,11 @@ class Uploadr(object):
 
                 logging.debug('After CYCLE '
                               'Up/Reuploading:[%s/%s attempts].',
-                              x, self.xcfg.MAX_UPLOAD_ATTEMPTS)
+                              attempts, self.xcfg.MAX_UPLOAD_ATTEMPTS)
 
                 # Max attempts reached
                 if (not ZuploadOK) and (
-                        x == (self.xcfg.MAX_UPLOAD_ATTEMPTS - 1)):
+                        attempts == (self.xcfg.MAX_UPLOAD_ATTEMPTS - 1)):
                     NP.niceprint('Reached max attempts to upload. Skipping '
                                  'file: [{!s}]'.format(NP.strunicodeout(file)))
                     logging.error('Reached max attempts to upload. Skipping '
@@ -1444,17 +1445,17 @@ class Uploadr(object):
                 else open(file, 'rb')
             logging.debug('photo:[%s] type(photo):[%s]', photo, type(photo))
 
-            for x in range(0, self.xcfg.MAX_UPLOAD_ATTEMPTS):
+            for attempts in range(0, self.xcfg.MAX_UPLOAD_ATTEMPTS):
                 res_add_tag = None
                 res_get_info = None
                 replace_resp = None
 
                 try:
-                    if x > 0:
+                    if attempts > 0:
                         NP.niceprint('   Re-Replacing:'
                                      '[{!s}]...[{!s}/{!s} attempts].'
                                      .format(NP.strunicodeout(file),
-                                             x,
+                                             attempts,
                                              self.xcfg.MAX_UPLOAD_ATTEMPTS),
                                      verbosity=1)
 
@@ -1543,7 +1544,7 @@ class Uploadr(object):
                                  useniceprint=True)
                     NUTIME.sleep(10)
 
-                    if x == self.xcfg.MAX_UPLOAD_ATTEMPTS - 1:
+                    if attempts == self.xcfg.MAX_UPLOAD_ATTEMPTS - 1:
                         raise ValueError('Reached maximum number of attempts '
                                          'to replace, skipping')
                     continue

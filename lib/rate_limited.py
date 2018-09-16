@@ -69,7 +69,8 @@ class LastTime:
         """ acquire
         """
 
-        logging.debug('LastTime: [on acquire...]')
+        # CODING: Commented out to avoid issue #74. Otherwise inits logging!
+        # logging.debug('LastTime: [on acquire...]')
         acquired = False
         try:
             acquired = self.ratelock.acquire()
@@ -90,7 +91,8 @@ class LastTime:
         """ release
         """
 
-        logging.debug('LastTime: [on release...]')
+        # CODING: Commented out to avoid issue #74. Otherwise inits logging!
+        # logging.debug('LastTime: [on release...]')
         try:
             self.ratelock.release()
         except Exception as ex:
@@ -149,7 +151,6 @@ class LastTime:
                                       int(now))
                                   .split('.')[1][:3]),
                           time.localtime(now)))
-
 
 # -----------------------------------------------------------------------------
 # rate_limited

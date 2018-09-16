@@ -204,15 +204,15 @@ class Uploadr(object):
         rows = cur.fetchall()
         for row in rows:
             logging.debug('Checking file_id:[%s] file:[%s] '
-                          'isFileExcluded?',
+                          'is_file_excluded?',
                           NP.strunicodeout(row[0]),
                           NP.strunicodeout(row[1]))
             logging.debug('type(row[1]):[%s]', type(row[1]))
             # row[0] is photo_id
             # row[1] is filename
-            if (self.isFileExcluded(unicode(row[1], 'utf-8')  # noqa
-                                    if sys.version_info < (3, )
-                                    else str(row[1]))):
+            if (self.is_file_excluded(unicode(row[1], 'utf-8')  # noqa
+                                      if sys.version_info < (3, )
+                                      else str(row[1]))):
                 # Running in single processing mode, no need for lock
                 self.deleteFile(row, cur)
 
@@ -329,7 +329,7 @@ class Uploadr(object):
                      .format(str(changed_media_count)))
 
         # Convert Raw files
-        self.convertRawFiles(rawfiles, changed_media)
+        self.convert_raw_files(rawfiles, changed_media)
 
         if self.args.bad_files:
             # Cater for bad files
@@ -400,17 +400,17 @@ class Uploadr(object):
         NP.niceprint("*****Completed uploading files*****")
 
     # -------------------------------------------------------------------------
-    # convertRawFiles
+    # convert_raw_files
     #
     # Processes RAW files and adds the converted JPG files to the
-    # finalMediafiles
+    # final_media_files
     #
-    def convertRawFiles(self, rawfiles, finalMediafiles):
-        """ convertRawFiles
+    def convert_raw_files(self, rawfiles, final_media_files):
+        """ convert_raw_files
 
-            rawfiles        = List with raw files
-            finalMediafiles = Converted Raw files will be appended to this list
-                              list will be sorted
+            rawfiles          = List with raw files
+            final_media_files = Converted Raw files will be appended to this
+                                list and list is returned sorted
         """
 
         if not self.xcfg.CONVERT_RAW_FILES:
@@ -439,12 +439,12 @@ class Uploadr(object):
                     NP.niceerror(caught=True,
                                  caughtprefix='+++',
                                  caughtcode='009',
-                                 caughtmsg='Exception in size convertRawFiles',
+                                 caughtmsg='convert_raw_files: getsize',
                                  useniceprint=False,
                                  exceptsysinfo=True)
 
                 if okfilesize and (filesize < self.xcfg.FILE_MAX_SIZE):
-                    finalMediafiles.append(
+                    final_media_files.append(
                         os.path.normpath(
                             NP.strunicodeout(dirpath) +
                             NP.strunicodeout("/") +
@@ -464,7 +464,7 @@ class Uploadr(object):
                                  NP.strunicodeout(dirpath) +
                                  NP.strunicodeout('/') +
                                  NP.strunicodeout(afile))))
-        finalMediafiles.sort()
+        final_media_files.sort()
         NP.niceprint('*****Completed converting files*****')
 
     # -------------------------------------------------------------------------
@@ -702,14 +702,14 @@ class Uploadr(object):
         return files, rawfiles
 
     # -------------------------------------------------------------------------
-    # isFileExcluded
+    # is_file_excluded
     #
     # Check if a filename is within the list of EXCLUDED_FOLDERS. Returns:
     #   True = if filename's folder is within one of the EXCLUDED_FOLDERS
     #   False = if filename's folder not on one of the EXCLUDED_FOLDERS
     #
-    def isFileExcluded(self, filename):
-        """ isFileExcluded
+    def is_file_excluded(self, filename):
+        """ is_file_excluded
 
         Returns True if a file is within an EXCLUDED_FOLDERS directory/folder
         """
@@ -727,10 +727,10 @@ class Uploadr(object):
                           NP.strunicodeout(filename))
             # Now everything should be in Unicode
             if excluded_dir in os.path.dirname(filename):
-                logging.debug('Returning isFileExcluded:[True]')
+                logging.debug('Returning is_file_excluded:[True]')
                 return True
 
-        logging.debug('Returning isFileExcluded:[False]')
+        logging.debug('Returning is_file_excluded:[False]')
         return False
 
     # -------------------------------------------------------------------------
@@ -849,6 +849,7 @@ class Uploadr(object):
 
             # Database Locked is returned often on this INSERT
             # Will try MAX_SQL_ATTEMPTS...
+            attempts = None
             for attempts in range(0, self.xcfg.MAX_SQL_ATTEMPTS):
                 logging.info('BEGIN SQL:[%s]...[%s}/%s attempts].',
                              'INSERT INTO files',
@@ -1056,6 +1057,8 @@ class Uploadr(object):
                 ZuploadOK = False
                 ZbadFile = False
                 ZuploadError = False
+
+                attempts = None
                 for attempts in range(0, self.xcfg.MAX_UPLOAD_ATTEMPTS):
                     # Reset variables on each iteration
                     uploadResp = None
@@ -1445,6 +1448,7 @@ class Uploadr(object):
                 else open(file, 'rb')
             logging.debug('photo:[%s] type(photo):[%s]', photo, type(photo))
 
+            attempts = None
             for attempts in range(0, self.xcfg.MAX_UPLOAD_ATTEMPTS):
                 res_add_tag = None
                 res_get_info = None
@@ -1853,7 +1857,7 @@ class Uploadr(object):
     #
     # Processing function for adding files to set in multiprocessing mode
     #
-    def fn_addFilesToSets(self, lockDB, running, mutex, sfiles, c_total, cur):
+    def fn_addFilesToSets(self, lockdb, running, mutex, sfiles, c_total, cur):
         """ fn_addFilesToSets
         """
 
@@ -1872,7 +1876,7 @@ class Uploadr(object):
                 aset = None
                 try:
                     # Acquire DBlock if in multiprocessing mode
-                    mp.use_lock(lockDB, True, self.args.processes)
+                    mp.use_lock(lockdb, True, self.args.processes)
                     acur.execute('SELECT set_id, name '
                                  'FROM sets WHERE name = ?',
                                  (setname,))
@@ -1887,7 +1891,7 @@ class Uploadr(object):
                                  exceptsysinfo=True)
                 finally:
                     # Release DBlock if in multiprocessing mode
-                    mp.use_lock(lockDB, False, self.args.processes)
+                    mp.use_lock(lockdb, False, self.args.processes)
 
                 if aset is not None:
                     set_id = aset[0]
@@ -1897,7 +1901,7 @@ class Uploadr(object):
                                  .format(NP.strunicodeout(filepic[1]),
                                          NP.strunicodeout(setname),
                                          set_id))
-                    self.addFileToSet(lockDB, set_id, filepic, acur)
+                    self.addFileToSet(lockdb, set_id, filepic, acur)
                 else:
                     NP.niceprint('Not able to assign pic to set')
                     logging.error('Not able to assign pic to set')
@@ -1934,10 +1938,10 @@ class Uploadr(object):
         # ---------------------------------------------------------------------
         # Local Variables
         #
-        #   slockDB     = multiprocessing Lock for access to Database
+        #   slockdb     = multiprocessing Lock for access to Database
         #   smutex      = multiprocessing mutex for access to value srunning
         #   srunning    = multiprocessing Value to count processed photos
-        slockDB = None
+        slockdb = None
         smutex = None
         srunning = None
 
@@ -1963,7 +1967,7 @@ class Uploadr(object):
                             (self.xcfg.FILES_DIR, self.xcfg.FULL_SET_NAME,
                              self.xcfg.FILES_DIR, self.xcfg.FULL_SET_NAME,))
 
-                setsToCreate = cur.fetchall()
+                sets_to_create = cur.fetchall()
             except lite.Error as err:
                 NP.niceerror(caught=True,
                              caughtprefix='+++ DB',
@@ -1974,7 +1978,7 @@ class Uploadr(object):
                              exceptsysinfo=True)
                 raise
 
-            for aset in setsToCreate:
+            for aset in sets_to_create:
                 # aset[0] = setname
                 # Find Primary photo
                 setname = NP.strunicodeout(aset[0])
@@ -1988,7 +1992,7 @@ class Uploadr(object):
                 primary_pic = cur.fetchone()
 
                 # primary_pic[0] = files_id from files table
-                set_id = self.createSet(slockDB,
+                set_id = self.createSet(slockdb,
                                         setname, primary_pic[0],
                                         cur, con)
                 NP.niceprint('Created the set:[{!s}] '
@@ -2015,7 +2019,7 @@ class Uploadr(object):
                 # To prevent recursive calling, check if __name__ == '__main__'
                 # if __name__ == '__main__':
                 mp.mprocessing(self.args.processes,
-                               slockDB,
+                               slockdb,
                                srunning,
                                smutex,
                                files,
@@ -2046,7 +2050,7 @@ class Uploadr(object):
                                      .format(NP.strunicodeout(filepic[1]),
                                              NP.strunicodeout(setname),
                                              set_id))
-                        self.addFileToSet(slockDB, set_id, filepic, cur)
+                        self.addFileToSet(slockdb, set_id, filepic, cur)
                     else:
                         NP.niceprint('Not able to assign pic to set')
                         logging.error('Not able to assign pic to set')

@@ -2346,7 +2346,7 @@ class Uploadr(object):
                 litedb.close(con)
                 sys.exit(7)
 
-            _success =  litedb.execute(
+            _success = litedb.execute(
                 con, 'DELETE#149',
                 None, self.args.processes,  # No need for lock
                 cur,

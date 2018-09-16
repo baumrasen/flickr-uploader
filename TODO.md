@@ -5,6 +5,8 @@
 ## Pending improvements
 -----------------------
 
+* Check CODING References within code
+* Review/adjust pylint warnings/errors
 * Dual logging_levels??? afer... multiprocessing_logging.install_mp_handler()
 * Test use of library https://github.com/jruere/multiprocessing-logging in Windows
 * Mask sensitive data on NicePrint.niceprint()

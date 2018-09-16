@@ -56,7 +56,7 @@ def connect(sqlite_file):
 
 def execute(aconn, qry_name, adb_lock, nprocs,
             cursor, statement, qmarkargs=(),
-            caughtcode='000'):
+            dbcaughtcode='000'):
     """
         qry_name  = Query Name
         adb_lock  = lock to be used
@@ -118,7 +118,7 @@ def execute(aconn, qry_name, adb_lock, nprocs,
         _success = False
         NPR.niceerror(caught=True,
                       caughtprefix='+++ DB',
-                      caughtcode=caughtcode,
+                      caughtcode=dbcaughtcode,
                       caughtmsg='DB error on [{!s}]: [{!s}]'
                       .format(qry_name, err.args[0]),
                       useniceprint=True)

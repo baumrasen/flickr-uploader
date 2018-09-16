@@ -151,7 +151,7 @@ script:
 
 # First RUN -------------------------------------------------------------------
   # stdout to LOG file, stderr to LST file
-  - travis_wait coverage run -a --concurrency multiprocessing `which uploadr.py` $VerboseVar $UploadrOptions > $NOHUPLOGFILE 2> $NOHUPLSTFILE
+  - coverage run -a --concurrency multiprocessing `which uploadr.py` $VerboseVar $UploadrOptions > $NOHUPLOGFILE 2> $NOHUPLSTFILE
   - tail -n $TAIL_LINES $NOHUPLOGFILE $NOHUPLSTFILE
 
   - coverage combine
@@ -211,9 +211,9 @@ script:
 
   # Actual RUN
   # Scenario Old273INI: run ./uploadr.py instead of `which uploadr.py`
-  - if [[ $TestScenario == Old273INI ]]; then travis_wait coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> $NOHUPLOGFILE 2>> $NOHUPLSTFILE; fi
-  - if [[ $TestScenario == DryRunNoToken ]]; then travis_wait coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> $NOHUPLOGFILE 2>> $NOHUPLSTFILE < /home/travis/build/oPromessa/flickr-uploader/tests/verifiercode.txt || echo ok; fi
-  - if [[ $TestScenario != Old273INI && $TestScenario != DryRunNoToken ]]; then travis_wait coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> $NOHUPLOGFILE 2>> $NOHUPLSTFILE; fi
+  - if [[ $TestScenario == Old273INI ]]; then coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> $NOHUPLOGFILE 2>> $NOHUPLSTFILE; fi
+  - if [[ $TestScenario == DryRunNoToken ]]; then coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> $NOHUPLOGFILE 2>> $NOHUPLSTFILE < /home/travis/build/oPromessa/flickr-uploader/tests/verifiercode.txt || echo ok; fi
+  - if [[ $TestScenario != Old273INI && $TestScenario != DryRunNoToken ]]; then coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> $NOHUPLOGFILE 2>> $NOHUPLSTFILE; fi
 
   - tail -n $TAIL_LINES $NOHUPLOGFILE $NOHUPLSTFILE
 

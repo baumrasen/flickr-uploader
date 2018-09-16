@@ -193,31 +193,30 @@ class Uploadr(object):
         if not self.check_token():
             # authenticate sys.exits in case of failure
             self.authenticate()
-        con = lite.connect(self.xcfg.DB_PATH)
-        con.text_factory = str
 
-        with con:
-            cur = con.cursor()
-            cur.execute("SELECT files_id, path FROM files")
-            rows = cur.fetchall()
+        con, cur = litedb.connect(self.xcfg.DB_PATH)
+        litedb.execute(con,
+                       'SELECT#005',
+                       lock, self.args.processes,
+                       cur,
+                       'SELECT files_id, path FROM files',
+                       dbcaughtcode='005')
+        rows = cur.fetchall()
+        for row in rows:
+            logging.debug('Checking file_id:[%s] file:[%s] '
+                          'isFileExcluded?',
+                          NP.strunicodeout(row[0]),
+                          NP.strunicodeout(row[1]))
+            logging.debug('type(row[1]):[%s]', type(row[1]))
+            # row[0] is photo_id
+            # row[1] is filename
+            if (self.isFileExcluded(unicode(row[1], 'utf-8')  # noqa
+                                    if sys.version_info < (3, )
+                                    else str(row[1]))):
+                # Running in single processing mode, no need for lock
+                self.deleteFile(row, cur)
 
-            for row in rows:
-                logging.debug('Checking file_id:[%s] file:[%s] '
-                              'isFileExcluded?',
-                              NP.strunicodeout(row[0]),
-                              NP.strunicodeout(row[1]))
-                logging.debug('type(row[1]):[%s]', type(row[1]))
-                # row[0] is photo_id
-                # row[1] is filename
-                if (self.isFileExcluded(unicode(row[1], 'utf-8')  # noqa
-                                        if sys.version_info < (3, )
-                                        else str(row[1]))):
-                    # Running in single processing mode, no need for lock
-                    self.deleteFile(row, cur)
-
-        # Closing DB connection
-        if con is not None:
-            con.close()
+        litedb.close(con)
 
         NP.niceprint('*****Completed files from Excluded Folders*****')
 
@@ -241,46 +240,35 @@ class Uploadr(object):
         if not self.check_token():
             # authenticate sys.exits in case of failure
             self.authenticate()
-        con = lite.connect(self.xcfg.DB_PATH)
-        con.text_factory = str
 
-        with con:
-            try:
-                cur = con.cursor()
-                cur.execute("SELECT files_id, path FROM files")
-                rows = cur.fetchall()
-                NP.niceprint('[{!s:>6s}] will be checked for Removal...'
-                             .format(str(len(rows))))
-            except lite.Error as err:
-                NP.niceerror(caught=True,
-                             caughtprefix='+++ DB',
-                             caughtcode='008',
-                             caughtmsg='DB error on SELECT: [{!s}]'
-                             .format(err.args[0]),
-                             useniceprint=True)
-                if con is not None:
-                    con.close()
-                return False
+        con, cur = litedb.connect(self.xcfg.DB_PATH)
+        litedb.execute(con,
+                       'SELECT#008',
+                       lock, self.args.processes,
+                       cur,
+                       'SELECT files_id, path FROM files',
+                       dbcaughtcode='008')
+        rows = cur.fetchall()
+        NP.niceprint('[{!s:>6s}] will be checked for Removal...'
+                     .format(str(len(rows))))
 
-            count = 0
-            for row in rows:
-                if (not os.path.isfile(row[1].decode('utf-8')
-                                       if NP.is_str_unicode(row[1])
-                                       else row[1])):
-                    # Running in single processing mode, no need for lock
-                    success = self.deleteFile(row, cur)
-                    logging.warning('deleteFile result: [%s]', success)
-                    count = count + 1
-                    if count % 3 == 0:
-                        NP.niceprint('[{!s:>6s}] files removed...'
-                                     .format(str(count)))
-            if count % 100 > 0:
-                NP.niceprint('[{!s:>6s}] files removed...'
-                             .format(str(count)))
+        count = 0
+        for row in rows:
+            if (not os.path.isfile(row[1].decode('utf-8')
+                                   if NP.is_str_unicode(row[1])
+                                   else row[1])):
+                # Running in single processing mode, no need for lock
+                success = self.deleteFile(row, cur)
+                logging.warning('deleteFile result: [%s]', success)
+                count = count + 1
+                if count % 3 == 0:
+                    NP.niceprint('[{!s:>6s}] files removed...'
+                                 .format(str(count)))
+        if count % 100 > 0:
+            NP.niceprint('[{!s:>6s}] files removed...'
+                         .format(str(count)))
 
-        # Closing DB connection
-        if con is not None:
-            con.close()
+        litedb.close(con)
 
         NP.niceprint('*****Completed deleted files*****')
 
@@ -307,36 +295,33 @@ class Uploadr(object):
 
         NP.niceprint("*****Uploading files*****")
 
-        con = lite.connect(self.xcfg.DB_PATH)
-        con.text_factory = str
+        con, cur = litedb.connect(self.xcfg.DB_PATH)
 
-        with con:
-            # Search for  media files to load including raw files to convert
-            all_media, rawfiles = self.grabNewFiles()
+        # Search for  media files to load including raw files to convert
+        all_media, rawfiles = self.grabNewFiles()
 
-            # If managing changes, consider all files
-            if self.xcfg.MANAGE_CHANGES:
-                logging.warning('MANAGE_CHANGES is True. Reviewing all_media.')
-                changed_media = all_media
+        # If managing changes, consider all files
+        if self.xcfg.MANAGE_CHANGES:
+            logging.warning('MANAGE_CHANGES is True. Reviewing all_media.')
+            changed_media = all_media
 
-            # If not, then get just the new and missing files
+        # If not, then get just the new and missing files
+        else:
+            logging.warning('MANAGE_CHANGES is False. Reviewing only '
+                            'changed_media.')
+
+            litedb.execute(con,
+                           'SELECT#015',
+                           lock, self.args.processes,
+                           cur,
+                           'SELECT path FROM files',
+                           dbcaughtcode='015')
+            existing_media = set(file[0] for file in cur.fetchall())
+
+            if existing_media:
+                changed_media = set(all_media) - existing_media
             else:
-                logging.warning('MANAGE_CHANGES is False. Reviewing only '
-                                'changed_media.')
-                cur = con.cursor()
-                try:
-                    cur.execute("SELECT path FROM files")
-                    existing_media = set(file[0] for file in cur.fetchall())
-                    changed_media = set(all_media) - existing_media
-                except lite.Error as err:
-                    NP.niceerror(caught=True,
-                                 caughtprefix='+++ DB',
-                                 caughtcode='015',
-                                 caughtmsg='DB error on DB select: [{!s}]'
-                                 .format(err.args[0]),
-                                 useniceprint=True,
-                                 exceptsysinfo=True)
-                    changed_media = all_media
+                changed_media = all_media
 
         changed_media_count = len(changed_media)
         KonstantsClass.media_count = changed_media_count
@@ -348,14 +333,16 @@ class Uploadr(object):
 
         if self.args.bad_files:
             # Cater for bad files
-            con = lite.connect(self.xcfg.DB_PATH)
-            con.text_factory = str
-            with con:
-                cur = con.cursor()
-                cur.execute("SELECT path FROM badfiles")
-                bad_media = set(file[0] for file in cur.fetchall())
-                changed_media = set(changed_media) - bad_media
-                logging.debug('len(bad_media)=[%s]', len(bad_media))
+            # CODING no reconnect: litedb.connect
+            litedb.execute(con,
+                           'SELECT#016',
+                           lock, self.args.processes,
+                           cur,
+                           'SELECT path FROM badfiles',
+                           dbcaughtcode='016')
+            bad_media = set(file[0] for file in cur.fetchall())
+            changed_media = set(changed_media) - bad_media
+            logging.debug('len(bad_media)=[%s]', len(bad_media))
 
             changed_media_count = len(changed_media)
             NP.niceprint('Removing {!s} badfiles. Found {!s} files to upload.'
@@ -368,9 +355,10 @@ class Uploadr(object):
             logging.debug('__name__:[%s] to prevent recursive calling)!',
                           __name__)
 
-            con = lite.connect(self.xcfg.DB_PATH)
-            con.text_factory = str
-            cur = con.cursor
+            # CODING: with litedb.connect stil valid no need to reconnect?
+            # con = lite.connect(self.xcfg.DB_PATH)
+            # con.text_factory = str
+            # cur = con.cursor
 
             # To prevent recursive calling, check if __name__ == '__main__'
             # if __name__ == '__main__':
@@ -407,8 +395,8 @@ class Uploadr(object):
             NP.niceprocessedfiles(count, KonstantsClass.media_count, True)
 
         # Closing DB connection
-        if con is not None:
-            con.close()
+        litedb.close(con)
+
         NP.niceprint("*****Completed uploading files*****")
 
     # -------------------------------------------------------------------------
@@ -704,6 +692,12 @@ class Uploadr(object):
             NP.niceprint('Pretty Print Output for [rawfiles]-------\n{!s}'
                          .format(pprint.pformat(rawfiles)),
                          verbosity=3)
+        else:
+            logging.debug('Masking enabled: Pretty Print Output for '
+                         '[files]/[rawfiles] disabled!')
+            NP.niceprint('Masking enabled: Pretty Print Output for '
+                         '[files]/[rawfiles] disabled!',
+                         verbosity=3)
 
         return files, rawfiles
 
@@ -863,13 +857,13 @@ class Uploadr(object):
 
                 db_success = False
                 db_success = litedb.execute(
-                    con, 'INSERT#002', lock, self.args.processes,
+                    con, 'INSERT#030', lock, self.args.processes,
                     cur,
                     'INSERT INTO files '
                     '(files_id, path, md5, last_modified, tagged) '
                     'VALUES (?, ?, ?, ?, 1)',
                     qmarkargs=(file_id, file, file_checksum, last_modified),
-                    caughtcode='030')
+                    dbcaughtcode='030')
 
                 if not db_success:
                     NP.niceerror(caught=True,
@@ -913,13 +907,13 @@ class Uploadr(object):
             last_modified = Last modified time
             """
 
-            litedb.execute(con, 'INSERT#003', lock, self.args.processes,
+            litedb.execute(con, 'INSERT#035', lock, self.args.processes,
                            cur,
                            'INSERT INTO badfiles '
                            '(path, md5, last_modified, tagged) '
                            'VALUES (?, ?, ?, 1)',
                            qmarkargs=(file, file_checksum, last_modified),
-                           caughtcode='041')
+                           dbcaughtcode='035')
         # ---------------------------------------------------------------------
 
         if self.args.dry_run:
@@ -939,12 +933,12 @@ class Uploadr(object):
         con, cur = litedb.connect(self.xcfg.DB_PATH)
 
         with con:
-            litedb.execute(con, 'SELECT#001', lock, self.args.processes,
+            litedb.execute(con, 'SELECT#040', lock, self.args.processes,
                            cur,
                            'SELECT rowid, files_id, path, set_id, md5, '
                            'tagged, last_modified FROM files WHERE path = ?',
                            qmarkargs=(file,),
-                           caughtcode='035')
+                           dbcaughtcode='040')
 
             row = cur.fetchone()
             logging.debug('row: %s', row)
@@ -1342,11 +1336,11 @@ class Uploadr(object):
                     logging.info('Will UPDATE files SET set_id = null '
                                  'for pic:[%s] ', row[1])
                     litedb.execute(
-                        con, 'UPDATE#001', lock, self.args.processes,
+                        con, 'UPDATE#050', lock, self.args.processes,
                         cur,
                         'UPDATE files SET set_id = null WHERE files_id = ?',
                         qmarkargs=(row[1],),
-                        caughtcode='045')
+                        dbcaughtcode='050')
 
                     logging.info('Did UPDATE files SET set_id = null '
                                  'for pic:[%s]',
@@ -1372,12 +1366,12 @@ class Uploadr(object):
 
                     # Control for when running multiprocessing set locking
                     litedb.execute(
-                        con, 'UPDATE#002', lock, self.args.processes,
+                        con, 'UPDATE#051', lock, self.args.processes,
                         cur,
                         'UPDATE files SET last_modified = ?'
                         'WHERE files_id = ?',
                         qmarkargs=(last_modified, row[1]),
-                        caughtcode='050')
+                        dbcaughtcode='051')
 
                 logging.warning('CHANGES row[6]!=last_modified: [%s]',
                                 row[6] != last_modified)
@@ -1667,6 +1661,7 @@ class Uploadr(object):
     # When EXCLUDED_FOLDERS defintion changes. You can run the -g
     # or --remove-excluded option in order to remove files previously loaded
     #
+    # CODING: Argument cur is not actually being used. Confirm and delete.
     def deleteFile(self, file, cur, lock=None):
         """ deleteFile
 
@@ -1696,41 +1691,41 @@ class Uploadr(object):
             con, nucur = litedb.connect(self.xcfg.DB_PATH)
 
             litedb.execute(con,
-                           'SELECT#030:dbDeleteRecordLocalDB',
+                           'SELECT#060:dbDeleteRecordLocalDB',
                            lock, self.args.processes,
                            nucur,
                            'SELECT set_id FROM files WHERE files_id = ?',
                            qmarkargs=(file[0],),
-                           caughtcode='087')
+                           dbcaughtcode='060')
             row = nucur.fetchone()
             if row is not None:
                 litedb.execute(con,
-                               'SELECT#031:dbDeleteRecordLocalDB',
+                               'SELECT#061:dbDeleteRecordLocalDB',
                                lock, self.args.processes,
                                nucur,
                                'SELECT set_id FROM files WHERE set_id = ?',
                                qmarkargs=(row[0],),
-                               caughtcode='088')
+                               dbcaughtcode='061')
                 rows = nucur.fetchall()
                 if len(rows) == 1:
                     NP.niceprint('File is the last of the set, '
                                  'deleting the set ID: [{!s}]'
                                  .format(str(row[0])))
                     litedb.execute(
-                        con, 'DELETE#032:dbDeleteRecordLocalDB',
+                        con, 'DELETE#062:dbDeleteRecordLocalDB',
                         lock, self.args.processes,
                         nucur,
                         'DELETE FROM sets WHERE set_id = ?',
                         qmarkargs=(row[0],),
-                        caughtcode='089')
+                        dbcaughtcode='062')
 
             litedb.execute(
-                con, 'DELETE#032:dbDeleteRecordLocalDB',
+                con, 'DELETE#063:dbDeleteRecordLocalDB',
                 lock, self.args.processes,
                 nucur,
                 'DELETE FROM files WHERE files_id = ?',
                 qmarkargs=(file[0],),
-                caughtcode='090')
+                dbcaughtcode='063')
 
             litedb.close(con)
         # ---------------------------------------------------------------------

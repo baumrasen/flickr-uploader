@@ -141,7 +141,8 @@ def mprocessing(nprocs, lockdb, running, mutex, itemslist, a_fn, cur):
 
     # if __name__ == '__main__':
     logging.debug('===Multiprocessing=== Setting up logger!')
-    multiprocessing.log_to_stderr()
+    # CODING No need for such low level debugging to stderr
+    # multiprocessing.log_to_stderr()
     logger = multiprocessing.get_logger()
     logger.setLevel(log_level)
 

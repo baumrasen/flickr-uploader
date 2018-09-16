@@ -312,27 +312,21 @@ class RedactingFormatter(logging.Formatter):
     """
         >>> import logging
         >>> import lib.NicePrint as npc
-        >>> logging.basicConfig()
+        >>> logging.basicConfig(level=logging.WARNING)
         >>> np = npc.NicePrint()
         >>> patts = (r'(?<=path:\[).+?(?=\])',)
         >>> for h in logging.root.handlers:
         ...     h.setFormatter(npc.RedactingFormatter(h.formatter, patts))
-        >>> logging.critical('path:[somefile]')
-        CRITICAL:path:[...]
-        ...
+        >>> logging.critical('path:[somefile]') # CRITICAL:root:path:[>...<]
     """
     def __init__(self, orig_formatter, patterns):
         self.orig_formatter = orig_formatter
         self._patterns = patterns
 
     def _hashrepl(self, matchobj):
-        print('>in  matchobj:[{!s}]/type:[{!s}]'
-              .format(matchobj.group(0), type(matchobj.group(0))))
         _hexmatch = '>' +\
             hashlib.sha1(matchobj.group(0).encode('utf-8')).hexdigest() +\
             '<'
-        print('>out matchobj:[{!s}]/type:[{!s}]'
-              .format(_hexmatch, type(matchobj.group(0))))
         return _hexmatch
         # for grp in matchobj.groups():
         #     # return hashlib.sha224(matchobj.group(0)).hexdigest()

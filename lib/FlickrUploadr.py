@@ -1,4 +1,4 @@
-        """
+"""
     by oPromessa, 2017
     Published on https://github.com/oPromessa/flickr-uploader/
 

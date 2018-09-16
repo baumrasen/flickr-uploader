@@ -597,6 +597,16 @@ if __name__ == "__main__":
     else:
         raise ValueError('No config file found or incorrect config!')
 
+    # Update console logging level as per LOGGING_LEVEL from INI file
+    CONSOLE_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL)
+    logging.warning('\n\tCONSOLE_LOGGING.setLevel=[%s] '
+                    '\n\tROTATING_LOGGING.setLevel/enabled?=[%s/%s] '
+                    '\n\tMY_CFG.LOGGING_LEVEL=[%s]',
+                    MY_CFG.LOGGING_LEVEL,
+                    MY_CFG.ROTATING_LOGGING_LEVEL,
+                    MY_CFG.ROTATING_LOGGING,
+                    MY_CFG.LOGGING_LEVEL)
+
     # Rotating LOGGING level to err_file
     if MY_CFG.ROTATING_LOGGING:
         ROTATING_LOGGING = None
@@ -635,16 +645,6 @@ if __name__ == "__main__":
                             UPLDR_K.Version,
                             MY_CFG.LOGGING_LEVEL,
                             sys.version)
-
-    # Update console logging level as per LOGGING_LEVEL from INI file
-    CONSOLE_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL)
-    logging.warning('CONSOLE_LOGGING.setLevel=[%s] '
-                    'ROTATING_LOGGING.setLevel/enabled?=[%s/%s] '
-                    'MY_CFG.LOGGING_LEVEL=[%s]',
-                    MY_CFG.LOGGING_LEVEL,
-                    MY_CFG.ROTATING_LOGGING_LEVEL,
-                    MY_CFG.ROTATING_LOGGING,
-                    MY_CFG.LOGGING_LEVEL)
 
     logging.info('Output for FLICKR Configuration:\n%s',
                  pprint.pformat(MY_CFG.FLICKR))

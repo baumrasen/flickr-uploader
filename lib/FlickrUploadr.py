@@ -197,7 +197,7 @@ class Uploadr(object):
         con, cur = litedb.connect(self.xcfg.DB_PATH)
         litedb.execute(con,
                        'SELECT#005',
-                       lock, self.args.processes,
+                       None, self.args.processes, # No need for lock
                        cur,
                        'SELECT files_id, path FROM files',
                        dbcaughtcode='005')
@@ -244,7 +244,7 @@ class Uploadr(object):
         con, cur = litedb.connect(self.xcfg.DB_PATH)
         litedb.execute(con,
                        'SELECT#008',
-                       lock, self.args.processes,
+                       None, self.args.processes, # No need for lock
                        cur,
                        'SELECT files_id, path FROM files',
                        dbcaughtcode='008')
@@ -312,7 +312,7 @@ class Uploadr(object):
 
             litedb.execute(con,
                            'SELECT#015',
-                           lock, self.args.processes,
+                           nulockDB, self.args.processes,
                            cur,
                            'SELECT path FROM files',
                            dbcaughtcode='015')
@@ -336,7 +336,7 @@ class Uploadr(object):
             # CODING no reconnect: litedb.connect
             litedb.execute(con,
                            'SELECT#016',
-                           lock, self.args.processes,
+                           nulockDB, self.args.processes,
                            cur,
                            'SELECT path FROM badfiles',
                            dbcaughtcode='016')
@@ -694,7 +694,7 @@ class Uploadr(object):
                          verbosity=3)
         else:
             logging.debug('Masking enabled: Pretty Print Output for '
-                         '[files]/[rawfiles] disabled!')
+                          '[files]/[rawfiles] disabled!')
             NP.niceprint('Masking enabled: Pretty Print Output for '
                          '[files]/[rawfiles] disabled!',
                          verbosity=3)

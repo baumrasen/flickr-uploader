@@ -1049,7 +1049,7 @@ class Uploadr(object):
                                  title_filename,
                                  os.path.splitext(title_filename)[1])
                     title_filename = os.path.splitext(title_filename)[0]
-                    logging.info('title_name:[%s]', title_filename)
+                    logging.info('title:[%s]', title_filename)
                 else:
                     title_filename = self.xcfg.FLICKR["title"]
                     logging.info('title from INI file:[%s]', title_filename)
@@ -2583,7 +2583,7 @@ class Uploadr(object):
                                  useniceprint=True)
 
                 if found_sets is None:
-                    logging.info('Adding set [%s] (%s) '
+                    logging.info('Adding set [%s] setname:[%s] '
                                  'with primary photo [%s].',
                                  set_id,
                                  'None'
@@ -2610,9 +2610,9 @@ class Uploadr(object):
                                      .format(err.args[0]),
                                      useniceprint=True)
                 else:
-                    logging.info('Set found on DB:[%s]',
+                    logging.info('Found on DB Set:[%s]',
                                  NP.strunicodeout(setname))
-                    NP.niceprint('Set found on DB:[{!s}]'
+                    NP.niceprint('Found on DB Set:[{!s}]'
                                  .format(NP.strunicodeout(setname)),
                                  verbosity=1)
         else:

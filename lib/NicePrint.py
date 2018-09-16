@@ -314,19 +314,29 @@ class RedactingFormatter(logging.Formatter):
         self._patterns = patterns
 
     def _hashrepl(self, matchobj):
-        return '=' + hashlib.sha1(matchobj.group(0)).hexdigest() + '='
+        logging.debug('>in  matchobj:[%s]/type:[%s]',
+                      matchobj.group(0),
+                      type(matchobj.group(0)))
+        _hexmatch = hashlib.sha1(strunicodeout(matchobj.group(0))).hexdigest()
+        logging.debug('<out matchobj:[%s]/type:[%s]',
+                      matchobj.group(0),
+                      type(matchobj.group(0)))
+        return _hexmatch
         # Debugging
         # return '\n>' + matchobj.group(0) + '<\n' + '=' + \
         # hashlib.sha224(matchobj.group(0)).hexdigest() + '=\n'
 
-        for grp in matchobj.groups():
-            # return hashlib.sha224(matchobj.group(0)).hexdigest()
-            return '@' + hashlib.sha224(grp).hexdigest() + '@'
+        # for grp in matchobj.groups():
+        #     # return hashlib.sha224(matchobj.group(0)).hexdigest()
+        #     return '=' + hashlib.sha224(strunicodeout(grp)).hexdigest() + '='
 
     def format(self, record):
         msg = self.orig_formatter.format(record)
+        # CODING
+        logging.debug('>in  msg:[%s]/type:[%s]', msg, type(msg))
         for pattern in self._patterns:
             msg = re.sub(pattern, self._hashrepl, msg, re.IGNORECASE)
+        logging.debug('<out msg:[%s]/type:[%s]', msg, type(msg))
         return msg
 
     def __getattr__(self, attr):

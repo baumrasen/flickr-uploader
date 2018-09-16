@@ -367,7 +367,7 @@ def run_uploadr(args):
     # Setup the database. Clean badfiles entries if asked
     myflick.setup_db()
     if args.clean_bad_files:
-        myflick.cleanDBbadfiles()
+        myflick.clean_db_badfiles()
 
     if args.authenticate:
         check_token_authenticate()

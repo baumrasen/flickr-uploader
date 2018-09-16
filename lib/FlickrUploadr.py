@@ -1,4 +1,4 @@
-"""
+        """
     by oPromessa, 2017
     Published on https://github.com/oPromessa/flickr-uploader/
 
@@ -422,7 +422,7 @@ class Uploadr(object):
                              .format(NP.strunicodeout(fullpath)))
                 continue
 
-            if self.convertRawFile(dirpath, afile, ext, fnameonly):
+            if self.convert_raw_file(dirpath, afile, ext, fnameonly):
                 try:
                     okfilesize = True
                     filesize = os.path.getsize(
@@ -463,13 +463,13 @@ class Uploadr(object):
         NP.niceprint('*****Completed converting files*****')
 
     # -------------------------------------------------------------------------
-    # convertRawFile
+    # convert_raw_file
     #
     # Converts a RAW file into JPG. Also copies tags from RAW file.
     # Uses external exiftool.
     #
-    def convertRawFile(self, a_dirpath, a_fname, a_fext, a_fbasename):
-        """ convertRawFile
+    def convert_raw_file(self, a_dirpath, a_fname, a_fext, a_fbasename):
+        """ convert_raw_file
 
         a_dirpath  = dirpath folder for filename
         a_fname    = filename (including extension)
@@ -2310,13 +2310,13 @@ class Uploadr(object):
         NP.niceprint('Completed database setup')
 
     # -------------------------------------------------------------------------
-    # cleanDBbadfiles
+    # clean_db_badfiles
     #
     # Cleans up (deletes) contents from DB badfiles table
     #
-    def cleanDBbadfiles(self):
+    def clean_db_badfiles(self):
         """
-            cleanDBbadfiles
+            clean_db_badfiles
 
             Cleans up (deletes) contents from DB badfiles table
         """

@@ -197,7 +197,7 @@ class Uploadr(object):
         con, cur = litedb.connect(self.xcfg.DB_PATH)
         litedb.execute(con,
                        'SELECT#005',
-                       None, self.args.processes, # No need for lock
+                       None, self.args.processes,  # No need for lock
                        cur,
                        'SELECT files_id, path FROM files',
                        dbcaughtcode='005')
@@ -244,7 +244,7 @@ class Uploadr(object):
         con, cur = litedb.connect(self.xcfg.DB_PATH)
         litedb.execute(con,
                        'SELECT#008',
-                       None, self.args.processes, # No need for lock
+                       None, self.args.processes,  # No need for lock
                        cur,
                        'SELECT files_id, path FROM files',
                        dbcaughtcode='008')

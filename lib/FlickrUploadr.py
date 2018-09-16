@@ -286,10 +286,10 @@ class Uploadr(object):
         # ---------------------------------------------------------------------
         # Local Variables
         #
-        #   nulockDB     = multiprocessing Lock for access to Database
+        #   nulockdb     = multiprocessing Lock for access to Database
         #   numutex      = multiprocessing mutex for access to value srunning
         #   nrunning    = multiprocessing Value to count processed photos
-        nulockDB = None
+        nulockdb = None
         numutex = None
         nurunning = None
 
@@ -312,7 +312,7 @@ class Uploadr(object):
 
             litedb.execute(con,
                            'SELECT#015',
-                           nulockDB, self.args.processes,
+                           nulockdb, self.args.processes,
                            cur,
                            'SELECT path FROM files',
                            dbcaughtcode='015')
@@ -336,7 +336,7 @@ class Uploadr(object):
             # CODING no reconnect: litedb.connect
             litedb.execute(con,
                            'SELECT#016',
-                           nulockDB, self.args.processes,
+                           nulockdb, self.args.processes,
                            cur,
                            'SELECT path FROM badfiles',
                            dbcaughtcode='016')
@@ -363,7 +363,7 @@ class Uploadr(object):
             # To prevent recursive calling, check if __name__ == '__main__'
             # if __name__ == '__main__':
             mp.mprocessing(self.args.processes,
-                           nulockDB,
+                           nulockdb,
                            nurunning,
                            numutex,
                            changed_media,

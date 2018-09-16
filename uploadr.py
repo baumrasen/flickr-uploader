@@ -657,7 +657,7 @@ if __name__ == "__main__":
         NPR.niceprint('Mask-Sensitive Argument enabled!')
         logging.debug('Mask-Sensitive Argument enabled!')
         # Patterns to filter
-        patts = (
+        MASK_PATTERNS = (
             # CODING: Reconfirm logging for: filename, path, file, etc.
 
             # Non-greedy "[filename]" preceeded by "path:[" & followed by "]"
@@ -679,9 +679,9 @@ if __name__ == "__main__":
         logging.debug('Setting Masking Logging Formatter')
         for hnd in logging.root.handlers:
             hnd.setFormatter(NicePrint.RedactingFormatter(hnd.formatter,
-                                                          patts))
+                                                          MASK_PATTERNS))
         logging.debug('Masking Logging Formatter is now set!')
-        logging.debug('Masking Patterns: %s', patts)
+        logging.debug('Masking Patterns: %s', MASK_PATTERNS)
 
     # Ensure that only one instance of this script is running
     try:

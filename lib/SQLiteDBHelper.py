@@ -128,10 +128,7 @@ def execute(aconn, qry_name, adb_lock, nprocs,
         # Release DB lock if running in multiprocessing mode
         mp.use_lock(adb_lock, False, nprocs)
 
-    logging.debug('<-- DBHelper.execute [%s] '
-                  'statement:[%s] qmarkargs:[%s] type(qmarkargs):[%s]',
-                  qry_name,
-                  statement, qmarkargs, type(qmarkargs))
+    logging.info('<-- DBHelper.execute [%s] _success:[%s]', qry_name, _success)
 
     return _success
 

@@ -309,8 +309,8 @@ $ ./uploadr.py --dry-run
 ```
 Run `./uploadr.py --help` for up to the minute information on arguments:
 ```bash
-[910][2018.06.22 01:58:57]:[5834       ][PRINT   ]:[uploadr] ----------- (V2.8.6) Start -----------(Log:40)
-usage: uploadr.py [-h] [-C filename.ini] [-a] [-v] [-x] [-n] [-i TITLE]
+[961][2018.09.16 06:06:42]:[15221      ][PRINT   ]:[uploadr] ----------- (V2.8.7) Start -----------(Log:40)
+usage: uploadr.py [-h] [-C filename.ini] [-a] [-v] [-x] [-m] [-n] [-i TITLE]
                   [-e DESCRIPTION] [-t TAGS] [-l N] [-r] [-p P] [-u] [-d] [-b]
                   [-c] [-s] [-g] [--add-albums-migrate]
 
@@ -322,8 +322,7 @@ optional arguments:
 Configuration related options:
   -C filename.ini, --config-file filename.ini
                         Optional configuration file. Default
-                        is:[/home/ruler/Documents/GitHub/flickr-
-                        uploader/uploadr.ini]
+                        is:[/home/ruler/uploader/bin/uploadr.ini]
   -a, --authenticate    Performs/Verifies authentication with Flickr. To be
                         run on initial setup.Does not run any other option.
 
@@ -333,6 +332,9 @@ Verbose and dry-run options:
   -x, --verbose-progress
                         Provides progress indicator on each upload. See also
                         LOGGING_LEVEL value in INI file.
+  -m, --mask-sensitive  Masks sensitive data on log files like your pics
+                        filenames and set/albums names. (Uses SHA1 hashing
+                        algorithm)
   -n, --dry-run         Dry run. No changes are actually performed.
 
 Information options:

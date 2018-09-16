@@ -309,23 +309,31 @@ class NicePrint:
 # class RedactingFormatter wrapps logging.Formatter to mask logging messages.
 #
 class RedactingFormatter(logging.Formatter):
+    """
+        >>> import logging
+        >>> import lib.NicePrint as npc
+        >>> logging.basicConfig()
+        >>> np = npc.NicePrint()
+        >>> patts = (r'(?<=path:\[).+?(?=\])',)
+        >>> for h in logging.root.handlers:
+        ...     h.setFormatter(npc.RedactingFormatter(h.formatter, patts))
+        >>> logging.critical('path:[somefile]')
+        CRITICAL:path:[...]
+        ...
+    """
     def __init__(self, orig_formatter, patterns):
         self.orig_formatter = orig_formatter
         self._patterns = patterns
 
     def _hashrepl(self, matchobj):
-        logging.debug('>in  matchobj:[%s]/type:[%s]',
-                      matchobj.group(0),
-                      type(matchobj.group(0)))
-        _hexmatch = hashlib.sha1(strunicodeout(matchobj.group(0))).hexdigest()
-        logging.debug('<out matchobj:[%s]/type:[%s]',
-                      matchobj.group(0),
-                      type(matchobj.group(0)))
+        print('>in  matchobj:[{!s}]/type:[{!s}]'
+              .format(matchobj.group(0), type(matchobj.group(0))))
+        _hexmatch = '>' +\
+            hashlib.sha1(matchobj.group(0).encode('utf-8')).hexdigest() +\
+            '<'
+        print('>out matchobj:[{!s}]/type:[{!s}]'
+              .format(_hexmatch, type(matchobj.group(0))))
         return _hexmatch
-        # Debugging
-        # return '\n>' + matchobj.group(0) + '<\n' + '=' + \
-        # hashlib.sha224(matchobj.group(0)).hexdigest() + '=\n'
-
         # for grp in matchobj.groups():
         #     # return hashlib.sha224(matchobj.group(0)).hexdigest()
         #     return '=' + hashlib.sha224(strunicodeout(grp)).hexdigest() + '='

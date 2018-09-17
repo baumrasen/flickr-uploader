@@ -1780,8 +1780,8 @@ class Uploadr(object):
                           cur,
                           'INSERT INTO sets (set_id, name, primary_photo_id) '
                           'VALUES (?,?,?)',
-                          (set_id, setname, primary_photo_id),
-                          dbcaughtcode='094')
+                          qmarkargs=(set_id, setname, primary_photo_id),
+                          dbcaughtcode='094'):
             litedb.execute(con, 'UPDATE#095', lock, self.args.processes,
                           cur,
                           'UPDATE files SET set_id = ? WHERE files_id = ?',
@@ -1930,9 +1930,9 @@ class Uploadr(object):
                                'FROM files '
                                'WHERE set_id is NULL '
                                'AND getSet(path, ?, ?) = ?',
-                               qmarkargs= (self.xcfg.FILES_DIR,
-                                           self.xcfg.FULL_SET_NAME,
-                                           setname,),
+                               qmarkargs=(self.xcfg.FILES_DIR,
+                                          self.xcfg.FULL_SET_NAME,
+                                          setname,),
                                dbcaughtcode='156')
                 primary_pic = cur.fetchone()
 
@@ -1952,7 +1952,7 @@ class Uploadr(object):
                            'SELECT files_id, path, set_id '
                            'FROM files '
                            'WHERE set_id is NULL',
-                            dbcaughtcode='157')
+                           dbcaughtcode='157')
             files = cur.fetchall()
             # CODING:Check need for cur.close().Only location in which is used!
             # cur.close()

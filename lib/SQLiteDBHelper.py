@@ -178,6 +178,7 @@ def enable_callback_tracebacks(flag):
 
     return _success
 
+
 # -----------------------------------------------------------------------------
 # If called directly run doctests
 #

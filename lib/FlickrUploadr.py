@@ -1783,10 +1783,10 @@ class Uploadr(object):
                           qmarkargs=(set_id, setname, primary_photo_id),
                           dbcaughtcode='094'):
             litedb.execute(con, 'UPDATE#095', lock, self.args.processes,
-                          cur,
-                          'UPDATE files SET set_id = ? WHERE files_id = ?',
-                          qmarkargs=(set_id, primary_photo_id),
-                          dbcaughtcode='095')
+                           cur,
+                           'UPDATE files SET set_id = ? WHERE files_id = ?',
+                           qmarkargs=(set_id, primary_photo_id),
+                           dbcaughtcode='095')
 
         return True
 
@@ -2033,9 +2033,7 @@ class Uploadr(object):
         if self.args.dry_run:
             return True
 
-        con = lite.connect(self.xcfg.DB_PATH)
-        con.text_factory = str
-        bcur = con.cursor()
+        con, bcur = litedb.connect(self.xcfg.DB_PATH)
 
         get_success, _, get_errcode = faw.flickrapi_fn(
             self.nuflickr.photosets.addPhoto, (),
@@ -2048,23 +2046,13 @@ class Uploadr(object):
                          .format(NP.strunicodeout(file[1]),
                                  NP.strunicodeout(set_id)))
 
-            try:
-                # Acquire DBlock if in multiprocessing mode
-                mp.use_lock(lock, True, self.args.processes)
-                bcur.execute("UPDATE files SET set_id = ? "
-                             "WHERE files_id = ?",
-                             (set_id, file[0]))
-                con.commit()
-            except lite.Error as err:
-                NP.niceerror(caught=True,
-                             caughtprefix='+++ DB',
-                             caughtcode='096',
-                             caughtmsg='DB error on UPDATE files: [{!s}]'
-                             .format(err.args[0]),
-                             useniceprint=True)
-            finally:
-                # Release DBlock if in multiprocessing mode
-                mp.use_lock(lock, False, self.args.processes)
+            litedb.execute(con, 'SELECT#096', lock, self.args.processes,
+                           bcur,
+                           'UPDATE files SET set_id = ? '
+                           'WHERE files_id = ?',
+                           qmarkargs=(set_id, file[0]),
+                           dbcaughtcode='096')
+
         elif not get_success and get_errcode == 1:
             # Error: 1: Photoset not found
             NP.niceprint('Photoset not found, creating new set...')
@@ -2075,25 +2063,15 @@ class Uploadr(object):
             self.createSet(lock, setname, file[0], cur, con)
         elif not get_success and get_errcode == 3:
             # Error: 3: Photo already in set
-            try:
-                NP.niceprint('Photo already in set... updating DB'
-                             'set_id=[{!s}] photo_id=[{!s}]'
-                             .format(set_id, file[0]))
-                # Acquire DBlock if in multiprocessing mode
-                mp.use_lock(lock, True, self.args.processes)
-                bcur.execute('UPDATE files SET set_id = ? '
-                             'WHERE files_id = ?', (set_id, file[0]))
-            except lite.Error as err:
-                NP.niceerror(caught=True,
-                             caughtprefix='+++ DB',
-                             caughtcode='110',
-                             caughtmsg='DB error on UPDATE SET: [{!s}]'
-                             .format(err.args[0]),
-                             useniceprint=True)
-            finally:
-                con.commit()
-                # Release DBlock if in multiprocessing mode
-                mp.use_lock(lock, False, self.args.processes)
+            NP.niceprint('Photo already in set... updating DB'
+                         'set_id=[{!s}] photo_id=[{!s}]'
+                         .format(set_id, file[0]))            
+            litedb.execute(con, 'SELECT#110', lock, self.args.processes,
+                           bcur,
+                           'UPDATE files SET set_id = ? '
+                           'WHERE files_id = ?',
+                           qmarkargs=(set_id, file[0]),
+                           dbcaughtcode='110')
         else:
             NP.niceerror(caught=True,
                          caughtprefix='xxx',
@@ -2108,7 +2086,9 @@ class Uploadr(object):
                          caughtcode='122',
                          caughtmsg='Closing DB connection on addFileToSet',
                          useniceprint=True)
-            con.close()
+            # CODING: replaced by litedb.close
+            # con.close()
+            litedb.close(con)
 
     # -------------------------------------------------------------------------
     # createSet

@@ -2065,7 +2065,7 @@ class Uploadr(object):
             # Error: 3: Photo already in set
             NP.niceprint('Photo already in set... updating DB'
                          'set_id=[{!s}] photo_id=[{!s}]'
-                         .format(set_id, file[0]))            
+                         .format(set_id, file[0]))
             litedb.execute(con, 'SELECT#110', lock, self.args.processes,
                            bcur,
                            'UPDATE files SET set_id = ? '

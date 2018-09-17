@@ -75,15 +75,17 @@ env:
 #   ExcludedFolders+IgnoredFiles in Single Processing mode.
 #       Also test cleaning up badfiles database entries and listing files not in set. Plus RAW files.
 #       Also test -m/--mask-sensitive option
+#       Also test ROTATING_LOGGIN into uploadr.err file
 #   Old273INI to test previous INI config file format using os.path.dirname(sys.argv[0]) vs os.getcwd()
 #   NoVerbose
+#       Also test ROTATING_LOGGIN into uploadr.err file
   matrix:
 # TestScenario: Help, DryRunNoToken, BadFiles, MultiProcessing, Remove, Replace, RemoveReplace, Old273INI
     - TestScenario=Help UploadrOptions="$VerboseVar --help" DeleteAllFromFlickr=1
     - TestScenario=DryRunNoToken UploadrOptions="$VerboseVar -n -p 10"
     #- TestScenario=BadFiles UploadrOptions="$VerboseVar $BadFilesVar"
     - TestScenario=MultiProcessing UploadrOptions="$VerboseVar $BadFilesVar -p 20"
-    #- TestScenario=addAlbumsMigrate UploadrOptions="$VerboseVar -p 20"
+    - TestScenario=addAlbumsMigrate UploadrOptions="$VerboseVar -p 20"
     - TestScenario=RemoveReplace UploadrOptions="$VerboseVar $BadFilesVar $ListPhotosNotInSet -p 10 -c"
     - TestScenario=ExcludedFolders UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -c -l 50 -m"
     - TestScenario=Old273INI UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -p 10"

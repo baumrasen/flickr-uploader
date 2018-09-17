@@ -1776,40 +1776,17 @@ class Uploadr(object):
         NP.niceprint('  Add set to DB:[{!s}]'
                      .format(NP.strunicodeout(setname)), verbosity=1)
 
-        try:
-            # Acquire DBlock if in multiprocessing mode
-            mp.use_lock(lock, True, self.args.processes)
-            cur.execute('INSERT INTO sets (set_id, name, primary_photo_id) '
-                        'VALUES (?,?,?)',
-                        (set_id, setname, primary_photo_id))
-        except lite.Error as err:
-            NP.niceerror(caught=True,
-                         caughtprefix='+++ DB',
-                         caughtcode='094',
-                         caughtmsg='DB error on INSERT: [{!s}]'
-                         .format(err.args[0]),
-                         useniceprint=True)
-        finally:
-            con.commit()
-            # Release DBlock if in multiprocessing mode
-            mp.use_lock(lock, False, self.args.processes)
-
-        try:
-            # Acquire DBlock if in multiprocessing mode
-            mp.use_lock(lock, True, self.args.processes)
-            cur.execute('UPDATE files SET set_id = ? WHERE files_id = ?',
-                        (set_id, primary_photo_id))
-        except lite.Error as err:
-            NP.niceerror(caught=True,
-                         caughtprefix='+++ DB',
-                         caughtcode='095',
-                         caughtmsg='DB error on UPDATE: [{!s}]'
-                         .format(err.args[0]),
-                         useniceprint=True)
-        finally:
-            con.commit()
-            # Release DBlock if in multiprocessing mode
-            mp.use_lock(lock, False, self.args.processes)
+        if litedb.execute(con, 'INSERT#094', lock, self.args.processes,
+                          cur,
+                          'INSERT INTO sets (set_id, name, primary_photo_id) '
+                          'VALUES (?,?,?)',
+                          (set_id, setname, primary_photo_id),
+                          dbcaughtcode='094')
+            litedb.execute(con, 'UPDATE#095', lock, self.args.processes,
+                          cur,
+                          'UPDATE files SET set_id = ? WHERE files_id = ?',
+                          qmarkargs=(set_id, primary_photo_id),
+                          dbcaughtcode='095')
 
         return True
 
@@ -1857,8 +1834,8 @@ class Uploadr(object):
             setname = faw.set_name_from_file(filepic[1],
                                              self.xcfg.FILES_DIR,
                                              self.xcfg.FULL_SET_NAME)
-            aset = None
 
+            aset = None
             litedb.execute(fn_con,
                            'SELECT#098:dbDeleteRecordLocalDB',
                            lockdb, self.args.processes,
@@ -1924,45 +1901,39 @@ class Uploadr(object):
         if self.args.dry_run:
             return True
 
-        con = lite.connect(self.xcfg.DB_PATH)
-        con.text_factory = str
+        con, cur = litedb.connect(self.xcfg.DB_PATH)
         con.create_function("getSet", 3, faw.set_name_from_file)
-        # Enable traceback return from create_function.
-        lite.enable_callback_tracebacks(True)
+        # Enable traceback return from con.create_function.
+        litedb.enable_callback_tracebacks(True)
 
         with con:
-            cur = con.cursor()
-
-            try:
-                # List of Sets to be created
-                cur.execute('SELECT DISTINCT getSet(path, ?, ?) '
-                            'FROM files WHERE getSet(path, ?, ?) '
-                            'NOT IN (SELECT name FROM sets)',
-                            (self.xcfg.FILES_DIR, self.xcfg.FULL_SET_NAME,
-                             self.xcfg.FILES_DIR, self.xcfg.FULL_SET_NAME,))
-
-                sets_to_create = cur.fetchall()
-            except lite.Error as err:
-                NP.niceerror(caught=True,
-                             caughtprefix='+++ DB',
-                             caughtcode='145',
-                             caughtmsg='DB error on DB create: [{!s}]'
-                             .format(err.args[0]),
-                             useniceprint=True,
-                             exceptsysinfo=True)
-                raise
+            # List of Sets to be created
+            litedb.execute(con, 'SELECT#145', slockdb, self.args.processes,
+                           cur,
+                           'SELECT DISTINCT getSet(path, ?, ?) '
+                           'FROM files WHERE getSet(path, ?, ?) '
+                           'NOT IN (SELECT name FROM sets)',
+                           qmarkargs=(self.xcfg.FILES_DIR,
+                                      self.xcfg.FULL_SET_NAME,
+                                      self.xcfg.FILES_DIR,
+                                      self.xcfg.FULL_SET_NAME,),
+                           dbcaughtcode='145')
+            sets_to_create = cur.fetchall()
 
             for aset in sets_to_create:
                 # aset[0] = setname
                 # Find Primary photo
                 setname = NP.strunicodeout(aset[0])
-                cur.execute('SELECT MIN(files_id), path '
-                            'FROM files '
-                            'WHERE set_id is NULL '
-                            'AND getSet(path, ?, ?) = ?',
-                            (self.xcfg.FILES_DIR,
-                             self.xcfg.FULL_SET_NAME,
-                             setname,))
+                litedb.execute(con, 'SELECT#156', slockdb, self.args.processes,
+                               cur,
+                               'SELECT MIN(files_id), path '
+                               'FROM files '
+                               'WHERE set_id is NULL '
+                               'AND getSet(path, ?, ?) = ?',
+                               qmarkargs= (self.xcfg.FILES_DIR,
+                                           self.xcfg.FULL_SET_NAME,
+                                           setname,),
+                               dbcaughtcode='156')
                 primary_pic = cur.fetchone()
 
                 # primary_pic[0] = files_id from files table
@@ -1976,11 +1947,15 @@ class Uploadr(object):
                                      set_id,
                                      primary_pic[0]))
 
-            cur.execute('SELECT files_id, path, set_id '
-                        'FROM files '
-                        'WHERE set_id is NULL')
+            litedb.execute(con, 'SELECT#157', slockdb, self.args.processes,
+                           cur,
+                           'SELECT files_id, path, set_id '
+                           'FROM files '
+                           'WHERE set_id is NULL',
+                            dbcaughtcode='157')
             files = cur.fetchall()
-            cur.close()
+            # CODING:Check need for cur.close().Only location in which is used!
+            # cur.close()
 
             # running in multi processing mode
             if self.args.processes and self.args.processes > 0:
@@ -1988,7 +1963,8 @@ class Uploadr(object):
                               self.args.processes)
                 logging.debug('__name__:[%s] to prevent recursive calling)!',
                               __name__)
-                cur = con.cursor()
+                # CODING: cur already defined. Remove
+                # cur = con.cursor()
 
                 # To prevent recursive calling, check if __name__ == '__main__'
                 # if __name__ == '__main__':
@@ -2003,7 +1979,8 @@ class Uploadr(object):
 
             # running in single processing mode
             else:
-                cur = con.cursor()
+                # CODING: cur already defined. Remove
+                # cur = con.cursor()
 
                 for filepic in files:
                     # filepic[1] = path for the file from table files
@@ -2012,9 +1989,14 @@ class Uploadr(object):
                                                      self.xcfg.FILES_DIR,
                                                      self.xcfg.FULL_SET_NAME)
 
-                    cur.execute('SELECT set_id, name '
-                                'FROM sets WHERE name = ?',
-                                (setname,))
+                    litedb.execute(con, 'SELECT#158',
+                                   slockdb, self.args.processes,
+                                   cur,
+                                   'SELECT set_id, name '
+                                   'FROM sets WHERE name = ?',
+                                   qmarkargs=(setname,),
+                                   dbcaughtcode='158')
+
                     aset = cur.fetchone()
                     if aset is not None:
                         set_id = aset[0]

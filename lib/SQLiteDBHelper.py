@@ -152,6 +152,32 @@ def total_rows(cursor, table_name, print_out=False):
     return count[0][0]
 
 
+def enable_callback_tracebacks(flag):
+    """
+    
+    To get tracebacks from in user-defined functions, aggregates, converters,
+    authorizer callbacks etc.
+    """
+    assert isinstance(flag, bool),\
+        NP.niceassert('enable_callback_traceback: wrong argument:[{!s}]'
+                      .format(flag))
+
+    _success = True
+    try:
+        lite.enable_callback_tracebacks(flag)
+    except lite.Error as err:
+        _success = False
+        NPR.niceerror(caught=True,
+                      caughtprefix='+++ DB',
+                      caughtcode=dbcaughtcode,
+                      caughtmsg='DB error on [{!s}]: [{!s}]'
+                      .format('Enable callback', err.args[0]),
+                      useniceprint=True)
+
+    logging.info('<-- DBHelper.enable_callback [%s] _success:[%s]', _success)
+    
+    return _success
+
 # -----------------------------------------------------------------------------
 # If called directly run doctests
 #

@@ -2713,6 +2713,9 @@ class Uploadr(object):
         if ret_photos_uploaded == 0:
             # A) checksum,                             Count=0  THEN NOT EXISTS
             ret_is_photo_uploaded = False
+            NP.niceprint(' IS_UPLOADED:[FALSE]',
+                         fname='isuploaded', verbosity=2)
+            logging.warning(' IS_UPLOADED:[FALSE]')
         elif ret_photos_uploaded >= 1:
             logging.warning('+++#190: '
                             'Found [%s] images with checksum:[%s]',

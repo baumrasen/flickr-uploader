@@ -150,12 +150,12 @@ def total_rows(aconn, table_name, lock, nprocs, acursor, dbcaughtcode='000'):
     """
 
     acount = -1
-    if litedb.execute(aconn,
-                      table_name,
-                      lock, nprocs,
-                      acursor,
-                      'SELECT count(*) FROM {}'.format(table_name),
-                      dbcaughtcode=dbcaughtcode):
+    if execute(aconn,
+               table_name,
+               lock, nprocs,
+               acursor,
+               'SELECT count(*) FROM {}'.format(table_name),
+               dbcaughtcode=dbcaughtcode):
         acount = acursor.fetchone()[0]
 
     logging.info('Count=[%s] from table=[%s]', acount, table_name)

@@ -3211,6 +3211,9 @@ class Uploadr(object):
                 None, self.args.processes,  # No need for lock,
                 cur, dbcaughtcode='220')
 
+            if con is not None and con in locals():
+                litedb.close(con)
+
             return acount
 
         # Total Local photos count --------------------------------------------

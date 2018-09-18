@@ -327,7 +327,13 @@ class RedactingFormatter(logging.Formatter):
     def _hashrepl(self, matchobj):
         # print('>in  matchobj:[{!s}]/type:[{!s}]'
         #       .format(matchobj.group(0), type(matchobj.group(0))))
-        _hexmatch = '>' + hashlib.sha1(matchobj.group(0)).hexdigest() + '<'
+        if sys.version_info < (3, ):
+            tohash = NicePrint().strunicodeout(matchobj.group(0))
+        else:
+            tohash = matchobj.group(0).encode('utf- 8')
+
+        _hexmatch = '>' + hashlib.sha1(tohash).hexdigest() + '<'
+
         # print('>out matchobj:[{!s}]/type:[{!s}]'
         #       .format(_hexmatch, type(matchobj.group(0))))
         return _hexmatch

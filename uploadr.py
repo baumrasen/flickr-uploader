@@ -674,7 +674,12 @@ if __name__ == "__main__":
             r'(?<=Album:\[).+?(?=\])',
 
             # Non-greedy "[setName]" word preceeded by "album"
-            r'(?<=album)\w+'
+            r'(?<=album)\w+',
+
+            # Non-greedy "'api_key': " and "'secret': "
+            r'(?<=api_key\'. ).+?\w+',
+            r'(?<=api_key\%).+?\w+',
+            r'(?<=secret\'. ).+?\w+'
             )
         logging.debug('Setting Masking Logging Formatter')
         for hnd in logging.root.handlers:

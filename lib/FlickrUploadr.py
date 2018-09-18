@@ -3204,23 +3204,13 @@ class Uploadr(object):
 
                 Returns SELECT Count(*) from atable
             """
-            con = lite.connect(self.xcfg.DB_PATH)
-            con.text_factory = str
-            acount = -1
-            with con:
-                try:
-                    cur = con.cursor()
-                    cur.execute("SELECT Count(*) FROM {!s}".format(atable))
-                    acount = cur.fetchone()[0]
-                    logging.info('Count=[%s] from table=[%s]', acount, atable)
-                except lite.Error as err:
-                    NP.niceerror(caught=True,
-                                 caughtprefix='+++ DB',
-                                 caughtcode='220',
-                                 caughtmsg='DB error on '
-                                 'SELECT FROM {!s}: [{!s}]'
-                                 .format(atable, err.args[0]),
-                                 useniceprint=True)
+
+            con, cur = litedb.connect(self.xcfg.DB_PATH)
+            acount = litedb.total_rows(
+                con, atable,
+                None, self.args.processes,  # No need for lock,
+                cur, dbcaughtcode='220')
+
             return acount
 
         # Total Local photos count --------------------------------------------

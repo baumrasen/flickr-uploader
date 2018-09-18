@@ -143,13 +143,24 @@ def close(conn):
         conn.close()
 
 
-def total_rows(cursor, table_name, print_out=False):
-    """ Returns the total number of rows in the database """
-    cursor.execute('SELECT COUNT(*) FROM {}'.format(table_name))
-    count = cursor.fetchall()
-    if print_out:
-        print('\nTotal rows: {}'.format(count[0][0]))
-    return count[0][0]
+def total_rows(conn, table_name, lock, nprocs, acursor, dbcaughtcode='000'):
+    """ total_rows
+
+    Returns the total number of rows in a database table
+    """
+
+    acount = -1
+    if litedb.execute(con,
+                      table_name,
+                      lock, nprocs,
+                      acursor,
+                      'SELECT count(*) FROM {}'.format(table_name),
+                      dbcaughtcode=dbcaughtcode):
+        acount = cur.fetchone()[0]
+
+    logging.info('Count=[%s] from table=[%s]', acount, atable)
+
+    return acount
 
 
 def enable_callback_tracebacks(flag):

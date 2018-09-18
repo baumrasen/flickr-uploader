@@ -185,7 +185,9 @@ def enable_callback_tracebacks(flag):
                       .format('Enable callback', err.args[0]),
                       useniceprint=True)
 
-    logging.info('<-- DBHelper.enable_callback [%s] _success:[%s]', _success)
+    logging.info('<-- DBHelper.enable_callback [%s] _success:[%s]',
+                 flag,
+                 _success)
 
     return _success
 

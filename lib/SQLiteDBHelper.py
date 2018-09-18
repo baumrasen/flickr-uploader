@@ -143,22 +143,22 @@ def close(conn):
         conn.close()
 
 
-def total_rows(aconn, table_name, lock, nprocs, acursor, dbcaughtcode='000'):
+def total_rows(conn, table_name, lock, nprocs, acursor, dbcaughtcode='000'):
     """ total_rows
 
     Returns the total number of rows in a database table
     """
 
     acount = -1
-    if litedb.execute(aconn,
+    if litedb.execute(con,
                       table_name,
                       lock, nprocs,
                       acursor,
                       'SELECT count(*) FROM {}'.format(table_name),
                       dbcaughtcode=dbcaughtcode):
-        acount = acursor.fetchone()[0]
+        acount = cur.fetchone()[0]
 
-    logging.info('Count=[%s] from table=[%s]', acount, table_name)
+    logging.info('Count=[%s] from table=[%s]', acount, atable)
 
     return acount
 

@@ -2625,7 +2625,7 @@ class Uploadr(object):
         ret_photo_id = None
         ret_uploaded_no_set = False
 
-        logging.info('Is Already Uploaded:[checksum:%s] [album:%s]?',
+        logging.info('Is Already Uploaded:[checksum:%s] album:[%s]?',
                      xchecksum, NP.strunicodeout(xsetname))
 
         # Searchs for image with tag:checksum (calls Flickr photos.search)

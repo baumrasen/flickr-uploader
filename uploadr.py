@@ -646,12 +646,6 @@ if __name__ == "__main__":
                             MY_CFG.LOGGING_LEVEL,
                             sys.version)
 
-    logging.info('Output for FLICKR Configuration:\n%s',
-                 pprint.pformat(MY_CFG.FLICKR))
-    NPR.niceprint('Output for FLICKR Configuration:\n{!s}'
-                  .format(pprint.pformat(MY_CFG.FLICKR)),
-                  verbosity=3)
-
     # Enables mask  sensitive data on log files.
     if PARSED_ARGS.mask_sensitive:
         NPR.niceprint('Mask-Sensitive Argument enabled!')
@@ -664,7 +658,7 @@ if __name__ == "__main__":
             r'(?<=path:\[).+?(?=\])',
 
             # Non-greedy "[filename]" preceeded by "Title:[" & followed by "]"
-            r'(?<=Title:\[).+?(?=\])',
+            r'(?<=Title[:=]\[).+?(?=\])',
             r'(?<=file:\[).+?(?=\])',
             r'(?<=filename:\[).+?(?=\])',
 
@@ -687,6 +681,12 @@ if __name__ == "__main__":
                                                           MASK_PATTERNS))
         logging.debug('Masking Logging Formatter is now set!')
         logging.debug('Masking Patterns: %s', MASK_PATTERNS)
+
+    logging.info('Output for FLICKR Configuration:\n%s',
+                 pprint.pformat(MY_CFG.FLICKR))
+    NPR.niceprint('Output for FLICKR Configuration:\n{!s}'
+                  .format(pprint.pformat(MY_CFG.FLICKR)),
+                  verbosity=3)
 
     # Ensure that only one instance of this script is running
     try:

@@ -2380,49 +2380,32 @@ class Uploadr(object):
         if self.args.dry_run:
             return True
 
-        con = lite.connect(self.xcfg.DB_PATH)
-        con.text_factory = str
-        with con:
-            cur = con.cursor()
+        con, cur = litedb.connect(self.xcfg.DB_PATH)
+        litedb.execute(con,
+                       'SELECT#150',
+                       None, self.args.processes,  # No need for lock
+                       cur,
+                       'SELECT set_id, name FROM sets WHERE set_id NOT IN '
+                       ' (SELECT set_id FROM files)',
+                       dbcaughtcode='150')
+        unusedsets = None
+        unusedsets = cur.fetchall()
 
-            try:
-                unusedsets = None
-                cur.execute("SELECT set_id, name FROM sets WHERE set_id NOT IN\
-                            (SELECT set_id FROM files)")
-                unusedsets = cur.fetchall()
-            except lite.Error as err:
-                NP.niceerror(caught=True,
-                             caughtprefix='+++ DB',
-                             caughtcode='150',
-                             caughtmsg='DB error SELECT FROM sets: [{!s}]'
-                             .format(err.args[0]),
-                             useniceprint=True)
-            finally:
-                pass
-
-            for row in unusedsets:
-                NP.niceprint('Removing set [{!s}] ({!s}).'
-                             .format(NP.strunicodeout(row[0]),
-                                     NP.strunicodeout(row[1])),
-                             verbosity=1)
-
-                try:
-                    cur.execute("DELETE FROM sets WHERE set_id = ?", (row[0],))
-                except lite.Error as err:
-                    NP.niceerror(caught=True,
-                                 caughtprefix='+++ DB',
-                                 caughtcode='160',
-                                 caughtmsg='DB error DELETE FROM sets: [{!s}]'
-                                 .format(err.args[0]),
-                                 useniceprint=True)
-                finally:
-                    pass
-
-            con.commit()
+        for row in unusedsets:
+            NP.niceprint('Removing set [{!s}] ({!s}).'
+                         .format(NP.strunicodeout(row[0]),
+                                 NP.strunicodeout(row[1])),
+                         verbosity=1)
+            litedb.execute(con,
+                           'DELETE#151',
+                           None, self.args.processes,  # No need for lock
+                           cur,
+                           'DELETE FROM sets WHERE set_id = ?',
+                           qmarkargs=(row[0],),
+                           dbcaughtcode='151')
 
         # Closing DB connection
-        if con is not None:
-            con.close()
+        litedb.close(con)
         NP.niceprint('*****Completed removing empty Sets from DB*****')
 
     # -------------------------------------------------------------------------
@@ -2434,26 +2417,19 @@ class Uploadr(object):
 
         Prints the list of sets/albums recorded on the local database
         """
-        con = lite.connect(self.xcfg.DB_PATH)
-        con.text_factory = str
-        with con:
-            try:
-                cur = con.cursor()
-                cur.execute("SELECT set_id, name FROM sets")
-                allsets = cur.fetchall()
-            except lite.Error as err:
-                NP.niceerror(caught=True,
-                             caughtprefix='+++ DB',
-                             caughtcode='163',
-                             caughtmsg='DB error on SELECT FROM sets: [{!s}]'
-                             .format(err.args[0]),
-                             useniceprint=True)
-            for row in allsets:
-                NP.niceprint('Set: [{!s}] ({!s})'.format(str(row[0]), row[1]))
+        con, cur = litedb.connect(self.xcfg.DB_PATH)
+        litedb.execute(con,
+                       'SELECT#160',
+                       None, self.args.processes,  # No need for lock
+                       cur,
+                       'SELECT set_id, name FROM sets',
+                       dbcaughtcode='160')
+        allsets = cur.fetchall()
+        for row in allsets:
+            NP.niceprint('Set: [{!s}] ({!s})'.format(str(row[0]), row[1]))
 
         # Closing DB connection
-        if con is not None:
-            con.close()
+        litedb.close(con)
 
     # -------------------------------------------------------------------------
     # Get sets from Flickr
@@ -3176,52 +3152,49 @@ class Uploadr(object):
             List badfiles recorded on Local DB from previous loads
         """
 
-        NP.niceprint('Listing badfiles: Start.', fname='list_bad_files')
-        con = lite.connect(self.xcfg.DB_PATH)
-        con.text_factory = str
-        with con:
-            try:
-                cur = con.cursor()
-                cur.execute('SELECT files_id, path, set_id, md5, tagged, '
-                            'last_modified '
-                            'FROM badfiles ORDER BY path')
-                badFiles = cur.fetchall()
-                logging.info('len(badFiles)=[%s]', len(badFiles))
-            except lite.Error as err:
-                NP.niceerror(caught=True,
-                             caughtprefix='+++ DB',
-                             caughtcode='219',
-                             caughtmsg='DB error on SELECT FROM sets: [{!s}]'
-                             .format(err.args[0]),
-                             useniceprint=True)
-                return False
-
-            count = 0
-            count_total = len(badFiles)
-            for row in badFiles:
-                count += 1
-                # row[0] = files_id
-                # row[1] = path
-                # row[2] = set_id
-                # row[3] = md5
-                # row[4] = tagged
-                # row[5] = last_modified
-                print('files_id|path|set_id|md5|tagged|last_modified')
-                print('{!s}|{!s}|{!s}|{!s}|{!s}|{!s}'
-                      .format(NP.strunicodeout(str(row[0])),
-                              NP.strunicodeout(str(row[1])),
-                              NP.strunicodeout(str(row[2])),
-                              NP.strunicodeout(str(row[3])),
-                              NP.strunicodeout(str(row[4])),
-                              NUTIME.strftime(UPLDR_K.TimeFormat,
-                                              NUTIME.localtime(row[5]))))
-                sys.stdout.flush()
-
-            NP.niceprocessedfiles(count, count_total, True)
-
-        NP.niceprint('Listing badfiles: End. No more options will run.',
+        NP.niceprint('*****Listing badfiles: Start.*****',
                      fname='list_bad_files')
+        
+        con, cur = litedb.connect(self.xcfg.DB_PATH)
+        if not litedb.execute(con,
+                              'SELECT#165',
+                              None, self.args.processes,  # No need for lock
+                              cur,
+                              'SELECT files_id, path, set_id, md5, tagged, '
+                              'last_modified '
+                              'FROM badfiles ORDER BY path',
+                              dbcaughtcode='165'):
+            return False
 
+        badFiles = None
+        count_total = len(badFiles)        
+        logging.info('len(badFiles)=[%s]', count_total)
+
+        count = 0
+        for row in badFiles:
+            count += 1
+            # row[0] = files_id
+            # row[1] = path
+            # row[2] = set_id
+            # row[3] = md5
+            # row[4] = tagged
+            # row[5] = last_modified
+            print('files_id|path|set_id|md5|tagged|last_modified')
+            print('{!s}|{!s}|{!s}|{!s}|{!s}|{!s}'
+                  .format(NP.strunicodeout(str(row[0])),
+                          NP.strunicodeout(str(row[1])),
+                          NP.strunicodeout(str(row[2])),
+                          NP.strunicodeout(str(row[3])),
+                          NP.strunicodeout(str(row[4])),
+                          NUTIME.strftime(UPLDR_K.TimeFormat,
+                                          NUTIME.localtime(row[5]))))
+            sys.stdout.flush()
+
+        NP.niceprocessedfiles(count, count_total, True)
+        NP.niceprint('*****Listing badfiles: End. '
+                     'No more options will run.*****',
+                     fname='list_bad_files')
+        
         return True
 
     # -------------------------------------------------------------------------

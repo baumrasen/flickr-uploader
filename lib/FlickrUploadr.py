@@ -2939,25 +2939,25 @@ class Uploadr(object):
             cur        = cursor
         """
 
-        for i, f in enumerate(filelist):
-            logging.warning('===Current element of Chunk: [%s][%s]', i, f)
+        for i, afile in enumerate(filelist):
+            logging.warning('===Current element of Chunk: [%s][%s]', i, afile)
 
-            # f[0] = files_id
-            # f[1] = path
-            # f[2] = set_name
-            # f[3] = set_id
+            # afile[0] = files_id
+            # afile[1] = path
+            # afile[2] = set_name
+            # afile[3] = set_id
             NP.niceprint('ID:[{!s}] Path:[{!s}] Set:[{!s}] SetID:[{!s}]'
-                         .format(str(f[0]), f[1], f[2], f[3]),
+                         .format(str(afile[0]), afile[1], afile[2], afile[3]),
                          fname='addAlbumMigrate')
 
             # row[1] = path for the file from table files
-            setname = faw.set_name_from_file(f[1],
+            setname = faw.set_name_from_file(afile[1],
                                              self.xcfg.FILES_DIR,
                                              self.xcfg.FULL_SET_NAME)
             tfind, tid = self.photos_find_tag(
-                photo_id=f[0],
-                intag='album:{}'.format(f[2]
-                                        if f[2] is not None
+                photo_id=afile[0],
+                intag='album:{}'.format(afile[2]
+                                        if afile[2] is not None
                                         else setname))
 
             logging.warning('       Find Tag:[%s] TagId:[%s]',
@@ -2968,9 +2968,9 @@ class Uploadr(object):
             if not tfind:
                 get_success, _, get_errcode = faw.flickrapi_fn(
                     self.nuflickr.photos.addTags, (),
-                    dict(photo_id=f[0],
-                         tags='album:"{}"'.format(f[2]
-                                                  if f[2] is not None
+                    dict(photo_id=afile[0],
+                         tags='album:"{}"'.format(afile[2]
+                                                  if afile[2] is not None
                                                   else setname)),
                     2, 2, False, caughtcode='214')
 
@@ -2979,14 +2979,14 @@ class Uploadr(object):
                                 'Added album tag'
                                 if a_result
                                 else ' Failed tagging',
-                                str(f[0]),
-                                NP.strunicodeout(f[1]))
+                                str(afile[0]),
+                                NP.strunicodeout(afile[1]))
                 NP.niceprint('{!s}: Photo_id:[{!s}] [{!s}]'
                              .format('Added album tag'
                                      if a_result
                                      else ' Failed tagging',
-                                     str(f[0]),
-                                     NP.strunicodeout(f[1])),
+                                     str(afile[0]),
+                                     NP.strunicodeout(afile[1])),
                              fname='addAlbumMigrate')
             else:
                 logging.warning('      Found Tag:[%s] TagId:[{%s]',

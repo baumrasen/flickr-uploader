@@ -2248,8 +2248,8 @@ class Uploadr(object):
                                dbcaughtcode='010')
                 litedb.execute(con, 'CREATE#011:setup_db',
                                None, self.args.processes, cur,
-                               'CREATE UNIQUE INDEX IF NOT EXISTS badfileindex '
-                               'ON badfiles (path)',
+                               'CREATE UNIQUE INDEX IF NOT EXISTS badfileindex'
+                               ' ON badfiles (path)',
                                dbcaughtcode='011')
                 cur.execute('CREATE UNIQUE INDEX IF NOT EXISTS badfileindex '
                             'ON badfiles (path)')

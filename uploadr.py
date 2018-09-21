@@ -542,6 +542,7 @@ if __name__ == "__main__":
 
     # Set verbosity level as per -v count
     NPR.set_verbosity(PARSED_ARGS.verbose)
+    NPR.set_mask_sensitivity(PARSED_ARGS.mask_sensitive)
 
     # Print/show arguments
     logging.info('Output for arguments(args):\n%s',

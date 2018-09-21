@@ -117,8 +117,8 @@ class NicePrint:
             mask_sensitivity = True/False
         """
 
-    cls.mask_sensitivity = amask_sensitivity\
-        if isinstance(amask_sensitivity, bool) else False
+        cls.mask_sensitivity = amask_sensitivity\
+            if isinstance(amask_sensitivity, bool) else False
 
 
     # -------------------------------------------------------------------------

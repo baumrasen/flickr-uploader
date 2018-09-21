@@ -120,7 +120,6 @@ class NicePrint:
         cls.mask_sensitivity = amask_sensitivity\
             if isinstance(amask_sensitivity, bool) else False
 
-
     # -------------------------------------------------------------------------
     # get_mask_sensitivity
     #

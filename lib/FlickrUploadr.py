@@ -3021,10 +3021,10 @@ class Uploadr(object):
         # ---------------------------------------------------------------------
         # Local Variables
         #
-        #   mlockDB     = multiprocessing Lock for access to Database
+        #   mlockdb     = multiprocessing Lock for access to Database
         #   mmutex      = multiprocessing mutex for access to value mrunning
         #   mrunning    = multiprocessing Value to count processed photos
-        mlockDB = None
+        mlockdb = None
         mmutex = None
         mrunning = None
 
@@ -3063,7 +3063,7 @@ class Uploadr(object):
                 # To prevent recursive calling, check if __name__ == '__main__'
                 # if __name__ == '__main__':
                 mp.mprocessing(self.args.processes,
-                               mlockDB,
+                               mlockdb,
                                mrunning,
                                mmutex,
                                existing_media,

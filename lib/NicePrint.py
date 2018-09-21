@@ -117,8 +117,8 @@ class NicePrint:
             mask_sensitivity = True/False
         """
         assert isinstance(amask_sensitivity, bool),\
-            NPR.niceassert('set_mask_sensitivity: wrong argument:[{!s}]'
-                           .format(amask_sensitivity))
+            self.niceassert('set_mask_sensitivity: wrong argument:[{!s}]'
+                            .format(amask_sensitivity))
 
         cls.mask_sensitivity = amask_sensitivity
 

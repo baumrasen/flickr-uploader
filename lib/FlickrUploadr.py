@@ -3154,7 +3154,7 @@ class Uploadr(object):
 
         NP.niceprint('*****Listing badfiles: Start.*****',
                      fname='list_bad_files')
-        
+
         con, cur = litedb.connect(self.xcfg.DB_PATH)
         if not litedb.execute(con,
                               'SELECT#165',
@@ -3167,7 +3167,7 @@ class Uploadr(object):
             return False
 
         badFiles = None
-        count_total = len(badFiles)        
+        count_total = len(badFiles)
         logging.info('len(badFiles)=[%s]', count_total)
 
         count = 0
@@ -3194,7 +3194,7 @@ class Uploadr(object):
         NP.niceprint('*****Listing badfiles: End. '
                      'No more options will run.*****',
                      fname='list_bad_files')
-        
+
         return True
 
     # -------------------------------------------------------------------------

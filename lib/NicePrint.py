@@ -66,19 +66,22 @@ class NicePrint:
     #   class variable shared by all instances
     #
     #   verbosity = Verbosity Level defined: 0, 1, 2, ...
+    #   masking   = Masking sensitive data: True/False
 
     verbosity = 0
+    mask_sensitivity = False
 
     # -------------------------------------------------------------------------
     # class NicePrint __init__
     #
-    def __init__(self, averbosity=0):
+    def __init__(self, averbosity=0, amask_sensitivity=False):
         """ class NicePrint __init__
 
             verbosity = Verbosity Level defined: 0, 1, 2, ...
         """
 
         self.set_verbosity(averbosity)
+        self.set_mask_sensitivity(amask_sensitivity)
 
     # -------------------------------------------------------------------------
     # set_verbosity
@@ -103,6 +106,33 @@ class NicePrint:
         """
 
         return cls.verbosity
+
+    # -------------------------------------------------------------------------
+    # set_mask_sensitivity
+    #
+    @classmethod
+    def set_mask_sensitivity(cls, amask_sensitivity=False):
+        """ set_verbosity
+
+            mask_sensitivity = True/False
+        """
+        assert isinstance(amask_sensitivity, bool),\
+            NPR.niceassert('set_mask_sensitivity: wrong argument:[{!s}]'
+                           .format(amask_sensitivity))
+
+        cls.mask_sensitivity = amask_sensitivity
+
+    # -------------------------------------------------------------------------
+    # get_mask_sensitivity
+    #
+    @classmethod
+    def get_mask_sensitivity(cls):
+        """ get_verbosity
+
+            returns Class mask_sensitivity setting
+        """
+
+        return cls.mask_sensitivity
 
     # -------------------------------------------------------------------------
     # is_str_unicode
@@ -162,7 +192,7 @@ class NicePrint:
     # Print a message with the format:
     #   [2017.10.25 22:32:03]:[PRINT   ]:[uploadr] Some Message
     #
-    def niceprint(self, astr, fname='uploadr', verbosity=0, masking=False):
+    def niceprint(self, astr, fname='uploadr', verbosity=0):
         """ niceprint
         Print a message with the format:
             [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
@@ -170,9 +200,14 @@ class NicePrint:
         """
 
         if verbosity <= self.get_verbosity():
-            if masking:
+            if self.get_mask_sensitivity():
                 for pattern in UPLDR_K.MaskPatterns:
-                    astr = re.sub(pattern, self._hashrepl, astr, re.IGNORECASE)
+                    astr = re.sub(
+                        pattern,
+                        RedactingFormatter(None,
+                                           UPLDR_K.MaskPatterns)._hashrepl,
+                        astr,
+                        re.IGNORECASE)
             print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
                   .format(UPLDR_K.Gre,
                           UPLDR_K.Run,

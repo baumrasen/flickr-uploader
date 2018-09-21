@@ -67,7 +67,8 @@ class Konstants:
         # CODING: Reconfirm logging for: filename, path, file, etc.
 
         # Non-greedy "[filename]" preceeded by "path:[" & followed by "]"
-        r'(?<=path:\[).+?(?=\])',
+        r'(?<=(path):\[).+?(?=\])',
+        r'(?<=(loaded):\[).+?(?=\])',
 
         # Non-greedy "[filename]" preceeded by "Title:[" & followed by "]"
         r'(?<=Title[:=]\[).+?(?=\])',

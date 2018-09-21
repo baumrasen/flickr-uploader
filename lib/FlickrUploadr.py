@@ -2176,7 +2176,7 @@ class Uploadr(object):
         try:
             con, cur = litedb.connect(self.xcfg.DB_PATH)
 
-            _success = False
+            # CODING: Use _success = False to check each step.
             litedb.execute(con, 'CREATE#001:setup_db',
                            None, self.args.processes, cur,
                            'CREATE TABLE IF NOT EXISTS files '

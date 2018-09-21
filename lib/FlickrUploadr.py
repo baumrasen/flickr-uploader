@@ -2221,13 +2221,13 @@ class Uploadr(object):
                                None, self.args.processes, cur,
                                'ALTER TABLE files '
                                'ADD COLUMN last_modified REAL',
-                               dbcaughtcode='006')                                
+                               dbcaughtcode='006')
 
                 # Obtain new version to continue updating database
                 litedb.execute(con, 'PRAGMA#007:setup_db',
                                None, self.args.processes, cur,
                                'PRAGMA user_version',
-                               dbcaughtcode='007')                
+                               dbcaughtcode='007')
                 row = cur.fetchone()
             if row[0] == 1:
                 # Database version 2 <=========================DB VERSION: 2===

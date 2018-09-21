@@ -170,7 +170,6 @@ class NicePrint:
         """
 
         if verbosity <= self.get_verbosity():
-            
             if masking:
                 for pattern in UPLDR_K.MaskPatterns:
                     astr = re.sub(pattern, self._hashrepl, astr, re.IGNORECASE)
@@ -182,7 +181,7 @@ class NicePrint:
                           UPLDR_K.Std,
                           'PRINT',
                           self.strunicodeout(fname),
-                          self.strunicodeout(RedactingFormatter().format(astr))))
+                          self.strunicodeout(astr)))
 
     # -------------------------------------------------------------------------
     # niceassert

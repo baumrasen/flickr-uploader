@@ -196,11 +196,11 @@ class Uploadr(object):
 
         con, cur = litedb.connect(self.xcfg.DB_PATH)
         litedb.execute(con,
-                       'SELECT#005',
+                       'SELECT#025',
                        None, self.args.processes,  # No need for lock
                        cur,
                        'SELECT files_id, path FROM files',
-                       dbcaughtcode='005')
+                       dbcaughtcode='025')
         rows = cur.fetchall()
         for row in rows:
             logging.debug('Checking file_id:[%s] file:[%s] '
@@ -243,11 +243,11 @@ class Uploadr(object):
 
         con, cur = litedb.connect(self.xcfg.DB_PATH)
         litedb.execute(con,
-                       'SELECT#008',
+                       'SELECT#026',
                        None, self.args.processes,  # No need for lock
                        cur,
                        'SELECT files_id, path FROM files',
-                       dbcaughtcode='008')
+                       dbcaughtcode='026')
         rows = cur.fetchall()
         NP.niceprint('[{!s:>6s}] will be checked for Removal...'
                      .format(str(len(rows))))
@@ -311,11 +311,11 @@ class Uploadr(object):
                             'changed_media.')
 
             litedb.execute(con,
-                           'SELECT#015',
+                           'SELECT#027',
                            nulockdb, self.args.processes,
                            cur,
                            'SELECT path FROM files',
-                           dbcaughtcode='015')
+                           dbcaughtcode='027')
             existing_media = set(file[0] for file in cur.fetchall())
 
             if existing_media:
@@ -335,11 +335,11 @@ class Uploadr(object):
             # Cater for bad files
             # CODING no reconnect: litedb.connect
             litedb.execute(con,
-                           'SELECT#016',
+                           'SELECT#028',
                            nulockdb, self.args.processes,
                            cur,
                            'SELECT path FROM badfiles',
-                           dbcaughtcode='016')
+                           dbcaughtcode='028')
             bad_media = set(file[0] for file in cur.fetchall())
             changed_media = set(changed_media) - bad_media
             logging.debug('len(bad_media)=[%s]', len(bad_media))
@@ -2176,7 +2176,7 @@ class Uploadr(object):
         try:
             con, cur = litedb.connect(self.xcfg.DB_PATH)
 
-            # CODING: Use _success = False to check each step.
+            # CODING: Use _success = False to check each step.3
             litedb.execute(con, 'CREATE#001:setup_db',
                            None, self.args.processes, cur,
                            'CREATE TABLE IF NOT EXISTS files '
@@ -2205,45 +2205,58 @@ class Uploadr(object):
             # [2] = badfiles table added
             # [3] = Adding album tags to pics on upload.
             #       Used in subsequent searches.
-            cur = con.cursor()
-            cur.execute('PRAGMA user_version')
+            litedb.execute(con, 'SELECT#005:setup_db',
+                           None, self.args.processes, cur,
+                           'PRAGMA user_version',
+                           dbcaughtcode='005')
             row = cur.fetchone()
             if row[0] == 0:
                 # Database version 1 <=========================DB VERSION: 1===
                 NP.niceprint('Adding last_modified column to database',
                              verbosity=1)
                 cur = con.cursor()
-                litedb.execute(con, 'PRAGMA#005:setup_db',
+                litedb.execute(con, 'PRAGMA#006:setup_db',
                                None, self.args.processes, cur,
                                'PRAGMA user_version="1"',
-                               dbcaughtcode='005')
-                litedb.execute(con, 'ALTER#006:setup_db',
+                               dbcaughtcode='006')
+                litedb.execute(con, 'ALTER#007:setup_db',
                                None, self.args.processes, cur,
                                'ALTER TABLE files '
                                'ADD COLUMN last_modified REAL',
-                               dbcaughtcode='006')
-
+                               dbcaughtcode='007')
                 # Obtain new version to continue updating database
-                litedb.execute(con, 'PRAGMA#007:setup_db',
+                litedb.execute(con, 'PRAGMA#008:setup_db',
                                None, self.args.processes, cur,
                                'PRAGMA user_version',
-                               dbcaughtcode='007')
+                               dbcaughtcode='008')
                 row = cur.fetchone()
             if row[0] == 1:
                 # Database version 2 <=========================DB VERSION: 2===
                 # Cater for badfiles
                 NP.niceprint('Adding table badfiles to database',
                              verbosity=1)
-                cur.execute('PRAGMA user_version="2"')
-                cur.execute('CREATE TABLE IF NOT EXISTS badfiles '
-                            '(files_id INTEGER PRIMARY KEY AUTOINCREMENT, '
-                            'path TEXT, set_id INT, md5 TEXT, tagged INT, '
-                            'last_modified REAL)')
+                litedb.execute(con, 'PRAGMA#009:setup_db',
+                               None, self.args.processes, cur,
+                               'PRAGMA user_version="2"',
+                               dbcaughtcode='009')
+                litedb.execute(con, 'CREATE#010:setup_db',
+                               None, self.args.processes, cur,
+                               'CREATE TABLE IF NOT EXISTS badfiles '
+                               '(files_id INTEGER PRIMARY KEY AUTOINCREMENT, '
+                               'path TEXT, set_id INT, md5 TEXT, tagged INT, '
+                               'last_modified REAL)',
+                               dbcaughtcode='010')
+                litedb.execute(con, 'CREATE#011:setup_db',
+                               None, self.args.processes, cur,
+                               'CREATE UNIQUE INDEX IF NOT EXISTS badfileindex '
+                               'ON badfiles (path)',
+                               dbcaughtcode='011')
                 cur.execute('CREATE UNIQUE INDEX IF NOT EXISTS badfileindex '
                             'ON badfiles (path)')
-                con.commit()
-                cur = con.cursor()
-                cur.execute('PRAGMA user_version')
+                litedb.execute(con, 'PRAGMA#012:setup_db',
+                               None, self.args.processes, cur,
+                               'PRAGMA user_version',
+                               dbcaughtcode='012')
                 row = cur.fetchone()
             if row[0] == 2:
                 NP.niceprint('Database version: [{!s}]'.format(row[0]))
@@ -2253,11 +2266,14 @@ class Uploadr(object):
                     NP.niceprint('Successfully added album tags to pics '
                                  'already upload. Updating Database version.',
                                  fname='addAlbumsMigrate')
-
-                    cur.execute('PRAGMA user_version="3"')
-                    con.commit()
-                    cur = con.cursor()
-                    cur.execute('PRAGMA user_version')
+                    litedb.execute(con, 'PRAGMA#014:setup_db',
+                                   None, self.args.processes, cur,
+                                   'PRAGMA user_version="3"',
+                                   dbcaughtcode='014')
+                    litedb.execute(con, 'PRAGMA#015:setup_db',
+                                   None, self.args.processes, cur,
+                                   'PRAGMA user_version',
+                                   dbcaughtcode='015')
                     row = cur.fetchone()
                 else:
                     logging.warning('Failed adding album tags to pics '

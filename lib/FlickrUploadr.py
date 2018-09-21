@@ -2175,25 +2175,29 @@ class Uploadr(object):
         con = None
         try:
             con, cur = litedb.connect(self.xcfg.DB_PATH)
-            
-            _success = litedb.execute(con,
-                                      'CREATE#001:setup_db',
-                                      None, self.args.processes,
-                                      cur,
-                                      'CREATE TABLE IF NOT EXISTS files '
-                                      '(files_id INT, path TEXT, set_id INT, '
-                                      'md5 TEXT, tagged INT)',
-                                      dbcaughtcode='001')
---- 
-            # cur.execute('CREATE TABLE IF NOT EXISTS files '
-            #             '(files_id INT, path TEXT, set_id INT, '
-            #             'md5 TEXT, tagged INT)')
-            cur.execute('CREATE TABLE IF NOT EXISTS sets '
-                        '(set_id INT, name TEXT, primary_photo_id INTEGER)')
-            cur.execute('CREATE UNIQUE INDEX IF NOT EXISTS fileindex '
-                        'ON files (path)')
-            cur.execute('CREATE INDEX IF NOT EXISTS setsindex ON sets (name)')
-            con.commit()
+
+            _success = False
+            litedb.execute(con, 'CREATE#001:setup_db',
+                           None, self.args.processes, cur,
+                           'CREATE TABLE IF NOT EXISTS files '
+                           '(files_id INT, path TEXT, set_id INT, '
+                           'md5 TEXT, tagged INT)',
+                           dbcaughtcode='001')
+            litedb.execute(con, 'CREATE#002:setup_db',
+                           None, self.args.processes, cur,
+                           'CREATE TABLE IF NOT EXISTS sets '
+                           '(set_id INT, name TEXT, primary_photo_id INTEGER)',
+                           dbcaughtcode='002')
+            litedb.execute(con, 'CREATE#003:setup_db',
+                           None, self.args.processes, cur,
+                           'CREATE UNIQUE INDEX IF NOT EXISTS fileindex '
+                           'ON files (path)',
+                           dbcaughtcode='003')
+            litedb.execute(con, 'CREATE#004:setup_db',
+                           None, self.args.processes, cur,
+                           'CREATE INDEX IF NOT EXISTS setsindex '
+                           'ON sets (name)',
+                           dbcaughtcode='004')
 
             # Check database version.
             # [0] = newly created
@@ -2209,12 +2213,21 @@ class Uploadr(object):
                 NP.niceprint('Adding last_modified column to database',
                              verbosity=1)
                 cur = con.cursor()
-                cur.execute('PRAGMA user_version="1"')
-                cur.execute('ALTER TABLE files ADD COLUMN last_modified REAL')
-                con.commit()
-                # obtain new version to continue updating database
-                cur = con.cursor()
-                cur.execute('PRAGMA user_version')
+                litedb.execute(con, 'PRAGMA#005:setup_db',
+                               None, self.args.processes, cur,
+                               'PRAGMA user_version="1"',
+                               dbcaughtcode='005')
+                litedb.execute(con, 'ALTER#006:setup_db',
+                               None, self.args.processes, cur,
+                               'ALTER TABLE files '
+                               'ADD COLUMN last_modified REAL',
+                               dbcaughtcode='006')                                
+
+                # Obtain new version to continue updating database
+                litedb.execute(con, 'PRAGMA#007:setup_db',
+                               None, self.args.processes, cur,
+                               'PRAGMA user_version',
+                               dbcaughtcode='007')                
                 row = cur.fetchone()
             if row[0] == 1:
                 # Database version 2 <=========================DB VERSION: 2===

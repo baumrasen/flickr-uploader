@@ -646,41 +646,19 @@ if __name__ == "__main__":
                             MY_CFG.LOGGING_LEVEL,
                             sys.version)
 
-    # Enables mask  sensitive data on log files.
+    # Enables mask sensitive data on log files.
     if PARSED_ARGS.mask_sensitive:
         NPR.niceprint('Mask-Sensitive Argument enabled!')
         logging.debug('Mask-Sensitive Argument enabled!')
-        # Patterns to filter
-        MASK_PATTERNS = (
-            # CODING: Reconfirm logging for: filename, path, file, etc.
 
-            # Non-greedy "[filename]" preceeded by "path:[" & followed by "]"
-            r'(?<=path:\[).+?(?=\])',
-
-            # Non-greedy "[filename]" preceeded by "Title:[" & followed by "]"
-            r'(?<=Title[:=]\[).+?(?=\])',
-            r'(?<=file:\[).+?(?=\])',
-            r'(?<=filename:\[).+?(?=\])',
-
-            # Non-greedy "[setName]" preceeded by "Set:[" & followed by "]"
-            r'(?<=Set:\[).+?(?=\])',
-            r'(?<=SetName:\[).+?(?=\])',
-            r'(?<=Album:\[).+?(?=\])',
-
-            # Non-greedy "[setName]" word preceeded by "album"
-            r'(?<=album)\w+',
-
-            # Non-greedy "'api_key': " and "'secret': "
-            r'(?<=api_key\'. ).+?\w+',
-            r'(?<=api_key\%).+?\w+',
-            r'(?<=secret\'. ).+?\w+'
-            )
+        # Patterns to filter defined on UPLDR_K.MaskPatterns
         logging.debug('Setting Masking Logging Formatter')
         for hnd in logging.root.handlers:
-            hnd.setFormatter(NicePrint.RedactingFormatter(hnd.formatter,
-                                                          MASK_PATTERNS))
+            hnd.setFormatter(NicePrint.RedactingFormatter(
+                hnd.formatter,
+                UPLDR_K.MaskPatterns))
         logging.debug('Masking Logging Formatter is now set!')
-        logging.debug('Masking Patterns: %s', MASK_PATTERNS)
+        logging.debug('Masking Patterns: %s', UPLDR_K.MaskPatterns)
 
     logging.info('Output for FLICKR Configuration:\n%s',
                  pprint.pformat(MY_CFG.FLICKR))

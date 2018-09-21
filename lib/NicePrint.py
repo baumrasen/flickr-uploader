@@ -162,7 +162,7 @@ class NicePrint:
     # Print a message with the format:
     #   [2017.10.25 22:32:03]:[PRINT   ]:[uploadr] Some Message
     #
-    def niceprint(self, astr, fname='uploadr', verbosity=0):
+    def niceprint(self, astr, fname='uploadr', verbosity=0, masking=False):
         """ niceprint
         Print a message with the format:
             [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
@@ -170,6 +170,10 @@ class NicePrint:
         """
 
         if verbosity <= self.get_verbosity():
+            
+            if masking:
+                for pattern in UPLDR_K.MaskPatterns:
+                    astr = re.sub(pattern, self._hashrepl, astr, re.IGNORECASE)
             print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
                   .format(UPLDR_K.Gre,
                           UPLDR_K.Run,
@@ -178,7 +182,7 @@ class NicePrint:
                           UPLDR_K.Std,
                           'PRINT',
                           self.strunicodeout(fname),
-                          self.strunicodeout(astr)))
+                          self.strunicodeout(RedactingFormatter().format(astr))))
 
     # -------------------------------------------------------------------------
     # niceassert

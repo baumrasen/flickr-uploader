@@ -2174,12 +2174,20 @@ class Uploadr(object):
         NP.niceprint('Setting up database:[{!s}]'.format(self.xcfg.DB_PATH))
         con = None
         try:
-            con = lite.connect(self.xcfg.DB_PATH)
-            con.text_factory = str
-            cur = con.cursor()
-            cur.execute('CREATE TABLE IF NOT EXISTS files '
-                        '(files_id INT, path TEXT, set_id INT, '
-                        'md5 TEXT, tagged INT)')
+            con, cur = litedb.connect(self.xcfg.DB_PATH)
+            
+            _success = litedb.execute(con,
+                                      'CREATE#001:setup_db',
+                                      None, self.args.processes,
+                                      cur,
+                                      'CREATE TABLE IF NOT EXISTS files '
+                                      '(files_id INT, path TEXT, set_id INT, '
+                                      'md5 TEXT, tagged INT)',
+                                      dbcaughtcode='001')
+--- 
+            # cur.execute('CREATE TABLE IF NOT EXISTS files '
+            #             '(files_id INT, path TEXT, set_id INT, '
+            #             'md5 TEXT, tagged INT)')
             cur.execute('CREATE TABLE IF NOT EXISTS sets '
                         '(set_id INT, name TEXT, primary_photo_id INTEGER)')
             cur.execute('CREATE UNIQUE INDEX IF NOT EXISTS fileindex '

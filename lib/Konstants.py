@@ -62,6 +62,33 @@ class Konstants:
     Blu = '\033[34m'   # blue
     Pur = '\033[35m'   # purple
 
+    # Patterns to filter/ defined on UPLDR_K.MaskPatterns/mask sensitive data
+    MaskPatterns = (
+        # CODING: Reconfirm logging for: filename, path, file, etc.
+
+        # Non-greedy "[filename]" preceeded by "path:[" & followed by "]"
+        r'(?<=path:\[).+?(?=\])',
+
+        # Non-greedy "[filename]" preceeded by "Title:[" & followed by "]"
+        r'(?<=Title[:=]\[).+?(?=\])',
+        r'(?<=file:\[).+?(?=\])',
+        r'(?<=filename:\[).+?(?=\])',
+
+        # Non-greedy "[setName]" preceeded by "Set:[" & followed by "]"
+        r'(?<=Set:\[).+?(?=\])',
+        r'(?<=SetName:\[).+?(?=\])',
+        r'(?<=Album:\[).+?(?=\])',
+
+        # Non-greedy "[setName]" word preceeded by "album"
+        r'(?<=album)\w+',
+
+        # Non-greedy "'api_key': " and "'secret': "
+        r'(?<=key ).+?\w+',
+        r'(?<=api_key\'. ).+?\w+',
+        r'(?<=api_key\%).+?\w+',
+        r'(?<=secret\'. ).+?\w+'
+        )
+
     # -------------------------------------------------------------------------
     # class Konstants __init__
     #

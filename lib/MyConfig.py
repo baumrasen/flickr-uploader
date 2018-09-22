@@ -76,10 +76,10 @@ class MyConfig(object):
     #
     #   strunicodeout = from niceprint module
     # ---------------------------------------------------------------------
-    npr = NicePrint.NicePrint()
     strunicodeout = staticmethod(NicePrint.NicePrint.strunicodeout)
-    niceerror = npr.niceerror
     is_str_unicode = staticmethod(NicePrint.NicePrint.is_str_unicode)
+    npr = NicePrint.NicePrint()
+    niceerror = npr.niceerror
 
     # Config section ----------------------------------------------------------
     INISections = ['Config']

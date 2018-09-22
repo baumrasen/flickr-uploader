@@ -87,7 +87,6 @@ class NicePrint:
         logging.debug('isinstance %s', isinstance(self, NicePrint))
         logging.debug('GetMask Sensitivity: %s', self.get_mask_sensitivity())
 
-
     # -------------------------------------------------------------------------
     # set_verbosity
     #

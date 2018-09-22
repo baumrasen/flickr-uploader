@@ -209,7 +209,7 @@ class NicePrint:
                         re.IGNORECASE)
                     logging.debug('<out astr:[%s]/type:[%s]/pattern=[%s]',
                                   astr, type(astr), pattern)
-                logging.info('<out astr:[%s]/type:[%s]', astr, type(astr))                    
+                logging.info('<out astr:[%s]/type:[%s]', astr, type(astr))
 
             print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
                   .format(UPLDR_K.Gre,

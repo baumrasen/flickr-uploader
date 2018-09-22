@@ -82,10 +82,6 @@ class NicePrint:
 
         self.set_verbosity(averbosity)
         self.set_mask_sensitivity(amask_sensitivity)
-        logging.debug('Class name: %s', self.__class__.__name__)
-        logging.debug('Self: %s', self)
-        logging.debug('isinstance %s', isinstance(self, NicePrint))
-        logging.debug('GetMask Sensitivity: %s', self.get_mask_sensitivity())
 
     # -------------------------------------------------------------------------
     # set_verbosity

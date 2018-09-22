@@ -82,6 +82,11 @@ class NicePrint:
 
         self.set_verbosity(averbosity)
         self.set_mask_sensitivity(amask_sensitivity)
+        logging.debug('Class name: %s', self.__class__.__name__)
+        logging.debug('Self: %s', self)
+        logging.debug('isinstance %s', isinstance(self, NicePrint))
+        logging.debug('GetMask Sensitivity: %s', self.get_mask_sensitivity())
+
 
     # -------------------------------------------------------------------------
     # set_verbosity
@@ -137,7 +142,8 @@ class NicePrint:
     #
     # Returns true if String is Unicode
     #
-    def is_str_unicode(self, astr):
+    @staticmethod
+    def is_str_unicode(astr):
         """ is_str_unicode
         Determines if a string is Unicode (return True) or not (returns False)
         to allow correct print operations.
@@ -171,7 +177,8 @@ class NicePrint:
     #
     # Returns true if String is Unicode
     #
-    def strunicodeout(self, astr):
+    @staticmethod
+    def strunicodeout(astr):
         """ strunicodeout
         Outputs s.encode('utf-8') if is_str_unicode(s) else s
             NicePrint('Checking file:[{!s}]...'.format(strunicodeout(file))
@@ -182,7 +189,7 @@ class NicePrint:
         'Hello'
         """
         astr = '' if astr is None else astr
-        return astr.encode('utf-8') if self.is_str_unicode(astr) else astr
+        return astr.encode('utf-8') if NicePrint.is_str_unicode(astr) else astr
 
     # -------------------------------------------------------------------------
     # niceprint
@@ -196,20 +203,18 @@ class NicePrint:
             [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
             Accounts for UTF-8 Messages
         """
-
+        # CODING
         if verbosity <= self.get_verbosity():
             if self.get_mask_sensitivity():
-                logging.debug('>in  astr:[%s]/type:[%s]', astr, type(astr))
+                # logging.debug('>in  astr:[%s]/type:[%s]', astr, type(astr))
                 for pattern in UPLDR_K.MaskPatterns:
                     astr = re.sub(
                         pattern,
                         RedactingFormatter(None,
                                            UPLDR_K.MaskPatterns)._hashrepl,
                         astr,
-                        re.IGNORECASE)
-                    logging.debug('<out astr:[%s]/type:[%s]/pattern=[%s]',
-                                  astr, type(astr), pattern)
-                logging.info('<out astr:[%s]/type:[%s]', astr, type(astr))
+                        flags=re.IGNORECASE)
+                # logging.info('<out astr:[%s]/type:[%s]', astr, type(astr))
 
             print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
                   .format(UPLDR_K.Gre,
@@ -369,7 +374,8 @@ class RedactingFormatter(logging.Formatter):
         # print('>in  matchobj:[{!s}]/type:[{!s}]'
         #       .format(matchobj.group(0), type(matchobj.group(0))))
         if sys.version_info < (3, ):
-            tohash = NicePrint().strunicodeout(matchobj.group(0))
+            # CODING: staticmethod from NicePrint NOT from instance NicePrint()
+            tohash = NicePrint.strunicodeout(matchobj.group(0))
         else:
             tohash = matchobj.group(0).encode('utf- 8')
 
@@ -384,7 +390,7 @@ class RedactingFormatter(logging.Formatter):
         # CODING
         # print('>in  msg:[%s]/type:[%s]', msg, type(msg))
         for pattern in self._patterns:
-            msg = re.sub(pattern, self._hashrepl, msg, re.IGNORECASE)
+            msg = re.sub(pattern, self._hashrepl, msg, flags=re.IGNORECASE)
         # print('<out msg:[%s]/type:[%s]', msg, type(msg))
         return msg
 

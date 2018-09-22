@@ -2665,9 +2665,9 @@ class Uploadr(object):
             # CODING: how to indicate an error... different from False?
             # Possibly raising an exception?
             # raise Exception('photos.search: Max attempts exhausted.')
-            NP.niceprint(' IS_UPLOADED:[ERROR#1]',
+            NP.niceprint(' IS_UPLOADED=[ERROR#1]',
                          fname='isuploaded', verbosity=3)
-            logging.warning(' IS_UPLOADED:[ERROR#1]')
+            logging.warning(' IS_UPLOADED=[ERROR#1]')
 
             return ret_is_photo_uploaded, ret_photos_uploaded, \
                 ret_photo_id, ret_uploaded_no_set
@@ -2677,8 +2677,8 @@ class Uploadr(object):
         # Set 'Number of pics with specified checksum' to 0 and return.
         if not searchIsUploaded.find('photos').attrib['total']:
             ret_photos_uploaded = 0
-            logging.error(' IS_UPLOADED:[ERROR#3]: Invalid return. Confinuing')
-            NP.niceprint(' IS_UPLOADED:[ERROR#3]: Invalid return. Confinuing',
+            logging.error(' IS_UPLOADED=[ERROR#3]: Invalid return. Confinuing')
+            NP.niceprint(' IS_UPLOADED=[ERROR#3]: Invalid return. Confinuing',
                          fname='isuploaded',
                          verbosity=3)
         else:
@@ -2688,9 +2688,9 @@ class Uploadr(object):
         if ret_photos_uploaded == 0:
             # A) checksum,                             Count=0  THEN NOT EXISTS
             ret_is_photo_uploaded = False
-            NP.niceprint(' IS_UPLOADED:[FALSE]',
+            NP.niceprint(' IS_UPLOADED=[FALSE]',
                          fname='isuploaded', verbosity=2)
-            logging.warning(' IS_UPLOADED:[FALSE]')
+            logging.warning(' IS_UPLOADED=[FALSE]')
         elif ret_photos_uploaded >= 1:
             logging.warning('+++#190: '
                             'Found [%s] images with checksum:[%s]',
@@ -2743,9 +2743,9 @@ class Uploadr(object):
                     # Possibly raising an exception?
                     # raise Exception('photos_getAllContexts: '
                     #                 'Max attempts exhausted.')
-                    NP.niceprint(' IS_UPLOADED:[ERROR#2]',
+                    NP.niceprint(' IS_UPLOADED=[ERROR#2]',
                                  fname='isuploaded', verbosity=3)
-                    logging.warning(' IS_UPLOADED:[ERROR#2]')
+                    logging.warning(' IS_UPLOADED=[ERROR#2]')
 
                     return ret_is_photo_uploaded, ret_photos_uploaded, \
                         ret_photo_id, ret_uploaded_no_set
@@ -2765,10 +2765,10 @@ class Uploadr(object):
                         intag='album:{}'
                         .format(xsetname))
                     if tfind:
-                        NP.niceprint(' IS_UPLOADED:[UPLOADED WITHOUT'
+                        NP.niceprint(' IS_UPLOADED=[UPLOADED WITHOUT'
                                      ' SET WITH ALBUM TAG]',
                                      fname='isuploaded', verbosity=2)
-                        logging.warning(' IS_UPLOADED:[UPLOADED WITHOUT'
+                        logging.warning(' IS_UPLOADED=[UPLOADED WITHOUT'
                                         ' SET WITH ALBUM TAG]')
                         ret_is_photo_uploaded = True
                         ret_photo_id = pic.attrib['id']
@@ -2778,10 +2778,10 @@ class Uploadr(object):
                     # B1) checksum, title, empty setname,       Count=1
                     #           THEN NOT EXISTS, IGNORE IF tag album NOT FOUND
                     else:
-                        NP.niceprint('IS_UPLOADED:[UPLOADED WITHOUT'
+                        NP.niceprint('IS_UPLOADED=[UPLOADED WITHOUT'
                                      ' SET WITHOUT ALBUM TAG]',
                                      fname='isuploaded', verbosity=2)
-                        logging.warning('IS_UPLOADED:[UPLOADED WITHOUT'
+                        logging.warning('IS_UPLOADED=[UPLOADED WITHOUT'
                                         ' SET WITHOUT ALBUM TAG]')
                         ret_is_photo_uploaded = False
                         ret_uploaded_no_set = True
@@ -2814,9 +2814,9 @@ class Uploadr(object):
                     #                                               THEN EXISTS
                     if (NP.strunicodeout(xsetname) ==
                             NP.strunicodeout(setinlist.attrib['title'])):
-                        NP.niceprint(' IS_UPLOADED:[TRUE WITH SET]',
+                        NP.niceprint(' IS_UPLOADED=[TRUE WITH SET]',
                                      fname='isuploaded', verbosity=2)
-                        logging.warning(' IS_UPLOADED:[TRUE WITH SET]')
+                        logging.warning(' IS_UPLOADED=[TRUE WITH SET]')
                         ret_is_photo_uploaded = True
                         ret_photo_id = pic.attrib['id']
                         ret_uploaded_no_set = False
@@ -2825,10 +2825,10 @@ class Uploadr(object):
                     else:
                         # D) checksum, title, other setname,       Count>=1
                         #                                       THEN NOT EXISTS
-                        NP.niceprint(' IS_UPLOADED:[FALSE OTHER SET, '
+                        NP.niceprint(' IS_UPLOADED=[FALSE OTHER SET, '
                                      'CONTINUING SEARCH IN SETS]',
                                      fname='isuploaded', verbosity=2)
-                        logging.warning(' IS_UPLOADED:[FALSE OTHER SET, '
+                        logging.warning(' IS_UPLOADED=[FALSE OTHER SET, '
                                         'CONTINUING SEARCH IN SETS]')
                         continue
 

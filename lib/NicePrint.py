@@ -199,6 +199,7 @@ class NicePrint:
 
         if verbosity <= self.get_verbosity():
             if self.get_mask_sensitivity():
+                logging.debug('>in  astr:[%s]/type:[%s]', astr, type(astr))
                 for pattern in UPLDR_K.MaskPatterns:
                     astr = re.sub(
                         pattern,
@@ -206,6 +207,9 @@ class NicePrint:
                                            UPLDR_K.MaskPatterns)._hashrepl,
                         astr,
                         re.IGNORECASE)
+                    logging.debug('<out astr:[%s]/type:[%s]', astr, type(astr))                    
+                logging.info('<out astr:[%s]/type:[%s]', astr, type(astr))                    
+
             print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
                   .format(UPLDR_K.Gre,
                           UPLDR_K.Run,

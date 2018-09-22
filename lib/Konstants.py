@@ -71,14 +71,15 @@ class Konstants:
         r'(?<=(loaded):\[).+?(?=\])',
 
         # Non-greedy "[filename]" preceeded by "Title:[" & followed by "]"
-        r'(?<=Title[:=]\[).+?(?=\])',
+        r'(?<=title[:=]\[).+?(?=\])',
         r'(?<=file:\[).+?(?=\])',
         r'(?<=filename:\[).+?(?=\])',
 
         # Non-greedy "[setName]" preceeded by "Set:[" & followed by "]"
-        r'(?<=Set:\[).+?(?=\])',
-        r'(?<=SetName:\[).+?(?=\])',
-        r'(?<=Album:\[).+?(?=\])',
+        r'(?<=set:\[).+?(?=\])',
+        r'(?<=setname:\[).+?(?=\])',
+        r'(?<=set to db:\[).+?(?=\])',
+        r'(?<=album:\[).+?(?=\])',
 
         # Non-greedy "[setName]" word preceeded by "album"
         r'(?<=album)\w+',

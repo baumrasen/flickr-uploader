@@ -787,8 +787,7 @@ class Uploadr(object):
         """
 
         for i, filepic in enumerate(filelist):
-            logging.warning('===Current element of Chunk: [%s][%s]',
-                            i, filepic)
+            logging.warning('===Element of Chunk:[%s] file:[%s]', i, filepic)
             self.uploadFile(lock, filepic)
 
             # no need to check for
@@ -2392,7 +2391,8 @@ class Uploadr(object):
         unusedsets = cur.fetchall()
 
         for row in unusedsets:
-            NP.niceprint('Removing set [{!s}] ({!s}).'
+
+            NP.niceprint('Removing id:[{!s}] set:[{!s}]'
                          .format(NP.strunicodeout(row[0]),
                                  NP.strunicodeout(row[1])),
                          verbosity=1)
@@ -2940,7 +2940,7 @@ class Uploadr(object):
         """
 
         for i, afile in enumerate(filelist):
-            logging.warning('===Current element of Chunk: [%s][%s]', i, afile)
+            logging.warning('===Element of Chunk:[%s] file:[%s]', i, afile)
 
             # afile[0] = files_id
             # afile[1] = path

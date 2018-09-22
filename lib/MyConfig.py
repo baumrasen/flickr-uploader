@@ -77,7 +77,7 @@ class MyConfig(object):
     #   strunicodeout = from niceprint module
     # ---------------------------------------------------------------------
     npr = NicePrint.NicePrint()
-    strunicodeout = npr.strunicodeout
+    strunicodeout = staticmethod(NicePrint.NicePrint.strunicodeout)
     niceerror = npr.niceerror
     is_str_unicode = npr.is_str_unicode
 

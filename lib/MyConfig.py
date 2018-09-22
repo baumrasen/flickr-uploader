@@ -74,10 +74,10 @@ class MyConfig(object):
     # =====================================================================
     # Functions aliases
     #
-    #   strunicodeout = @staticmethod from niceprint module
+    #   strunicodeout = from niceprint module
     # ---------------------------------------------------------------------
     npr = NicePrint.NicePrint()
-    strunicodeout = NicePrint.NicePrint.strunicodeout
+    strunicodeout = npr.strunicodeout
     niceerror = npr.niceerror
     is_str_unicode = npr.is_str_unicode
 
@@ -203,7 +203,8 @@ class MyConfig(object):
                 logging.debug('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                               .format(item,
                                       type(self.__dict__[item]),
-                                      strunicodeout(self.__dict__[item])))
+                                      self.strunicodeout(
+                                          self.__dict__[item])))
 
     # -------------------------------------------------------------------------
     # MyConfig.readconfig
@@ -255,7 +256,8 @@ class MyConfig(object):
                 logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                              .format(item,
                                      type(self.__dict__[item]),
-                                     strunicodeout(self.__dict__[item])))
+                                     self.strunicodeout(
+                                         self.__dict__[item])))
 
     # -------------------------------------------------------------------------
     # MyConfig.processconfig
@@ -300,13 +302,13 @@ class MyConfig(object):
                 logging.debug('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                               .format(item,
                                       type(ini_check[item]),
-                                      strunicodeout(ini_check[item])))
+                                      self.strunicodeout(ini_check[item])))
         # Evaluate values
         for item in sorted(self.__dict__):
             logging.debug('Eval for : [{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                           .format(item,
                                   type(self.__dict__[item]),
-                                  strunicodeout(self.__dict__[item])))
+                                  self.strunicodeout(self.__dict__[item])))
 
             try:
                 if ini_check[item] in ('list', 'int', 'bool', 'str', 'dict'):
@@ -342,7 +344,8 @@ class MyConfig(object):
                               '= [{!s:10s}]'
                               .format(item,
                                       type(self.__dict__[item]),
-                                      strunicodeout(self.__dict__[item])))
+                                      self.strunicodeout(
+                                          self.__dict__[item])))
 
         if logging.getLogger().getEffectiveLevel() <= logging.INFO:
             logging.info('\t\t\t\tProcessed INI key/values pairs...')
@@ -350,7 +353,8 @@ class MyConfig(object):
                 logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                              .format(item,
                                      type(self.__dict__[item]),
-                                     strunicodeout(self.__dict__[item])))
+                                     self.strunicodeout(
+                                         self.__dict__[item])))
 
         return True
 
@@ -406,7 +410,7 @@ class MyConfig(object):
                 if not os.path.isdir(self.__dict__[item]):
                     logging.critical('%s: [%s] is not a valid folder.',
                                      item,
-                                     strunicodeout(self.__dict__[item]))
+                                     self.strunicodeout(self.__dict__[item]))
                     result = False
 
             return result
@@ -438,8 +442,8 @@ class MyConfig(object):
                             os.path.dirname(self.__dict__[item]))):
                     logging.critical('%s:[%s] is not in a valid folder:[%s].',
                                      item,
-                                     strunicodeout(self.__dict__[item]),
-                                     strunicodeout(os.path.dirname(
+                                     self.strunicodeout(self.__dict__[item]),
+                                     self.strunicodeout(os.path.dirname(
                                          self.__dict__[item])))
                     result = False
             return result
@@ -468,8 +472,9 @@ class MyConfig(object):
                         logging.critical('%s:[%s] is not in '
                                          'a valid folder:[%s].',
                                          item,
-                                         strunicodeout(self.__dict__[item]),
-                                         strunicodeout(os.path.dirname(
+                                         self.strunicodeout(
+                                             self.__dict__[item]),
+                                         self.strunicodeout(os.path.dirname(
                                              self.__dict__[item])))
                         result = False
             return result
@@ -498,7 +503,8 @@ class MyConfig(object):
                     if not os.path.isdir(self.__dict__[item]):
                         logging.critical('%s: [%s] is not a valid folder.',
                                          item,
-                                         strunicodeout(self.__dict__[item]))
+                                         self.strunicodeout(
+                                             self.__dict__[item]))
                         result = False
                     elif not (
                             os.path.isfile(os.path.join(self.__dict__[item],
@@ -538,7 +544,7 @@ class MyConfig(object):
                     out_excluded_folders.append(str(folder))
                 logging.debug('folder from EXCLUDED_FOLDERS:[%s] '
                               'type:[%s]\n',
-                              strunicodeout(out_excluded_folders[
+                              self.strunicodeout(out_excluded_folders[
                                   len(out_excluded_folders) - 1]),
                               type(out_excluded_folders[
                                   len(out_excluded_folders) - 1]))
@@ -588,7 +594,8 @@ class MyConfig(object):
                 logging.info('[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]'
                              .format(item,
                                      type(self.__dict__[item]),
-                                     strunicodeout(self.__dict__[item])))
+                                     self.strunicodeout(
+                                         self.__dict__[item])))
 
         return returnverify
 

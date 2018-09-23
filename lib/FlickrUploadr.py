@@ -214,7 +214,7 @@ class Uploadr(object):
                                       if sys.version_info < (3, )
                                       else str(row[1]))):
                 # Running in single processing mode, no need for lock
-                self.deleteFile(row, cur)
+                self.delete_file(row, cur)
 
         litedb.close(con)
 
@@ -258,8 +258,8 @@ class Uploadr(object):
                                    if NP.is_str_unicode(row[1])
                                    else row[1])):
                 # Running in single processing mode, no need for lock
-                success = self.deleteFile(row, cur)
-                logging.warning('deleteFile result: [%s]', success)
+                success = self.delete_file(row, cur)
+                logging.warning('delete_file result: [%s]', success)
                 count = count + 1
                 if count % 3 == 0:
                     NP.niceprint('[{!s:>6s}] files removed...'
@@ -362,7 +362,7 @@ class Uploadr(object):
                            nurunning,
                            numutex,
                            changed_media,
-                           self.uploadFileX,
+                           self.mp_upload_file,
                            cur)
             con.commit()
 
@@ -373,7 +373,7 @@ class Uploadr(object):
                 logging.debug('file:[%s] type(file):[%s]',
                               file, type(file))
                 # lock parameter not used (set to None) under single processing
-                success = self.uploadFile(lock=None, file=file)
+                success = self.upload_file(lock=None, file=file)
                 if (self.args.drip_feed and
                         success and
                         i != changed_media_count - 1):
@@ -772,14 +772,14 @@ class Uploadr(object):
         return True
 
     # -------------------------------------------------------------------------
-    # uploadFileX
+    # mp_upload_file
     #
-    # uploadFile wrapper for multiprocessing purposes
+    # upload_file wrapper for multiprocessing purposes
     #
-    def uploadFileX(self, lock, running, mutex, filelist, ctotal, cur):
-        """ uploadFileX
+    def mp_upload_file(self, lock, running, mutex, filelist, ctotal, cur):
+        """ mp_upload_file
 
-            Wrapper function for multiprocessing support to call uploadFile
+            Wrapper function for multiprocessing support to call upload_file
             with a chunk of the files.
             lock = for database access control in multiprocessing
             running = shared value to count processed files in multiprocessing
@@ -788,11 +788,11 @@ class Uploadr(object):
 
         for i, filepic in enumerate(filelist):
             logging.warning('===Element of Chunk:[%s] file:[%s]', i, filepic)
-            self.uploadFile(lock, filepic)
+            self.upload_file(lock, filepic)
 
             # no need to check for
             # (self.args.processes and self.args.processes > 0):
-            # as uploadFileX is already multiprocessing
+            # as mp_upload_file is already multiprocessing
 
             logging.debug('===Multiprocessing=== in.mutex.acquire(w)')
             mutex.acquire()
@@ -805,7 +805,7 @@ class Uploadr(object):
             NP.niceprocessedfiles(xcount, ctotal, False)
 
     # -------------------------------------------------------------------------
-    # uploadFile
+    # upload_file
     #
     # uploads a file into flickr
     #   lock = parameter for multiprocessing control of access to DB.
@@ -813,8 +813,8 @@ class Uploadr(object):
     #          as it is not used)
     #   file = file to be uploaded
     #
-    def uploadFile(self, lock, file):
-        """ uploadFile
+    def upload_file(self, lock, file):
+        """ upload_file
         uploads file into flickr
 
         May run in single or multiprocessing mode
@@ -1318,7 +1318,7 @@ class Uploadr(object):
                 # We have a file from disk which is found on the database
                 # and is also on flickr but its set on flickr is not defined.
                 # So we need to reset the local datbase set_id so that it will
-                # be later assigned once we run createSets()
+                # be later assigned once we run create_sets()
                 logging.debug('str(row[1]) == str(isfile_id:[%s])'
                               'row[1]:[%s]=>type:[%s] '
                               'isfile_id:[%s]=>type:[%s]',
@@ -1352,7 +1352,7 @@ class Uploadr(object):
                 #   file/last_modified value and do nothing else
                 #
                 #   if DB/lastmodified is different from file/lastmodified
-                #   then: if md5 has changed then perform replacePhoto
+                #   then: if md5 has changed then perform replace_photo
                 #   operation on Flickr
                 logging.warning('CHANGES row[6]=[%s-(%s)]',
                                 NUTIME.strftime(
@@ -1375,14 +1375,14 @@ class Uploadr(object):
                                 row[6] != last_modified)
                 if row[6] != last_modified:
                     # Update db both the new file/md5 and the
-                    # last_modified time of file by by calling replacePhoto
+                    # last_modified time of file by by calling replace_photo
 
                     if file_checksum is None:
                         file_checksum = faw.md5checksum(file)
                     if file_checksum != str(row[4]):
-                        self.replacePhoto(lock, file, row[1], row[4],
-                                          file_checksum, last_modified,
-                                          cur, con)
+                        self.replace_photo(lock, file, row[1], row[4],
+                                           file_checksum, last_modified,
+                                           cur, con)
 
         # Closing DB connection
         if con is not None:
@@ -1390,8 +1390,8 @@ class Uploadr(object):
         return success
 
     # -------------------------------------------------------------------------
-    # replacePhoto
-    #   Should be only called from uploadFile
+    # replace_photo
+    #   Should be only called from upload_file
     #
     #   lock            = parameter for multiprocessing control of access to DB
     #                     (if self.args.processes = 0 then lock can be None
@@ -1406,9 +1406,9 @@ class Uploadr(object):
     #   cur             = current cursor for updating Database
     #   con             = current DB connection
     #
-    def replacePhoto(self, lock, file, file_id,
-                     oldfile_md5, file_md5, last_modified, cur, con):
-        """ replacePhoto
+    def replace_photo(self, lock, file, file_id,
+                      oldfile_md5, file_md5, last_modified, cur, con):
+        """ replace_photo
         lock            = parameter for multiprocessing control of access to DB
                           (if self.args.processes = 0 then lock can be None
                           as it is not used)
@@ -1604,12 +1604,12 @@ class Uploadr(object):
                               'xrow[0].files_id=[%s]'
                               'xrow[1].file=[%s]',
                               xrow[0], NP.strunicodeout(xrow[1]))
-                if self.deleteFile(xrow, cur, lock):
+                if self.delete_file(xrow, cur, lock):
                     NP.niceprint('..Video deleted:[{!s}]'
                                  .format(NP.strunicodeout(file)),
                                  fname='replace')
                     logging.warning('Delete for replace succeed!')
-                    if self.uploadFile(lock, file):
+                    if self.upload_file(lock, file):
                         NP.niceprint('.Video replaced:[{!s}]'
                                      .format(NP.strunicodeout(file)),
                                      fname='replace')
@@ -1638,7 +1638,7 @@ class Uploadr(object):
             NP.niceerror(caught=True,
                          caughtprefix='+++',
                          caughtcode='082',
-                         caughtmsg='Caught exception in replacePhoto',
+                         caughtmsg='Caught exception in replace_photo',
                          exceptsysinfo=True)
             success = False
 
@@ -1653,8 +1653,8 @@ class Uploadr(object):
     # or --remove-excluded option in order to remove files previously loaded
     #
     # CODING: Argument cur is not actually being used. Confirm and delete.
-    def deleteFile(self, file, cur, lock=None):
-        """ deleteFile
+    def delete_file(self, file, cur, lock=None):
+        """ delete_file
 
         delete file from flickr
 
@@ -1757,7 +1757,7 @@ class Uploadr(object):
             NP.niceerror(caught=True,
                          caughtprefix='xxx',
                          caughtcode='090',
-                         caughtmsg='Failed to delete photo (deleteFile)',
+                         caughtmsg='Failed to delete photo (delete_file)',
                          useniceprint=True)
 
         return success
@@ -1882,10 +1882,10 @@ class Uploadr(object):
     # -------------------------------------------------------------------------
 
     # -------------------------------------------------------------------------
-    # createSets
+    # create_sets
     #
-    def createSets(self):
-        """ createSets
+    def create_sets(self):
+        """ create_sets
 
             Creates Sets (Album) in Flickr
         """
@@ -1946,9 +1946,9 @@ class Uploadr(object):
                 primary_pic = cur.fetchone()
 
                 # primary_pic[0] = files_id from files table
-                set_id = self.createSet(slockdb,
-                                        setname, primary_pic[0],
-                                        cur, con)
+                set_id = self.create_set(slockdb,
+                                         setname, primary_pic[0],
+                                         cur, con)
                 NP.niceprint('Created the set:[{!s}] '
                              'set_id=[{!s}] '
                              'primaryId=[{!s}]'
@@ -2069,7 +2069,7 @@ class Uploadr(object):
                                              self.xcfg.FILES_DIR,
                                              self.xcfg.FULL_SET_NAME)
             # CODING: cur vs bcur! Check!
-            self.createSet(lock, setname, file[0], cur, con)
+            self.create_set(lock, setname, file[0], cur, con)
         elif not get_success and get_errcode == 3:
             # Error: 3: Photo already in set
             NP.niceprint('Photo already in set... updating DB'
@@ -2100,12 +2100,12 @@ class Uploadr(object):
             litedb.close(con)
 
     # -------------------------------------------------------------------------
-    # createSet
+    # create_set
     #
     # Creates an Album in Flickr.
     #
-    def createSet(self, lock, setname, primary_photo_id, cur, con):
-        """ createSet
+    def create_set(self, lock, setname, primary_photo_id, cur, con):
+        """ create_set
 
         Creates an Album in Flickr.
         Calls log_set_creation to create Album on local database.
@@ -2940,7 +2940,7 @@ class Uploadr(object):
     def maddAlbumsMigrate(self, lock, running, mutex, filelist, c_total, cur):
         """ maddAlbumsMigrate
 
-            Wrapper function for multiprocessing support to call uploadFile
+            Wrapper function for multiprocessing support to call upload_file
             with a chunk of the files.
             lock       = for database access control in multiprocessing
             running    = shared value to count processed files in

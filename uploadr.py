@@ -431,7 +431,7 @@ def run_uploadr(args):
             if args.remove_excluded:
                 myflick.remove_excluded_media()
 
-            myflick.createSets()
+            myflick.create_sets()
             myflick.pics_status(KonstantsClass.media_count)
     # Run Uploadr -------------------------------------------------------------
 

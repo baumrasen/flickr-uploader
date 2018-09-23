@@ -15,7 +15,7 @@
   isLoaded = False control variable
 * "Check for duplicates/wrong checksum" on upload may not be working fully!
 * Consider using python module exiftool?
-* Would be nice to update ALL tags on replacePhoto and not only the
+* Would be nice to update ALL tags on replace_photo and not only the
   mandatory checksum tag as FLICKR maintains the tags from the first load.
 * Change code to insert on database prior to upload and then update result.
 * CODING: REUPLOAD deleted files from Flickr...

@@ -298,7 +298,7 @@ class Uploadr(object):
         con, cur = litedb.connect(self.xcfg.DB_PATH)
 
         # Search for  media files to load including raw files to convert
-        all_media, rawfiles = self.grabNewFiles()
+        all_media, rawfiles = self.grab_newfiles()
 
         # If managing changes, consider all files
         if self.xcfg.MANAGE_CHANGES:
@@ -592,12 +592,12 @@ class Uploadr(object):
         return success
 
     # -------------------------------------------------------------------------
-    # grabNewFiles
+    # grab_newfiles
     #
     # Select files and RAW files from FILES_DIR to be uploaded
     #
-    def grabNewFiles(self):
-        """ grabNewFiles
+    def grab_newfiles(self):
+        """ grab_newfiles
 
             Select files from FILES_DIR taking into consideration
             EXCLUDED_FOLDERS and IGNORED_REGEX filenames.
@@ -945,35 +945,35 @@ class Uploadr(object):
 
             # Check if file is already loaded
             if self.args.not_is_already_uploaded:
-                isLoaded = False
+                is_loaded = False
                 isfile_id = None
-                isNoSet = None
-                logging.info('not_is_already_uploaded:[%s]', isLoaded)
+                is_no_set = None
+                logging.info('not_is_already_uploaded:[%s]', is_loaded)
             else:
                 file_checksum = faw.md5checksum(file)
-                isLoaded, isCount, isfile_id, isNoSet = \
+                is_loaded, is_count, isfile_id, is_no_set = \
                     self.is_already_uploaded(file,
                                              file_checksum,
                                              setname)
                 logging.info('is_already_uploaded:[%s] '
                              'count:[%s] pic:[%s] '
                              'row is None == [%s] '
-                             'isNoSet:[%s]',
-                             isLoaded,
-                             isCount, isfile_id,
+                             'is_no_set:[%s]',
+                             is_loaded,
+                             is_count, isfile_id,
                              row is None,
-                             isNoSet)
+                             is_no_set)
             # CODING: REUPLOAD deleted files from Flickr...
             # A) File loaded. Not recorded on DB. Update local DB.
             # B) Not loaded. Not recorded on DB. Upload file to FLickr.
             # C) File loaded. Recorded on DB. Look for changes...
             # D) Not loaded, Recorded on DB. Reupload.
             #    Handle D) like B)...
-            #    or (not isLoaded and row is not None)
+            #    or (not is_loaded and row is not None)
             #    ... delete from DB... run normally the (RE)upload process
 
             # A) File loaded. Not recorded on DB. Update local DB.
-            if isLoaded and row is None:
+            if is_loaded and row is None:
                 if file_checksum is None:
                     file_checksum = faw.md5checksum(file)
 
@@ -1046,20 +1046,20 @@ class Uploadr(object):
                     logging.info('title from INI file:[%s]', title_filename)
 
                 # CODING: Check MAX_UPLOAD_ATTEMPTS. Replace with @retry?
-                uploadResp = None
+                uploadresp = None
                 photo_id = None
-                ZuploadOK = False
-                ZbadFile = False
-                ZuploadError = False
+                zuploadok = False
+                zbadfile = False
+                zuploaderror = False
 
                 attempts = None
                 for attempts in range(0, self.xcfg.MAX_UPLOAD_ATTEMPTS):
                     # Reset variables on each iteration
-                    uploadResp = None
+                    uploadresp = None
                     photo_id = None
-                    ZuploadOK = False
-                    ZbadFile = False
-                    ZuploadError = False
+                    zuploadok = False
+                    zbadfile = False
+                    zuploaderror = False
                     logging.warning('Up/Reuploading:[%s/%s attempts].',
                                     attempts, self.xcfg.MAX_UPLOAD_ATTEMPTS)
                     if attempts > 0:
@@ -1072,7 +1072,7 @@ class Uploadr(object):
                     # replace commas from tags and checksum tags
                     # to avoid tags conflicts
                     try:
-                        uploadResp = self.nuflickr.upload(
+                        uploadresp = self.nuflickr.upload(
                             filename=file,
                             fileobj=faw.FileWithCallback(
                                 file,
@@ -1094,17 +1094,17 @@ class Uploadr(object):
                             is_friend=str(self.xcfg.FLICKR["is_friend"])
                         )
 
-                        logging.info('is_good:[%s] Output for uploadResp:[%s]',
-                                     faw.is_good(uploadResp),
+                        logging.info('is_good:[%s] Output for uploadresp:[%s]',
+                                     faw.is_good(uploadresp),
                                      xml.etree.ElementTree.tostring(
-                                         uploadResp,
+                                         uploadresp,
                                          encoding='utf-8',
                                          method='xml'))
 
-                        if faw.is_good(uploadResp):
-                            ZuploadOK = True
+                        if faw.is_good(uploadresp):
+                            zuploadok = True
                             # Save photo_id returned from Flickr upload
-                            photo_id = uploadResp.findall('photoid')[0].text
+                            photo_id = uploadresp.findall('photoid')[0].text
                             logging.info('  Uploaded file:[%s] '
                                          'Id=[%s]. Check for '
                                          'duplicates/wrong checksum...',
@@ -1119,8 +1119,8 @@ class Uploadr(object):
 
                             break
                         else:
-                            ZuploadError = True
-                            raise IOError(uploadResp)
+                            zuploaderror = True
+                            raise IOError(uploadresp)
 
                     except (IOError, httplib.HTTPException):
                         NP.niceerror(caught=True,
@@ -1139,32 +1139,32 @@ class Uploadr(object):
                                      useniceprint=True)
                         NUTIME.sleep(10)
 
-                        ZisLoaded, ZisCount, photo_id, ZisNoSet = \
+                        zisloaded, ziscount, photo_id, zisnoset = \
                             self.is_already_uploaded(
                                 file,
                                 file_checksum,
                                 setname)
                         logging.warning('is_already_uploaded:[%s] '
-                                        'Zcount:[%s] Zpic:[%s] '
-                                        'ZisNoSet:[%s]',
-                                        ZisLoaded,
-                                        ZisCount, photo_id,
-                                        ZisNoSet)
+                                        'ziscount:[%s] Zpic:[%s] '
+                                        'zisnoset:[%s]',
+                                        zisloaded,
+                                        ziscount, photo_id,
+                                        zisnoset)
 
-                        if ZisCount == 0:
-                            ZuploadError = True
+                        if ziscount == 0:
+                            zuploaderror = True
                             continue
                         # CODING On Issue #77 Confirm everything is ok!
-                        elif ZisCount == 1 and ZisLoaded:
-                            ZuploadOK = True
-                            ZuploadError = False
+                        elif ziscount == 1 and zisloaded:
+                            zuploadok = True
+                            zuploaderror = False
                             NP.niceprint('Found, '
                                          'continuing with next image.')
                             logging.warning('Found, '
                                             'continuing with next image.')
                             break
-                        elif ZisCount > 1:
-                            ZuploadError = True
+                        elif ziscount > 1:
+                            zuploaderror = True
                             NP.niceprint('More than one file with same '
                                          'checksum/album tag! '
                                          'Any collisions? File: [{!s}]'
@@ -1192,7 +1192,7 @@ class Uploadr(object):
                         if (format(ex.code) == '5') or (
                                 format(ex.code) == '8'):
                             # Badfile
-                            ZbadFile = True
+                            zbadfile = True
                             if not self.args.bad_files:
                                 # Break for ATTEMPTS cycle
                                 break
@@ -1228,32 +1228,32 @@ class Uploadr(object):
                                          useniceprint=True)
                             NUTIME.sleep(10)
 
-                            ZisLoaded, ZisCount, photo_id, ZisNoSet = \
+                            zisloaded, ziscount, photo_id, zisnoset = \
                                 self.is_already_uploaded(
                                     file,
                                     file_checksum,
                                     setname)
                             logging.warning('is_already_uploaded:[%s] '
-                                            'Zcount:[%s] Zpic:[%s] '
-                                            'ZisNoSet:[%s]',
-                                            ZisLoaded,
-                                            ZisCount, photo_id,
-                                            ZisNoSet)
+                                            'ziscount:[%s] Zpic:[%s] '
+                                            'zisnoset:[%s]',
+                                            zisloaded,
+                                            ziscount, photo_id,
+                                            zisnoset)
 
-                            if ZisCount == 0:
-                                ZuploadError = True
+                            if ziscount == 0:
+                                zuploaderror = True
                                 continue
                             # CODING On Issue #77 Confirm everything is ok!
-                            elif ZisCount == 1 and ZisLoaded:
-                                ZuploadOK = True
-                                ZuploadError = False
+                            elif ziscount == 1 and zisloaded:
+                                zuploadok = True
+                                zuploaderror = False
                                 NP.niceprint('Found, '
                                              'continuing with next image.')
                                 logging.warning('Found, '
                                                 'continuing with next image.')
                                 break
-                            elif ZisCount > 1:
-                                ZuploadError = True
+                            elif ziscount > 1:
+                                zuploaderror = True
                                 NP.niceprint('More than one file with same '
                                              'checksum/album tag! '
                                              'Any collisions? File: [{!s}]'
@@ -1272,14 +1272,14 @@ class Uploadr(object):
                               attempts, self.xcfg.MAX_UPLOAD_ATTEMPTS)
 
                 # Max attempts reached
-                if (not ZuploadOK) and (
+                if (not zuploadok) and (
                         attempts == (self.xcfg.MAX_UPLOAD_ATTEMPTS - 1)):
                     NP.niceprint('Reached max attempts to upload. Skipping '
                                  'file: [{!s}]'.format(NP.strunicodeout(file)))
                     logging.error('Reached max attempts to upload. Skipping '
                                   'file: [%s]', NP.strunicodeout(file))
                 # Error
-                elif (not ZuploadOK) and ZuploadError:
+                elif (not zuploadok) and zuploaderror:
                     NP.niceprint('Error occurred while uploading. Skipping '
                                  'file:[{!s}]'
                                  .format(NP.strunicodeout(file)))
@@ -1287,18 +1287,18 @@ class Uploadr(object):
                                   'file:[%s]',
                                   NP.strunicodeout(file))
                 # Bad file
-                elif (not ZuploadOK) and ZbadFile:
+                elif (not zuploadok) and zbadfile:
                     NP.niceprint('       Bad file:[{!s}]'
                                  .format(NP.strunicodeout(file)))
                 # Successful update
-                elif ZuploadOK:
+                elif zuploadok:
                     NP.niceprint('Successful file:[{!s}]'
                                  .format(NP.strunicodeout(file)))
 
                     assert photo_id is not None, NP.niceassert(
                         'photo_id None:[{!s}]'
                         .format(NP.strunicodeout(file)))
-                    # Save file_id: from uploadResp or is_already_uploaded
+                    # Save file_id: from uploadresp or is_already_uploaded
                     file_id = photo_id
 
                     # Insert into DB files
@@ -1326,8 +1326,8 @@ class Uploadr(object):
                               row[1], type(row[1]),
                               isfile_id, type(isfile_id))
                 # C) File loaded. Recorded on DB. Manage changes & Flickr set.
-                if (isLoaded and
-                        isNoSet and
+                if (is_loaded and
+                        is_no_set and
                         (row is not None) and
                         (str(row[1]) == str(isfile_id))):
 

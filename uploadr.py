@@ -220,6 +220,13 @@ def parse_arguments():
                                  'Use this option for faster INITIAL upload. '
                                  'Do not use it in subsequent uploads to '
                                  'prevent/recover orphan pics without a set.')
+    pgrpparser.add_argument('--no-delete-from-flickr', action='store',
+                            metavar='nodelete',
+                            type=str,
+                            default=UPLDR_K.no_delete_tag,
+                            help='Do not actually deletepics from flicr.com &'
+                                 'mark them with tag:[{!s}]'
+                            .format(UPLDR_K.no_delete_tag))    
     # run in daemon mode uploading every X seconds
     pgrpparser.add_argument('-d', '--daemon', action='store_true',
                             help='Run forever as a daemon.'
@@ -540,6 +547,12 @@ if __name__ == "__main__":
     # Parse the arguments options
     PARSED_ARGS = parse_arguments()
 
+    logging.critical('No delete=%s', PARSED_ARGS.no_delete_from_flickr)
+    if PARSED_ARGS.no_delete_from_flickr:
+        logging.critical('TRUE')
+    else:
+        logging.critical('FALSE')
+    sys.exit(4)
     # Set verbosity level as per -v count
     NPR.set_verbosity(PARSED_ARGS.verbose)
     NPR.set_mask_sensitivity(PARSED_ARGS.mask_sensitive)

@@ -1729,10 +1729,20 @@ class Uploadr(object):
         NP.niceprint('  Deleting file:[{!s}]'
                      .format(NP.strunicodeout(file[1])))
 
-        get_success, _, get_errcode = faw.flickrapi_fn(
-            self.nuflickr.photos.delete, (),
-            dict(photo_id=str(file[0])),
-            2, 2, False, caughtcode='111')
+        # Cater for option --no-delete-from-flickr
+        if not self.args.no_delete_from_flickr:
+            get_success, _, get_errcode = faw.flickrapi_fn(
+                self.nuflickr.photos.delete, (),
+                dict(photo_id=str(file[0])),
+                2, 2, False, caughtcode='111')
+        else:
+            logging.info('no_delete_from_flickr option is enabled:[%s]',
+                         self.args.no_delete_from_flickr)
+            get_success, res_add_tag, get_errcode = faw.flickrapi_fn(
+                self.nuflickr.photos.addTags, (),
+                dict(photo_id=str(file[0]),
+                     tags='{}'.format(self.args.no_delete_from_flickr)),
+                2, 2, False, caughtcode='112')
 
         success = False
         if ((get_success and get_errcode == 0) or

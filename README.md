@@ -71,7 +71,7 @@ You should get the following depending on how the setting FULL_SET_NAME is set:
 ## Requirements
 ---------------
 * Python 2.7+ (should work on DSM from Synology (v6.1), Windows and MAC)
-* Also compatile with Python 3.6
+* Also compatile with Python 3.6 and 3.7
 * Recommendation on Synology DSM: **do not install/use** the "Python Module" from the DSM Packages.
 * flicrkapi module. May need to install get-pip.py. (Instructions for
   Synology DSM below.)

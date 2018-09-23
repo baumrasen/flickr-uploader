@@ -548,12 +548,9 @@ if __name__ == "__main__":
     # Parse the arguments options
     PARSED_ARGS = parse_arguments()
 
-    logging.critical('No delete=%s', PARSED_ARGS.no_delete_from_flickr)
     if PARSED_ARGS.no_delete_from_flickr:
-        logging.critical('TRUE')
-    else:
-        logging.critical('FALSE')
-    sys.exit(4)
+        logging.warning('Option --no-delete-from-flickr enabled=[%s]',
+                        PARSED_ARGS.no_delete_from_flickr)
     # Set verbosity level as per -v count
     NPR.set_verbosity(PARSED_ARGS.verbose)
     NPR.set_mask_sensitivity(PARSED_ARGS.mask_sensitive)

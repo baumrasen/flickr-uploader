@@ -220,13 +220,14 @@ def parse_arguments():
                                  'Use this option for faster INITIAL upload. '
                                  'Do not use it in subsequent uploads to '
                                  'prevent/recover orphan pics without a set.')
-    pgrpparser.add_argument('--no-delete-from-flickr', action='store',
+    pgrpparser.add_argument('--no-delete-from-flickr',
                             metavar='nodelete',
                             type=str,
-                            default=UPLDR_K.no_delete_tag,
+                            nargs='?',
+                            const=str(UPLDR_K.no_delete_tag),
                             help='Do not actually deletepics from flicr.com &'
-                                 'mark them with tag:[{!s}]'
-                            .format(UPLDR_K.no_delete_tag))    
+                                 ' mark them with tag:[{!s}]'
+                            .format(UPLDR_K.no_delete_tag))
     # run in daemon mode uploading every X seconds
     pgrpparser.add_argument('-d', '--daemon', action='store_true',
                             help='Run forever as a daemon.'

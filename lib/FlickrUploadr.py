@@ -3166,12 +3166,12 @@ class Uploadr(object):
                               dbcaughtcode='165'):
             return False
 
-        badFiles = None
-        count_total = len(badFiles)
-        logging.info('len(badFiles)=[%s]', count_total)
+        bad_files = None
+        count_total = len(bad_files)
+        logging.info('len(bad_files)=[%s]', count_total)
 
         count = 0
-        for row in badFiles:
+        for row in bad_files:
             count += 1
             # row[0] = files_id
             # row[1] = path

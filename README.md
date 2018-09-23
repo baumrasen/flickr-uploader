@@ -516,3 +516,6 @@ Not in sets on Flickr:[     0]
 
 * Q: What happens if the local control Database (flickrdb) is deleted?
   - By re-running the program **without the -u opiotn** it will go thru your local files and check/search for already loaded pics with same checksum+Set and re-builds the local database.
+  
+* Q: Is all sensitive information (albums and filenames) masked with the **-u** option?
+  - Please note the **-u** masking option does not filter every sensitive information. In particular when DEBUG error level is set.

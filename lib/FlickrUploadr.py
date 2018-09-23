@@ -477,19 +477,19 @@ class Uploadr(object):
         a_fbasename = filiename without extension
         """
         # ---------------------------------------------------------------------
-        # convertRawFileCommand
+        # convert_raw_file_cmd
         #
         # Prepare and executes the command for RAW file conversion.
         #
-        def convertRawFileCommand(convert_or_copy_tags):
-            """ convertRawFileCommand
+        def convert_raw_file_cmd(convert_or_copy_tags):
+            """ convert_raw_file_cmd
 
             convert_or_copy_tags = 'Convert'  converts a raw file to JPG
                                    'CopyTags' copy tags from raw file to JPG
             """
 
             assert convert_or_copy_tags in ['Convert', 'CopyTags'],\
-                NP.niceassert('convertRawFileCommand: wrong argument:[{!s}]'
+                NP.niceassert('convert_raw_file_cmd: wrong argument:[{!s}]'
                               .format(convert_or_copy_tags))
 
             result_cmd = True
@@ -555,7 +555,7 @@ class Uploadr(object):
                          NP.strunicodeout(a_fname),
                          NP.strunicodeout(a_fbasename),
                          NP.strunicodeout(file_ext))
-            if convertRawFileCommand('Convert'):
+            if convert_raw_file_cmd('Convert'):
                 NP.niceprint('....Created JPG:[{!s}]'
                              .format(NP.strunicodeout(a_fbasename) + ".JPG"))
             else:
@@ -573,7 +573,7 @@ class Uploadr(object):
             NP.niceprint('...Copying tags:[{!s}]'
                          .format(NP.strunicodeout(a_fname)))
 
-            if convertRawFileCommand('CopyTags'):
+            if convert_raw_file_cmd('CopyTags'):
                 NP.niceprint('....Copied tags:[{!s}]'
                              .format(NP.strunicodeout(a_fname)))
             else:
@@ -634,7 +634,7 @@ class Uploadr(object):
                 # Ignore filenames wihtin IGNORED_REGEX
                 if any(ignored.search(afile)
                        for ignored in self.xcfg.IGNORED_REGEX):
-                    logging.debug('File %s in IGNORED_REGEX:',
+                    logging.debug('File:[%s] in IGNORED_REGEX:',
                                   NP.strunicodeout(file_path))
                     continue
                 ext = os.path.splitext(os.path.basename(afile))[1][1:].lower()
@@ -729,12 +729,12 @@ class Uploadr(object):
         return False
 
     # -------------------------------------------------------------------------
-    # updatedVideoDate
+    # update_video_date
     #
     # Update the video date taken based on last_modified time of file
     #
-    def updatedVideoDate(self, xfile_id, xfile, xlast_modified):
-        """ updatedVideoDate
+    def update_video_date(self, xfile_id, xfile, xlast_modified):
+        """ update_video_date
 
             Update the video date taken based on last_modified time of file
         """
@@ -990,7 +990,7 @@ class Uploadr(object):
                                 file_checksum, last_modified)
 
                 # Update the Video Date Taken
-                self.updatedVideoDate(isfile_id, file, last_modified)
+                self.update_video_date(isfile_id, file, last_modified)
 
                 con.commit()
 
@@ -1309,7 +1309,7 @@ class Uploadr(object):
                                     last_modified)
 
                     # Update the Video Date Taken
-                    self.updatedVideoDate(file_id, file, last_modified)
+                    self.update_video_date(file_id, file, last_modified)
 
                     success = True
 
@@ -1579,7 +1579,7 @@ class Uploadr(object):
                            dbcaughtcode='070')
 
             # Update the Video Date Taken
-            self.updatedVideoDate(file_id, file, last_modified)
+            self.update_video_date(file_id, file, last_modified)
 
             success = True
 

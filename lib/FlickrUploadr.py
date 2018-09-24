@@ -2449,8 +2449,8 @@ class Uploadr(object):
     #   Searches localDBSet from local database (flickrdb)
     #   if localDBSet is None then INSERTs flickrset into flickrdb
     #
-    def getFlickrSets(self):
-        """ getFlickrSets
+    def get_flickr_sets(self):
+        """ get_flickr_sets
 
             Gets list of FLickr Sets (Albums) and populates
             local DB accordingly
@@ -2460,9 +2460,7 @@ class Uploadr(object):
         if self.args.dry_run:
             return True
 
-        con = lite.connect(self.xcfg.DB_PATH)
-        con.text_factory = str
-        cur = con.cursor()
+        con, cur = litedb.connect(self.xcfg.DB_PATH)
 
         get_success, get_result, get_errcode = faw.flickrapi_fn(
             self.nuflickr.photosets.getList, (),
@@ -2520,50 +2518,32 @@ class Uploadr(object):
                              else NP.strunicodeout(setname),
                              primary_photo_id)
 
-                logging.debug('SELECT set_id FROM sets WHERE set_id = "%s"',
-                              set_id)
-                try:
-                    cur.execute("SELECT set_id FROM sets "
-                                "WHERE set_id = '" + set_id + "'")
-                    found_sets = cur.fetchone()
-                    logging.info('Output for found_sets is [%s]',
-                                 'None' if found_sets is None else found_sets)
-                except lite.Error as err:
-                    NP.niceerror(caught=True,
-                                 caughtprefix='+++ DB',
-                                 caughtcode='164',
-                                 caughtmsg='DB error on SELECT FROM '
-                                 'sets: [{!s}]'
-                                 .format(err.args[0]),
-                                 useniceprint=True)
-
+                litedb.execute(con,
+                               'SELECT#164',
+                               None, self.args.processes,  # No need for lock
+                               cur,
+                               'SELECT set_id FROM sets WHERE set_id = ?',
+                               qmarkargs=(set_id,),
+                               dbcaughtcode='164')
+                found_sets = cur.fetchone()
+                logging.info('Output for found_sets is [%s]',
+                             'None' if found_sets is None else found_sets)
                 if found_sets is None:
-                    logging.info('Adding set [%s] setname:[%s] '
-                                 'with primary photo [%s].',
-                                 set_id,
+                    logging.info('Adding set:[%s] id:[%s] primary photo:[%s]',
                                  'None'
                                  if setname is None
                                  else NP.strunicodeout(setname),
+                                 set_id,
                                  primary_photo_id)
-                    try:
-                        logging.debug('INSERT INTO sets (set_id, name, '
-                                      'primary_photo_id) VALUES (%s,%s,%s)',
-                                      set_id,
-                                      NP.strunicodeout(setname),
-                                      primary_photo_id)
-                        cur.execute('INSERT INTO sets (set_id, name, '
-                                    'primary_photo_id) VALUES (?,?,?)',
-                                    (set_id, setname, primary_photo_id))
-                        con.commit()
-
-                    except lite.Error as err:
-                        NP.niceerror(caught=True,
-                                     caughtprefix='+++ DB',
-                                     caughtcode='165',
-                                     caughtmsg='DB error on INSERT INTO '
-                                     'sets: [{!s}]'
-                                     .format(err.args[0]),
-                                     useniceprint=True)
+                    litedb.execute(con,
+                                   'INSERT#165',
+                                   None, self.args.processes,  # No need for lock
+                                   cur,
+                                   'INSERT INTO sets (set_id, name, '
+                                   'primary_photo_id) VALUES (?,?,?)',
+                                   qmarkargs=(set_id, setname, primary_photo_id),
+                                   dbcaughtcode='165')
+    
                 else:
                     logging.info('Found on DB Set:[%s]',
                                  NP.strunicodeout(setname))
@@ -2593,7 +2573,7 @@ class Uploadr(object):
                          caughtmsg='Closing DB connection on '
                          'photosets.getList',
                          useniceprint=True)
-            con.close()
+            litedb.close(con)        
 
     # -------------------------------------------------------------------------
     # is_already_uploaded

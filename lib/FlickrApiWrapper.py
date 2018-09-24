@@ -4,11 +4,6 @@
 
     FlickrApiWrapper = Helper functions to call flickrapi from
                        FlickrUploadr.Uploadr class
-
-    CODING:
-    Return codes = None => Error
-                   Generate Exceptions? No
-                   True/False/Error status?
 """
 
 # -----------------------------------------------------------------------------

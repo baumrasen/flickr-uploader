@@ -333,7 +333,6 @@ class Uploadr(object):
 
         if self.args.bad_files:
             # Cater for bad files
-            # CODING no reconnect: litedb.connect
             litedb.execute(con,
                            'SELECT#028',
                            nulockdb, self.args.processes,
@@ -1046,13 +1045,13 @@ class Uploadr(object):
                     title_filename = self.xcfg.FLICKR["title"]
                     logging.info('title from INI file:[%s]', title_filename)
 
-                # CODING: Check MAX_UPLOAD_ATTEMPTS. Replace with @retry?
                 uploadresp = None
                 photo_id = None
                 zuploadok = False
                 zbadfile = False
                 zuploaderror = False
 
+                # Try as many as MAX_UPLOAD_ATTEMPTS
                 attempts = None
                 for attempts in range(0, self.xcfg.MAX_UPLOAD_ATTEMPTS):
                     # Reset variables on each iteration
@@ -1386,8 +1385,8 @@ class Uploadr(object):
                                            cur, con)
 
         # Closing DB connection
-        if con is not None:
-            con.close()
+        litedb.close(con)        
+
         return success
 
     # -------------------------------------------------------------------------
@@ -2022,8 +2021,8 @@ class Uploadr(object):
                         logging.error('Not able to assign pic to set')
 
         # Closing DB connection
-        if con is not None:
-            con.close()
+        litedb.close(con)
+        
         NP.niceprint('*****Completed creating sets*****')
 
     # -------------------------------------------------------------------------
@@ -2096,8 +2095,6 @@ class Uploadr(object):
                          caughtcode='122',
                          caughtmsg='Closing DB connection on add_file_to_set',
                          useniceprint=True)
-            # CODING: replaced by litedb.close
-            # con.close()
             litedb.close(con)
 
     # -------------------------------------------------------------------------
@@ -2299,8 +2296,7 @@ class Uploadr(object):
                 # Database version 4 <=========================DB VERSION: 4===
                 # ...for future use!
             # Closing DB connection
-            if con is not None:
-                con.close()
+            litedb.close(con)
         except lite.Error as err:
             NP.niceerror(caught=True,
                          caughtprefix='+++ DB',
@@ -2309,13 +2305,11 @@ class Uploadr(object):
                          .format(err.args[0]),
                          useniceprint=True)
 
-            if con is not None:
-                con.close()
+            litedb.close(con)
             sys.exit(6)
         finally:
             # Closing DB connection
-            if con is not None:
-                con.close()
+            litedb.close(con)
 
         NP.niceprint('Completed database setup')
 

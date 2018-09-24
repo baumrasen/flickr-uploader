@@ -198,7 +198,6 @@ class NicePrint:
             [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
             Accounts for UTF-8 Messages
         """
-        # CODING
         if verbosity <= self.get_verbosity():
             if self.get_mask_sensitivity():
                 # logging.debug('>in  astr:[%s]/type:[%s]', astr, type(astr))
@@ -209,7 +208,7 @@ class NicePrint:
                                            UPLDR_K.MaskPatterns)._hashrepl,
                         astr,
                         flags=re.IGNORECASE)
-                # logging.info('<out astr:[%s]/type:[%s]', astr, type(astr))
+                # logging.debug('<out astr:[%s]/type:[%s]', astr, type(astr))
 
             print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
                   .format(UPLDR_K.Gre,
@@ -382,11 +381,9 @@ class RedactingFormatter(logging.Formatter):
 
     def format(self, record):
         msg = self.orig_formatter.format(record)
-        # CODING
-        # print('>in  msg:[%s]/type:[%s]', msg, type(msg))
         for pattern in self._patterns:
             msg = re.sub(pattern, self._hashrepl, msg, flags=re.IGNORECASE)
-        # print('<out msg:[%s]/type:[%s]', msg, type(msg))
+
         return msg
 
     def __getattr__(self, attr):

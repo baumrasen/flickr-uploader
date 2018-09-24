@@ -64,8 +64,6 @@ class Konstants:
 
     # Patterns to filter/ defined on UPLDR_K.MaskPatterns/mask sensitive data
     MaskPatterns = (
-        # CODING: Reconfirm logging for: filename, path, file, etc.
-
         # Non-greedy "[filename]" preceeded by "path:[" & followed by "]"
         r'(?<=(path):\[).+?(?=\])',
         r'(?<=(loaded):\[).+?(?=\])',

@@ -3153,8 +3153,7 @@ class Uploadr(object):
                               dbcaughtcode='165'):
             return False
 
-        bad_files = None
-        bad_Files = cur.fetchall()        
+        bad_files = cur.fetchall()        
         count_total = len(bad_files)
         logging.info('len(bad_files)=[%s]', count_total)
 

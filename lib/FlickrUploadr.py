@@ -2537,13 +2537,14 @@ class Uploadr(object):
                                  primary_photo_id)
                     litedb.execute(con,
                                    'INSERT#165',
-                                   None, self.args.processes,  # No need for lock
-                                   cur,
+                                   None,  # No need for lock
+                                   self.args.processes, cur,
                                    'INSERT INTO sets (set_id, name, '
                                    'primary_photo_id) VALUES (?,?,?)',
-                                   qmarkargs=(set_id, setname, primary_photo_id),
+                                   qmarkargs=(set_id, setname,
+                                              primary_photo_id),
                                    dbcaughtcode='165')
-    
+
                 else:
                     logging.info('Found on DB Set:[%s]',
                                  NP.strunicodeout(setname))
@@ -2573,7 +2574,7 @@ class Uploadr(object):
                          caughtmsg='Closing DB connection on '
                          'photosets.getList',
                          useniceprint=True)
-            litedb.close(con)        
+            litedb.close(con)
 
     # -------------------------------------------------------------------------
     # is_already_uploaded

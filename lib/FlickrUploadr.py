@@ -2785,7 +2785,7 @@ class Uploadr(object):
                                         method='xml'))
 
                     logging.warning(
-                        '\nCheck : id=[%s] File=[%s]\n'
+                        '\nCheck : id:[%s] File:[%s]\n'
                         'Check : Title:[%s] Set:[%s]\n'
                         'Flickr: Title:[%s] Set:[%s] Tags:[%s]\n',
                         pic.attrib['id'],

@@ -785,7 +785,8 @@ class Uploadr(object):
             running = shared value to count processed files in multiprocessing
             mutex = for running access control in multiprocessing
         """
-
+        # CODING
+        # pylint: disable=unused-argument        
         for i, filepic in enumerate(filelist):
             logging.warning('===Element of Chunk:[%s] file:[%s]', i, filepic)
             self.upload_file(lock, filepic)
@@ -3153,6 +3154,7 @@ class Uploadr(object):
             return False
 
         bad_files = None
+        bad_Files = cur.fetchall()        
         count_total = len(bad_files)
         logging.info('len(bad_files)=[%s]', count_total)
 

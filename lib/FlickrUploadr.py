@@ -1385,7 +1385,7 @@ class Uploadr(object):
                                            cur, con)
 
         # Closing DB connection
-        litedb.close(con)        
+        litedb.close(con)
 
         return success
 
@@ -2022,7 +2022,6 @@ class Uploadr(object):
 
         # Closing DB connection
         litedb.close(con)
-        
         NP.niceprint('*****Completed creating sets*****')
 
     # -------------------------------------------------------------------------

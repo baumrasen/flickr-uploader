@@ -2271,10 +2271,10 @@ class Uploadr(object):
                 NP.niceprint('Database version: [{!s}]'.format(row[0]))
                 # Database version 3 <=========================DB VERSION: 3===
                 NP.niceprint('Adding album tags to pics already uploaded... ')
-                if self.addAlbumsMigrate():
+                if self.add_albums_tag():
                     NP.niceprint('Successfully added album tags to pics '
                                  'already upload. Updating Database version.',
-                                 fname='addAlbumsMigrate')
+                                 fname='add_albums_tag')
                     litedb.execute(con, 'PRAGMA#014:setup_db',
                                    None, self.args.processes, cur,
                                    'PRAGMA user_version="3"',
@@ -2291,7 +2291,7 @@ class Uploadr(object):
                     NP.niceprint('Failed adding album tags to pics '
                                  'on upload. Not updating Database version.'
                                  'Please check logs, correct, and retry.',
-                                 fname='addAlbumsMigrate')
+                                 fname='add_albums_tag')
 
             if row[0] == 3:
                 NP.niceprint('Database version: [{!s}]'.format(row[0]))
@@ -2933,25 +2933,31 @@ class Uploadr(object):
         return get_result
 
     # -------------------------------------------------------------------------
-    # maddAlbumsMigrate
+    # madd_albums_tag
     #
-    # maddAlbumsMigrate wrapper for multiprocessing purposes
+    # madd_albums_tag wrapper for multiprocessing purposes
     #
-    def maddAlbumsMigrate(self, lock, running, mutex, filelist, c_total, cur):
-        """ maddAlbumsMigrate
+    def madd_albums_tag(self, lock, running, mutex, filelist, c_total, cur):
+        """ madd_albums_tag
 
-            Wrapper function for multiprocessing support to call upload_file
+            Wrapper function for multiprocessing support to call add_albums_tag
             with a chunk of the files.
             lock       = for database access control in multiprocessing
             running    = shared value to count processed files in
                          multiprocessing
             mutex      = for running access control in multiprocessing
-            cur        = cursor
-        """
+            cur        = cursor for database access control in multiprocessing
 
+            Remarks:
+                code, cur = Not used as function does not update database.
+                pylint: disable=unused-argument
+        """
+        # CODING
+        # pylint: disable=unused-argument
         for i, afile in enumerate(filelist):
             logging.warning('===Element of Chunk:[%s] file:[%s]', i, afile)
 
+            # CODING: ALBUM_TAGS_01: Refactor with code at ALBUM_TAGS_02
             # afile[0] = files_id
             # afile[1] = path
             # afile[2] = set_name
@@ -2985,13 +2991,13 @@ class Uploadr(object):
                     2, 2, False, caughtcode='214')
 
                 a_result = get_success and get_errcode == 0
-                logging.warning('%s: Photo_id:[%s] [%s] ',
+                logging.warning('%s: Photo_id:[%s] File:[%s] ',
                                 'Added album tag'
                                 if a_result
                                 else ' Failed tagging',
                                 str(afile[0]),
                                 NP.strunicodeout(afile[1]))
-                NP.niceprint('{!s}: Photo_id:[{!s}] [{!s}]'
+                NP.niceprint('{!s}: Photo_id:[{!s}] File:[{!s}]'
                              .format('Added album tag'
                                      if a_result
                                      else ' Failed tagging',
@@ -3018,12 +3024,12 @@ class Uploadr(object):
             rate_limited.rate_5_callspersecond()
 
     # -------------------------------------------------------------------------
-    # addAlbumsMigrate
+    # add_albums_tag
     #
     # Prepare for version 2.7.0 Add album info to loaded pics
     #
-    def addAlbumsMigrate(self):
-        """ addAlbumsMigrate
+    def add_albums_tag(self):
+        """ add_albums_tag
 
             Adds tag:album to pics
         """
@@ -3041,113 +3047,102 @@ class Uploadr(object):
         if not self.check_token():
             # authenticate sys.exits in case of failure
             self.authenticate()
-        con = lite.connect(self.xcfg.DB_PATH)
-        con.text_factory = str
-        with con:
-            try:
-                cur = con.cursor()
-                cur.execute('SELECT files_id, path, sets.name, sets.set_id '
-                            'FROM files LEFT OUTER JOIN sets ON '
-                            'files.set_id = sets.set_id')
-                existing_media = cur.fetchall()
-                logging.info('len(existing_media)=[%s]',
-                             len(existing_media))
-            except lite.Error as err:
-                NP.niceerror(caught=True,
-                             caughtprefix='+++ DB',
-                             caughtcode='215',
-                             caughtmsg='DB error on SELECT FROM sets: [{!s}]'
-                             .format(err.args[0]),
-                             useniceprint=True)
-                return False
 
+        con, cur = litedb.connect(self.xcfg.DB_PATH)
+
+        if not litedb.execute(con,
+                              'SELECT#215',
+                              None, self.args.processes,  # No need for lock
+                              cur,
+                              'SELECT files_id, path, sets.name, sets.set_id '
+                              'FROM files LEFT OUTER JOIN sets ON '
+                              'files.set_id = sets.set_id',
+                              dbcaughtcode='215'):
+            return False
+
+        existing_media = cur.fetchall()
+        logging.info('len(existing_media)=[%s]', len(existing_media))
+
+        count_total = len(existing_media)
+        # running in multi processing mode
+        if self.args.processes and self.args.processes > 0:
+            logging.debug('Running [%s] processes pool.',
+                          self.args.processes)
+            logging.debug('__name__:[%s] to prevent recursive calling)!',
+                          __name__)
+
+            # To prevent recursive calling, check if __name__ == '__main__'
+            # if __name__ == '__main__':
+            mp.mprocessing(self.args.processes,
+                           mlockdb,
+                           mrunning,
+                           mmutex,
+                           existing_media,
+                           self.madd_albums_tag,
+                           cur)
+
+        # running in single processing mode
+        else:
+            count = 0
             count_total = len(existing_media)
-            # running in multi processing mode
-            if self.args.processes and self.args.processes > 0:
-                logging.debug('Running [%s] processes pool.',
-                              self.args.processes)
-                logging.debug('__name__:[%s] to prevent recursive calling)!',
-                              __name__)
-                cur = con.cursor()
+            for row in existing_media:
+                count += 1
+                # CODING: ALBUM_TAGS_02: Refactor with code at ALBUM_TAGS_01
+                # row[0] = files_id
+                # row[1] = path
+                # row[2] = set_name
+                # row[3] = set_id
+                NP.niceprint('ID:[{!s}] Path:[{!s}] Set:[{!s}] SetID:[{!s}]'
+                             .format(str(row[0]), row[1], row[2], row[3]),
+                             fname='addAlbumMigrate')
 
-                # To prevent recursive calling, check if __name__ == '__main__'
-                # if __name__ == '__main__':
-                mp.mprocessing(self.args.processes,
-                               mlockdb,
-                               mrunning,
-                               mmutex,
-                               existing_media,
-                               self.maddAlbumsMigrate,
-                               cur)
+                # row[1] = path for the file from table files
+                setname = faw.set_name_from_file(row[1],
+                                                 self.xcfg.FILES_DIR,
+                                                 self.xcfg.FULL_SET_NAME)
 
-                con.commit()
+                tfind, tid = self.photos_find_tag(
+                    photo_id=row[0],
+                    intag='album:{}'.format(row[2]
+                                            if row[2] is not None
+                                            else setname))
 
-            # running in single processing mode
-            else:
-                count = 0
-                count_total = len(existing_media)
-                for row in existing_media:
-                    count += 1
-                    # row[0] = files_id
-                    # row[1] = path
-                    # row[2] = set_name
-                    # row[3] = set_id
-                    NP.niceprint('ID:[{!s}] Path:[{!s}] '
-                                 'Set:[{!s}] SetID:[{!s}]'
-                                 .format(str(row[0]), row[1],
-                                         row[2], row[3]),
+                logging.warning('       Find Tag:[%s] TagId:[%s]', tfind, tid)
+                NP.niceprint('       Find Tag:[{!s}] TagId:[{!s}]'
+                             .format(tfind, tid), verbosity=1)
+
+                if not tfind:
+                    get_success, _, get_errcode = faw.flickrapi_fn(
+                        self.nuflickr.photos.addTags, (),
+                        dict(photo_id=row[0],
+                             tags='album:"{}"'.format(row[2]
+                                                      if row[2] is not None
+                                                      else setname)),
+                        2, 2, False, caughtcode='218')
+
+                    a_result = get_success and get_errcode == 0
+                    logging.warning('%s: Photo_id:[%s] [%s]',
+                                    'Added album tag'
+                                    if a_result
+                                    else ' Failed tagging',
+                                    str(row[0]),
+                                    NP.strunicodeout(row[1]))
+                    NP.niceprint('{!s}: Photo_id:[{!s}] [{!s}]'
+                                 .format('Added album tag'
+                                         if a_result
+                                         else ' Failed tagging',
+                                         str(row[0]),
+                                         NP.strunicodeout(row[1])),
                                  fname='addAlbumMigrate')
-
-                    # row[1] = path for the file from table files
-                    setname = faw.set_name_from_file(row[1],
-                                                     self.xcfg.FILES_DIR,
-                                                     self.xcfg.FULL_SET_NAME)
-
-                    tfind, tid = self.photos_find_tag(
-                        photo_id=row[0],
-                        intag='album:{}'.format(row[2]
-                                                if row[2] is not None
-                                                else setname))
-
-                    logging.warning('       Find Tag:[%s] TagId:[%s]',
+                else:
+                    logging.warning('      Found Tag:[%s] TagId:[{%s]',
                                     tfind, tid)
-                    NP.niceprint('       Find Tag:[{!s}] TagId:[{!s}]'
+                    NP.niceprint('      Found Tag:[{!s}] TagId:[{!s}]'
                                  .format(tfind, tid), verbosity=1)
 
-                    if not tfind:
-                        get_success, _, get_errcode = \
-                            faw.flickrapi_fn(
-                                self.nuflickr.photos.addTags, (),
-                                dict(photo_id=row[0],
-                                     tags='album:"{}"'
-                                     .format(row[2]
-                                             if row[2] is not None
-                                             else setname)),
-                                2, 2, False, caughtcode='218')
+                NP.niceprocessedfiles(count, count_total, False)
 
-                        a_result = get_success and get_errcode == 0
-                        logging.warning('%s: Photo_id:[%s] [%s]',
-                                        'Added album tag'
-                                        if a_result
-                                        else ' Failed tagging',
-                                        str(row[0]),
-                                        NP.strunicodeout(row[1]))
-                        NP.niceprint('{!s}: Photo_id:[{!s}] [{!s}]'
-                                     .format('Added album tag'
-                                             if a_result
-                                             else ' Failed tagging',
-                                             str(row[0]),
-                                             NP.strunicodeout(row[1])),
-                                     fname='addAlbumMigrate')
-                    else:
-                        logging.warning('      Found Tag:[%s] TagId:[{%s]',
-                                        tfind, tid)
-                        NP.niceprint('      Found Tag:[{!s}] TagId:[{!s}]'
-                                     .format(tfind, tid), verbosity=1)
-
-                    NP.niceprocessedfiles(count, count_total, False)
-
-                NP.niceprocessedfiles(count, count_total, True)
+            NP.niceprocessedfiles(count, count_total, True)
 
         return True
 

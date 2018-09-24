@@ -404,12 +404,12 @@ def run_uploadr(args):
 
         if args.add_albums_migrate:
             NPR.niceprint('Preparation migration to 2.7.0',
-                          fname='addAlbumsMigrate')
+                          fname='add_albums_tag')
 
-            if myflick.addAlbumsMigrate():
+            if myflick.add_albums_tag():
                 NPR.niceprint('Successfully added album tags to pics '
                               'on upload.',
-                              fname='addAlbumsMigrate')
+                              fname='add_albums_tag')
             else:
                 NPR.niceerror(
                     caught=True,

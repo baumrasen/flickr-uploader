@@ -1665,10 +1665,10 @@ class Uploadr(object):
         """
 
         # ---------------------------------------------------------------------
-        # dbDeleteRecordLocalDB
+        # delete_record_localdb
         #
-        def dbDeleteRecordLocalDB(lock, file):
-            """ dbDeleteRecordLocalDB
+        def delete_record_localdb(lock, file):
+            """ delete_record_localdb
 
             Find out if the file is the last item in a set, if so,
             remove the set from the local db
@@ -1682,7 +1682,7 @@ class Uploadr(object):
             con, nucur = litedb.connect(self.xcfg.DB_PATH)
 
             litedb.execute(con,
-                           'SELECT#060:dbDeleteRecordLocalDB',
+                           'SELECT#060:delete_record_localdb',
                            lock, self.args.processes,
                            nucur,
                            'SELECT set_id FROM files WHERE files_id = ?',
@@ -1691,7 +1691,7 @@ class Uploadr(object):
             row = nucur.fetchone()
             if row is not None:
                 litedb.execute(con,
-                               'SELECT#061:dbDeleteRecordLocalDB',
+                               'SELECT#061:delete_record_localdb',
                                lock, self.args.processes,
                                nucur,
                                'SELECT set_id FROM files WHERE set_id = ?',
@@ -1703,7 +1703,7 @@ class Uploadr(object):
                                  'deleting the set ID: [{!s}]'
                                  .format(str(row[0])))
                     litedb.execute(
-                        con, 'DELETE#062:dbDeleteRecordLocalDB',
+                        con, 'DELETE#062:delete_record_localdb',
                         lock, self.args.processes,
                         nucur,
                         'DELETE FROM sets WHERE set_id = ?',
@@ -1711,7 +1711,7 @@ class Uploadr(object):
                         dbcaughtcode='062')
 
             litedb.execute(
-                con, 'DELETE#063:dbDeleteRecordLocalDB',
+                con, 'DELETE#063:delete_record_localdb',
                 lock, self.args.processes,
                 nucur,
                 'DELETE FROM files WHERE files_id = ?',
@@ -1749,7 +1749,7 @@ class Uploadr(object):
                 (not get_success and get_errcode == 1)):
             # Error: 1: File already removed from Flickr
 
-            dbDeleteRecordLocalDB(lock, file)
+            delete_record_localdb(lock, file)
             NP.niceprint('   Deleted file:[{!s}]'
                          .format(NP.strunicodeout(file[1])))
             success = True
@@ -1826,12 +1826,12 @@ class Uploadr(object):
             NUTIME.sleep(self.xcfg.SLEEP_TIME)
 
     # ---------------------------------------------------------------------
-    # fn_addFilesToSets
+    # fn_add_filestosets
     #
     # Processing function for adding files to set in multiprocessing mode
     #
-    def fn_addFilesToSets(self, lockdb, running, mutex, sfiles, c_total, cur):
-        """ fn_addFilesToSets
+    def fn_add_filestosets(self, lockdb, running, mutex, sfiles, c_total, cur):
+        """ fn_add_filestosets
         """
 
         # CODING Use a different conn and cur to avoid error +++096
@@ -1846,7 +1846,7 @@ class Uploadr(object):
 
             aset = None
             litedb.execute(fn_con,
-                           'SELECT#098:dbDeleteRecordLocalDB',
+                           'SELECT#098:delete_record_localdb',
                            lockdb, self.args.processes,
                            acur,
                            'SELECT set_id, name FROM sets WHERE name = ?',
@@ -1862,7 +1862,7 @@ class Uploadr(object):
                              .format(NP.strunicodeout(filepic[1]),
                                      NP.strunicodeout(setname),
                                      set_id))
-                self.addFileToSet(lockdb, set_id, filepic, acur)
+                self.add_file_to_set(lockdb, set_id, filepic, acur)
             else:
                 NP.niceprint('Not able to assign pic to set')
                 logging.error('Not able to assign pic to set')
@@ -1982,7 +1982,7 @@ class Uploadr(object):
                                srunning,
                                smutex,
                                files,
-                               self.fn_addFilesToSets,
+                               self.fn_add_filestosets,
                                cur)
                 con.commit()
 
@@ -2015,7 +2015,7 @@ class Uploadr(object):
                                      .format(NP.strunicodeout(filepic[1]),
                                              NP.strunicodeout(setname),
                                              set_id))
-                        self.addFileToSet(slockdb, set_id, filepic, cur)
+                        self.add_file_to_set(slockdb, set_id, filepic, cur)
                     else:
                         NP.niceprint('Not able to assign pic to set')
                         logging.error('Not able to assign pic to set')
@@ -2026,10 +2026,10 @@ class Uploadr(object):
         NP.niceprint('*****Completed creating sets*****')
 
     # -------------------------------------------------------------------------
-    # addFiletoSet
+    # add_file_to_set
     #
-    def addFileToSet(self, lock, set_id, file, cur):
-        """ addFileToSet
+    def add_file_to_set(self, lock, set_id, file, cur):
+        """ add_file_to_set
 
             Adds a file to set...
 
@@ -2085,7 +2085,7 @@ class Uploadr(object):
             NP.niceerror(caught=True,
                          caughtprefix='xxx',
                          caughtcode='097',
-                         caughtmsg='Failed add photo to set (addFiletoSet)',
+                         caughtmsg='Failed add photo to set (add_file_to_set)',
                          useniceprint=True)
 
         # Closing DB connection
@@ -2093,7 +2093,7 @@ class Uploadr(object):
             NP.niceerror(caught=True,
                          caughtprefix='+++ DB',
                          caughtcode='122',
-                         caughtmsg='Closing DB connection on addFileToSet',
+                         caughtmsg='Closing DB connection on add_file_to_set',
                          useniceprint=True)
             # CODING: replaced by litedb.close
             # con.close()
@@ -2419,11 +2419,11 @@ class Uploadr(object):
         NP.niceprint('*****Completed removing empty Sets from DB*****')
 
     # -------------------------------------------------------------------------
-    # Display Sets
+    # display_sets
     #
     # CODING: Not being used!
-    def displaySets(self):
-        """ displaySets
+    def display_sets(self):
+        """ display_sets
 
         Prints the list of sets/albums recorded on the local database
         """
@@ -2436,7 +2436,7 @@ class Uploadr(object):
                        dbcaughtcode='160')
         allsets = cur.fetchall()
         for row in allsets:
-            NP.niceprint('Set: [{!s}] ({!s})'.format(str(row[0]), row[1]))
+            NP.niceprint('Set:[{!s}] id:[{!s}]'.format(str(row[1]), row[0]))
 
         # Closing DB connection
         litedb.close(con)

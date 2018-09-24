@@ -424,7 +424,7 @@ def run_uploadr(args):
             myflick.list_bad_files()
         else:
             myflick.remove_useless_sets_table()
-            myflick.getFlickrSets()
+            myflick.get_flickr_sets()
             myflick.upload()
             myflick.remove_deleted_media()
 

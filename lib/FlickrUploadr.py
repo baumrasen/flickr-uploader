@@ -2645,7 +2645,7 @@ class Uploadr(object):
         # </photos>
         #
         # Use a big random waitime to avoid errors in multiprocessing mode.
-        get_success, searchIsUploaded, get_errcode = faw.flickrapi_fn(
+        get_success, search_is_uploaded, get_errcode = faw.flickrapi_fn(
             self.nuflickr.photos.search, (),
             dict(user_id="me",
                  tags='checksum:{}'.format(xchecksum),
@@ -2666,14 +2666,14 @@ class Uploadr(object):
         # Number of pics with specified checksum
         # CODING: Protect issue #66. Flickr returns attrib == '' instead of 0
         # Set 'Number of pics with specified checksum' to 0 and return.
-        if not searchIsUploaded.find('photos').attrib['total']:
+        if not search_is_uploaded.find('photos').attrib['total']:
             ret_photos_uploaded = 0
             logging.error(' IS_UPLOADED=[ERROR#3]: Invalid return. Confinuing')
             NP.niceprint(' IS_UPLOADED=[ERROR#3]: Invalid return. Confinuing',
                          fname='isuploaded',
                          verbosity=3)
         else:
-            ret_photos_uploaded = int(searchIsUploaded
+            ret_photos_uploaded = int(search_is_uploaded
                                       .find('photos').attrib['total'])
 
         if ret_photos_uploaded == 0:
@@ -2694,7 +2694,7 @@ class Uploadr(object):
 
             # For each pic found on Flickr 1st check title and then Sets
             pic_index = 0
-            for pic in searchIsUploaded.find('photos').findall('photo'):
+            for pic in search_is_uploaded.find('photos').findall('photo'):
                 pic_index += 1
                 logging.debug('idx=[%s] pic.id=[%s] '
                               'pic.title=[%s] pic.tags=[%s]',
@@ -3188,11 +3188,11 @@ class Uploadr(object):
     #
     # List Local pics, loaded pics into Flickr, pics not in sets on Flickr
     #
-    def pics_status(self, InitialFoundFiles):
+    def pics_status(self, initial_found_files):
         """ pics_status
 
             Shows Total photos and Photos Not in Sets on Flickr
-            InitialFoundFiles = shows the Found files prior to processing
+            initial_found_files = shows the Found files prior to processing
         """
 
         def db_count_rows(atable):
@@ -3251,9 +3251,9 @@ class Uploadr(object):
                      '               Flickr:[{!s:>6s}]\t[{!s:>6s}] '
                      ':Flickr-Local\n'
                      'Not in sets on Flickr:[{!s:>6s}]'
-                     .format(InitialFoundFiles,
+                     .format(initial_found_files,
                              bad_files_count,
-                             InitialFoundFiles - bad_files_count,
+                             initial_found_files - bad_files_count,
                              countlocal,
                              countflickr,
                              int(countflickr) - int(countlocal),

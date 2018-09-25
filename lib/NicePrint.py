@@ -324,7 +324,7 @@ class NicePrint:
     #
     # Nicely print number of processed files
     #
-    def niceprocessedfiles(self, count, ctotal, total):
+    def niceprocessedfiles(self, count, ctotal, total, msg='Files Processed'):
         """
         niceprocessedfiles
 
@@ -335,12 +335,12 @@ class NicePrint:
 
         if not total:
             if int(count) % 100 == 0:
-                self.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
-                               .format(count, ctotal))
+                self.niceprint('{!s:>15s}:[{!s:>6s}] of [{!s:>6s}]'
+                               .format(msg, count, ctotal))
         else:
             if int(count) % 100 > 0:
-                self.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
-                               .format(count, ctotal))
+                self.niceprint('{!s:>15s}:[{!s:>6s}] of [{!s:>6s}]'
+                               .format(msg, count, ctotal))
 
         sys.stdout.flush()
 

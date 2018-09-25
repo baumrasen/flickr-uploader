@@ -1875,7 +1875,8 @@ class Uploadr(object):
             logging.info('===Multiprocessing=== out.mutex.release(w)')
 
             # Show number of files processed so far
-            NP.niceprocessedfiles(xcount, c_total, False)
+            NP.niceprocessedfiles(xcount, c_total, False,
+                                  msg='Added to Set')
 
         # Closing DB connection
         litedb.close(fn_con)
@@ -2993,7 +2994,8 @@ class Uploadr(object):
             logging.info('===Multiprocessing=== out.mutex.release(w)')
 
             # Show number of files processed so far
-            NP.niceprocessedfiles(xcount, c_total, False)
+            NP.niceprocessedfiles(xcount, c_total, False,
+                                  msg='Album tag Added')
 
             # Control pace (rate limit)of each proceess
             rate_limited.rate_5_callspersecond()
@@ -3115,9 +3117,12 @@ class Uploadr(object):
                     NP.niceprint('      Found Tag:[{!s}] TagId:[{!s}]'
                                  .format(tfind, tid), verbosity=1)
 
-                NP.niceprocessedfiles(count, count_total, False)
+                NP.niceprocessedfiles(count, count_total, False,
+                                      msg='Album tag Added')
 
-            NP.niceprocessedfiles(count, count_total, True)
+            NP.niceprocessedfiles(count, count_total, True,
+                                  msg='Album tag Added')
+
 
         return True
 
@@ -3170,7 +3175,7 @@ class Uploadr(object):
                                           NUTIME.localtime(row[5]))))
             sys.stdout.flush()
 
-        NP.niceprocessedfiles(count, count_total, True)
+        NP.niceprocessedfiles(count, count_total, True, msg='Badfiles Listed')
         NP.niceprint('*****Listing badfiles: End. '
                      'No more options will run.*****',
                      fname='list_bad_files')

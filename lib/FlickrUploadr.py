@@ -3123,7 +3123,6 @@ class Uploadr(object):
             NP.niceprocessedfiles(count, count_total, True,
                                   msg='Album tag Added')
 
-
         return True
 
     # -------------------------------------------------------------------------

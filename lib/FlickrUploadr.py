@@ -845,12 +845,10 @@ class Uploadr(object):
             # Will try MAX_SQL_ATTEMPTS...
             attempts = None
             for attempts in range(0, self.xcfg.MAX_SQL_ATTEMPTS):
-                logging.info('BEGIN SQL:[%s]...[%s}/%s attempts].',
-                             'INSERT INTO files',
+                logging.info('db_insert_files: Start:[%s/%s attempts].',
                              attempts,
                              self.xcfg.MAX_SQL_ATTEMPTS)
 
-                db_success = False
                 db_success = litedb.execute(
                     con, 'INSERT#030', lock, self.args.processes,
                     cur,
@@ -869,23 +867,20 @@ class Uploadr(object):
                                  .format(attempts, self.xcfg.MAX_SQL_ATTEMPTS),
                                  useniceprint=True)
                     NUTIME.sleep(2)
-                else:
-                    if attempts > 0:
-                        NP.niceerror(caught=True,
-                                     caughtprefix='+++ DB',
-                                     caughtcode='032',
-                                     caughtmsg='Succeed at retry SQL...'
-                                     '[{!s}/{!s} attempts]'
-                                     .format(attempts,
-                                             self.xcfg.MAX_SQL_ATTEMPTS),
-                                     useniceprint=True)
-                    logging.info(
-                        'END SQL:[%s]...[%s/%s attempts].',
-                        'INSERT INTO files',
-                        attempts,
-                        self.xcfg.MAX_SQL_ATTEMPTS)
-                    # Break the cycle of SQL_ATTEMPTS and continue
-                    break
+                elif attempts > 0:
+                    NP.niceerror(caught=True,
+                                 caughtprefix='+++ DB',
+                                 caughtcode='032',
+                                 caughtmsg='Succeed at retry SQL...'
+                                 '[{!s}/{!s} attempts]'
+                                 .format(attempts,
+                                         self.xcfg.MAX_SQL_ATTEMPTS),
+                                 useniceprint=True)
+                logging.info('db_insert_files:  Done:[%s/%s attempts].',
+                             attempts,
+                             self.xcfg.MAX_SQL_ATTEMPTS)                        
+                # Break the cycle of SQL_ATTEMPTS and continue
+                break
         # ---------------------------------------------------------------------
 
         # ---------------------------------------------------------------------
@@ -934,14 +929,13 @@ class Uploadr(object):
                        'tagged, last_modified FROM files WHERE path = ?',
                        qmarkargs=(file,),
                        dbcaughtcode='040')
-
         row = cur.fetchone()
         logging.debug('row: %s', row)
 
         # use file modified timestamp to check for changes
         last_modified = os.stat(file).st_mtime
+        # fille_checksum will be checked only if required for performance
         file_checksum = None
-
         # Check if file is already loaded
         if self.args.not_is_already_uploaded:
             is_loaded = False
@@ -996,7 +990,7 @@ class Uploadr(object):
                                  NP.strunicodeout(setname)),
                          verbosity=1)
 
-            logging.warning(' Uploading file:[%s] On Album:[%s],,,',
+            logging.warning(' Uploading file:[%s] On Album:[%s]...',
                             NP.strunicodeout(file),
                             NP.strunicodeout(setname))
 

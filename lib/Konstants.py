@@ -102,13 +102,15 @@ class Konstants:
         #   base_dir      = Base configuration directory for files
         #   ini_file      = Location of INI file, normally named "uploadr.ini"
         #   etc_ini_file  = Location of INI "uploadr.ini" from ../etc folder
-        #   no_delete_tag = Tag to mark files which weren ot delete.
+        #   no_delete_tag = Tag to mark files which were not delete.
         #                   Check parameter --no-delete-from-flickr
+        #   upload_sleep  = Seconds to sleep prior to reattempt a failed upload
         #
         self.base_dir = str('.')
         self.ini_file = str('uploadr.ini')
         self.etc_ini_file = str('../etc/uploadr.ini')
         self.no_delete_tag = str('nodelete')
+        self.upload_sleep = 20  # Normally set to 10.
 
 
 # -----------------------------------------------------------------------------

@@ -225,7 +225,7 @@ def parse_arguments():
                             type=str,
                             nargs='?',
                             const=str(UPLDR_K.no_delete_tag),
-                            help='Do not actually deletepics from flicr.com &'
+                            help='Do not actually delete pics from flicr.com &'
                                  ' mark them with tag:[{!s}]'
                             .format(UPLDR_K.no_delete_tag))
     # run in daemon mode uploading every X seconds
@@ -551,6 +551,8 @@ if __name__ == "__main__":
     if PARSED_ARGS.no_delete_from_flickr:
         logging.warning('Option --no-delete-from-flickr enabled=[%s]',
                         PARSED_ARGS.no_delete_from_flickr)
+    # Debug: upload_sleep: Seconds to sleep prior to reattempt a failed upload
+    logging.info('Upload sleep setting:[%s] seconds', UPLDR_K.upload_sleep)
     # Set verbosity level as per -v count
     NPR.set_verbosity(PARSED_ARGS.verbose)
     NPR.set_mask_sensitivity(PARSED_ARGS.mask_sensitive)

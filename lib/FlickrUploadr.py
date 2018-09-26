@@ -928,461 +928,430 @@ class Uploadr(object):
         success = False
         con, cur = litedb.connect(self.xcfg.DB_PATH)
 
-        with con:
-            litedb.execute(con, 'SELECT#040', lock, self.args.processes,
-                           cur,
-                           'SELECT rowid, files_id, path, set_id, md5, '
-                           'tagged, last_modified FROM files WHERE path = ?',
-                           qmarkargs=(file,),
-                           dbcaughtcode='040')
+        litedb.execute(con, 'SELECT#040', lock, self.args.processes,
+                       cur,
+                       'SELECT rowid, files_id, path, set_id, md5, '
+                       'tagged, last_modified FROM files WHERE path = ?',
+                       qmarkargs=(file,),
+                       dbcaughtcode='040')
 
-            row = cur.fetchone()
-            logging.debug('row: %s', row)
+        row = cur.fetchone()
+        logging.debug('row: %s', row)
 
-            # use file modified timestamp to check for changes
-            last_modified = os.stat(file).st_mtime
-            file_checksum = None
+        # use file modified timestamp to check for changes
+        last_modified = os.stat(file).st_mtime
+        file_checksum = None
 
-            # Check if file is already loaded
-            if self.args.not_is_already_uploaded:
-                is_loaded = False
-                isfile_id = None
-                is_no_set = None
-                logging.info('not_is_already_uploaded:[%s]', is_loaded)
-            else:
+        # Check if file is already loaded
+        if self.args.not_is_already_uploaded:
+            is_loaded = False
+            isfile_id = None
+            is_no_set = None
+            logging.info('not_is_already_uploaded:[%s]', is_loaded)
+        else:
+            file_checksum = faw.md5checksum(file)
+            is_loaded, is_count, isfile_id, is_no_set = \
+                self.is_already_uploaded(file, file_checksum, setname)
+            logging.info('is_already_uploaded:[%s] '
+                         'count:[%s] pic:[%s] '
+                         'row is None == [%s] '
+                         'is_no_set:[%s]',
+                         is_loaded,
+                         is_count, isfile_id,
+                         row is None,
+                         is_no_set)
+        # CODING: REUPLOAD deleted files from Flickr...
+        # A) File loaded. Not recorded on DB. Update local DB.
+        # B) Not loaded. Not recorded on DB. Upload file to FLickr.
+        # C) File loaded. Recorded on DB. Look for changes...
+        # D) Not loaded, Recorded on DB. Reupload.
+        #    Handle D) like B)...
+        #    or (not is_loaded and row is not None)
+        #    ... delete from DB... run normally the (RE)upload process
+
+        # A) File loaded. Not recorded on DB. Update local DB.
+        if is_loaded and row is None:
+            if file_checksum is None:
                 file_checksum = faw.md5checksum(file)
-                is_loaded, is_count, isfile_id, is_no_set = \
-                    self.is_already_uploaded(file,
-                                             file_checksum,
-                                             setname)
-                logging.info('is_already_uploaded:[%s] '
-                             'count:[%s] pic:[%s] '
-                             'row is None == [%s] '
-                             'is_no_set:[%s]',
-                             is_loaded,
-                             is_count, isfile_id,
-                             row is None,
-                             is_no_set)
-            # CODING: REUPLOAD deleted files from Flickr...
-            # A) File loaded. Not recorded on DB. Update local DB.
-            # B) Not loaded. Not recorded on DB. Upload file to FLickr.
-            # C) File loaded. Recorded on DB. Look for changes...
-            # D) Not loaded, Recorded on DB. Reupload.
-            #    Handle D) like B)...
-            #    or (not is_loaded and row is not None)
-            #    ... delete from DB... run normally the (RE)upload process
 
-            # A) File loaded. Not recorded on DB. Update local DB.
-            if is_loaded and row is None:
-                if file_checksum is None:
-                    file_checksum = faw.md5checksum(file)
+            # Insert into DB files
+            logging.warning(' Already loaded:[%s] '
+                            'On Album:[%s]: UPDATING LOCAL DATABASE.',
+                            NP.strunicodeout(file),
+                            NP.strunicodeout(setname))
+            NP.niceprint(' Already loaded:[{!s}] '
+                         'On Album:[{!s}]: UPDATING LOCAL DATABASE.'
+                         .format(NP.strunicodeout(file),
+                                 NP.strunicodeout(setname)))
+            db_insert_files(lock, isfile_id, file,
+                            file_checksum, last_modified)
 
-                # Insert into DB files
-                logging.warning(' Already loaded:[%s] '
-                                'On Album:[%s]: UPDATING LOCAL DATABASE.',
-                                NP.strunicodeout(file),
-                                NP.strunicodeout(setname))
-                NP.niceprint(' Already loaded:[{!s}] '
-                             'On Album:[{!s}]: UPDATING LOCAL DATABASE.'
-                             .format(NP.strunicodeout(file),
-                                     NP.strunicodeout(setname)))
-                db_insert_files(lock, isfile_id, file,
-                                file_checksum, last_modified)
+            # Update the Video Date Taken
+            self.update_video_date(isfile_id, file, last_modified)
 
-                # Update the Video Date Taken
-                self.update_video_date(isfile_id, file, last_modified)
+        # B) Not loaded. Not recorded on DB. Upload file to FLickr.
+        elif row is None:
+            NP.niceprint(' Uploading file:[{!s}] On Album:[{!s}]...'
+                         .format(NP.strunicodeout(file),
+                                 NP.strunicodeout(setname)),
+                         verbosity=1)
 
-                con.commit()
+            logging.warning(' Uploading file:[%s] On Album:[%s],,,',
+                            NP.strunicodeout(file),
+                            NP.strunicodeout(setname))
 
-            # B) Not loaded. Not recorded on DB. Upload file to FLickr.
-            elif row is None:
-                NP.niceprint(' Uploading file:[{!s}] On Album:[{!s}]...'
-                             .format(NP.strunicodeout(file),
-                                     NP.strunicodeout(setname)),
-                             verbosity=1)
+            if file_checksum is None:
+                file_checksum = faw.md5checksum(file)
 
-                logging.warning(' Uploading file:[%s] On Album:[%s],,,',
-                                NP.strunicodeout(file),
-                                NP.strunicodeout(setname))
+            # Title Handling
+            if self.args.title:
+                self.xcfg.FLICKR["title"] = self.args.title
+            # Description Handling
+            if self.args.description:
+                self.xcfg.FLICKR["description"] = self.args.description
+            # Tags Handling
+            if self.args.tags:  # Append a space to later add -t TAGS
+                self.xcfg.FLICKR["tags"] += " "
+                NP.niceprint('TAGS:[{} {}]'
+                             .format(self.xcfg.FLICKR["tags"],
+                                     self.args.tags).replace(',', ''),
+                             verbosity=2)
 
-                if file_checksum is None:
-                    file_checksum = faw.md5checksum(file)
+            # if FLICKR["title"] is empty...
+            # if filename's exif title is empty...
+            #   Can't check without import exiftool
+            # set it to filename OR do not load it up in order to
+            # allow flickr.com itself to set it up
+            # NOTE: an empty title forces flickrapi/auth.py
+            # code at line 280 to encode into utf-8 the filename
+            # this causes an error
+            # UnicodeDecodeError: 'ascii' codec can't decode byte 0xc3
+            # in position 11: ordinal not in range(128)
+            # Worked around it by forcing the title to filename
+            if self.xcfg.FLICKR["title"] == "":
+                path_filename, title_filename = os.path.split(file)
+                logging.info('path:[%s] filename:[%s] ext=[%s]',
+                             path_filename,
+                             title_filename,
+                             os.path.splitext(title_filename)[1])
+                title_filename = os.path.splitext(title_filename)[0]
+                logging.info('title:[%s]', title_filename)
+            else:
+                title_filename = self.xcfg.FLICKR["title"]
+                logging.info('title from INI file:[%s]', title_filename)
 
-                # Title Handling
-                if self.args.title:
-                    self.xcfg.FLICKR["title"] = self.args.title
-                # Description Handling
-                if self.args.description:
-                    self.xcfg.FLICKR["description"] = self.args.description
-                # Tags Handling
-                if self.args.tags:  # Append a space to later add -t TAGS
-                    self.xcfg.FLICKR["tags"] += " "
-                    NP.niceprint('TAGS:[{} {}]'
-                                 .format(self.xcfg.FLICKR["tags"],
-                                         self.args.tags).replace(',', ''),
-                                 verbosity=2)
+            uploadresp = None
+            photo_id = None
+            zuploadok = False
+            zbadfile = False
+            zuploaderror = False
 
-                # if FLICKR["title"] is empty...
-                # if filename's exif title is empty...
-                #   Can't check without import exiftool
-                # set it to filename OR do not load it up in order to
-                # allow flickr.com itself to set it up
-                # NOTE: an empty title forces flickrapi/auth.py
-                # code at line 280 to encode into utf-8 the filename
-                # this causes an error
-                # UnicodeDecodeError: 'ascii' codec can't decode byte 0xc3
-                # in position 11: ordinal not in range(128)
-                # Worked around it by forcing the title to filename
-                if self.xcfg.FLICKR["title"] == "":
-                    path_filename, title_filename = os.path.split(file)
-                    logging.info('path:[%s] filename:[%s] ext=[%s]',
-                                 path_filename,
-                                 title_filename,
-                                 os.path.splitext(title_filename)[1])
-                    title_filename = os.path.splitext(title_filename)[0]
-                    logging.info('title:[%s]', title_filename)
-                else:
-                    title_filename = self.xcfg.FLICKR["title"]
-                    logging.info('title from INI file:[%s]', title_filename)
-
+            # Try as many as MAX_UPLOAD_ATTEMPTS
+            attempts = None
+            for attempts in range(0, self.xcfg.MAX_UPLOAD_ATTEMPTS):
+                # Reset variables on each iteration
                 uploadresp = None
                 photo_id = None
                 zuploadok = False
                 zbadfile = False
                 zuploaderror = False
+                logging.warning('Up/Reuploading:[%s/%s attempts].',
+                                attempts, self.xcfg.MAX_UPLOAD_ATTEMPTS)
+                if attempts > 0:
+                    NP.niceprint('    Reuploading:[{!s}] '
+                                 '[{!s}/{!s} attempts].'
+                                 .format(NP.strunicodeout(file),
+                                         attempts,
+                                         self.xcfg.MAX_UPLOAD_ATTEMPTS))
+                # Upload file to Flickr
+                # replace commas from tags and checksum tags
+                # to avoid tags conflicts
+                try:
+                    uploadresp = self.nuflickr.upload(
+                        filename=file,
+                        fileobj=faw.FileWithCallback(
+                            file,
+                            faw.callback,
+                            self.args.verbose_progress),
+                        title=title_filename
+                        if self.xcfg.FLICKR["title"] == ""
+                        else str(self.xcfg.FLICKR["title"]),
+                        description=str(self.xcfg.FLICKR["description"]),
+                        tags='{} checksum:{} album:"{}" {}'
+                        .format(
+                            self.xcfg.FLICKR["tags"],
+                            file_checksum,
+                            NP.strunicodeout(setname),
+                            self.args.tags if self.args.tags else '')
+                        .replace(',', ''),
+                        is_public=str(self.xcfg.FLICKR["is_public"]),
+                        is_family=str(self.xcfg.FLICKR["is_family"]),
+                        is_friend=str(self.xcfg.FLICKR["is_friend"])
+                    )
 
-                # Try as many as MAX_UPLOAD_ATTEMPTS
-                attempts = None
-                for attempts in range(0, self.xcfg.MAX_UPLOAD_ATTEMPTS):
-                    # Reset variables on each iteration
-                    uploadresp = None
-                    photo_id = None
-                    zuploadok = False
-                    zbadfile = False
-                    zuploaderror = False
-                    logging.warning('Up/Reuploading:[%s/%s attempts].',
-                                    attempts, self.xcfg.MAX_UPLOAD_ATTEMPTS)
-                    if attempts > 0:
-                        NP.niceprint('    Reuploading:[{!s}] '
-                                     '[{!s}/{!s} attempts].'
+                    logging.info('is_good:[%s] Output for uploadresp:[%s]',
+                                 faw.is_good(uploadresp),
+                                 xml.etree.ElementTree.tostring(
+                                     uploadresp,
+                                     encoding='utf-8',
+                                     method='xml'))
+
+                    if faw.is_good(uploadresp):
+                        zuploadok = True
+                        # Save photo_id returned from Flickr upload
+                        photo_id = uploadresp.findall('photoid')[0].text
+                        logging.info('  Uploaded file:[%s] '
+                                     'Id=[%s]. Check for '
+                                     'duplicates/wrong checksum...',
+                                     NP.strunicodeout(file),
+                                     photo_id)
+                        NP.niceprint('  Uploaded file:[{!s}] '
+                                     'ID=[{!s}]. Check for '
+                                     'duplicates/wrong checksum...'
                                      .format(NP.strunicodeout(file),
-                                             attempts,
-                                             self.xcfg.MAX_UPLOAD_ATTEMPTS))
-                    # Upload file to Flickr
-                    # replace commas from tags and checksum tags
-                    # to avoid tags conflicts
-                    try:
-                        uploadresp = self.nuflickr.upload(
-                            filename=file,
-                            fileobj=faw.FileWithCallback(
-                                file,
-                                faw.callback,
-                                self.args.verbose_progress),
-                            title=title_filename
-                            if self.xcfg.FLICKR["title"] == ""
-                            else str(self.xcfg.FLICKR["title"]),
-                            description=str(self.xcfg.FLICKR["description"]),
-                            tags='{} checksum:{} album:"{}" {}'
-                            .format(
-                                self.xcfg.FLICKR["tags"],
-                                file_checksum,
-                                NP.strunicodeout(setname),
-                                self.args.tags if self.args.tags else '')
-                            .replace(',', ''),
-                            is_public=str(self.xcfg.FLICKR["is_public"]),
-                            is_family=str(self.xcfg.FLICKR["is_family"]),
-                            is_friend=str(self.xcfg.FLICKR["is_friend"])
-                        )
+                                             photo_id),
+                                     verbosity=1)
 
-                        logging.info('is_good:[%s] Output for uploadresp:[%s]',
-                                     faw.is_good(uploadresp),
-                                     xml.etree.ElementTree.tostring(
-                                         uploadresp,
-                                         encoding='utf-8',
-                                         method='xml'))
+                        break
+                    else:
+                        zuploaderror = True
+                        raise IOError(uploadresp)
 
-                        if faw.is_good(uploadresp):
-                            zuploadok = True
-                            # Save photo_id returned from Flickr upload
-                            photo_id = uploadresp.findall('photoid')[0].text
-                            logging.info('  Uploaded file:[%s] '
-                                         'Id=[%s]. Check for '
-                                         'duplicates/wrong checksum...',
-                                         NP.strunicodeout(file),
-                                         photo_id)
-                            NP.niceprint('  Uploaded file:[{!s}] '
-                                         'ID=[{!s}]. Check for '
-                                         'duplicates/wrong checksum...'
-                                         .format(NP.strunicodeout(file),
-                                                 photo_id),
-                                         verbosity=1)
+                except (IOError, httplib.HTTPException):
+                    NP.niceerror(caught=True,
+                                 caughtprefix='+++',
+                                 caughtcode='038',
+                                 caughtmsg='Caught IOError/HTTP exception',
+                                 useniceprint=True,
+                                 exceptsysinfo=True)
+                    # CODING: Repeat also below on FlickError (!= 5 and 8)
+                    # On error, check if exists a photo with file_checksum
+                    NP.niceerror(caught=True,
+                                 caughtprefix='xxx',
+                                 caughtcode='039',
+                                 caughtmsg='Sleep 10 and check if file is'
+                                 'already uploaded.',
+                                 useniceprint=True)
+                    NUTIME.sleep(10)
 
-                            break
-                        else:
-                            zuploaderror = True
-                            raise IOError(uploadresp)
+                    zisloaded, ziscount, photo_id, zisnoset = \
+                        self.is_already_uploaded(file, file_checksum, setname)
+                    logging.warning('is_already_uploaded:[%s] '
+                                    'ziscount:[%s] Zpic:[%s] '
+                                    'zisnoset:[%s]',
+                                    zisloaded,
+                                    ziscount, photo_id,
+                                    zisnoset)
 
-                    except (IOError, httplib.HTTPException):
-                        NP.niceerror(caught=True,
-                                     caughtprefix='+++',
-                                     caughtcode='038',
-                                     caughtmsg='Caught IOError/HTTP exception',
-                                     useniceprint=True,
-                                     exceptsysinfo=True)
-                        # CODING: Repeat also below on FlickError (!= 5 and 8)
-                        # On error, check if exists a photo with file_checksum
-                        NP.niceerror(caught=True,
-                                     caughtprefix='xxx',
-                                     caughtcode='039',
-                                     caughtmsg='Sleep 10 and check if file is'
-                                     'already uploaded.',
-                                     useniceprint=True)
-                        NUTIME.sleep(10)
+                    if ziscount == 0:
+                        zuploaderror = True
+                        continue
+                    # CODING On Issue #77 Confirm everything is ok!
+                    elif ziscount == 1 and zisloaded:
+                        zuploadok = True
+                        zuploaderror = False
+                        NP.niceprint(' Found! Next Pic:[{!s}]'
+                                     .format(NP.strunicodeout(file)))
+                        logging.warning(' Found! Next Pic:[%s]',
+                                        NP.strunicodeout(file))
+                        break
+                    elif ziscount > 1:
+                        zuploaderror = True
+                        NP.niceprint('More than one file with same '
+                                     'checksum/album tag! '
+                                     'Any collisions? File: [{!s}]'
+                                     .format(NP.strunicodeout(file)))
+                        logging.error('More than one file with same '
+                                      'checksum/album tag! '
+                                      'Any collisions? File: [%s]',
+                                      NP.strunicodeout(file))
+                        break
 
-                        zisloaded, ziscount, photo_id, zisnoset = \
-                            self.is_already_uploaded(
-                                file,
-                                file_checksum,
-                                setname)
-                        logging.warning('is_already_uploaded:[%s] '
-                                        'ziscount:[%s] Zpic:[%s] '
-                                        'zisnoset:[%s]',
-                                        zisloaded,
-                                        ziscount, photo_id,
-                                        zisnoset)
+                except flickrapi.exceptions.FlickrError as ex:
+                    NP.niceerror(caught=True,
+                                 caughtprefix='+++',
+                                 caughtcode='040',
+                                 caughtmsg='Flickrapi exception on upload',
+                                 exceptuse=True,
+                                 exceptcode=ex.code,
+                                 exceptmsg=ex,
+                                 useniceprint=True,
+                                 exceptsysinfo=True)
+                    # Error code: [5]
+                    # Error code: [Error: 5: Filetype was not recognised]
+                    # Error code: [8]
+                    # Error code: [Error: 8: Filesize was too large]
+                    if (format(ex.code) == '5') or (
+                            format(ex.code) == '8'):
+                        # Badfile
 
-                        if ziscount == 0:
-                            zuploaderror = True
-                            continue
-                        # CODING On Issue #77 Confirm everything is ok!
-                        elif ziscount == 1 and zisloaded:
-                            zuploadok = True
-                            zuploaderror = False
-                            NP.niceprint('Found, '
-                                         'continuing with next image.')
-                            logging.warning('Found, '
-                                            'continuing with next image.')
-                            break
-                        elif ziscount > 1:
-                            zuploaderror = True
-                            NP.niceprint('More than one file with same '
-                                         'checksum/album tag! '
-                                         'Any collisions? File: [{!s}]'
-                                         .format(NP.strunicodeout(file)))
-                            logging.error('More than one file with same '
-                                          'checksum/album tag! '
-                                          'Any collisions? File: [%s]',
-                                          NP.strunicodeout(file))
-                            break
-
-                    except flickrapi.exceptions.FlickrError as ex:
-                        NP.niceerror(caught=True,
-                                     caughtprefix='+++',
-                                     caughtcode='040',
-                                     caughtmsg='Flickrapi exception on upload',
-                                     exceptuse=True,
-                                     exceptcode=ex.code,
-                                     exceptmsg=ex,
-                                     useniceprint=True,
-                                     exceptsysinfo=True)
-                        # Error code: [5]
-                        # Error code: [Error: 5: Filetype was not recognised]
-                        # Error code: [8]
-                        # Error code: [Error: 8: Filesize was too large]
-                        if (format(ex.code) == '5') or (
-                                format(ex.code) == '8'):
-                            # Badfile
-                            zbadfile = True
-                            if not self.args.bad_files:
-                                # Break for ATTEMPTS cycle
-                                break
-
-                            # self.args.bad_files is True
-                            # Add to db the file NOT uploaded
-                            # Set locking for when running multiprocessing
-                            NP.niceprint('   Log Bad file:[{!s}] due to [{!s}]'
-                                         .format(
-                                             file,
-                                             'Filetype was not recognised'
-                                             if (format(ex.code) == '5')
-                                             else 'Filesize was too large'))
-                            logging.info('Bad file:[%s]',
-                                         NP.strunicodeout(file))
-
-                            db_insert_badfiles(lock,
-                                               file,
-                                               file_checksum,
-                                               last_modified)
-
+                        zbadfile = True
+                        if not self.args.bad_files:
                             # Break for ATTEMPTS cycle
                             break
-                        else:
-                            # CODING: Repeat above on IOError
-                            # On error, check if exists a photo with
-                            # file_checksum
-                            NP.niceerror(caught=True,
-                                         caughtprefix='xxx',
-                                         caughtcode='042',
-                                         caughtmsg='Sleep 10 and check if '
-                                         'file is already uploaded.',
-                                         useniceprint=True)
-                            NUTIME.sleep(10)
+                        # self.args.bad_files is True: Add to badfiles
+                        amsg = 'Filetype was not recognised'\
+                               if (format(ex.code) == '5')\
+                               else 'Filesize was too large'
+                        NP.niceprint('   Log Bad file:[{!s}] due to [{!s}]'
+                                     .format(file, amsg))
+                        logging.info('   Log Bad file:[{!s}] due to [%s]',
+                                     NP.strunicodeout(file), amsg)
 
-                            zisloaded, ziscount, photo_id, zisnoset = \
-                                self.is_already_uploaded(
-                                    file,
-                                    file_checksum,
-                                    setname)
-                            logging.warning('is_already_uploaded:[%s] '
-                                            'ziscount:[%s] Zpic:[%s] '
-                                            'zisnoset:[%s]',
-                                            zisloaded,
-                                            ziscount, photo_id,
-                                            zisnoset)
+                        db_insert_badfiles(lock,
+                                           file, file_checksum, last_modified)
 
-                            if ziscount == 0:
-                                zuploaderror = True
-                                continue
-                            # CODING On Issue #77 Confirm everything is ok!
-                            elif ziscount == 1 and zisloaded:
-                                zuploadok = True
-                                zuploaderror = False
-                                NP.niceprint('Found, '
-                                             'continuing with next image.')
-                                logging.warning('Found, '
-                                                'continuing with next image.')
-                                break
-                            elif ziscount > 1:
-                                zuploaderror = True
-                                NP.niceprint('More than one file with same '
-                                             'checksum/album tag! '
-                                             'Any collisions? File: [{!s}]'
-                                             .format(NP.strunicodeout(file)))
-                                logging.error('More than one file with same '
-                                              'checksum/album tag! '
-                                              'Any collisions? File: [%s]',
-                                              NP.strunicodeout(file))
-                                break
+                        # Break for ATTEMPTS cycle
+                        break
+                    # CODING: Repeat above on IOError
+                    # On error, check if exists a photo with
+                    # file_checksum
+                    NP.niceerror(caught=True,
+                                 caughtprefix='xxx',
+                                 caughtcode='042',
+                                 caughtmsg='Sleep 10 and check if '
+                                 'file is already uploaded.',
+                                 useniceprint=True)
+                    NUTIME.sleep(10)
 
-                    finally:
-                        con.commit()
+                    zisloaded, ziscount, photo_id, zisnoset = \
+                        self.is_already_uploaded( file, file_checksum, setname)
+                    logging.warning('is_already_uploaded:[%s] '
+                                    'ziscount:[%s] Zpic:[%s] '
+                                    'zisnoset:[%s]',
+                                    zisloaded,
+                                    ziscount, photo_id,
+                                    zisnoset)
 
-                logging.debug('After CYCLE '
-                              'Up/Reuploading:[%s/%s attempts].',
-                              attempts, self.xcfg.MAX_UPLOAD_ATTEMPTS)
+                    if ziscount == 0:
+                        zuploaderror = True
+                        continue
+                    # CODING On Issue #77 Confirm everything is ok!
+                    elif ziscount == 1 and zisloaded:
+                        zuploadok = True
+                        zuploaderror = False
+                        NP.niceprint(' Found! Next Pic:[{!s}]'
+                                     .format(NP.strunicodeout(file)))
+                        logging.warning(' Found! Next Pic:[%s]',
+                                        NP.strunicodeout(file))
+                        break
+                    elif ziscount > 1:
+                        zuploaderror = True
+                        NP.niceprint('More than one file with same '
+                                     'checksum/album tag! '
+                                     'Any collisions? File: [{!s}]'
+                                     .format(NP.strunicodeout(file)))
+                        logging.error('More than one file with same '
+                                      'checksum/album tag! '
+                                      'Any collisions? File: [%s]',
+                                      NP.strunicodeout(file))
+                        break
 
-                # Max attempts reached
-                if (not zuploadok) and (
-                        attempts == (self.xcfg.MAX_UPLOAD_ATTEMPTS - 1)):
-                    NP.niceprint('Reached max attempts to upload. Skipping '
-                                 'file: [{!s}]'.format(NP.strunicodeout(file)))
-                    logging.error('Reached max attempts to upload. Skipping '
-                                  'file: [%s]', NP.strunicodeout(file))
-                # Error
-                elif (not zuploadok) and zuploaderror:
-                    NP.niceprint('Error occurred while uploading. Skipping '
-                                 'file:[{!s}]'
-                                 .format(NP.strunicodeout(file)))
-                    logging.error('Error occurred while uploading. Skipping '
-                                  'file:[%s]',
-                                  NP.strunicodeout(file))
-                # Bad file
-                elif (not zuploadok) and zbadfile:
-                    NP.niceprint('       Bad file:[{!s}]'
-                                 .format(NP.strunicodeout(file)))
-                # Successful update
-                elif zuploadok:
-                    NP.niceprint('Successful file:[{!s}]'
-                                 .format(NP.strunicodeout(file)))
+            logging.error('After CYCLE Up/Reuploading:[%s/%s attempts].',
+                          attempts, self.xcfg.MAX_UPLOAD_ATTEMPTS)
 
-                    assert photo_id is not None, NP.niceassert(
-                        'photo_id None:[{!s}]'
-                        .format(NP.strunicodeout(file)))
-                    # Save file_id: from uploadresp or is_already_uploaded
-                    file_id = photo_id
+            # Max attempts reached
+            if (not zuploadok) and (
+                    attempts == (self.xcfg.MAX_UPLOAD_ATTEMPTS - 1)):
+                NP.niceprint('Reached max attempts to upload. Skipping '
+                             'file: [{!s}]'.format(NP.strunicodeout(file)))
+                logging.error('Reached max attempts to upload. Skipping '
+                              'file: [%s]', NP.strunicodeout(file))
+            # Error
+            elif (not zuploadok) and zuploaderror:
+                NP.niceprint('Error occurred while uploading. Skipping '
+                             'file:[{!s}]'
+                             .format(NP.strunicodeout(file)))
+                logging.error('Error occurred while uploading. Skipping '
+                              'file:[%s]',
+                              NP.strunicodeout(file))
+            # Bad file
+            elif (not zuploadok) and zbadfile:
+                NP.niceprint('       Bad file:[{!s}]'
+                             .format(NP.strunicodeout(file)))
+            # Successful update
+            elif zuploadok:
+                NP.niceprint('Successful file:[{!s}]'
+                             .format(NP.strunicodeout(file)))
 
-                    # Insert into DB files
-                    db_insert_files(lock,
-                                    file_id,
-                                    file,
-                                    file_checksum,
-                                    last_modified)
+                assert photo_id is not None, NP.niceassert(
+                    'photo_id None:[{!s}]'
+                    .format(NP.strunicodeout(file)))
+                # Save file_id: from uploadresp or is_already_uploaded
+                file_id = photo_id
 
-                    # Update the Video Date Taken
-                    self.update_video_date(file_id, file, last_modified)
+                db_insert_files(lock,
+                                file_id, file, file_checksum, last_modified)
 
-                    success = True
+                # Update the Video Date Taken
+                self.update_video_date(file_id, file, last_modified)
 
-            # C) File loaded. Recorded on DB. Look for changes...
-            elif self.xcfg.MANAGE_CHANGES:
-                # We have a file from disk which is found on the database
-                # and is also on flickr but its set on flickr is not defined.
-                # So we need to reset the local datbase set_id so that it will
-                # be later assigned once we run create_sets()
-                logging.debug('str(row[1]) == str(isfile_id:[%s])'
-                              'row[1]:[%s]=>type:[%s] '
-                              'isfile_id:[%s]=>type:[%s]',
-                              str(row[1]) == str(isfile_id),
-                              row[1], type(row[1]),
-                              isfile_id, type(isfile_id))
-                # C) File loaded. Recorded on DB. Manage changes & Flickr set.
-                if (is_loaded and
-                        is_no_set and
-                        (row is not None) and
-                        (str(row[1]) == str(isfile_id))):
+                success = True
 
-                    logging.info('Will UPDATE files SET set_id = null '
-                                 'for pic:[%s] ', row[1])
-                    litedb.execute(
-                        con, 'UPDATE#050', lock, self.args.processes,
-                        cur,
-                        'UPDATE files SET set_id = null WHERE files_id = ?',
-                        qmarkargs=(row[1],),
-                        dbcaughtcode='050')
+        # C) File loaded. Recorded on DB. Look for changes...
+        elif self.xcfg.MANAGE_CHANGES:
+            # We have a file from disk which is found on the database
+            # and is also on flickr but its set on flickr is not defined.
+            # So we need to reset the local datbase set_id so that it will
+            # be later assigned once we run create_sets()
+            logging.debug('str(row[1]) == str(isfile_id:[%s])'
+                          'row[1]:[%s]=>type:[%s] '
+                          'isfile_id:[%s]=>type:[%s]',
+                          str(row[1]) == str(isfile_id),
+                          row[1], type(row[1]),
+                          isfile_id, type(isfile_id))
+            # C) File loaded. Recorded on DB. Manage changes & Flickr set.
+            if (is_loaded and
+                    is_no_set and
+                    (row is not None) and
+                    (str(row[1]) == str(isfile_id))):
 
-                    logging.info('Did UPDATE files SET set_id = null '
-                                 'for pic:[%s]',
-                                 row[1])
+                logging.info('Will UPDATE files SET set_id = null '
+                             'for pic:[%s] ', row[1])
+                litedb.execute(
+                    con, 'UPDATE#050', lock, self.args.processes,
+                    cur,
+                    'UPDATE files SET set_id = null WHERE files_id = ?',
+                    qmarkargs=(row[1],),
+                    dbcaughtcode='050')
 
-                # we have a file from disk which is found on the database also
-                # row[6] is last_modified date/timestamp
-                # row[1] is files_id
-                # row[4] is md5
-                #   if DB/last_modified is None update it with current
-                #   file/last_modified value and do nothing else
-                #
-                #   if DB/lastmodified is different from file/lastmodified
-                #   then: if md5 has changed then perform replace_photo
-                #   operation on Flickr
-                logging.warning('CHANGES row[6]=[%s-(%s)]',
-                                NUTIME.strftime(
-                                    UPLDR_K.TimeFormat,
-                                    NUTIME.localtime(row[6])),
-                                row[6])
-                if row[6] is None:
-                    # Update db the last_modified time of file
+            # we have a file from disk which is found on the database also
+            # row[6] is last_modified date/timestamp
+            # row[1] is files_id
+            # row[4] is md5
+            #   if DB/last_modified is None update it with current
+            #   file/last_modified value and do nothing else
+            #
+            #   if DB/lastmodified is different from file/lastmodified
+            #   then: if md5 has changed then perform replace_photo
+            #   operation on Flickr
+            logging.warning('CHANGES LastModified @db:[%s]=[%s]=[%s]:@file',
+                            NUTIME.strftime(UPLDR_K.TimeFormat,
+                                            NUTIME.localtime(row[6])),
+                            row[6] != last_modified,
+                            NUTIME.strftime(UPLDR_K.TimeFormat,
+                                            NUTIME.localtime(last_modified)))
+            if row[6] is None:
+                # Update db the last_modified time of file
 
-                    # Control for when running multiprocessing set locking
-                    litedb.execute(
-                        con, 'UPDATE#051', lock, self.args.processes,
-                        cur,
-                        'UPDATE files SET last_modified = ?'
-                        'WHERE files_id = ?',
-                        qmarkargs=(last_modified, row[1]),
-                        dbcaughtcode='051')
+                litedb.execute(
+                    con, 'UPDATE#051', lock, self.args.processes,
+                    cur,
+                    'UPDATE files SET last_modified = ?'
+                    'WHERE files_id = ?',
+                    qmarkargs=(last_modified, row[1]),
+                    dbcaughtcode='051')
 
-                logging.warning('CHANGES row[6]!=last_modified: [%s]',
-                                row[6] != last_modified)
-                if row[6] != last_modified:
-                    # Update db both the new file/md5 and the
-                    # last_modified time of file by by calling replace_photo
+            if row[6] != last_modified:
+                # Update db both the new file/md5 and the
+                # last_modified time of file by by calling replace_photo
 
-                    if file_checksum is None:
-                        file_checksum = faw.md5checksum(file)
-                    if file_checksum != str(row[4]):
-                        self.replace_photo(lock, file, row[1], row[4],
-                                           file_checksum, last_modified,
-                                           cur, con)
+                if file_checksum is None:
+                    file_checksum = faw.md5checksum(file)
+                if file_checksum != str(row[4]):
+                    self.replace_photo(lock, file, row[1], row[4],
+                                       file_checksum, last_modified,
+                                       cur, con)
 
         # Closing DB connection
         litedb.close(con)

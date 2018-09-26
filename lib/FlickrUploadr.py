@@ -537,9 +537,8 @@ class Uploadr(object):
 
         NP.niceprint(' Converting raw:[{!s}]'
                      .format(NP.strunicodeout(os.path.join(a_dirpath,
-                                                           a_fname))))
-        logging.info(' Converting raw:[%s]',
-                     NP.strunicodeout(os.path.join(a_dirpath, a_fname)))
+                                                           a_fname))),
+                     logalso=logging.INFO)
         success = False
 
         # file_ext = a_fname's extension (without the ".")
@@ -562,9 +561,8 @@ class Uploadr(object):
                 return success
         else:
             NP.niceprint('raw: JPG exists:[{!s}]'
-                         .format(NP.strunicodeout(a_fbasename) + ".JPG"))
-            logging.warning('raw: JPG exists:[%s]',
-                            NP.strunicodeout(a_fbasename) + ".JPG")
+                         .format(NP.strunicodeout(a_fbasename) + ".JPG"),
+                         logalso=logging.WARNING)
             return success
 
         if os.path.exists(NP.strunicodeout(
@@ -579,14 +577,14 @@ class Uploadr(object):
                 NP.niceprint('raw tags failed:[{!s}]'.format(a_fname))
                 return success
         else:
-            NP.niceprint('.....raw failed:[{!s}]'.format(a_fname))
-            logging.warning('.....raw failed:[%s]', a_fname)
+            NP.niceprint('.....raw failed:[{!s}]'.format(a_fname),
+                         logalso=logging.WARNING)
             return success
 
         success = True
-        logging.info('  Converted raw:[%s]', NP.strunicodeout(a_fname))
         NP.niceprint('  Converted raw:[{!s}]'
-                     .format(NP.strunicodeout(a_fname)))
+                     .format(NP.strunicodeout(a_fname)),
+                     logalso=logging.INFO)
 
         return success
 
@@ -675,23 +673,19 @@ class Uploadr(object):
         rawfiles.sort()
         files.sort()
         if not self.args.mask_sensitive:
-            logging.debug('Pretty Print Output for [files]-------\n%s',
-                          pprint.pformat(files))
-            logging.debug('Pretty Print Output for [rawfiles]-------\n%s',
-                          pprint.pformat(rawfiles))
-
             NP.niceprint('Pretty Print Output for [files]-------\n{!s}'
                          .format(pprint.pformat(files)),
-                         verbosity=3)
+                         verbosity=3,
+                         logalso=logging.DEBUG)
             NP.niceprint('Pretty Print Output for [rawfiles]-------\n{!s}'
                          .format(pprint.pformat(rawfiles)),
-                         verbosity=3)
+                         verbosity=3,
+                         logalso=logging.DEBUG)
         else:
-            logging.debug('Masking enabled: Pretty Print Output for '
-                          '[files]/[rawfiles] disabled!')
             NP.niceprint('Masking enabled: Pretty Print Output for '
                          '[files]/[rawfiles] disabled!',
-                         verbosity=3)
+                         verbosity=3,
+                         logalso=logging.DEBUG)
 
         return files, rawfiles
 
@@ -751,13 +745,12 @@ class Uploadr(object):
             res_set_date = None
             video_date = NUTIME.strftime('%Y-%m-%d %H:%M:%S',
                                          NUTIME.localtime(xlast_modified))
-            logging.info('video_date:[%s]', video_date)
-
             NP.niceprint('   Setting Date:[{!s}] for file:[{!s}] Id=[{!s}]'
                          .format(video_date,
                                  NP.strunicodeout(xfile),
                                  xfile_id),
-                         verbosity=1)
+                         verbosity=1,
+                         logalso=logging.INFO)
 
             res_set_date = self.photos_set_dates(xfile_id,
                                                  str(video_date))
@@ -1091,18 +1084,13 @@ class Uploadr(object):
                         zuploadok = True
                         # Save photo_id returned from Flickr upload
                         photo_id = uploadresp.findall('photoid')[0].text
-                        logging.info('  Uploaded file:[%s] '
-                                     'Id=[%s]. Check for '
-                                     'duplicates/wrong checksum...',
-                                     NP.strunicodeout(file),
-                                     photo_id)
                         NP.niceprint('  Uploaded file:[{!s}] '
                                      'ID=[{!s}]. Check for '
                                      'duplicates/wrong checksum...'
                                      .format(NP.strunicodeout(file),
                                              photo_id),
-                                     verbosity=1)
-
+                                     verbosity=1,
+                                     logalso=logging.INFO)
                         break
                     else:
                         zuploaderror = True
@@ -1143,20 +1131,16 @@ class Uploadr(object):
                         zuploadok = True
                         zuploaderror = False
                         NP.niceprint(' Found! Next Pic:[{!s}]'
-                                     .format(NP.strunicodeout(file)))
-                        logging.warning(' Found! Next Pic:[%s]',
-                                        NP.strunicodeout(file))
+                                     .format(NP.strunicodeout(file)),
+                                     logalso=logging.WARNING)
                         break
                     elif ziscount > 1:
                         zuploaderror = True
                         NP.niceprint('More than one file with same '
                                      'checksum/album tag! '
                                      'Any collisions? File: [{!s}]'
-                                     .format(NP.strunicodeout(file)))
-                        logging.error('More than one file with same '
-                                      'checksum/album tag! '
-                                      'Any collisions? File: [%s]',
-                                      NP.strunicodeout(file))
+                                     .format(NP.strunicodeout(file)),
+                                     logalso=logging.ERROR)
                         break
 
                 except flickrapi.exceptions.FlickrError as ex:
@@ -1186,9 +1170,8 @@ class Uploadr(object):
                                if (format(ex.code) == '5')\
                                else 'Filesize was too large'
                         NP.niceprint('   Log Bad file:[{!s}] due to [{!s}]'
-                                     .format(file, amsg))
-                        logging.info('   Log Bad file:[%s] due to [%s]',
-                                     NP.strunicodeout(file), amsg)
+                                     .format(file, amsg),
+                                     logalso=logging.INFO)
 
                         db_insert_badfiles(lock,
                                            file, file_checksum, last_modified)
@@ -1224,20 +1207,16 @@ class Uploadr(object):
                         zuploadok = True
                         zuploaderror = False
                         NP.niceprint(' Found! Next Pic:[{!s}]'
-                                     .format(NP.strunicodeout(file)))
-                        logging.warning(' Found! Next Pic:[%s]',
-                                        NP.strunicodeout(file))
+                                     .format(NP.strunicodeout(file)),
+                                     logalso=logging.WARNING)
                         break
                     elif ziscount > 1:
                         zuploaderror = True
                         NP.niceprint('More than one file with same '
                                      'checksum/album tag! '
                                      'Any collisions? File: [{!s}]'
-                                     .format(NP.strunicodeout(file)))
-                        logging.error('More than one file with same '
-                                      'checksum/album tag! '
-                                      'Any collisions? File: [%s]',
-                                      NP.strunicodeout(file))
+                                     .format(NP.strunicodeout(file)),
+                                     logalso=logging.ERROR)
                         break
 
             logging.error('After CYCLE Up/Reuploading:[%s/%s attempts].',
@@ -1247,17 +1226,14 @@ class Uploadr(object):
             if (not zuploadok) and (
                     attempts == (self.xcfg.MAX_UPLOAD_ATTEMPTS - 1)):
                 NP.niceprint('Reached max attempts to upload. Skipping '
-                             'file: [{!s}]'.format(NP.strunicodeout(file)))
-                logging.error('Reached max attempts to upload. Skipping '
-                              'file: [%s]', NP.strunicodeout(file))
+                             'file: [{!s}]'.format(NP.strunicodeout(file)),
+                             logalso=logging.ERROR)
             # Error
             elif (not zuploadok) and zuploaderror:
                 NP.niceprint('Error occurred while uploading. Skipping '
                              'file:[{!s}]'
-                             .format(NP.strunicodeout(file)))
-                logging.error('Error occurred while uploading. Skipping '
-                              'file:[%s]',
-                              NP.strunicodeout(file))
+                             .format(NP.strunicodeout(file)),
+                             logalso=logging.ERROR)
             # Bad file
             elif (not zuploadok) and zbadfile:
                 NP.niceprint('       Bad file:[{!s}]'
@@ -1513,8 +1489,8 @@ class Uploadr(object):
                 (not faw.is_good(res_add_tag)) or \
                     (not faw.is_good(res_get_info)):
                 NP.niceprint('Issue replacing:[{!s}]'
-                             .format(NP.strunicodeout(file)))
-                logging.error('Issue replacing:[%s]', NP.strunicodeout(file))
+                             .format(NP.strunicodeout(file)),
+                             logalso=logging.ERROR)
 
             if not faw.is_good(replace_resp):
                 raise IOError(replace_resp)
@@ -1526,8 +1502,8 @@ class Uploadr(object):
                 raise IOError(res_get_info)
 
             NP.niceprint('  Replaced file:[{!s}]'
-                         .format(NP.strunicodeout(file)))
-            logging.warning('  Replaced file:[%s]', NP.strunicodeout(file))
+                         .format(NP.strunicodeout(file)),
+                         logalso=logging.WARNING)
 
             # Update the db the file uploaded
             # Control for when running multiprocessing set locking
@@ -1569,22 +1545,26 @@ class Uploadr(object):
                 if self.delete_file(xrow, cur, lock):
                     NP.niceprint('..Video deleted:[{!s}]'
                                  .format(NP.strunicodeout(file)),
-                                 fname='replace')
+                                 fname='replace',
+                                 logalso=logging.WARNING)
                     logging.warning('Delete for replace succeed!')
                     if self.upload_file(lock, file):
                         NP.niceprint('.Video replaced:[{!s}]'
                                      .format(NP.strunicodeout(file)),
-                                     fname='replace')
+                                     fname='replace',
+                                     logalso=logging.WARNING)
                         logging.warning('Upload for replace succeed!')
                     else:
                         NP.niceprint('..Failed upload:[{!s}]'
                                      .format(NP.strunicodeout(file)),
-                                     fname='replace')
+                                     fname='replace',
+                                     logalso=logging.ERROR)
                         logging.error('Upload for replace failed!')
                 else:
                     NP.niceprint('..Failed delete:[{!s}]'
                                  .format(NP.strunicodeout(file)),
-                                 fname='replace')
+                                 fname='replace',
+                                 logalso=logging.ERROR)
                     logging.error('Delete for replace failed!')
 
         except lite.Error as err:
@@ -1782,9 +1762,8 @@ class Uploadr(object):
             NP.niceprint('Daemon mode out:[{!s}]'
                          .format(str(NUTIME.asctime(time.localtime()))))
             NP.niceprint('    Daemon wait:[{!s}] seconds.'
-                         .format(self.xcfg.SLEEP_TIME))
-            logging.warning('    Daemon wait:[%s] seconds.',
-                            self.xcfg.SLEEP_TIME)
+                         .format(self.xcfg.SLEEP_TIME),
+                         logalso=logging.WARNING)
             NUTIME.sleep(self.xcfg.SLEEP_TIME)
 
     # ---------------------------------------------------------------------
@@ -1826,8 +1805,8 @@ class Uploadr(object):
                                      set_id))
                 self.add_file_to_set(lockdb, set_id, filepic, acur)
             else:
-                NP.niceprint('Not able to assign pic to set')
-                logging.error('Not able to assign pic to set')
+                NP.niceprint('Not able to assign pic to set',
+                             logalso=logging.ERROR)
 
             logging.debug('===Multiprocessing=== in.mutex.acquire(w)')
             mutex.acquire()
@@ -2071,9 +2050,9 @@ class Uploadr(object):
         Calls log_set_creation to create Album on local database.
         """
 
-        logging.info('   Creating set:[%s]', NP.strunicodeout(setname))
         NP.niceprint('   Creating set:[{!s}]'
-                     .format(NP.strunicodeout(setname)))
+                     .format(NP.strunicodeout(setname)),
+                     logalso=logging.INFO)
 
         if self.args.dry_run:
             return True
@@ -2107,13 +2086,8 @@ class Uploadr(object):
                          'Probably deleted from Flickr but still '
                          'on local db and local file.'
                          .format(primary_photo_id,
-                                 NP.strunicodeout(setname)))
-            logging.error(
-                'Primary photo [%s] for Set [%s] does not exist on Flickr.'
-                ' Probably deleted from Flickr but still on local db '
-                'and local file.',
-                primary_photo_id,
-                NP.strunicodeout(setname))
+                                 NP.strunicodeout(setname)),
+                         logalso=logging.ERROR)
             success = False
         else:
             # CODING: Revise code/message output
@@ -2245,13 +2219,11 @@ class Uploadr(object):
                                    dbcaughtcode='015')
                     row = cur.fetchone()
                 else:
-                    logging.warning('Failed adding album tags to pics '
-                                    'on upload. Not updating Database version.'
-                                    'please check logs, correct, and retry.')
                     NP.niceprint('Failed adding album tags to pics '
                                  'on upload. Not updating Database version.'
                                  'Please check logs, correct, and retry.',
-                                 fname='add_albums_tag')
+                                 fname='add_albums_tag',
+                                 logalso=logging.WARNING)
 
             if row[0] == 3:
                 NP.niceprint('Database version: [{!s}]'.format(row[0]))
@@ -2500,11 +2472,10 @@ class Uploadr(object):
                                    dbcaughtcode='165')
 
                 else:
-                    logging.info('Found on DB Set:[%s]',
-                                 NP.strunicodeout(setname))
                     NP.niceprint('Found on DB Set:[{!s}]'
                                  .format(NP.strunicodeout(setname)),
-                                 verbosity=1)
+                                 verbosity=1,
+                                 logalso=logging.INFO)
         else:
             NP.niceerror(caught=True,
                          caughtprefix='xxx',
@@ -2611,8 +2582,8 @@ class Uploadr(object):
             # Possibly raising an exception?
             # raise Exception('photos.search: Max attempts exhausted.')
             NP.niceprint(' IS_UPLOADED=[ERROR#1]',
-                         fname='isuploaded', verbosity=3)
-            logging.warning(' IS_UPLOADED=[ERROR#1]')
+                         fname='isuploaded', verbosity=3,
+                         logalso=logging.WARNING)
 
             return ret_is_photo_uploaded, ret_photos_uploaded, \
                 ret_photo_id, ret_uploaded_no_set
@@ -2622,10 +2593,10 @@ class Uploadr(object):
         # Set 'Number of pics with specified checksum' to 0 and return.
         if not search_is_uploaded.find('photos').attrib['total']:
             ret_photos_uploaded = 0
-            logging.error(' IS_UPLOADED=[ERROR#3]: Invalid return. Confinuing')
             NP.niceprint(' IS_UPLOADED=[ERROR#3]: Invalid return. Confinuing',
                          fname='isuploaded',
-                         verbosity=3)
+                         verbosity=3,
+                         logalso=logging.ERROR)
         else:
             ret_photos_uploaded = int(search_is_uploaded
                                       .find('photos').attrib['total'])
@@ -2634,8 +2605,8 @@ class Uploadr(object):
             # A) checksum,                             Count=0  THEN NOT EXISTS
             ret_is_photo_uploaded = False
             NP.niceprint(' IS_UPLOADED=[FALSE]',
-                         fname='isuploaded', verbosity=2)
-            logging.warning(' IS_UPLOADED=[FALSE]')
+                         fname='isuploaded', verbosity=2,
+                         logalso=logging.WARNING)
         elif ret_photos_uploaded >= 1:
             logging.warning('+++#190: '
                             'Found [%s] images with checksum:[%s]',
@@ -2689,8 +2660,8 @@ class Uploadr(object):
                     # raise Exception('photos_getAllContexts: '
                     #                 'Max attempts exhausted.')
                     NP.niceprint(' IS_UPLOADED=[ERROR#2]',
-                                 fname='isuploaded', verbosity=3)
-                    logging.warning(' IS_UPLOADED=[ERROR#2]')
+                                 fname='isuploaded', verbosity=3,
+                                 logalso=logging.WARNING)
 
                     return ret_is_photo_uploaded, ret_photos_uploaded, \
                         ret_photo_id, ret_uploaded_no_set
@@ -2712,9 +2683,8 @@ class Uploadr(object):
                     if tfind:
                         NP.niceprint(' IS_UPLOADED=[UPLOADED WITHOUT'
                                      ' SET WITH ALBUM TAG]',
-                                     fname='isuploaded', verbosity=2)
-                        logging.warning(' IS_UPLOADED=[UPLOADED WITHOUT'
-                                        ' SET WITH ALBUM TAG]')
+                                     fname='isuploaded', verbosity=2,
+                                     logalso=logging.WARNING)
                         ret_is_photo_uploaded = True
                         ret_photo_id = pic.attrib['id']
                         ret_uploaded_no_set = True
@@ -2725,9 +2695,8 @@ class Uploadr(object):
                     else:
                         NP.niceprint('IS_UPLOADED=[UPLOADED WITHOUT'
                                      ' SET WITHOUT ALBUM TAG]',
-                                     fname='isuploaded', verbosity=2)
-                        logging.warning('IS_UPLOADED=[UPLOADED WITHOUT'
-                                        ' SET WITHOUT ALBUM TAG]')
+                                     fname='isuploaded', verbosity=2,
+                                     logalso=logging.WARNING)
                         ret_is_photo_uploaded = False
                         ret_uploaded_no_set = True
 
@@ -2760,8 +2729,8 @@ class Uploadr(object):
                     if (NP.strunicodeout(xsetname) ==
                             NP.strunicodeout(setinlist.attrib['title'])):
                         NP.niceprint(' IS_UPLOADED=[TRUE WITH SET]',
-                                     fname='isuploaded', verbosity=2)
-                        logging.warning(' IS_UPLOADED=[TRUE WITH SET]')
+                                     fname='isuploaded', verbosity=2,
+                                     logalso=logging.WARNING)
                         ret_is_photo_uploaded = True
                         ret_photo_id = pic.attrib['id']
                         ret_uploaded_no_set = False
@@ -2772,9 +2741,8 @@ class Uploadr(object):
                         #                                       THEN NOT EXISTS
                         NP.niceprint(' IS_UPLOADED=[FALSE OTHER SET, '
                                      'CONTINUING SEARCH IN SETS]',
-                                     fname='isuploaded', verbosity=2)
-                        logging.warning(' IS_UPLOADED=[FALSE OTHER SET, '
-                                        'CONTINUING SEARCH IN SETS]')
+                                     fname='isuploaded', verbosity=2,
+                                     logalso=logging.WARNING)
                         continue
 
         return ret_is_photo_uploaded, ret_photos_uploaded, \
@@ -2940,10 +2908,9 @@ class Uploadr(object):
                                      NP.strunicodeout(afile[1])),
                              fname='addAlbumMigrate')
             else:
-                logging.warning('      Found Tag:[%s] TagId:[{%s]',
-                                tfind, tid)
                 NP.niceprint('      Found Tag:[{!s}] TagId:[{!s}]'
-                             .format(tfind, tid), verbosity=1)
+                             .format(tfind, tid), verbosity=1,
+                             logalso=logging.WARNING)
 
             logging.debug('===Multiprocessing=== in.mutex.acquire(w)')
             mutex.acquire()
@@ -3043,9 +3010,9 @@ class Uploadr(object):
                                             if row[2] is not None
                                             else setname))
 
-                logging.warning('       Find Tag:[%s] TagId:[%s]', tfind, tid)
                 NP.niceprint('       Find Tag:[{!s}] TagId:[{!s}]'
-                             .format(tfind, tid), verbosity=1)
+                             .format(tfind, tid), verbosity=1,
+                             logalso=logging.WARNING)
 
                 if not tfind:
                     get_success, _, get_errcode = faw.flickrapi_fn(
@@ -3057,24 +3024,18 @@ class Uploadr(object):
                         2, 2, False, caughtcode='218')
 
                     a_result = get_success and get_errcode == 0
-                    logging.warning('%s: Photo_id:[%s] [%s]',
-                                    'Added album tag'
-                                    if a_result
-                                    else ' Failed tagging',
-                                    str(row[0]),
-                                    NP.strunicodeout(row[1]))
                     NP.niceprint('{!s}: Photo_id:[{!s}] [{!s}]'
                                  .format('Added album tag'
                                          if a_result
                                          else ' Failed tagging',
                                          str(row[0]),
                                          NP.strunicodeout(row[1])),
-                                 fname='addAlbumMigrate')
+                                 fname='addAlbumMigrate',
+                                 logalso=logging.WARNING)
                 else:
-                    logging.warning('      Found Tag:[%s] TagId:[{%s]',
-                                    tfind, tid)
                     NP.niceprint('      Found Tag:[{!s}] TagId:[{!s}]'
-                                 .format(tfind, tid), verbosity=1)
+                                 .format(tfind, tid), verbosity=1,
+                                 logalso=logging.WARNING)
 
                 NP.niceprocessedfiles(count, count_total, False,
                                       msg='Album tag Added')

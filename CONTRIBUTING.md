@@ -12,12 +12,13 @@
 * If using isThisStringUnicode for (something) if test else (other) make
   sure to break lines with \ correctly. Be careful.
 * Some ocasional critical messages are generated with `sys.stderr.write()`
-* Use niceprint function to output messages to stdout. Control verbosity.
+* Use niceprint function to output messages to stdout. Control verbosity. Use logalso for logging.
   ```python
   niceprint(' Always shows')
   niceprint(' Always shows', verbosity=0)
   niceprint(' Shows on mode verbose', verbosity=1)
   niceprint(' IS_UPLOADED:[ERROR#1]', fname='isuploaded', verbosity=2)
+  niceprint(' IS_UPLOADED:[ERROR#1]', fname='isuploaded', verbosity=2, logalso=logging.ERROR)
   ```
 * Use logging. for CRITICAL, ERROR, WARNING, INFO, DEBUG messages to stderr.
   Three uses and one remark:

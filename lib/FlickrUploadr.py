@@ -969,14 +969,11 @@ class Uploadr(object):
                 file_checksum = faw.md5checksum(file)
 
             # Insert into DB files
-            logging.warning(' Already loaded:[%s] '
-                            'On Album:[%s]: UPDATING LOCAL DATABASE.',
-                            NP.strunicodeout(file),
-                            NP.strunicodeout(setname))
             NP.niceprint(' Already loaded:[{!s}] '
                          'On Album:[{!s}]: UPDATING LOCAL DATABASE.'
                          .format(NP.strunicodeout(file),
-                                 NP.strunicodeout(setname)))
+                                 NP.strunicodeout(setname)),
+                         logalso=logging.WARNING)
             db_insert_files(lock, isfile_id, file,
                             file_checksum, last_modified)
 

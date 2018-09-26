@@ -301,10 +301,10 @@ def run_uploadr(args):
             Confirms setting MYCFG.FILES_DIR is defined and a valid folder.
             Exits from program otherwise.
         """
-        logging.warning('FILES_DIR: [%s]', NPR.strunicodeout(MY_CFG.FILES_DIR))
         NPR.niceprint('FILES_DIR: [{!s}]'
                       .format(NPR.strunicodeout(MY_CFG.FILES_DIR)),
-                      verbosity=1)
+                      verbosity=1,
+                      logalso=logging.WARNING)
 
         if MY_CFG.FILES_DIR == "":
             NPR.niceerror(
@@ -379,12 +379,10 @@ def run_uploadr(args):
     elif args.daemon:
         # Will run in daemon mode every SLEEP_TIME seconds
         if myflick.check_token():
-            logging.warning('Will run in daemon mode every [%s] seconds'
-                            'Make sure you have previously authenticated!',
-                            MY_CFG.SLEEP_TIME)
             NPR.niceprint('Will run in daemon mode every [{!s}] seconds'
                           'Make sure you have previously authenticated!'
-                          .format(MY_CFG.SLEEP_TIME))
+                          .format(MY_CFG.SLEEP_TIME),
+                          logalso=logging.WARNING)
             myflick.run()
         else:
             NPR.niceerror(
@@ -541,7 +539,8 @@ NPR = NicePrint.NicePrint()
 #
 NPR.niceprint('----------- (V{!s}) Start -----------(Log:{!s})'
               .format(UPLDR_K.Version,
-                      MY_CFG.LOGGING_LEVEL))
+                      MY_CFG.LOGGING_LEVEL),
+              logalso=logging.WARNING)
 # Install exception handler
 sys.excepthook = my_excepthook
 
@@ -554,11 +553,10 @@ if __name__ == "__main__":
                         PARSED_ARGS.no_delete_from_flickr)
 
     # Print/show arguments
-    logging.info('Output for arguments(args):\n%s',
-                 pprint.pformat(PARSED_ARGS))
     NPR.niceprint('Output for arguments(args):\n{!s}'
                   .format(pprint.pformat(PARSED_ARGS)),
-                  verbosity=3)
+                  verbosity=3,
+                  logalso=logging.INFO)
 
     # Debug: upload_sleep: Seconds to sleep prior to reattempt a failed upload
     logging.info('Upload sleep setting:[%s] seconds', UPLDR_K.upload_sleep)
@@ -664,8 +662,8 @@ if __name__ == "__main__":
 
     # Enables mask sensitive data on log files.
     if PARSED_ARGS.mask_sensitive:
-        NPR.niceprint('Mask-Sensitive Argument enabled!')
-        logging.debug('Mask-Sensitive Argument enabled!')
+        NPR.niceprint('Mask-Sensitive Argument enabled!',
+                      logalso=logging.DEBUG)
 
         # Patterns to filter defined on UPLDR_K.MaskPatterns
         logging.debug('Setting Masking Logging Formatter')
@@ -676,11 +674,10 @@ if __name__ == "__main__":
         logging.debug('Masking Logging Formatter is now set!')
         logging.debug('Masking Patterns: %s', UPLDR_K.MaskPatterns)
 
-    logging.info('Output for FLICKR Configuration:\n%s',
-                 pprint.pformat(MY_CFG.FLICKR))
     NPR.niceprint('Output for FLICKR Configuration:\n{!s}'
                   .format(pprint.pformat(MY_CFG.FLICKR)),
-                  verbosity=3)
+                  verbosity=3,
+                  logalso=logging.INFO)
 
     # Ensure that only one instance of this script is running
     try:
@@ -700,9 +697,7 @@ if __name__ == "__main__":
 
 NPR.niceprint('----------- (V{!s}) End -----------(Log:{!s})'
               .format(UPLDR_K.Version,
-                      MY_CFG.LOGGING_LEVEL))
-logging.warning('----------- (V%s) End -----------(Log:%s)',
-                UPLDR_K.Version,
-                MY_CFG.LOGGING_LEVEL)
+                      MY_CFG.LOGGING_LEVEL),
+              logalso=logging.WARNING)
 
 logging_close_handlers()

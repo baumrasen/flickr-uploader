@@ -203,8 +203,11 @@ class NicePrint:
         verbosity = print if within configured verbosity: See set_verbosity
         logalso   = also issues logging. Use logging.DEBUG, logging.ERROR, etc
         """
+        if logalso:
+            # logging prior to masking (if enabled) to avoid double-masking
+            logging.log(logalso, astr)
+
         if verbosity <= self.get_verbosity():
-            logstr = astr
             if self.get_mask_sensitivity():
                 # logging.debug('>in  astr:[%s]/type:[%s]', astr, type(astr))
                 for pattern in UPLDR_K.MaskPatterns:
@@ -225,8 +228,6 @@ class NicePrint:
                           'PRINT',
                           self.strunicodeout(fname),
                           self.strunicodeout(astr)))
-            if logalso:
-                logging.log(logalso, logstr)
 
     # -------------------------------------------------------------------------
     # niceassert

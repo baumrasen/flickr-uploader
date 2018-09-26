@@ -2275,12 +2275,9 @@ class Uploadr(object):
                          caughtmsg='DB error on DB create: [{!s}]'
                          .format(err.args[0]),
                          useniceprint=True)
-
+            # Closing DB connection and Exiting
             litedb.close(con)
             sys.exit(6)
-        finally:
-            # Closing DB connection
-            litedb.close(con)
 
         NP.niceprint('Completed database setup')
 

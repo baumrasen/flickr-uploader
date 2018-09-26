@@ -463,7 +463,7 @@ def check_base_ini_file(base_dir, ini_file):
             result_check = True
     except OSError as err:
         result_check = False
-        logging.critical(
+        logging.error(
             'No config folder and/or INI file found: %s', str(err))
 
     logging.debug('check_base_ini_file: result=[%s]', result_check)
@@ -586,7 +586,7 @@ if __name__ == "__main__":
                       caughtprefix='+++',
                       caughtcode='662',
                       caughtmsg='Invalid sys.argv INI file [{!s}].'
-                      .format(UPLDR_K.ini_file),
+                      ' Continuing...'.format(UPLDR_K.ini_file),
                       useniceprint=True)
         # INI file config (3/3)
         #   3. If not, os.path.dirname(sys.argv[0]), '../etc/uploadr.ini'
@@ -599,10 +599,11 @@ if __name__ == "__main__":
                           useniceprint=True)
             sys.exit(2)
         else:
+            
             UPLDR_K.ini_file = UPLDR_K.etc_ini_file
 
     # Source configuration from ini_file
-    logging.critical('FINAL ini_file:[%s]', UPLDR_K.ini_file)
+    logging.warning('FINAL ini_file:[%s]', UPLDR_K.ini_file)
     MY_CFG.readconfig(UPLDR_K.ini_file, ['Config'])
     if not (MY_CFG.processconfig() and MY_CFG.verifyconfig()):
         NPR.niceerror(caught=True,

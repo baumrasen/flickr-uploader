@@ -1709,7 +1709,7 @@ class Uploadr(object):
         else:
             logging.info('no_delete_from_flickr option is enabled:[%s]',
                          self.args.no_delete_from_flickr)
-            get_success, res_add_tag, get_errcode = faw.flickrapi_fn(
+            get_success, _, get_errcode = faw.flickrapi_fn(
                 self.nuflickr.photos.addTags, (),
                 dict(photo_id=str(file[0]),
                      tags='{}'.format(self.args.no_delete_from_flickr)),

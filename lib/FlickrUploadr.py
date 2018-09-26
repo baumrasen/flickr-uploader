@@ -1196,7 +1196,7 @@ class Uploadr(object):
                                else 'Filesize was too large'
                         NP.niceprint('   Log Bad file:[{!s}] due to [{!s}]'
                                      .format(file, amsg))
-                        logging.info('   Log Bad file:[{!s}] due to [%s]',
+                        logging.info('   Log Bad file:[%s] due to [%s]',
                                      NP.strunicodeout(file), amsg)
 
                         db_insert_badfiles(lock,

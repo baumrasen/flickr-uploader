@@ -311,26 +311,23 @@ def run_uploadr(args):
                 caught=True,
                 caughtprefix='xxx',
                 caughtcode='630',
-                caughtmsg='Please configure in INI file [normally uploadr.ini]'
-                ' the name of the folder [FILES_DIR] '
-                'with media available to sync with Flickr.',
+                caughtmsg='Configure in INI file [normally uploadr.ini] '
+                'the folder [FILES_DIR] with media to sync with Flickr.',
                 useniceprint=True)
 
             sys.exit(8)
-        else:
-            if not os.path.isdir(MY_CFG.FILES_DIR):
-                NPR.niceerror(
-                    caught=True,
-                    caughtprefix='xxx',
-                    caughtcode='631',
-                    caughtmsg='FILES_DIR: [{!s}] is not valid.'
-                    'Please configure the name of an existant folder'
-                    ' in INI file [normally uploadr.ini] '
-                    'with media available to sync with Flickr. '
-                    .format(NPR.strunicodeout(MY_CFG.FILES_DIR)),
-                    useniceprint=True)
+        elif not os.path.isdir(MY_CFG.FILES_DIR):
+            NPR.niceerror(
+                caught=True,
+                caughtprefix='xxx',
+                caughtcode='631',
+                caughtmsg='FILES_DIR: [{!s}] is not valid.'
+                'Use an existant folder in INI file [normally uploadr.ini] '
+                'with media to sync with Flickr. '
+                .format(NPR.strunicodeout(MY_CFG.FILES_DIR)),
+                useniceprint=True)
 
-                sys.exit(8)
+            sys.exit(8)
 
     def check_flickr_key_secret():
         """ def check_flickr_key_secret():
@@ -456,14 +453,18 @@ def check_base_ini_file(base_dir, ini_file):
 
     result_check = True
     try:
-        if not ((base_dir == '' or os.path.isdir(base_dir)) and
-                os.path.isfile(ini_file)):
-            raise OSError('[Errno 2] No such file or directory')
+        if not (base_dir == '' or os.path.isdir(base_dir)):
+            raise OSError('[Errno 2] No such directory:[{!s}]'
+                          .format(NPR.strunicodeout(base_dir)))
+        elif not os.path.isfile(ini_file):
+            raise OSError('[Errno 2] No such file:[{!s}]'
+                          .format(NPR.strunicodeout(ini_file)))
+        else:
+            result_check = True
     except OSError as err:
         result_check = False
         logging.critical(
-            'Config folder [%s] and/or INI file: [%s] not found or '
-            'incorrect format: [%s]!', base_dir, ini_file, str(err))
+            'No config folder and/or INI file found: %s', str(err))
 
     logging.debug('check_base_ini_file: result=[%s]', result_check)
     return result_check
@@ -551,11 +552,6 @@ if __name__ == "__main__":
     if PARSED_ARGS.no_delete_from_flickr:
         logging.warning('Option --no-delete-from-flickr enabled=[%s]',
                         PARSED_ARGS.no_delete_from_flickr)
-    # Debug: upload_sleep: Seconds to sleep prior to reattempt a failed upload
-    logging.info('Upload sleep setting:[%s] seconds', UPLDR_K.upload_sleep)
-    # Set verbosity level as per -v count
-    NPR.set_verbosity(PARSED_ARGS.verbose)
-    NPR.set_mask_sensitivity(PARSED_ARGS.mask_sensitive)
 
     # Print/show arguments
     logging.info('Output for arguments(args):\n%s',
@@ -564,12 +560,18 @@ if __name__ == "__main__":
                   .format(pprint.pformat(PARSED_ARGS)),
                   verbosity=3)
 
+    # Debug: upload_sleep: Seconds to sleep prior to reattempt a failed upload
+    logging.info('Upload sleep setting:[%s] seconds', UPLDR_K.upload_sleep)
+    # Set verbosity level as per -v count
+    NPR.set_verbosity(PARSED_ARGS.verbose)
+    NPR.set_mask_sensitivity(PARSED_ARGS.mask_sensitive)
+
     # INI file config (1/3)
     #   1. Use --config-file argument option [after PARSED_ARGS]
     if PARSED_ARGS.config_file:
         if not check_base_ini_file(UPLDR_K.base_dir, PARSED_ARGS.config_file):
             NPR.niceerror(caught=True,
-                          caughtprefix='+++ ',
+                          caughtprefix='+++',
                           caughtcode='661',
                           caughtmsg='Invalid -C argument INI file [{!s}]. '
                           'Exiting...'.format(UPLDR_K.ini_file),
@@ -579,37 +581,37 @@ if __name__ == "__main__":
             UPLDR_K.ini_file = PARSED_ARGS.config_file
     # INI file config (2/3)
     #   2. If not, os.path.dirname(sys.argv[0])
-    else:
-        if not check_base_ini_file(UPLDR_K.base_dir, UPLDR_K.ini_file):
+    elif not check_base_ini_file(UPLDR_K.base_dir, UPLDR_K.ini_file):
+        NPR.niceerror(caught=True,
+                      caughtprefix='+++',
+                      caughtcode='662',
+                      caughtmsg='Invalid sys.argv INI file [{!s}].'
+                      .format(UPLDR_K.ini_file),
+                      useniceprint=True)
+        # INI file config (3/3)
+        #   3. If not, os.path.dirname(sys.argv[0]), '../etc/uploadr.ini'
+        if not check_base_ini_file(UPLDR_K.base_dir, UPLDR_K.etc_ini_file):
             NPR.niceerror(caught=True,
-                          caughtprefix='+++ ',
-                          caughtcode='662',
-                          caughtmsg='Invalid sys.argv INI file [{!s}].'
-                          .format(UPLDR_K.ini_file),
+                          caughtprefix='+++',
+                          caughtcode='663',
+                          caughtmsg='Invalid sys.argv/etc INI file [{!s}].'
+                          ' Exiting...'.format(UPLDR_K.etc_ini_file),
                           useniceprint=True)
-            # INI file config (3/3)
-            #   3. If not, os.path.dirname(sys.argv[0]), '../etc/uploadr.ini'
-            if not check_base_ini_file(UPLDR_K.base_dir, UPLDR_K.etc_ini_file):
-                NPR.niceerror(caught=True,
-                              caughtprefix='+++ ',
-                              caughtcode='663',
-                              caughtmsg='Invalid sys.argv/etc INI file [{!s}].'
-                              ' Exiting...'.format(UPLDR_K.etc_ini_file),
-                              useniceprint=True)
-                sys.exit(2)
-            else:
-                UPLDR_K.ini_file = UPLDR_K.etc_ini_file
+            sys.exit(2)
+        else:
+            UPLDR_K.ini_file = UPLDR_K.etc_ini_file
 
     # Source configuration from ini_file
     logging.critical('FINAL ini_file:[%s]', UPLDR_K.ini_file)
     MY_CFG.readconfig(UPLDR_K.ini_file, ['Config'])
-    if MY_CFG.processconfig():
-        if MY_CFG.verifyconfig():
-            pass
-        else:
-            raise ValueError('No config file found or incorrect config!')
-    else:
-        raise ValueError('No config file found or incorrect config!')
+    if not (MY_CFG.processconfig() and MY_CFG.verifyconfig()):
+        NPR.niceerror(caught=True,
+                      caughtprefix='+++',
+                      caughtcode='664',
+                      caughtmsg='Incorrect config INI file [{!s}].'
+                      ' Exiting...'.format(UPLDR_K.ini_file),
+                      useniceprint=True)
+        sys.exit(8)
 
     # Update console logging level as per LOGGING_LEVEL from INI file
     CONSOLE_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL)
@@ -626,8 +628,8 @@ if __name__ == "__main__":
         ROTATING_LOGGING = None
         if not os.path.isdir(os.path.dirname(MY_CFG.ROTATING_LOGGING_PATH)):
             NPR.niceerror(caught=True,
-                          caughtprefix='+++ ',
-                          caughtcode='663',
+                          caughtprefix='+++',
+                          caughtcode='665',
                           caughtmsg='Invalid ROTATING_LOGGING_PATH config.',
                           useniceprint=True)
         else:

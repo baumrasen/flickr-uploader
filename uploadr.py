@@ -599,7 +599,6 @@ if __name__ == "__main__":
                           useniceprint=True)
             sys.exit(2)
         else:
-            
             UPLDR_K.ini_file = UPLDR_K.etc_ini_file
 
     # Source configuration from ini_file

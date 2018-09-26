@@ -192,13 +192,19 @@ class NicePrint:
     # Print a message with the format:
     #   [2017.10.25 22:32:03]:[PRINT   ]:[uploadr] Some Message
     #
-    def niceprint(self, astr, fname='uploadr', verbosity=0):
+    def niceprint(self, astr, fname='uploadr', verbosity=0, logalso=0):
         """ niceprint
         Print a message with the format:
             [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
             Accounts for UTF-8 Messages
+
+        astr      = message to be printed
+        fname     = message category
+        verbosity = print if within configured verbosity: See set_verbosity
+        logalso   = also issues logging. Use logging.DEBUG, logging.ERROR, etc
         """
         if verbosity <= self.get_verbosity():
+            logstr = astr
             if self.get_mask_sensitivity():
                 # logging.debug('>in  astr:[%s]/type:[%s]', astr, type(astr))
                 for pattern in UPLDR_K.MaskPatterns:
@@ -219,6 +225,8 @@ class NicePrint:
                           'PRINT',
                           self.strunicodeout(fname),
                           self.strunicodeout(astr)))
+            if logalso:
+                logging.log(logalso, logstr)
 
     # -------------------------------------------------------------------------
     # niceassert

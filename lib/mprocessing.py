@@ -201,23 +201,20 @@ def mprocessing(nprocs, lockdb, running, mutex, itemslist, a_fn, cur):
         proc_pool.append(proc_task)
         logging.debug('===Job/Task Process: Starting...')
         proc_task.start()
-        logging.debug('===Job/Task Process:  [%s] Started with pid:[%s]',
-                      proc_task.name,
-                      proc_task.pid)
         NPR.niceprint('===Job/Task Process: [{!s}] Started '
                       'with pid:[{!s}]'
                       .format(proc_task.name,
                               proc_task.pid),
-                      verbosity=3)
+                      verbosity=3,
+                      logalso=logging.DEBUG)
 
     # Check status of jobs/tasks in the Process Pool
     if log_level <= logging.DEBUG:
-        logging.debug('===Checking Processes launched/status:')
-        NPR.niceprint('===Checking Processes launched/status:', verbosity=3)
+        NPR.niceprint('===Checking Processes launched/status:',
+                      verbosity=3, logalso=logging.DEBUG)
         for j in proc_pool:
             NPR.niceprint('{!s}.is_alive = {!s}'.format(j.name, j.is_alive()),
-                          verbosity=3)
-            logging.debug('%s.is_alive = %s', j.name, j.is_alive())
+                          verbosity=3, logalso=logging.DEBUG)
 
     # Regularly print status of jobs/tasks in the Process Pool
     # Prints status while there are processes active
@@ -229,23 +226,17 @@ def mprocessing(nprocs, lockdb, running, mutex, itemslist, a_fn, cur):
         for prc in multiprocessing.active_children():
             logging.debug('===%s.is_alive = %s', prc.name, prc.is_alive())
             proc_task_active = prc
-        logging.info('===Will wait for 60 on %s.is_alive = %s',
-                     proc_task_active.name,
-                     proc_task_active.is_alive())
         NPR.niceprint('===Will wait for 60 on {!s}.is_alive = {!s}'
                       .format(proc_task_active.name,
                               proc_task_active.is_alive()),
-                      verbosity=3)
+                      verbosity=3, logalso=logging.INFO)
 
         proc_task_active.join(timeout=60)
-        logging.info('===Waited for 60s on %s.is_alive = %s',
-                     proc_task_active.name,
-                     proc_task_active.is_alive())
         NPR.niceprint('===Waited for 60s on '
                       '{!s}.is_alive = {!s}'
                       .format(proc_task_active.name,
                               proc_task_active.is_alive()),
-                      verbosity=3)
+                      verbosity=3, logalso=logging.INFO)
 
     # Wait for join all jobs/tasks in the Process Pool
     # All should be done by now!

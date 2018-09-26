@@ -1129,10 +1129,11 @@ class Uploadr(object):
                     NP.niceerror(caught=True,
                                  caughtprefix='xxx',
                                  caughtcode='039',
-                                 caughtmsg='Sleep 10 and check if file is'
-                                 'already uploaded.',
+                                 caughtmsg='Sleep {!s} and check if file is'
+                                 ' already uploaded.'
+                                 .format(UPLDR_K.upload_sleep),
                                  useniceprint=True)
-                    NUTIME.sleep(10)
+                    NUTIME.sleep(UPLDR_K.upload_sleep)
 
                     zisloaded, ziscount, photo_id, zisnoset = \
                         self.is_already_uploaded(file, file_checksum, setname)
@@ -1209,10 +1210,11 @@ class Uploadr(object):
                     NP.niceerror(caught=True,
                                  caughtprefix='xxx',
                                  caughtcode='042',
-                                 caughtmsg='Sleep 10 and check if '
-                                 'file is already uploaded.',
+                                 caughtmsg='Sleep {!s} and check if file is'
+                                 ' already uploaded.'
+                                 .format(UPLDR_K.upload_sleep),
                                  useniceprint=True)
-                    NUTIME.sleep(10)
+                    NUTIME.sleep(UPLDR_K.upload_sleep)
 
                     zisloaded, ziscount, photo_id, zisnoset = \
                         self.is_already_uploaded( file, file_checksum, setname)
@@ -1337,8 +1339,7 @@ class Uploadr(object):
                 litedb.execute(
                     con, 'UPDATE#051', lock, self.args.processes,
                     cur,
-                    'UPDATE files SET last_modified = ?'
-                    'WHERE files_id = ?',
+                    'UPDATE files SET last_modified = ? WHERE files_id = ?',
                     qmarkargs=(last_modified, row[1]),
                     dbcaughtcode='051')
 
@@ -1507,9 +1508,10 @@ class Uploadr(object):
                     NP.niceerror(caught=True,
                                  caughtprefix='xxx',
                                  caughtcode='061',
-                                 caughtmsg='Sleep 10 and try to replace again',
+                                 caughtmsg='Sleep {!s} and try replacing again'
+                                 .format(UPLDR_K.upload_sleep),
                                  useniceprint=True)
-                    NUTIME.sleep(10)
+                    NUTIME.sleep(UPLDR_K.upload_sleep)
 
                     if attempts == self.xcfg.MAX_UPLOAD_ATTEMPTS - 1:
                         raise ValueError('Reached maximum number of attempts '

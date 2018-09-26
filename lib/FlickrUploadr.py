@@ -1217,7 +1217,7 @@ class Uploadr(object):
                     NUTIME.sleep(UPLDR_K.upload_sleep)
 
                     zisloaded, ziscount, photo_id, zisnoset = \
-                        self.is_already_uploaded( file, file_checksum, setname)
+                        self.is_already_uploaded(file, file_checksum, setname)
                     logging.warning('is_already_uploaded:[%s] '
                                     'ziscount:[%s] Zpic:[%s] '
                                     'zisnoset:[%s]',

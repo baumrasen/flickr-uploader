@@ -871,7 +871,7 @@ class Uploadr(object):
                                  useniceprint=True)
                 logging.info('db_insert_files:  Done:[%s/%s attempts].',
                              attempts,
-                             self.xcfg.MAX_SQL_ATTEMPTS)                        
+                             self.xcfg.MAX_SQL_ATTEMPTS)
                 # Break the cycle of SQL_ATTEMPTS and continue
                 break
         # ---------------------------------------------------------------------

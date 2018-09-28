@@ -64,6 +64,12 @@ class Konstants:
 
     # Patterns to filter/ defined on UPLDR_K.MaskPatterns/mask sensitive data
     MaskPatterns = (
+        # Flickr token related unformation
+        r'(?<=(token)=)\w+',
+        r'(?<=(fullname)=)\w+',
+        r'(?<=(username)=)\w+',
+        r'(?<=(user_nsid)=)\w+',
+
         # Non-greedy "[filename]" preceeded by "path:[" & followed by "]"
         r'(?<=(path):\[).+?(?=\])',
         r'(?<=(loaded):\[).+?(?=\])',

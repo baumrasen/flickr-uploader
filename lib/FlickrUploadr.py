@@ -121,7 +121,7 @@ class Uploadr(object):
         if not mimetypes.types_map['.3gp'] == 'video/3gpp':
             NP.niceerror(caught=True,
                          caughtprefix='xxx',
-                         caughtcode='001',
+                         caughtcode='020',
                          caughtmsg='Not able to add mimetype'
                          ' ''video/3gp''/''.3gp'' correctly',
                          useniceprint=True)
@@ -432,7 +432,7 @@ class Uploadr(object):
                     okfilesize = False
                     NP.niceerror(caught=True,
                                  caughtprefix='+++',
-                                 caughtcode='009',
+                                 caughtcode='029',
                                  caughtmsg='convert_raw_files: getsize',
                                  useniceprint=False,
                                  exceptsysinfo=True)
@@ -519,7 +519,7 @@ class Uploadr(object):
             except Exception:
                 NP.niceerror(caught=True,
                              caughtprefix='+++',
-                             caughtcode='016',
+                             caughtcode='030',
                              caughtmsg='Error calling exiftool:[{!s}]'
                              .format(convert_or_copy_tags),
                              useniceprint=True,
@@ -849,12 +849,12 @@ class Uploadr(object):
                     '(files_id, path, md5, last_modified, tagged) '
                     'VALUES (?, ?, ?, ?, 1)',
                     qmarkargs=(file_id, file, file_checksum, last_modified),
-                    dbcaughtcode='030')
+                    dbcaughtcode='031')
 
                 if not db_success:
                     NP.niceerror(caught=True,
                                  caughtprefix='+++ DB',
-                                 caughtcode='031',
+                                 caughtcode='032',
                                  caughtmsg='Sleep 2 and retry SQL...'
                                  '[{!s}/{!s} attempts]'
                                  .format(attempts, self.xcfg.MAX_SQL_ATTEMPTS),
@@ -863,7 +863,7 @@ class Uploadr(object):
                 elif attempts > 0:
                     NP.niceerror(caught=True,
                                  caughtprefix='+++ DB',
-                                 caughtcode='032',
+                                 caughtcode='033',
                                  caughtmsg='Succeed at retry SQL...'
                                  '[{!s}/{!s} attempts]'
                                  .format(attempts,
@@ -916,12 +916,12 @@ class Uploadr(object):
         success = False
         con, cur = litedb.connect(self.xcfg.DB_PATH)
 
-        litedb.execute(con, 'SELECT#040', lock, self.args.processes,
+        litedb.execute(con, 'SELECT#036', lock, self.args.processes,
                        cur,
                        'SELECT rowid, files_id, path, set_id, md5, '
                        'tagged, last_modified FROM files WHERE path = ?',
                        qmarkargs=(file,),
-                       dbcaughtcode='040')
+                       dbcaughtcode='036')
         row = cur.fetchone()
         logging.debug('row: %s', row)
 
@@ -1508,13 +1508,13 @@ class Uploadr(object):
             # Update the db the file uploaded
             # Control for when running multiprocessing set locking
             litedb.execute(con,
-                           'UPDATE#070',
+                           'UPDATE#055',
                            lock, self.args.processes,
                            cur,
                            'UPDATE files SET md5 = ?,last_modified = ? '
                            'WHERE files_id = ?',
                            qmarkargs=(file_md5, last_modified, file_id),
-                           dbcaughtcode='070')
+                           dbcaughtcode='055')
 
             # Update the Video Date Taken
             self.update_video_date(file_id, file, last_modified)
@@ -1624,12 +1624,12 @@ class Uploadr(object):
             con, nucur = litedb.connect(self.xcfg.DB_PATH)
 
             litedb.execute(con,
-                           'SELECT#060:delete_record_localdb',
+                           'SELECT#058:delete_record_localdb',
                            lock, self.args.processes,
                            nucur,
                            'SELECT set_id FROM files WHERE files_id = ?',
                            qmarkargs=(file[0],),
-                           dbcaughtcode='060')
+                           dbcaughtcode='058')
             row = nucur.fetchone()
             if row is not None:
                 litedb.execute(con,
@@ -1698,7 +1698,7 @@ class Uploadr(object):
         else:
             NP.niceerror(caught=True,
                          caughtprefix='xxx',
-                         caughtcode='090',
+                         caughtcode='115',
                          caughtmsg='Failed to delete photo (delete_file)',
                          useniceprint=True)
 
@@ -1989,19 +1989,19 @@ class Uploadr(object):
             self.nuflickr.photosets.addPhoto, (),
             dict(photoset_id=str(set_id),
                  photo_id=str(file[0])),
-            2, 0, False, caughtcode='146')
+            2, 0, False, caughtcode='159')
 
         if get_success and get_errcode == 0:
             NP.niceprint(' Added file/set:[{!s}] set_id:[{!s}]'
                          .format(NP.strunicodeout(file[1]),
                                  NP.strunicodeout(set_id)))
 
-            litedb.execute(con, 'SELECT#096', lock, self.args.processes,
+            litedb.execute(con, 'SELECT#159', lock, self.args.processes,
                            bcur,
                            'UPDATE files SET set_id = ? '
                            'WHERE files_id = ?',
                            qmarkargs=(set_id, file[0]),
-                           dbcaughtcode='096')
+                           dbcaughtcode='159')
 
         elif not get_success and get_errcode == 1:
             # Error: 1: Photoset not found
@@ -2016,16 +2016,16 @@ class Uploadr(object):
             NP.niceprint('Photo already in set... updating DB'
                          'set_id=[{!s}] photo_id=[{!s}]'
                          .format(set_id, file[0]))
-            litedb.execute(con, 'SELECT#110', lock, self.args.processes,
+            litedb.execute(con, 'SELECT#160', lock, self.args.processes,
                            bcur,
                            'UPDATE files SET set_id = ? '
                            'WHERE files_id = ?',
                            qmarkargs=(set_id, file[0]),
-                           dbcaughtcode='110')
+                           dbcaughtcode='160')
         else:
             NP.niceerror(caught=True,
                          caughtprefix='xxx',
-                         caughtcode='097',
+                         caughtcode='120',
                          caughtmsg='Failed add photo to set (add_file_to_set)',
                          useniceprint=True)
 
@@ -2260,11 +2260,11 @@ class Uploadr(object):
 
         con, cur = litedb.connect(self.xcfg.DB_PATH)
 
-        litedb.execute(con, 'PRAGMA#147',
+        litedb.execute(con, 'PRAGMA#170',
                        None, self.args.processes,  # No need for lock
                        cur,
                        'PRAGMA user_version',
-                       dbcaughtcode='147')
+                       dbcaughtcode='170')
         row = cur.fetchone()
 
         if row[0] >= 2:
@@ -2272,22 +2272,22 @@ class Uploadr(object):
             NP.niceprint('Deleting from badfiles table. '
                          'Reseting sequence.')
             _success = litedb.execute(
-                con, 'DELETE#148',
+                con, 'DELETE#171',
                 None, self.args.processes,  # No need for lock
                 cur,
                 'DELETE FROM badfiles',
-                dbcaughtcode='148')
+                dbcaughtcode='171')
             if not _success:
                 litedb.close(con)
                 sys.exit(7)
 
             _success = litedb.execute(
-                con, 'DELETE#149',
+                con, 'DELETE#172',
                 None, self.args.processes,  # No need for lock
                 cur,
                 'DELETE FROM SQLITE_SEQUENCE '
                 'WHERE name="badfiles"',
-                dbcaughtcode='149')
+                dbcaughtcode='172')
             if not _success:
                 litedb.close(con)
                 sys.exit(7)
@@ -2317,12 +2317,12 @@ class Uploadr(object):
 
         con, cur = litedb.connect(self.xcfg.DB_PATH)
         litedb.execute(con,
-                       'SELECT#150',
+                       'SELECT#180',
                        None, self.args.processes,  # No need for lock
                        cur,
                        'SELECT set_id, name FROM sets WHERE set_id NOT IN '
                        ' (SELECT set_id FROM files)',
-                       dbcaughtcode='150')
+                       dbcaughtcode='180')
         unusedsets = None
         unusedsets = cur.fetchall()
 
@@ -2333,12 +2333,12 @@ class Uploadr(object):
                                  NP.strunicodeout(row[1])),
                          verbosity=1)
             litedb.execute(con,
-                           'DELETE#151',
+                           'DELETE#181',
                            None, self.args.processes,  # No need for lock
                            cur,
                            'DELETE FROM sets WHERE set_id = ?',
                            qmarkargs=(row[0],),
-                           dbcaughtcode='151')
+                           dbcaughtcode='181')
 
         # Closing DB connection
         litedb.close(con)
@@ -2355,11 +2355,11 @@ class Uploadr(object):
         """
         con, cur = litedb.connect(self.xcfg.DB_PATH)
         litedb.execute(con,
-                       'SELECT#160',
+                       'SELECT#190',
                        None, self.args.processes,  # No need for lock
                        cur,
                        'SELECT set_id, name FROM sets',
-                       dbcaughtcode='160')
+                       dbcaughtcode='190')
         allsets = cur.fetchall()
         for row in allsets:
             NP.niceprint('Set:[{!s}] id:[{!s}]'.format(str(row[1]), row[0]))
@@ -2445,12 +2445,12 @@ class Uploadr(object):
                              primary_photo_id)
 
                 litedb.execute(con,
-                               'SELECT#164',
+                               'SELECT#192',
                                None, self.args.processes,  # No need for lock
                                cur,
                                'SELECT set_id FROM sets WHERE set_id = ?',
                                qmarkargs=(set_id,),
-                               dbcaughtcode='164')
+                               dbcaughtcode='192')
                 found_sets = cur.fetchone()
                 logging.info('Output for found_sets is [%s]',
                              'None' if found_sets is None else found_sets)
@@ -2462,14 +2462,14 @@ class Uploadr(object):
                                  set_id,
                                  primary_photo_id)
                     litedb.execute(con,
-                                   'INSERT#165',
+                                   'INSERT#194',
                                    None,  # No need for lock
                                    self.args.processes, cur,
                                    'INSERT INTO sets (set_id, name, '
                                    'primary_photo_id) VALUES (?,?,?)',
                                    qmarkargs=(set_id, setname,
                                               primary_photo_id),
-                                   dbcaughtcode='165')
+                                   dbcaughtcode='194')
 
                 else:
                     NP.niceprint('Found on DB Set:[{!s}]'
@@ -3061,13 +3061,13 @@ class Uploadr(object):
 
         con, cur = litedb.connect(self.xcfg.DB_PATH)
         if not litedb.execute(con,
-                              'SELECT#165',
+                              'SELECT#218',
                               None, self.args.processes,  # No need for lock
                               cur,
                               'SELECT files_id, path, set_id, md5, tagged, '
                               'last_modified '
                               'FROM badfiles ORDER BY path',
-                              dbcaughtcode='165'):
+                              dbcaughtcode='218'):
             return False
 
         bad_files = cur.fetchall()

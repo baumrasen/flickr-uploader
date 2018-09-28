@@ -296,7 +296,7 @@ class NicePrint:
             +++     Exceptions handling related
             +++ DB  Database Exceptions handling related
             xxx     Error related
-          caughtcode = '010'
+          caughtcode = '000'
           caughtmsg = 'Flickrapi exception on...'/'DB Error on INSERT'
           useniceprint = True/False
           exceptuse = True/False

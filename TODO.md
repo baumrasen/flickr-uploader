@@ -7,9 +7,7 @@
 
 * Check CODING References within code
 * Review/adjust pylint warnings/errors
-* Dual logging_levels??? afer... multiprocessing_logging.install_mp_handler()
 * Test use of library https://github.com/jruere/multiprocessing-logging in Windows
-* Mask sensitive data on NicePrint.niceprint()
 * setup.py: drop installcfg option? May still be usable to place files in a user specific folder
 * Reconfirm the uploading sequence when -u option is set which affects
   isLoaded = False control variable

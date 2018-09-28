@@ -214,7 +214,7 @@ class Uploadr(object):
                                       if sys.version_info < (3, )
                                       else str(row[1]))):
                 # Running in single processing mode, no need for lock
-                self.delete_file(row, cur)
+                self.delete_file(row)
 
         litedb.close(con)
 
@@ -258,7 +258,7 @@ class Uploadr(object):
                                    if NP.is_str_unicode(row[1])
                                    else row[1])):
                 # Running in single processing mode, no need for lock
-                success = self.delete_file(row, cur)
+                success = self.delete_file(row)
                 logging.warning('delete_file result: [%s]', success)
                 count = count + 1
                 if count % 3 == 0:
@@ -1542,7 +1542,7 @@ class Uploadr(object):
                               'xrow[0].files_id=[%s]'
                               'xrow[1].file=[%s]',
                               xrow[0], NP.strunicodeout(xrow[1]))
-                if self.delete_file(xrow, cur, lock):
+                if self.delete_file(xrow, lock):
                     NP.niceprint('..Video deleted:[{!s}]'
                                  .format(NP.strunicodeout(file)),
                                  fname='replace',
@@ -1594,8 +1594,7 @@ class Uploadr(object):
     # When EXCLUDED_FOLDERS defintion changes. You can run the -g
     # or --remove-excluded option in order to remove files previously loaded
     #
-    # CODING: Argument cur is not actually being used. Confirm and delete.
-    def delete_file(self, file, cur, lock=None):
+    def delete_file(self, file, lock=None):
         """ delete_file
 
         delete file from flickr
@@ -1669,7 +1668,8 @@ class Uploadr(object):
             return True
 
         NP.niceprint('  Deleting file:[{!s}]'
-                     .format(NP.strunicodeout(file[1])))
+                     .format(NP.strunicodeout(file[1])),
+                     logalso=logging.WARNING))
 
         # Cater for option --no-delete-from-flickr
         if not self.args.no_delete_from_flickr:
@@ -1693,7 +1693,8 @@ class Uploadr(object):
 
             delete_record_localdb(lock, file)
             NP.niceprint('   Deleted file:[{!s}]'
-                         .format(NP.strunicodeout(file[1])))
+                         .format(NP.strunicodeout(file[1])),
+                         logalso=logging.WARNING)
             success = True
         else:
             NP.niceerror(caught=True,
@@ -1723,9 +1724,9 @@ class Uploadr(object):
         Also updates photo DB entry with its set_id
         """
 
-        logging.warning('  Add set to DB:[%s]', NP.strunicodeout(setname))
         NP.niceprint('  Add set to DB:[{!s}]'
-                     .format(NP.strunicodeout(setname)), verbosity=1)
+                     .format(NP.strunicodeout(setname)),
+                     verbosity=1, logalso=logging.WARNING)
 
         if litedb.execute(con, 'INSERT#094', lock, self.args.processes,
                           cur,
@@ -2479,7 +2480,7 @@ class Uploadr(object):
         else:
             NP.niceerror(caught=True,
                          caughtprefix='xxx',
-                         caughtcode='089',
+                         caughtcode='170',
                          caughtmsg='Failed to list photosets '
                          '(photosets.getList)',
                          exceptuse=True,
@@ -2495,7 +2496,7 @@ class Uploadr(object):
         if con is not None and con in locals():
             NP.niceerror(caught=True,
                          caughtprefix='+++ DB',
-                         caughtcode='121',
+                         caughtcode='171',
                          caughtmsg='Closing DB connection on '
                          'photosets.getList',
                          useniceprint=True)

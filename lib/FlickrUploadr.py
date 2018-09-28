@@ -777,7 +777,7 @@ class Uploadr(object):
             running = shared value to count processed files in multiprocessing
             mutex = for running access control in multiprocessing
         """
-        # CODING
+        # CODING pylint
         # pylint: disable=unused-argument
         for i, filepic in enumerate(filelist):
             logging.warning('===Element of Chunk:[%s] file:[%s]', i, filepic)
@@ -1906,8 +1906,6 @@ class Uploadr(object):
                            'WHERE set_id is NULL',
                            dbcaughtcode='157')
             files = cur.fetchall()
-            # CODING:Check need for cur.close().Only location in which is used!
-            # cur.close()
 
             # running in multi processing mode
             if self.args.processes and self.args.processes > 0:
@@ -1915,8 +1913,6 @@ class Uploadr(object):
                               self.args.processes)
                 logging.debug('__name__:[%s] to prevent recursive calling)!',
                               __name__)
-                # CODING: cur already defined. Remove
-                # cur = con.cursor()
 
                 # To prevent recursive calling, check if __name__ == '__main__'
                 # if __name__ == '__main__':
@@ -1927,13 +1923,9 @@ class Uploadr(object):
                                files,
                                self.fn_add_filestosets,
                                cur)
-                con.commit()
 
             # running in single processing mode
             else:
-                # CODING: cur already defined. Remove
-                # cur = con.cursor()
-
                 for filepic in files:
                     # filepic[1] = path for the file from table files
                     # filepic[2] = set_id from files table
@@ -1960,8 +1952,8 @@ class Uploadr(object):
                                              set_id))
                         self.add_file_to_set(slockdb, set_id, filepic, cur)
                     else:
-                        NP.niceprint('Not able to assign pic to set')
-                        logging.error('Not able to assign pic to set')
+                        NP.niceprint('Not able to assign pic to set.',
+                                     logalso=logging.ERROR)
 
         # Closing DB connection
         litedb.close(con)
@@ -2856,7 +2848,7 @@ class Uploadr(object):
                 code, cur = Not used as function does not update database.
                 pylint: disable=unused-argument
         """
-        # CODING
+        # CODING pylint
         # pylint: disable=unused-argument
         for i, afile in enumerate(filelist):
             logging.warning('===Element of Chunk:[%s] file:[%s]', i, afile)
@@ -2880,10 +2872,9 @@ class Uploadr(object):
                                         if afile[2] is not None
                                         else setname))
 
-            logging.warning('       Find Tag:[%s] TagId:[%s]',
-                            tfind, tid)
             NP.niceprint('       Find Tag:[{!s}] TagId:[{!s}]'
-                         .format(tfind, tid), verbosity=1)
+                         .format(tfind, tid), verbosity=1,
+                         logalso=logging.WARNING)
 
             if not tfind:
                 get_success, _, get_errcode = faw.flickrapi_fn(
@@ -2895,19 +2886,15 @@ class Uploadr(object):
                     2, 2, False, caughtcode='214')
 
                 a_result = get_success and get_errcode == 0
-                logging.warning('%s: Photo_id:[%s] File:[%s] ',
-                                'Added album tag'
-                                if a_result
-                                else ' Failed tagging',
-                                str(afile[0]),
-                                NP.strunicodeout(afile[1]))
                 NP.niceprint('{!s}: Photo_id:[{!s}] File:[{!s}]'
                              .format('Added album tag'
                                      if a_result
                                      else ' Failed tagging',
                                      str(afile[0]),
                                      NP.strunicodeout(afile[1])),
-                             fname='addAlbumMigrate')
+                             fname='addAlbumMigrate'
+                             logalso=logging.WARNING)
+
             else:
                 NP.niceprint('      Found Tag:[{!s}] TagId:[{!s}]'
                              .format(tfind, tid), verbosity=1,

@@ -66,7 +66,7 @@ class Konstants:
     MaskPatterns = (
         # Flickr token related unformation
         # fullname="Some Name", ...
-        r'(?<=(token)=)\w+',        
+        r'(?<=(token)=)\w+',
         r'(?<=(fullname)=)\W?\w+\s*\w*'
         # r'(?<=(fullname)=)\w+',
         r'(?<=(username)=)\w+',
@@ -95,7 +95,7 @@ class Konstants:
         r'(?<=api_key\'. ).+?\w+',
         r'(?<=api_key\%).+?\w+',
         r'(?<=secret\'. ).+?\w+',
-        
+
         # RAW related masking. Not being considered: tags:[xxx]
         r'(?<=raw:\[).+?(?=\])',
         r'(?<=failed:\[).+?(?=\])',

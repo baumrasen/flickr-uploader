@@ -1665,7 +1665,7 @@ class Uploadr(object):
 
         NP.niceprint('  Deleting file:[{!s}]'
                      .format(NP.strunicodeout(file[1])),
-                     logalso=logging.WARNING))
+                     logalso=logging.WARNING)
 
         # Cater for option --no-delete-from-flickr
         if not self.args.no_delete_from_flickr:

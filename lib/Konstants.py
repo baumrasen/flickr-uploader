@@ -94,7 +94,12 @@ class Konstants:
         r'(?<=key ).+?\w+',
         r'(?<=api_key\'. ).+?\w+',
         r'(?<=api_key\%).+?\w+',
-        r'(?<=secret\'. ).+?\w+'
+        r'(?<=secret\'. ).+?\w+',
+        
+        # RAW related masking. Not being considered: tags:[xxx]
+        r'(?<=raw:\[).+?(?=\])',
+        r'(?<=failed:\[).+?(?=\])',
+        r'(?<=JPG:\[).+?(?=\])'
         )
 
     # -------------------------------------------------------------------------

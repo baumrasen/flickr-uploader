@@ -2879,7 +2879,7 @@ class Uploadr(object):
                                      else ' Failed tagging',
                                      str(afile[0]),
                                      NP.strunicodeout(afile[1])),
-                             fname='addAlbumMigrate'
+                             fname='addAlbumMigrate',
                              logalso=logging.WARNING)
 
             else:

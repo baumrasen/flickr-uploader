@@ -358,8 +358,8 @@ def run_uploadr(args):
             # authenticate sys.exits in case of failure
             myflick.authenticate()
         else:
-            logging.info('Token is available.')
-            NPR.niceprint('Token is available.')
+            NPR.niceprint('Token is available.',
+                          logalso=logging.INFO)
 
     # Initial checks
     check_files_dir()

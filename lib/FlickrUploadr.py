@@ -147,7 +147,6 @@ class Uploadr(object):
             self.nuflickr.token_cache.token is None
             if self.nuflickr is not None
             else 'Not valid as nuflickr is None')
-        NP.niceprint('Checking if token is available... ')
 
         return self.nuflickr.token_cache.token is not None\
             if self.nuflickr is not None\
@@ -1771,8 +1770,9 @@ class Uploadr(object):
     def fn_add_filestosets(self, lockdb, running, mutex, sfiles, c_total, cur):
         """ fn_add_filestosets
         """
-
-        # CODING Use a different conn and cur to avoid error +++096
+        # CODING pylint
+        # pylint: disable=unused-argument
+        # CODING Use a different conn and cur to avoid error +++096 (old code)
         fn_con, acur = litedb.connect(self.xcfg.DB_PATH)
 
         for filepic in sfiles:

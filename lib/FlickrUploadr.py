@@ -1533,39 +1533,35 @@ class Uploadr(object):
                          exceptsysinfo=True)
             # Error: 8: Videos can't be replaced
             if ex.code == 8:
-                NP.niceprint('..Video replace:[{!s}]'
+                NP.niceprint('..Video replace:[{!s}] Delete/uploading...'
                              .format(NP.strunicodeout(file)),
-                             fname='replace')
-                logging.error('Videos can\'t be replaced, delete/uploading...')
+                             fname='replace',
+                             logalso=logging.ERROR)
                 xrow = [file_id, file]
                 logging.debug('delete/uploading '
                               'xrow[0].files_id=[%s]'
                               'xrow[1].file=[%s]',
                               xrow[0], NP.strunicodeout(xrow[1]))
                 if self.delete_file(xrow, lock):
-                    NP.niceprint('..Video deleted:[{!s}]'
+                    NP.niceprint('..Video deleted:[{!s}] for replace!'
                                  .format(NP.strunicodeout(file)),
                                  fname='replace',
                                  logalso=logging.WARNING)
-                    logging.warning('Delete for replace succeed!')
                     if self.upload_file(lock, file):
                         NP.niceprint('.Video replaced:[{!s}]'
                                      .format(NP.strunicodeout(file)),
                                      fname='replace',
                                      logalso=logging.WARNING)
-                        logging.warning('Upload for replace succeed!')
                     else:
-                        NP.niceprint('..Failed upload:[{!s}]'
+                        NP.niceprint('..Failed upload:[{!s}] for replace!'
                                      .format(NP.strunicodeout(file)),
                                      fname='replace',
                                      logalso=logging.ERROR)
-                        logging.error('Upload for replace failed!')
                 else:
-                    NP.niceprint('..Failed delete:[{!s}]'
+                    NP.niceprint('..Failed delete:[{!s}] for replace!'
                                  .format(NP.strunicodeout(file)),
                                  fname='replace',
                                  logalso=logging.ERROR)
-                    logging.error('Delete for replace failed!')
 
         except lite.Error as err:
             NP.niceerror(caught=True,
@@ -1752,8 +1748,8 @@ class Uploadr(object):
             Run in daemon mode. runs upload every SLEEP_TIME seconds.
         """
 
-        logging.warning('Daemon mode run.')
-        NP.niceprint('Daemon mode run.')
+        NP.niceprint('Daemon mode run.',
+                     logalso=logging.WARNING)
         while True:
             NP.niceprint(' Daemon mode go:[{!s}]'
                          .format(NUTIME.strftime(
@@ -2024,11 +2020,7 @@ class Uploadr(object):
 
         # Closing DB connection
         if con is not None and con in locals():
-            NP.niceerror(caught=True,
-                         caughtprefix='+++ DB',
-                         caughtcode='122',
-                         caughtmsg='Closing DB connection on add_file_to_set',
-                         useniceprint=True)
+            logging.warning('Closing DB connection on add_file_to_set.')
             litedb.close(con)
 
     # -------------------------------------------------------------------------
@@ -2486,12 +2478,7 @@ class Uploadr(object):
 
         # Closing DB connection
         if con is not None and con in locals():
-            NP.niceerror(caught=True,
-                         caughtprefix='+++ DB',
-                         caughtcode='171',
-                         caughtmsg='Closing DB connection on '
-                         'photosets.getList',
-                         useniceprint=True)
+            logging.warning('Closing DB connection on get_flickr_sets.')
             litedb.close(con)
 
     # -------------------------------------------------------------------------
@@ -3214,7 +3201,8 @@ class Uploadr(object):
                                      'photos not in a set', count)
                         break
             else:
-                NP.niceprint('Error in list get_not_in_set. No output.')
+                NP.niceprint('Error in list get_not_in_set. No output.',
+                             logalso=logging.ERROR)
 
             NP.niceprint('*****Completed Listing Photos not in a set '
                          'in Flickr******')

@@ -11,6 +11,16 @@ on the WEB and as a backup of your local storage.
 * flickr-uploader designed primarly for Synology Devices.
    * Also works on Linux, Mac and Windows systems.
 
+## Usage stats (as of Sep/2018)
+-------------------------------
+| version | system_name | percent | download_count |
+| ------- | ----------- | ------: | -------------: |
+| 2.8.6   | Linux       |  71.70% |             38 |
+| 2.8.6   | Darwin      |  13.21% |              7 |
+| 2.8.7a1 | Linux       |   7.55% |              4 |
+| 2.8.6   | Windows     |   5.66% |              3 |
+| 2.8.6a9 | Linux       |   1.89% |              1 |
+
 ## Features
 -----------
 * Uploads both images and movies (JPG, PNG, GIF, AVI, MOV, 3GP files)

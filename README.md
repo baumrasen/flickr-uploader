@@ -11,8 +11,8 @@ on the WEB and as a backup of your local storage.
 * flickr-uploader designed primarly for Synology Devices.
    * Also works on Linux, Mac and Windows systems.
 
-## Usage stats (as of Sep/2018)
--------------------------------
+## PyPi Download stats (as of Sep/2018)
+---------------------------------------
 | version | system_name | percent | download_count |
 | ------- | ----------- | ------: | -------------: |
 | 2.8.6   | Linux       |  71.70% |             38 |

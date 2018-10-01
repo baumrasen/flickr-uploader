@@ -18,7 +18,17 @@ import sys
 import os
 import logging
 import time
+import re
+import hashlib
+# -----------------------------------------------------------------------------
+# Helper class and functions for UPLoaDeR Global Constants.
 import lib.Konstants as KonstantsClass
+
+# =============================================================================
+# Functions aliases
+#
+#   UPLDR_K = KonstantsClass.Konstants
+# -----------------------------------------------------------------------------
 UPLDR_K = KonstantsClass.Konstants()
 
 
@@ -56,19 +66,22 @@ class NicePrint:
     #   class variable shared by all instances
     #
     #   verbosity = Verbosity Level defined: 0, 1, 2, ...
+    #   masking   = Masking sensitive data: True/False
 
     verbosity = 0
+    mask_sensitivity = False
 
     # -------------------------------------------------------------------------
     # class NicePrint __init__
     #
-    def __init__(self, averbosity=0):
+    def __init__(self, averbosity=0, amask_sensitivity=False):
         """ class NicePrint __init__
 
             verbosity = Verbosity Level defined: 0, 1, 2, ...
         """
 
         self.set_verbosity(averbosity)
+        self.set_mask_sensitivity(amask_sensitivity)
 
     # -------------------------------------------------------------------------
     # set_verbosity
@@ -95,11 +108,37 @@ class NicePrint:
         return cls.verbosity
 
     # -------------------------------------------------------------------------
+    # set_mask_sensitivity
+    #
+    @classmethod
+    def set_mask_sensitivity(cls, amask_sensitivity=False):
+        """ set_verbosity
+
+            mask_sensitivity = True/False
+        """
+
+        cls.mask_sensitivity = amask_sensitivity\
+            if isinstance(amask_sensitivity, bool) else False
+
+    # -------------------------------------------------------------------------
+    # get_mask_sensitivity
+    #
+    @classmethod
+    def get_mask_sensitivity(cls):
+        """ get_verbosity
+
+            returns Class mask_sensitivity setting
+        """
+
+        return cls.mask_sensitivity
+
+    # -------------------------------------------------------------------------
     # is_str_unicode
     #
     # Returns true if String is Unicode
     #
-    def is_str_unicode(self, astr):
+    @staticmethod
+    def is_str_unicode(astr):
         """ is_str_unicode
         Determines if a string is Unicode (return True) or not (returns False)
         to allow correct print operations.
@@ -133,7 +172,8 @@ class NicePrint:
     #
     # Returns true if String is Unicode
     #
-    def strunicodeout(self, astr):
+    @staticmethod
+    def strunicodeout(astr):
         """ strunicodeout
         Outputs s.encode('utf-8') if is_str_unicode(s) else s
             NicePrint('Checking file:[{!s}]...'.format(strunicodeout(file))
@@ -144,7 +184,7 @@ class NicePrint:
         'Hello'
         """
         astr = '' if astr is None else astr
-        return astr.encode('utf-8') if self.is_str_unicode(astr) else astr
+        return astr.encode('utf-8') if NicePrint.is_str_unicode(astr) else astr
 
     # -------------------------------------------------------------------------
     # niceprint
@@ -152,14 +192,33 @@ class NicePrint:
     # Print a message with the format:
     #   [2017.10.25 22:32:03]:[PRINT   ]:[uploadr] Some Message
     #
-    def niceprint(self, astr, fname='uploadr', verbosity=0):
+    def niceprint(self, astr, fname='uploadr', verbosity=0, logalso=0):
         """ niceprint
         Print a message with the format:
             [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
             Accounts for UTF-8 Messages
+
+        astr      = message to be printed
+        fname     = message category
+        verbosity = print if within configured verbosity: See set_verbosity
+        logalso   = also issues logging. Use logging.DEBUG, logging.ERROR, etc
         """
+        if logalso:
+            # logging prior to masking (if enabled) to avoid double-masking
+            logging.log(logalso, astr)
 
         if verbosity <= self.get_verbosity():
+            if self.get_mask_sensitivity():
+                # logging.debug('>in  astr:[%s]/type:[%s]', astr, type(astr))
+                for pattern in UPLDR_K.MaskPatterns:
+                    astr = re.sub(
+                        pattern,
+                        RedactingFormatter(None,
+                                           UPLDR_K.MaskPatterns)._hashrepl,
+                        astr,
+                        flags=re.IGNORECASE)
+                # logging.debug('<out astr:[%s]/type:[%s]', astr, type(astr))
+
             print('{}[{!s}][{!s}]:[{!s:11s}]{}[{!s:8s}]:[{!s}] {!s}'
                   .format(UPLDR_K.Gre,
                           UPLDR_K.Run,
@@ -237,7 +296,7 @@ class NicePrint:
             +++     Exceptions handling related
             +++ DB  Database Exceptions handling related
             xxx     Error related
-          caughtcode = '010'
+          caughtcode = '000'
           caughtmsg = 'Flickrapi exception on...'/'DB Error on INSERT'
           useniceprint = True/False
           exceptuse = True/False
@@ -274,7 +333,7 @@ class NicePrint:
     #
     # Nicely print number of processed files
     #
-    def niceprocessedfiles(self, count, ctotal, total):
+    def niceprocessedfiles(self, count, ctotal, total, msg='Files Processed'):
         """
         niceprocessedfiles
 
@@ -285,14 +344,59 @@ class NicePrint:
 
         if not total:
             if int(count) % 100 == 0:
-                self.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
-                               .format(count, ctotal))
+                self.niceprint('{!s:>15s}:[{!s:>6s}] of [{!s:>6s}]'
+                               .format(msg, count, ctotal))
         else:
             if int(count) % 100 > 0:
-                self.niceprint('Files Processed:[{!s:>6s}] of [{!s:>6s}]'
-                               .format(count, ctotal))
+                self.niceprint('{!s:>15s}:[{!s:>6s}] of [{!s:>6s}]'
+                               .format(msg, count, ctotal))
 
         sys.stdout.flush()
+
+
+# -----------------------------------------------------------------------------
+# class RedactingFormatter wrapps logging.Formatter to mask logging messages.
+#
+class RedactingFormatter(logging.Formatter):
+    """
+        >>> import logging
+        >>> import lib.NicePrint as npc
+        >>> logging.basicConfig(level=logging.WARNING)
+        >>> np = npc.NicePrint()
+        >>> patts = (r'(?<=path:\[).+?(?=\])',)
+        >>> for h in logging.root.handlers:
+        ...     h.setFormatter(npc.RedactingFormatter(h.formatter, patts))
+        >>> logging.critical('path:[somefile]') # CRITICAL:root:path:[>...<]
+
+    """
+    def __init__(self, orig_formatter, patterns):
+        self.orig_formatter = orig_formatter
+        self._patterns = patterns
+
+    def _hashrepl(self, matchobj):
+        # print('>in  matchobj:[{!s}]/type:[{!s}]'
+        #       .format(matchobj.group(0), type(matchobj.group(0))))
+        if sys.version_info < (3, ):
+            # CODING: staticmethod from NicePrint NOT from instance NicePrint()
+            tohash = NicePrint.strunicodeout(matchobj.group(0))
+        else:
+            tohash = matchobj.group(0).encode('utf- 8')
+
+        _hexmatch = '>' + hashlib.sha1(tohash).hexdigest() + '<'
+
+        # print('>out matchobj:[{!s}]/type:[{!s}]'
+        #       .format(_hexmatch, type(matchobj.group(0))))
+        return _hexmatch
+
+    def format(self, record):
+        msg = self.orig_formatter.format(record)
+        for pattern in self._patterns:
+            msg = re.sub(pattern, self._hashrepl, msg, flags=re.IGNORECASE)
+
+        return msg
+
+    def __getattr__(self, attr):
+        return getattr(self.orig_formatter, attr)
 
 
 # -----------------------------------------------------------------------------

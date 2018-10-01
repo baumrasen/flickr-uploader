@@ -87,6 +87,7 @@ import lib.multiprocessing_logging as multiprocessing_logging
 UPLDR_K = KonstantsClass.Konstants()
 # Sets LOGGING_LEVEL to allow logging even if everything else is wrong!
 # Parent logger is set to Maximum (DEBUG) so that suns will log as appropriate
+# Produces too much ouput info on MyConfig. Setting it to WARNING
 logging.getLogger().setLevel(logging.DEBUG)
 # define a Handler which writes WARNING messages or higher to the sys.stderr
 CONSOLE_LOGGING = logging.StreamHandler()
@@ -177,6 +178,10 @@ def parse_arguments():
     vgrpparser.add_argument('-x', '--verbose-progress', action='store_true',
                             help='Provides progress indicator on each upload. '
                                  'See also LOGGING_LEVEL value in INI file.')
+    vgrpparser.add_argument('-m', '--mask-sensitive', action='store_true',
+                            help='Masks sensitive data on log files like '
+                                 'your pics filenames and set/albums names. '
+                                 '(Uses SHA1 hashing algorithm)')
     vgrpparser.add_argument('-n', '--dry-run', action='store_true',
                             help='Dry run. No changes are actually performed.')
 
@@ -215,6 +220,14 @@ def parse_arguments():
                                  'Use this option for faster INITIAL upload. '
                                  'Do not use it in subsequent uploads to '
                                  'prevent/recover orphan pics without a set.')
+    pgrpparser.add_argument('--no-delete-from-flickr',
+                            metavar='nodelete',
+                            type=str,
+                            nargs='?',
+                            const=str(UPLDR_K.no_delete_tag),
+                            help='Do not actually delete pics from flicr.com &'
+                                 ' mark them with tag:[{!s}]'
+                            .format(UPLDR_K.no_delete_tag))
     # run in daemon mode uploading every X seconds
     pgrpparser.add_argument('-d', '--daemon', action='store_true',
                             help='Run forever as a daemon.'
@@ -288,36 +301,33 @@ def run_uploadr(args):
             Confirms setting MYCFG.FILES_DIR is defined and a valid folder.
             Exits from program otherwise.
         """
-        logging.warning('FILES_DIR: [%s]', NPR.strunicodeout(MY_CFG.FILES_DIR))
         NPR.niceprint('FILES_DIR: [{!s}]'
                       .format(NPR.strunicodeout(MY_CFG.FILES_DIR)),
-                      verbosity=1)
+                      verbosity=1,
+                      logalso=logging.WARNING)
 
         if MY_CFG.FILES_DIR == "":
             NPR.niceerror(
                 caught=True,
                 caughtprefix='xxx',
                 caughtcode='630',
-                caughtmsg='Please configure in INI file [normally uploadr.ini]'
-                ' the name of the folder [FILES_DIR] '
-                'with media available to sync with Flickr.',
+                caughtmsg='Configure in INI file [normally uploadr.ini] '
+                'the folder [FILES_DIR] with media to sync with Flickr.',
                 useniceprint=True)
 
             sys.exit(8)
-        else:
-            if not os.path.isdir(MY_CFG.FILES_DIR):
-                NPR.niceerror(
-                    caught=True,
-                    caughtprefix='xxx',
-                    caughtcode='631',
-                    caughtmsg='FILES_DIR: [{!s}] is not valid.'
-                    'Please configure the name of an existant folder'
-                    ' in INI file [normally uploadr.ini] '
-                    'with media available to sync with Flickr. '
-                    .format(NPR.strunicodeout(MY_CFG.FILES_DIR)),
-                    useniceprint=True)
+        elif not os.path.isdir(MY_CFG.FILES_DIR):
+            NPR.niceerror(
+                caught=True,
+                caughtprefix='xxx',
+                caughtcode='631',
+                caughtmsg='FILES_DIR: [{!s}] is not valid.'
+                'Use an existant folder in INI file [normally uploadr.ini] '
+                'with media to sync with Flickr. '
+                .format(NPR.strunicodeout(MY_CFG.FILES_DIR)),
+                useniceprint=True)
 
-                sys.exit(8)
+            sys.exit(8)
 
     def check_flickr_key_secret():
         """ def check_flickr_key_secret():
@@ -348,8 +358,8 @@ def run_uploadr(args):
             # authenticate sys.exits in case of failure
             myflick.authenticate()
         else:
-            logging.info('Token is available.')
-            NPR.niceprint('Token is available.')
+            NPR.niceprint('Token is available.',
+                          logalso=logging.INFO)
 
     # Initial checks
     check_files_dir()
@@ -362,19 +372,17 @@ def run_uploadr(args):
     # Setup the database. Clean badfiles entries if asked
     myflick.setup_db()
     if args.clean_bad_files:
-        myflick.cleanDBbadfiles()
+        myflick.clean_db_badfiles()
 
     if args.authenticate:
         check_token_authenticate()
     elif args.daemon:
         # Will run in daemon mode every SLEEP_TIME seconds
         if myflick.check_token():
-            logging.warning('Will run in daemon mode every [%s] seconds'
-                            'Make sure you have previously authenticated!',
-                            MY_CFG.SLEEP_TIME)
             NPR.niceprint('Will run in daemon mode every [{!s}] seconds'
                           'Make sure you have previously authenticated!'
-                          .format(MY_CFG.SLEEP_TIME))
+                          .format(MY_CFG.SLEEP_TIME),
+                          logalso=logging.WARNING)
             myflick.run()
         else:
             NPR.niceerror(
@@ -391,12 +399,12 @@ def run_uploadr(args):
 
         if args.add_albums_migrate:
             NPR.niceprint('Preparation migration to 2.7.0',
-                          fname='addAlbumsMigrate')
+                          fname='add_albums_tag')
 
-            if myflick.addAlbumsMigrate():
+            if myflick.add_albums_tag():
                 NPR.niceprint('Successfully added album tags to pics '
                               'on upload.',
-                              fname='addAlbumsMigrate')
+                              fname='add_albums_tag')
             else:
                 NPR.niceerror(
                     caught=True,
@@ -410,15 +418,15 @@ def run_uploadr(args):
         elif args.list_bad_files:
             myflick.list_bad_files()
         else:
-            myflick.removeUselessSetsTable()
-            myflick.getFlickrSets()
+            myflick.remove_useless_sets_table()
+            myflick.get_flickr_sets()
             myflick.upload()
             myflick.remove_deleted_media()
 
             if args.remove_excluded:
                 myflick.remove_excluded_media()
 
-            myflick.createSets()
+            myflick.create_sets()
             myflick.pics_status(KonstantsClass.media_count)
     # Run Uploadr -------------------------------------------------------------
 
@@ -443,14 +451,18 @@ def check_base_ini_file(base_dir, ini_file):
 
     result_check = True
     try:
-        if not ((base_dir == '' or os.path.isdir(base_dir)) and
-                os.path.isfile(ini_file)):
-            raise OSError('[Errno 2] No such file or directory')
+        if not (base_dir == '' or os.path.isdir(base_dir)):
+            raise OSError('[Errno 2] No such directory:[{!s}]'
+                          .format(NPR.strunicodeout(base_dir)))
+        elif not os.path.isfile(ini_file):
+            raise OSError('[Errno 2] No such file:[{!s}]'
+                          .format(NPR.strunicodeout(ini_file)))
+        else:
+            result_check = True
     except OSError as err:
         result_check = False
-        logging.critical(
-            'Config folder [%s] and/or INI file: [%s] not found or '
-            'incorrect format: [%s]!', base_dir, ini_file, str(err))
+        logging.error(
+            'No config folder and/or INI file found: %s', str(err))
 
     logging.debug('check_base_ini_file: result=[%s]', result_check)
     return result_check
@@ -527,7 +539,8 @@ NPR = NicePrint.NicePrint()
 #
 NPR.niceprint('----------- (V{!s}) Start -----------(Log:{!s})'
               .format(UPLDR_K.Version,
-                      MY_CFG.LOGGING_LEVEL))
+                      MY_CFG.LOGGING_LEVEL),
+              logalso=logging.WARNING)
 # Install exception handler
 sys.excepthook = my_excepthook
 
@@ -535,22 +548,28 @@ if __name__ == "__main__":
     # Parse the arguments options
     PARSED_ARGS = parse_arguments()
 
-    # Set verbosity level as per -v count
-    NPR.set_verbosity(PARSED_ARGS.verbose)
+    if PARSED_ARGS.no_delete_from_flickr:
+        logging.warning('Option --no-delete-from-flickr enabled=[%s]',
+                        PARSED_ARGS.no_delete_from_flickr)
 
     # Print/show arguments
-    logging.info('Output for arguments(args):\n%s',
-                 pprint.pformat(PARSED_ARGS))
     NPR.niceprint('Output for arguments(args):\n{!s}'
                   .format(pprint.pformat(PARSED_ARGS)),
-                  verbosity=3)
+                  verbosity=3,
+                  logalso=logging.INFO)
+
+    # Debug: upload_sleep: Seconds to sleep prior to reattempt a failed upload
+    logging.info('Upload sleep setting:[%s] seconds', UPLDR_K.upload_sleep)
+    # Set verbosity level as per -v count
+    NPR.set_verbosity(PARSED_ARGS.verbose)
+    NPR.set_mask_sensitivity(PARSED_ARGS.mask_sensitive)
 
     # INI file config (1/3)
     #   1. Use --config-file argument option [after PARSED_ARGS]
     if PARSED_ARGS.config_file:
         if not check_base_ini_file(UPLDR_K.base_dir, PARSED_ARGS.config_file):
             NPR.niceerror(caught=True,
-                          caughtprefix='+++ ',
+                          caughtprefix='+++',
                           caughtcode='661',
                           caughtmsg='Invalid -C argument INI file [{!s}]. '
                           'Exiting...'.format(UPLDR_K.ini_file),
@@ -560,45 +579,55 @@ if __name__ == "__main__":
             UPLDR_K.ini_file = PARSED_ARGS.config_file
     # INI file config (2/3)
     #   2. If not, os.path.dirname(sys.argv[0])
-    else:
-        if not check_base_ini_file(UPLDR_K.base_dir, UPLDR_K.ini_file):
+    elif not check_base_ini_file(UPLDR_K.base_dir, UPLDR_K.ini_file):
+        NPR.niceerror(caught=True,
+                      caughtprefix='+++',
+                      caughtcode='662',
+                      caughtmsg='Invalid sys.argv INI file [{!s}].'
+                      ' Continuing...'.format(UPLDR_K.ini_file),
+                      useniceprint=True)
+        # INI file config (3/3)
+        #   3. If not, os.path.dirname(sys.argv[0]), '../etc/uploadr.ini'
+        if not check_base_ini_file(UPLDR_K.base_dir, UPLDR_K.etc_ini_file):
             NPR.niceerror(caught=True,
-                          caughtprefix='+++ ',
-                          caughtcode='662',
-                          caughtmsg='Invalid sys.argv INI file [{!s}].'
-                          .format(UPLDR_K.ini_file),
+                          caughtprefix='+++',
+                          caughtcode='663',
+                          caughtmsg='Invalid sys.argv/etc INI file [{!s}].'
+                          ' Exiting...'.format(UPLDR_K.etc_ini_file),
                           useniceprint=True)
-            # INI file config (3/3)
-            #   3. If not, os.path.dirname(sys.argv[0]), '../etc/uploadr.ini'
-            if not check_base_ini_file(UPLDR_K.base_dir, UPLDR_K.etc_ini_file):
-                NPR.niceerror(caught=True,
-                              caughtprefix='+++ ',
-                              caughtcode='663',
-                              caughtmsg='Invalid sys.argv/etc INI file [{!s}].'
-                              ' Exiting...'.format(UPLDR_K.etc_ini_file),
-                              useniceprint=True)
-                sys.exit(2)
-            else:
-                UPLDR_K.ini_file = UPLDR_K.etc_ini_file
+            sys.exit(2)
+        else:
+            UPLDR_K.ini_file = UPLDR_K.etc_ini_file
 
     # Source configuration from ini_file
-    logging.critical('FINAL ini_file:[%s]', UPLDR_K.ini_file)
+    logging.warning('FINAL ini_file:[%s]', UPLDR_K.ini_file)
     MY_CFG.readconfig(UPLDR_K.ini_file, ['Config'])
-    if MY_CFG.processconfig():
-        if MY_CFG.verifyconfig():
-            pass
-        else:
-            raise ValueError('No config file found or incorrect config!')
-    else:
-        raise ValueError('No config file found or incorrect config!')
+    if not (MY_CFG.processconfig() and MY_CFG.verifyconfig()):
+        NPR.niceerror(caught=True,
+                      caughtprefix='+++',
+                      caughtcode='664',
+                      caughtmsg='Incorrect config INI file [{!s}].'
+                      ' Exiting...'.format(UPLDR_K.ini_file),
+                      useniceprint=True)
+        sys.exit(8)
+
+    # Update console logging level as per LOGGING_LEVEL from INI file
+    CONSOLE_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL)
+    logging.warning('\n\tCONSOLE_LOGGING.setLevel=[%s] '
+                    '\n\tROTATING_LOGGING.setLevel/enabled?=[%s/%s] '
+                    '\n\tMY_CFG.LOGGING_LEVEL=[%s]',
+                    MY_CFG.LOGGING_LEVEL,
+                    MY_CFG.ROTATING_LOGGING_LEVEL,
+                    MY_CFG.ROTATING_LOGGING,
+                    MY_CFG.LOGGING_LEVEL)
 
     # Rotating LOGGING level to err_file
     if MY_CFG.ROTATING_LOGGING:
         ROTATING_LOGGING = None
         if not os.path.isdir(os.path.dirname(MY_CFG.ROTATING_LOGGING_PATH)):
             NPR.niceerror(caught=True,
-                          caughtprefix='+++ ',
-                          caughtcode='663',
+                          caughtprefix='+++',
+                          caughtcode='665',
                           caughtmsg='Invalid ROTATING_LOGGING_PATH config.',
                           useniceprint=True)
         else:
@@ -631,21 +660,24 @@ if __name__ == "__main__":
                             MY_CFG.LOGGING_LEVEL,
                             sys.version)
 
-    # Update console logging level as per LOGGING_LEVEL from INI file
-    CONSOLE_LOGGING.setLevel(MY_CFG.LOGGING_LEVEL)
-    logging.warning('CONSOLE_LOGGING.setLevel=[%s] '
-                    'ROTATING_LOGGING.setLevel/enabled?=[%s/%s] '
-                    'MY_CFG.LOGGING_LEVEL=[%s]',
-                    MY_CFG.LOGGING_LEVEL,
-                    MY_CFG.ROTATING_LOGGING_LEVEL,
-                    MY_CFG.ROTATING_LOGGING,
-                    MY_CFG.LOGGING_LEVEL)
+    # Enables mask sensitive data on log files.
+    if PARSED_ARGS.mask_sensitive:
+        NPR.niceprint('Mask-Sensitive Argument enabled!',
+                      logalso=logging.DEBUG)
 
-    logging.info('Output for FLICKR Configuration:\n%s',
-                 pprint.pformat(MY_CFG.FLICKR))
+        # Patterns to filter defined on UPLDR_K.MaskPatterns
+        logging.debug('Setting Masking Logging Formatter')
+        for hnd in logging.root.handlers:
+            hnd.setFormatter(NicePrint.RedactingFormatter(
+                hnd.formatter,
+                UPLDR_K.MaskPatterns))
+        logging.debug('Masking Logging Formatter is now set!')
+        logging.debug('Masking Patterns: %s', UPLDR_K.MaskPatterns)
+
     NPR.niceprint('Output for FLICKR Configuration:\n{!s}'
                   .format(pprint.pformat(MY_CFG.FLICKR)),
-                  verbosity=3)
+                  verbosity=3,
+                  logalso=logging.INFO)
 
     # Ensure that only one instance of this script is running
     try:
@@ -665,9 +697,7 @@ if __name__ == "__main__":
 
 NPR.niceprint('----------- (V{!s}) End -----------(Log:{!s})'
               .format(UPLDR_K.Version,
-                      MY_CFG.LOGGING_LEVEL))
-logging.warning('----------- (V%s) End -----------(Log:%s)',
-                UPLDR_K.Version,
-                MY_CFG.LOGGING_LEVEL)
+                      MY_CFG.LOGGING_LEVEL),
+              logalso=logging.WARNING)
 
 logging_close_handlers()

@@ -4,11 +4,6 @@
 
     FlickrApiWrapper = Helper functions to call flickrapi from
                        FlickrUploadr.Uploadr class
-
-    CODING:
-    Return codes = None => Error
-                   Generate Exceptions? No
-                   True/False/Error status?
 """
 
 # -----------------------------------------------------------------------------
@@ -21,7 +16,9 @@ from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 # Import section
 #
 import sys
+import os.path
 import logging
+import hashlib
 try:
     import httplib as httplib      # Python 2
 except ImportError:
@@ -158,12 +155,11 @@ def flickrapi_fn(fn_name,
     if is_good(fn_result):
         fn_success = True
 
-        logging.info('fn:[%s] Output for fn_result:',
-                     fn_name.__name__)
-        logging.info(xml.etree.ElementTree.tostring(
-            fn_result,
-            encoding='utf-8',
-            method='xml'))
+        logging.info('fn:[%s] Output for fn_result: %s',
+                     fn_name.__name__,
+                     xml.etree.ElementTree.tostring(fn_result,
+                                                    encoding='utf-8',
+                                                    method='xml'))
     else:
         logging.error('fn:[%s] is_good(fn_result):[%s]',
                       fn_name.__name__,
@@ -253,9 +249,13 @@ def nu_authenticate(api_key,
     # Show url. Copy and paste it in your browser
     # Adjust parameter "perms" to to your needs
     authorize_url = flickrobj.auth_url(perms=perms)
-    print('Copy and paste following authorizaiton URL '
+    print('Copy and paste following authorization URL '
           'in your browser to obtain Verifier Code.')
     print(NPR.strunicodeout(authorize_url))
+    # Ensure this output message also gets to stderr/logging location
+    logging.critical('Copy and paste following authorization URL '
+                     'in your browser to obtain Verifier Code.\n %s',
+                     authorize_url)
 
     # Prompt for verifier code from the user.
     # Python 2.7 and 3.6
@@ -366,6 +366,128 @@ def get_cached_token(api_key,
         raise
 
     return flickrobj if fn_result else None
+
+
+# -----------------------------------------------------------------------------
+# FileWithCallback class
+#
+# For use with flickrapi upload for showing callback progress information
+# Check function callback definition
+#
+class FileWithCallback(object):
+    """ FileWithCallback
+
+        For use with flickrapi upload for showing callback progress information
+        Check function callback definition
+    """
+
+    def __init__(self, filename, fn_callback, verbose_progress):
+        """ class FileWithCallback __init__
+        """
+        self.file = open(filename, 'rb')
+        self.callback = fn_callback
+        self.verbose_progress = verbose_progress
+        # the following attributes and methods are required
+        self.len = os.path.getsize(filename)
+        self.fileno = self.file.fileno
+        self.tell = self.file.tell
+
+    # -------------------------------------------------------------------------
+    # class FileWithCallback read
+    #
+    def read(self, size):
+        """ read
+
+            Read file to upload into Flickr with FileWithCallback
+        """
+        if self.callback:
+            self.callback(self.tell() * 100 // self.len, self.verbose_progress)
+        return self.file.read(size)
+
+
+# -----------------------------------------------------------------------------
+# callback
+#
+# For use with flickrapi upload for showing callback progress information
+# Check function FileWithCallback definition
+# Set verbose-progress True to display progress
+#
+def callback(progress, verbose_progress):
+    """ callback
+
+        Print progress % while uploading into Flickr.
+        Valid only if argument verbose_progress is True
+    """
+    # only print rounded percentages: 0, 10, 20, 30, up to 100
+    # adapt as required
+    # if (progress % 10) == 0:
+    # if verbose_progress option is set
+    if verbose_progress:
+        if (progress % 40) == 0:
+            print(progress)
+
+
+# -----------------------------------------------------------------------------
+# md5checksum
+#
+def md5checksum(afilepath):
+    """ md5checksum
+
+        Calculates the MD5 checksum for afilepath
+    """
+    with open(afilepath, 'rb') as filehandler:
+        calc_md5 = hashlib.md5()
+        while True:
+            data = filehandler.read(8192)
+            if not data:
+                break
+            calc_md5.update(data)
+        return calc_md5.hexdigest()
+
+
+# -------------------------------------------------------------------------
+# set_name_from_file
+#
+def set_name_from_file(afile, afiles_dir, afull_set_name):
+    """set_name_from_file
+
+       Return setname for a file path depending on FULL_SET_NAME True/False
+       Example:
+       File to upload: /home/user/media/2014/05/05/photo.jpg
+            FILES_DIR: /home/user/media
+        FULL_SET_NAME:
+               False=> 05
+                True=> 2014/05/05
+
+        >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
+        '/some/photos', False)
+        'Album'
+        >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
+        '/some/photos', True)
+        'Parent/Album'
+    """
+
+    assert afile, NPR.niceassert('[{!s}] is empty!'
+                                 .format(NPR.strunicodeout(afile)))
+
+    logging.debug('set_name_from_file in: '
+                  'afile:[%s] afiles_dir=[%s] afull_set_name:[%s]',
+                  NPR.strunicodeout(afile),
+                  NPR.strunicodeout(afiles_dir),
+                  NPR.strunicodeout(afull_set_name))
+    if afull_set_name:
+        asetname = os.path.relpath(os.path.dirname(afile), afiles_dir)
+    else:
+        _, asetname = os.path.split(os.path.dirname(afile))
+    logging.debug('set_name_from_file out: '
+                  'afile:[%s] afiles_dir=[%s] afull_set_name:[%s]'
+                  ' asetname:[%s]',
+                  NPR.strunicodeout(afile),
+                  NPR.strunicodeout(afiles_dir),
+                  NPR.strunicodeout(afull_set_name),
+                  NPR.strunicodeout(asetname))
+
+    return asetname
 
 
 # -----------------------------------------------------------------------------

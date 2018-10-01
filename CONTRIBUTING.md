@@ -12,12 +12,13 @@
 * If using isThisStringUnicode for (something) if test else (other) make
   sure to break lines with \ correctly. Be careful.
 * Some ocasional critical messages are generated with `sys.stderr.write()`
-* Use niceprint function to output messages to stdout. Control verbosity.
+* Use niceprint function to output messages to stdout. Control verbosity. Use logalso for logging.
   ```python
   niceprint(' Always shows')
   niceprint(' Always shows', verbosity=0)
   niceprint(' Shows on mode verbose', verbosity=1)
   niceprint(' IS_UPLOADED:[ERROR#1]', fname='isuploaded', verbosity=2)
+  niceprint(' IS_UPLOADED:[ERROR#1]', fname='isuploaded', verbosity=2, logalso=logging.ERROR)
   ```
 * Use logging. for CRITICAL, ERROR, WARNING, INFO, DEBUG messages to stderr.
   Three uses and one remark:
@@ -28,10 +29,11 @@
    * Control additional specific output to stderr depending on level
    ```python
    if LOGGING_LEVEL <= logging.INFO:
-       logging.info('Output for {!s}:'.format('uploadResp'))
-       logging.info(xml.etree.ElementTree.tostring(addPhotoResp,
-                                                  encoding='utf-8',
-                                                  method='xml'))
+       logging.info('Output for [%s] is: %s',
+                    'uploadResp',
+                    xml.etree.ElementTree.tostring(uploadPhotoResp,
+                                                   encoding='utf-8',
+                                                   method='xml'))
        # <generate any further output>
    ```
    * Control additional specific output to stdout depending on level
@@ -105,3 +107,8 @@
           FILES_DIR = unicode(  # noqa
                             '', 'utf-8') if sys.version_info < (3, ) else str('')
     ```
+* Pypi test install:
+  `pip2.7 install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple flickr-uploader --prefix=~/apps/Python`
+  Use flickr-uploader==2.8.6a1 to install a specific version (alpha1 in this case)
+* setup.py install: use --old-and-unmanageable option to copy data files.
+  `python2.7 setup.py install --prefix=~/apps/Python --old-and-unmanageable`

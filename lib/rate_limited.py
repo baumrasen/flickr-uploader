@@ -68,12 +68,44 @@ class LastTime:
     def acquire(self):
         """ acquire
         """
-        self.ratelock.acquire()
+
+        # CODING: Commented out to avoid issue #74. Otherwise inits logging!
+        # logging.debug('LastTime: [on acquire...]')
+        acquired = False
+        try:
+            acquired = self.ratelock.acquire()
+        except Exception as ex:
+            NPR.niceerror(caught=True,
+                          caughtprefix='+++LastTime',
+                          caughtcode='001',
+                          caughtmsg='Exception on LastTime class: acquire',
+                          exceptuse=True,
+                          # exceptCode=ex.code,
+                          exceptmsg=ex,
+                          useniceprint=False,
+                          exceptsysinfo=True)
+            raise
+        return acquired
 
     def release(self):
         """ release
         """
-        self.ratelock.release()
+
+        # CODING: Commented out to avoid issue #74. Otherwise inits logging!
+        # logging.debug('LastTime: [on release...]')
+        try:
+            self.ratelock.release()
+        except Exception as ex:
+            NPR.niceerror(caught=True,
+                          caughtprefix='+++LastTime',
+                          caughtcode='002',
+                          caughtmsg='Exception on LastTime class: release',
+                          exceptuse=True,
+                          # exceptCode=ex.code,
+                          exceptmsg=ex,
+                          useniceprint=False,
+                          exceptsysinfo=True)
+            raise
 
     def set_last_time_called(self):
         """ set_last_time_called
@@ -139,11 +171,14 @@ def rate_limited(max_per_second):
     def decorate(func):
         """ decorate
         """
-        last_time.acquire()
+
+        acquired = last_time.acquire()
         if last_time.get_last_time_called() == 0:
             last_time.set_last_time_called()
         # last_time.debug('DECORATE')
-        last_time.release()
+        if acquired:
+            last_time.release()
+            acquired = False
 
         @wraps(func)
         def rate_limited_function(*args, **kwargs):
@@ -158,7 +193,7 @@ def rate_limited(max_per_second):
                          func.__name__, max_per_second)
 
             try:
-                last_time.acquire()
+                acquired = last_time.acquire()
                 last_time.add_cnt()
                 xfrom = time.time()
 
@@ -194,7 +229,7 @@ def rate_limited(max_per_second):
             except Exception as ex:
                 NPR.niceerror(caught=True,
                               caughtprefix='+++Rate',
-                              caughtcode='001',
+                              caughtcode='003',
                               caughtmsg='Exception on rate_limited_function',
                               exceptuse=True,
                               # exceptCode=ex.code,
@@ -203,7 +238,11 @@ def rate_limited(max_per_second):
                               exceptsysinfo=True)
                 raise
             finally:
-                last_time.release()
+                logging.debug('LastTime: [finally acquired:%s]', acquired)
+                if acquired:
+                    last_time.release()
+                    acquired = False
+                    logging.debug('LastTime: [released acquired:%s]', acquired)
             return ret
 
         return rate_limited_function
@@ -313,6 +352,21 @@ def retry(attempts=3, waittime=5, randtime=False):
 #     logging.error('...Continuing')
 # nargslist=dict(Caught=True, CaughtPrefix='+++')
 # retry_reportError(nargslist)
+
+
+# -------------------------------------------------------------------------
+# rate_5_callspersecond
+#
+@rate_limited(5)  # 5 calls per second
+def rate_5_callspersecond():
+    """ rate_5_callspersecond
+
+        Pace the calls rate within a specific function
+
+          n   = n calls per second  (ex. 3 means 3 calls per second)
+          1/n = n seconds per call (ex. 0.5 means 4 seconds in between calls)
+    """
+    logging.debug('rate_limit (5 calls/s) timestamp:[%s]', time.strftime('%T'))
 
 
 # -----------------------------------------------------------------------------

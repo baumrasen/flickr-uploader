@@ -1,6 +1,6 @@
 # flickr-uploader
 -----------------
-by oPromessa, 2017, V2.8.6 [![Master Build Status](https://travis-ci.org/oPromessa/flickr-uploader.svg?branch=master)](https://travis-ci.org/oPromessa/flickr-uploader)
+by oPromessa, 2017, V2.8.6 [![Master Build Status](https://travis-ci.org/oPromessa/flickr-uploader.svg?branch=master)](https://travis-ci.org/oPromessa/flickr-uploader) [![Coverage Status](https://coveralls.io/repos/github/oPromessa/flickr-uploader/badge.svg)](https://coveralls.io/github/oPromessa/flickr-uploader)
 * Published on [https://github.com/oPromessa/flickr-uploader/](https://github.com/oPromessa/flickr-uploader/)
 
 ## Description
@@ -8,8 +8,18 @@ by oPromessa, 2017, V2.8.6 [![Master Build Status](https://travis-ci.org/oPromes
 * Upload a directory of media (pics/videos) to Flickr for showing off your pics
 on the WEB and as a backup of your local storage.
 * Check Features, Requirements and Setup remarks.
-* flickr-uploader designed primarly for Synology Devices. 
+* flickr-uploader designed primarly for Synology Devices.
    * Also works on Linux, Mac and Windows systems.
+
+## PyPi Download stats (as of Sep/2018)
+---------------------------------------
+| version | system_name | percent | download_count |
+| ------- | ----------- | ------: | -------------: |
+| 2.8.6   | Linux       |  71.70% |             38 |
+| 2.8.6   | Darwin      |  13.21% |              7 |
+| 2.8.7a1 | Linux       |   7.55% |              4 |
+| 2.8.6   | Windows     |   5.66% |              3 |
+| 2.8.6a9 | Linux       |   1.89% |              1 |
 
 ## Features
 -----------
@@ -71,7 +81,8 @@ You should get the following depending on how the setting FULL_SET_NAME is set:
 ## Requirements
 ---------------
 * Python 2.7+ (should work on DSM from Synology (v6.1), Windows and MAC)
-* Also compatile with Python 3.6
+* Also compatile with Python 3.6 and 3.7
+* Recommendation on Synology DSM: **do not install/use** the "Python Module" from the DSM Packages.
 * flicrkapi module. May need to install get-pip.py. (Instructions for
   Synology DSM below.)
 * portalocker module for Windows systems. Not mandatory for Synology.
@@ -82,7 +93,7 @@ You should get the following depending on how the setting FULL_SET_NAME is set:
 ## Setup on Synology
 --------------------
 - Might work on other platforms like Windows also.
-- *Side note:* don't be overwhelmed with this setup. They are quite straitghtforward.
+- *Side note:* don't be overwhelmed with this setup. Steps are quite straitghtforward.
 - Summary steps:
 
 1. Enable SSH access to Synology DSM Server. (Optionally) install Python 3.
@@ -282,7 +293,7 @@ Python version on this system: 3.6.3 (default, Oct  3 2017, 21:45:48)
 [2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] Completed database setup
 [2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] Checking if token is available... if not will authenticate
 [2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] Getting new token.
-[2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] Copy and paste following authorizaiton URL in your browser to obtain Verifier Code.
+[2965][2018.04.16 23:55:09]:[12758      ][PRINT   ]:[uploadr] Copy and paste following authorization URL in your browser to obtain Verifier Code.
 https://www.flickr.com/services/oauth/authorize?oauth_token=xxxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx&perms=delete
 Verifier code (NNN-NNN-NNN):
 ```
@@ -308,10 +319,11 @@ $ ./uploadr.py --dry-run
 ```
 Run `./uploadr.py --help` for up to the minute information on arguments:
 ```bash
-[910][2018.06.22 01:58:57]:[5834       ][PRINT   ]:[uploadr] ----------- (V2.8.6) Start -----------(Log:40)
-usage: uploadr.py [-h] [-C filename.ini] [-a] [-v] [-x] [-n] [-i TITLE]
-                  [-e DESCRIPTION] [-t TAGS] [-l N] [-r] [-p P] [-u] [-d] [-b]
-                  [-c] [-s] [-g] [--add-albums-migrate]
+[961][2018.09.16 06:06:42]:[15221      ][PRINT   ]:[uploadr] ----------- (V2.8.7) Start -----------(Log:40)
+usage: uploadr.py [-h] [-C filename.ini] [-a] [-v] [-x] [-m] [-n] [-i TITLE]
+                  [-e DESCRIPTION] [-t TAGS] [-l N] [-r] [-p P] [-u]
+                  [--no-delete-from-flickr [nodelete]] [-d] [-b] [-c] [-s]
+                  [-g] [--add-albums-migrate]
 
 Upload files to Flickr. Uses uploadr.ini as config file.
 
@@ -321,8 +333,7 @@ optional arguments:
 Configuration related options:
   -C filename.ini, --config-file filename.ini
                         Optional configuration file. Default
-                        is:[/home/ruler/Documents/GitHub/flickr-
-                        uploader/uploadr.ini]
+                        is:[/home/ruler/uploader/bin/uploadr.ini]
   -a, --authenticate    Performs/Verifies authentication with Flickr. To be
                         run on initial setup.Does not run any other option.
 
@@ -332,6 +343,9 @@ Verbose and dry-run options:
   -x, --verbose-progress
                         Provides progress indicator on each upload. See also
                         LOGGING_LEVEL value in INI file.
+  -m, --mask-sensitive  Masks sensitive data on log files like your pics
+                        filenames and set/albums names. (Uses SHA1 hashing
+                        algorithm)
   -n, --dry-run         Dry run. No changes are actually performed.
 
 Information options:
@@ -357,6 +371,9 @@ Processing related options:
                         flickr prior to uploading. Use this option for faster
                         INITIAL upload. Do not use it in subsequent uploads to
                         prevent/recover orphan pics without a set.
+  --no-delete-from-flickr [nodelete]
+                        Do not actually deletepics from flicr.com & mark them
+                        with tag:[nodelete]
   -d, --daemon          Run forever as a daemon.Uploading every SLEEP_TIME
                         seconds. Please note it only performs upload/raw
                         convert/replace.
@@ -447,6 +464,12 @@ And enjoy!!!
 
 * Q: Is this script feature complete and fully tested?
    - Nope. It's a work in progress. I've tested it as needed for my needs, but it's possible to build additional features by contributing to the script.
+   - Have a few starsand feedback that it is being used by several people.
+
+* Q: Do I need to install the "Python Module" from DSM Installation Package?
+   - No.
+   - The standard out-of-the-box python 2.7 installed with Synology (on versions up to DSM 6.2 a the time of writing this) is more than enough.
+   - In fact,in one particular report I received, this package was causing several conflicts so, please, don't install it.
 
 * Q: How to automate it with a Synology NAS ?
    - First you will need to run script at least one time in a ssh client to get the token file.
@@ -492,17 +515,21 @@ getting existing sets from Flickr is managed also
          - The remark "some Bad files may no longer exist!" indicates that previously recorded badfiles may already been deleted from the local filesystem. Check possible use of "-c" option.
    - Photos count:
       - Local: Number of local pics found.
-      - Flickr: Number of pics indicated by Flickr (may be off by 1)
+      - Flickr: Number of pics indicated by Flickr (may be off by 1 immediately after upload due to Flickr refres)
+      - Flickr-Local: Difference of Flickr to Local pics (for easier reading/tracking)
       - Not in sets on Flickr: Indicates just that. It may indicate errors if it is bigger than 0, as all uploaded pics by uploadr should be on an Album. What I do normally, is to delete such pics from Flickr directly from the flickr/organize interface. But I've seen other users which have other tools uploading pics to Flickr to ignore this number.
 ```
- Initial Found Files:[   757]
+  Initial Found Files:[   757]
           - Bad Files:[     7] = [   750]
           Note: some Bad files may no longer exist!
 Photos count:
                 Local:[   750]
-               Flickr:[   750]
+               Flickr:[   755]	[     5] Flickr-Local
 Not in sets on Flickr:[     0]
 ```
 
 * Q: What happens if the local control Database (flickrdb) is deleted?
   - By re-running the program **without the -u opiotn** it will go thru your local files and check/search for already loaded pics with same checksum+Set and re-builds the local database.
+  
+* Q: Is all sensitive information (albums and filenames) masked with the **-u** option?
+  - Please note the **-u** masking option does not filter every sensitive information. In particular when DEBUG error level is set.

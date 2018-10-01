@@ -62,6 +62,46 @@ class Konstants:
     Blu = '\033[34m'   # blue
     Pur = '\033[35m'   # purple
 
+    # Patterns to filter/ defined on UPLDR_K.MaskPatterns/mask sensitive data
+    MaskPatterns = (
+        # Flickr token related unformation
+        # fullname="Some Name", ...
+        r'(?<=(token)=)\w+',
+        r'(?<=(fullname)=)\W?\w+\s*\w*'
+        # r'(?<=(fullname)=)\w+',
+        r'(?<=(username)=)\w+',
+        r'(?<=(user_nsid)=)\w+',
+
+        # Non-greedy "[filename]" preceeded by "path:[" & followed by "]"
+        r'(?<=(path):\[).+?(?=\])',
+        r'(?<=(loaded):\[).+?(?=\])',
+
+        # Non-greedy "[filename]" preceeded by "Title:[" & followed by "]"
+        r'(?<=title[:=]\[).+?(?=\])',
+        r'(?<=file:\[).+?(?=\])',
+        r'(?<=filename:\[).+?(?=\])',
+
+        # Non-greedy "[setName]" preceeded by "Set:[" & followed by "]"
+        r'(?<=set:\[).+?(?=\])',
+        r'(?<=setname:\[).+?(?=\])',
+        r'(?<=set to db:\[).+?(?=\])',
+        r'(?<=album:\[).+?(?=\])',
+
+        # Non-greedy "[setName]" word preceeded by "album"
+        r'(?<=album)\w+',
+
+        # Non-greedy "'api_key': " and "'secret': "
+        r'(?<=key ).+?\w+',
+        r'(?<=api_key\'. ).+?\w+',
+        r'(?<=api_key\%).+?\w+',
+        r'(?<=secret\'. ).+?\w+',
+
+        # RAW related masking. Not being considered: tags:[xxx]
+        r'(?<=raw:\[).+?(?=\])',
+        r'(?<=failed:\[).+?(?=\])',
+        r'(?<=JPG:\[).+?(?=\])'
+        )
+
     # -------------------------------------------------------------------------
     # class Konstants __init__
     #
@@ -75,10 +115,15 @@ class Konstants:
         #   base_dir      = Base configuration directory for files
         #   ini_file      = Location of INI file, normally named "uploadr.ini"
         #   etc_ini_file  = Location of INI "uploadr.ini" from ../etc folder
+        #   no_delete_tag = Tag to mark files which were not delete.
+        #                   Check parameter --no-delete-from-flickr
+        #   upload_sleep  = Seconds to sleep prior to reattempt a failed upload
         #
         self.base_dir = str('.')
         self.ini_file = str('uploadr.ini')
         self.etc_ini_file = str('../etc/uploadr.ini')
+        self.no_delete_tag = str('nodelete')
+        self.upload_sleep = 20  # Normally set to 10.
 
 
 # -----------------------------------------------------------------------------

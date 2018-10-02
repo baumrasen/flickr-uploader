@@ -162,7 +162,6 @@ $ cd dev
 dev$ export PYTHONPATH=~/apps/Python/lib/python2.7/site-packages
 dev$ pip install flickrapi --prefix=~/apps/Python
 ```
-
 #### 4.2 OPTION #2: Mannually
 - **Download** flickrapi-2.4.tar.gz from [PyPi.Python.Org](https://pypi.python.org/pypi/flickrapi).
 - **Extract to** ~/dev and run `python setup.py install --prefix=~/apps/Python`
@@ -207,7 +206,10 @@ dev$ export PYTHONPATH=~/apps/Python/lib/python2.7/site-packages
 dev$ pip install flickr-uploader --prefix=~/apps/Python
 ```
    * Installation also copies to '~/apps/Python/etc' folder the data files `uploadr.ini` and `uploadr.cron`
-
+   * **IMPORTANT NOTICE** To upgrade the version, one has to use the pip `--upgrade` option:
+```bash
+dev$ pip install flickr-uploader --prefix=~/apps/Python --upgrade
+```
 #### 5.2 OPTION #2: Mannually to be run from local folder
 - Download mannually from GitHub [flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest).
 - You can find under **Assets**:

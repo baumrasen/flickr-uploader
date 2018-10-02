@@ -66,9 +66,9 @@ class Konstants:
     MaskPatterns = (
         # Flickr token related unformation
         # fullname="Some Name", ...
-        r'(?<=(token)=)\w+',
-        r'(?<=(fullname)=)\W?\w+\s*\w*'
-        # r'(?<=(fullname)=)\w+',
+        r'(?<=(token)=).?\w+',
+        # r'(?<=(fullname)=)\W?\w+\s*\w*'
+        r'(?<=(fullname)=).?\w+',
         r'(?<=(username)=)\w+',
         r'(?<=(user_nsid)=)\w+',
 

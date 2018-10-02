@@ -206,7 +206,8 @@ dev$ export PYTHONPATH=~/apps/Python/lib/python2.7/site-packages
 dev$ pip install flickr-uploader --prefix=~/apps/Python
 ```
    * Installation also copies to '~/apps/Python/etc' folder the data files `uploadr.ini` and `uploadr.cron`
-   * **IMPORTANT NOTICE** To upgrade the version, one has to use the pip `--upgrade` option:
+   * To upgrade the version, one has to use the pip `--upgrade` option:
+   * **IMPORTANT NOTICE** Upgrade option will overwrite `uploadr.ini` and `uploadr.cron` files. **Do backup pevious files.**
 ```bash
 dev$ pip install flickr-uploader --prefix=~/apps/Python --upgrade
 ```

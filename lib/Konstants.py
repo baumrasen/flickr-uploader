@@ -67,10 +67,9 @@ class Konstants:
         # Flickr token related unformation
         # fullname="Some Name", ...
         r'(?<=(token)=).?\w+',
-        # r'(?<=(fullname)=)\W?\w+\s*\w*'
-        r'(?<=(fullname)=).?\w+',
-        r'(?<=(username)=)\w+',
-        r'(?<=(user_nsid)=)\w+',
+        r'(?<=(fullname)=).?\w+(\s*\w*){1,}',
+        r'(?<=(username)=).?\w+',
+        r'(?<=(user_nsid)=).?\w+',
 
         # Non-greedy "[filename]" preceeded by "path:[" & followed by "]"
         r'(?<=(path):\[).+?(?=\])',

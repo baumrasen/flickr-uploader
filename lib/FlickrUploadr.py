@@ -1218,8 +1218,8 @@ class Uploadr(object):
                                      logalso=logging.ERROR)
                         break
 
-            logging.error('After CYCLE Up/Reuploading:[%s/%s attempts].',
-                          attempts, self.xcfg.MAX_UPLOAD_ATTEMPTS)
+            logging.warning('After CYCLE Up/Reuploading:[%s/%s attempts].',
+                            attempts, self.xcfg.MAX_UPLOAD_ATTEMPTS)
 
             # Max attempts reached
             if (not zuploadok) and (

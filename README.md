@@ -83,7 +83,7 @@ You should get the following depending on how the setting FULL_SET_NAME is set:
 * Python 2.7+ (should work on DSM from Synology (v6.1), Windows and MAC)
 * Also compatile with Python 3.6 and 3.7
 * Recommendation on Synology DSM: **do not install/use** the "Python Module" from the DSM Packages.
-* flicrkapi module. May need to install get-pip.py. (Instructions for
+* flickrapi module. May need to install get-pip.py. (Instructions for
   Synology DSM below.)
 * portalocker module for Windows systems. Not mandatory for Synology.
 * File write access (for the token and local database)
@@ -375,7 +375,7 @@ Processing related options:
                         INITIAL upload. Do not use it in subsequent uploads to
                         prevent/recover orphan pics without a set.
   --no-delete-from-flickr [nodelete]
-                        Do not actually deletepics from flicr.com & mark them
+                        Do not actually deletepics from flickr.com & mark them
                         with tag:[nodelete]
   -d, --daemon          Run forever as a daemon.Uploading every SLEEP_TIME
                         seconds. Please note it only performs upload/raw

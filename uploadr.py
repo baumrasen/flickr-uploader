@@ -225,8 +225,8 @@ def parse_arguments():
                             type=str,
                             nargs='?',
                             const=str(UPLDR_K.no_delete_tag),
-                            help='Do not actually delete pics from flicr.com &'
-                                 ' mark them with tag:[{!s}]'
+                            help='Do not actually delete pics from flickr.com '
+                                 '& mark them with tag:[{!s}]'
                             .format(UPLDR_K.no_delete_tag))
     # run in daemon mode uploading every X seconds
     pgrpparser.add_argument('-d', '--daemon', action='store_true',

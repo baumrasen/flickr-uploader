@@ -489,11 +489,12 @@ def logging_close_handlers():
 # Global Variables
 #
 # -----------------------------------------------------------------------------
-# Class UPLDReConstants
+# Class UPLDR_K Constants
 #
-#   base_dir    = Base configuration directory location
-#   ini_file    = Configuration file
-#   media_count = Counter of total files to initially upload
+#   base_dir      = Base configuration directory location
+#   ini_file      = Configuration file
+#   etc_ini_file  = Optional location for Configuration file under etc/
+#   media_count   = Counter of total files to initially upload
 # -----------------------------------------------------------------------------
 # Base_dir set to os.path.abspat(os.path.dirname(sys.argv[0]))
 # INI file config:
@@ -512,15 +513,8 @@ UPLDR_K.media_count = 0
 logging.debug('      base_dir:[%s]', UPLDR_K.base_dir)
 logging.debug('           cwd:[%s]', os.getcwd())
 logging.debug('sys.prefix/etc:[%s]', os.path.join(sys.prefix, 'etc'))
-logging.debug('  abs(argv[0]):[%s]',
-              os.path.abspath(os.path.dirname(sys.argv[0])))
 logging.debug(' abs(__file__):[%s]',
               os.path.abspath(os.path.dirname(__file__)))
-logging.debug('argv[0]/../etc:[%s]',
-              os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]),
-                                           os.path.pardir,
-                                           'etc',
-                                           'uploadr.ini')))
 logging.debug('      ini_file:[%s]', UPLDR_K.ini_file)
 logging.debug('  etc_ini_file:[%s]', UPLDR_K.etc_ini_file)
 # -----------------------------------------------------------------------------
@@ -564,8 +558,13 @@ if __name__ == "__main__":
     NPR.set_verbosity(PARSED_ARGS.verbose)
     NPR.set_mask_sensitivity(PARSED_ARGS.mask_sensitive)
 
-    # INI file config (1/3)
-    #   1. Use --config-file argument option [after PARSED_ARGS]
+    # INI file config:
+    #  1. Use --config-file argument option [after PARSED_ARGS]
+    #  2. If not, os.path.dirname(sys.argv[0]) [from UPLDR_K.ini_file]
+    #  3. If not, os.path.dirname(sys.argv[0]), '..', 'etc', 'uploadr.ini'
+    #                                          [from UPLDR_K.etc_ini_file]
+    #
+    #  INI: 1/3. Use --config-file argument option [after PARSED_ARGS]
     if PARSED_ARGS.config_file:
         if not check_base_ini_file(UPLDR_K.base_dir, PARSED_ARGS.config_file):
             NPR.niceerror(caught=True,
@@ -577,8 +576,7 @@ if __name__ == "__main__":
             sys.exit(2)
         else:
             UPLDR_K.ini_file = PARSED_ARGS.config_file
-    # INI file config (2/3)
-    #   2. If not, os.path.dirname(sys.argv[0])
+    #  INI file config: 2/3. If not, os.path.dirname(sys.argv[0])
     elif not check_base_ini_file(UPLDR_K.base_dir, UPLDR_K.ini_file):
         NPR.niceerror(caught=True,
                       caughtprefix='+++',
@@ -586,8 +584,7 @@ if __name__ == "__main__":
                       caughtmsg='Invalid sys.argv INI file [{!s}].'
                       ' Continuing...'.format(UPLDR_K.ini_file),
                       useniceprint=True)
-        # INI file config (3/3)
-        #   3. If not, os.path.dirname(sys.argv[0]), '../etc/uploadr.ini'
+        #  INI: 3/3. If not, os.path.dirname(sys.argv[0]), '../etc/uploadr.ini'
         if not check_base_ini_file(UPLDR_K.base_dir, UPLDR_K.etc_ini_file):
             NPR.niceerror(caught=True,
                           caughtprefix='+++',

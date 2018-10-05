@@ -11,7 +11,6 @@
 * Temporary coding remarks within code marked with `CODING` keyword comment
 * If using isThisStringUnicode for (something) if test else (other) make
   sure to break lines with \ correctly. Be careful.
-* Some ocasional critical messages are generated with `sys.stderr.write()`
 * Use niceprint function to output messages to stdout. Control verbosity. Use logalso for logging.
   ```python
   niceprint(' Always shows')

@@ -11,15 +11,16 @@ on the WEB and as a backup of your local storage.
 * flickr-uploader designed primarly for Synology Devices.
    * Also works on Linux, Mac and Windows systems.
 
-## PyPi Download stats (as of Sep/2018)
+## PyPi Download stats (as of Oct/2018)
 ---------------------------------------
 | version | system_name | percent | download_count |
 | ------- | ----------- | ------: | -------------: |
-| 2.8.6   | Linux       |  71.70% |             38 |
-| 2.8.6   | Darwin      |  13.21% |              7 |
-| 2.8.7a1 | Linux       |   7.55% |              4 |
-| 2.8.6   | Windows     |   5.66% |              3 |
-| 2.8.6a9 | Linux       |   1.89% |              1 |
+| 2.8.6   | Linux       |  61.29% |             38 |
+| 2.8.7   | Linux       |  14.52% |              9 |
+| 2.8.6   | Darwin      |  11.29% |              7 |
+| 2.8.7a1 | Linux       |   6.45% |              4 |
+| 2.8.6   | Windows     |   4.84% |              3 |
+| 2.8.6a9 | Linux       |   1.61% |              1 |
 
 ## Features
 -----------
@@ -491,13 +492,15 @@ And enjoy!!!
    - If using relative FILES_DIR and two files exist on the same subfolder, it will not be re-uploaded.
    - So, in a nutshell, too many issues if you play around changing the FILES_DIR location.
 
+* Q: If one changes the FILES_DIR folder and do not DELETE the files from flickr.com?
+   - Uploadr WILL not delete the files from flickr.com.
 
 * Q: "my understanding is that this is a sync script, which means when I later delete a pic from a synced folder, it will get deleted from Flickr"
    - Yes a file removed locally will be deleted from Flickr.
    - *Remark*: I'm assuming in between each run you keep the contents of the flickrdb control database and do not remove it.
 
 * Q: "What about previously existing folders (they didn't seem to get deleted)"
-   - If all files from a folder (and corresponding Album on flickr) are deleted, then the actual Album will be also eliminated. Again, if you do not chnage the FILES_DIR in between runs.
+   - If all files from a folder (and corresponding Album on flickr) are deleted, then the actual Album will be also eliminated. Again, if you do not change the FILES_DIR in between runs.
 
 * Q: What about when I sync a folder with the same name of a previously existing folder? (you mention
 getting existing sets from Flickr is managed also
@@ -533,6 +536,12 @@ Not in sets on Flickr:[     0]
 
 * Q: What happens if the local control Database (flickrdb) is deleted?
   - By re-running the program **without the -u opiotn** it will go thru your local files and check/search for already loaded pics with same checksum+Set and re-builds the local database.
-  
+
 * Q: Is all sensitive information (albums and filenames) masked with the **-u** option?
   - Please note the **-u** masking option does not filter every sensitive information. In particular when DEBUG error level is set.
+
+* Q: What happens to previously loaded files if one reduces FILE_MAX_SIZE in settings?
+  - The files previously loaded over such reduced new size are not removed.
+
+* Q: What happens to previously loaded files if one changes the IGNORED_REGEX setting to filter out files?
+  - The files previously loaded over such reduced new size are not removed. Check possible future enhancement #83.

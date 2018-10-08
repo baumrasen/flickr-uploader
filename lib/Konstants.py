@@ -29,7 +29,7 @@ class Konstants:
         >>> Konstants.media_count = 999
         >>> print(Konstants.media_count)
         999
-        >>> print(0 < Konstants.Run < 10000 )
+        >>> print(0 < Konstants.Run < 3415)
         True
     """
 
@@ -44,7 +44,11 @@ class Konstants:
     #
     media_count = None
     TimeFormat = '%Y.%m.%d %H:%M:%S'
-    Run = eval(time.strftime('int("%j")+int("%H")*100+int("%M")*10+int("%S")'))
+    Run = int(time.strftime('%j')) +\
+          int(time.strftime('%H'))*100 +\
+          int(time.strftime('%M'))*10 +\
+          int(time.strftime('%S'))
+
     try:
         if __version__.__version__ is not None:
             Version = __version__.__version__

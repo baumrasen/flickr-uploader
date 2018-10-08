@@ -92,14 +92,16 @@ class TestMethods(unittest.TestCase):
 class TestKonstantsMethods(unittest.TestCase):
     """ TestKonstantsMethods
     """
+    def __init__(self):
+        self.upldr_k = KonstantsClass.Konstants()
+
     def test_media_count(self):
         """ test_media_count
         """
-        upldr_k = KonstantsClass.Konstants()
 
         for j in range(1, 20):
-            upldr_k.media_count = j
-            self.assertEqual(upldr_k.media_count, j)
+            self.upldr_k.media_count = j
+            self.assertEqual(self.upldr_k.media_count, j)
 
     def test_run(self):
         """ test_run
@@ -107,7 +109,6 @@ class TestKonstantsMethods(unittest.TestCase):
             Unit tests for KonstantsClass.Run formula
 
         """
-        # XXX CODING: DO I need... upldr_k = KonstantsClass.Konstants()
         print(int(time.strftime('%j')) +
               int(time.strftime('%H'))*100 +
               int(time.strftime('%M'))*10 +
@@ -125,15 +126,13 @@ class TestKonstantsMethods(unittest.TestCase):
     def test_initvalues(self):
         """ test_media_count
         """
-        upldr_k = KonstantsClass.Konstants()
+        self.assertIsInstance(self.upldr_k.base_dir, str)
+        self.assertIsInstance(self.upldr_k.ini_file, str)
+        self.assertIsInstance(self.upldr_k.etc_ini_file, str)
+        self.assertIsInstance(self.upldr_k.no_delete_tag, str)
 
-        self.assertIsInstance(upldr_k.base_dir, str)
-        self.assertIsInstance(upldr_k.ini_file, str)
-        self.assertIsInstance(upldr_k.etc_ini_file, str)
-        self.assertIsInstance(upldr_k.no_delete_tag, str)
-
-        self.assertIsInstance(upldr_k.upload_sleep, int)
-        self.assertTrue(0 <= upldr_k.upload_sleep)
+        self.assertIsInstance(self.upldr_k.upload_sleep, int)
+        self.assertTrue(0 <= self.upldr_k.upload_sleep)
 
 
 if __name__ == '__main__':

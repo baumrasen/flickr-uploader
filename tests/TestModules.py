@@ -92,8 +92,7 @@ class TestMethods(unittest.TestCase):
 class TestKonstantsMethods(unittest.TestCase):
     """ TestKonstantsMethods
     """
-    def __init__(self):
-        self.upldr_k = KonstantsClass.Konstants()
+    upldr_k = KonstantsClass.Konstants()
 
     def test_media_count(self):
         """ test_media_count

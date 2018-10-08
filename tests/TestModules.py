@@ -131,7 +131,7 @@ class TestKonstantsMethods(unittest.TestCase):
         self.assertIsInstance(self.upldr_k.no_delete_tag, str)
 
         self.assertIsInstance(self.upldr_k.upload_sleep, int)
-        self.assertTrue(0 <= self.upldr_k.upload_sleep)
+        self.assertTrue(0 <= self.upldr_k.upload_sleep <= 600)
 
 
 if __name__ == '__main__':

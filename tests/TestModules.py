@@ -108,9 +108,9 @@ class TestKonstantsMethods(unittest.TestCase):
 
         """
         # XXX CODING: DO I need... upldr_k = KonstantsClass.Konstants()
-        print(int(time.strftime('%j')) +\
-              int(time.strftime('%H'))*100 +\
-              int(time.strftime('%M'))*10 +\
+        print(int(time.strftime('%j')) +
+              int(time.strftime('%H'))*100 +
+              int(time.strftime('%M'))*10 +
               int(time.strftime('%S')))
 
         self.assertTrue(1 <= upldr_k.Run <= 3415)

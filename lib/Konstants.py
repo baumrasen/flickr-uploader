@@ -45,9 +45,9 @@ class Konstants:
     media_count = None
     TimeFormat = '%Y.%m.%d %H:%M:%S'
     Run = int(time.strftime('%j')) +\
-          int(time.strftime('%H'))*100 +\
-          int(time.strftime('%M'))*10 +\
-          int(time.strftime('%S'))
+        int(time.strftime('%H'))*100 +\
+        int(time.strftime('%M'))*10 +\
+        int(time.strftime('%S'))
 
     try:
         if __version__.__version__ is not None:

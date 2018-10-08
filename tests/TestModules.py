@@ -114,7 +114,7 @@ class TestKonstantsMethods(unittest.TestCase):
               int(time.strftime('%M'))*10 +
               int(time.strftime('%S')))
 
-        self.assertTrue(1 <= upldr_k.Run <= 3415)
+        self.assertTrue(1 <= self.upldr_k.Run <= 3415)
 
         for j in range(1, 366 + 1):
             for h_hour in range(24):

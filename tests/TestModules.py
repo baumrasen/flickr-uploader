@@ -39,7 +39,10 @@ class TestNicePrintMethods(unittest.TestCase):
         print(astr.getvalue())
         print('type:{}'.format(type(astr)))
         npre = r'\[[0-9. :]+\].+hello$'
-        self.assertRegex(astr.getvalue(), npre)
+        if sys.version_info < (2, 7):
+            self.assertRegexpMatches(astr.getvalue(), npre)
+        else:
+            self.assertRegex(astr.getvalue(), npre)
 
     def test_unicode(self):
         """ test_unicode

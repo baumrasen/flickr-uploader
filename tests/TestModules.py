@@ -28,6 +28,9 @@ class TestNicePrintMethods(unittest.TestCase):
         Print a message with the format:
             [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
         """
+        # CODING pylint
+        # pylint: disable=deprecated-method
+
         # with captured_stdout() as astr:
         #     print "hello"
         # assert astr.getvalue() == "hello\n", 'not ok'
@@ -40,7 +43,7 @@ class TestNicePrintMethods(unittest.TestCase):
         print('type:{}'.format(type(astr)))
         npre = r'\[[0-9. :]+\].+hello$'
         if sys.version_info < (2, 7):
-            self.assertRegexpMatches(astr.getvalue(), npre)
+            self.assertRegexpMatches(astr.getvalue(), npre)  # noqa
         else:
             self.assertRegex(astr.getvalue(), npre)
 

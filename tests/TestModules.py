@@ -39,7 +39,7 @@ class TestNicePrintMethods(unittest.TestCase):
         print(astr.getvalue())
         print('type:{}'.format(type(astr)))
         npre = r'\[[0-9. :]+\].+hello$'
-        self.assertRegexpMatches(astr.getvalue(), npre)
+        self.assertRegex(astr.getvalue(), npre)
 
     def test_unicode(self):
         """ test_unicode

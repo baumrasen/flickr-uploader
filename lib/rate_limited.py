@@ -291,7 +291,6 @@ def retry(attempts=3, waittime=5, randtime=False):
                 new_wrapper function for @retry
             """
             rtime = time
-            error = None
 
             if logging.getLogger().getEffectiveLevel() <= logging.INFO:
                 if args is not None:
@@ -311,17 +310,14 @@ def retry(attempts=3, waittime=5, randtime=False):
                 except flickrapi.exceptions.FlickrError as exc:
                     logging.error('___Retry f():[%s]: Error code A: [%s]',
                                   a_fn.__name__, exc)
-                    error = exc
                 except lite.Error as err:
                     logging.error('___Retry f():[%s]: Error code B: [%s]',
                                   a_fn.__name__, err)
-                    error = err
                     # CODING: Release existing locks on error?
                     # Check how to handle this particular scenario.
                 except Exception as err:
                     logging.error('___Retry f():[%s]: Error code C: Catchall',
                                   a_fn.__name__)
-                    error = err
 
                 logging.warning('___Function:[%s] Waiting:[%s] Rnd:[%s]',
                                 a_fn.__name__, waittime, randtime)

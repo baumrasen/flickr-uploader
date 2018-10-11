@@ -134,7 +134,7 @@ class Konstants:
     def __repr__(self):
         """ class Konstants __init__
         """
-        
+
         __rep2return__ = ''
         # for item in sorted(self.__dict__):
         #     __rep2return__ += '[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]\n'\

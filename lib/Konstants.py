@@ -128,6 +128,30 @@ class Konstants:
         self.no_delete_tag = str('nodelete')
         self.upload_sleep = 20  # Normally set to 10.
 
+    # -------------------------------------------------------------------------
+    # class Konstants __rept__
+    #
+    def __repr__(self):
+        """ class Konstants __init__
+        """
+        
+        __rep2return__ = ''
+        # for item in sorted(self.__dict__):
+        #     __rep2return__ += '[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]\n'\
+        #                       .format(item,
+        #                               type(self.__dict__[item]),
+        #                               self.__dict__[item])
+
+        for item in sorted([attr for attr in self.__class__.__dict__
+                            if not callable(getattr(self, attr)) and
+                            not attr.startswith("__")]):
+            __rep2return__ += '[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]\n'\
+                              .format(item,
+                                      type(self.__class__.__dict__[item]),
+                                      self.__class__.__dict__[item])
+
+        return __rep2return__
+
 
 # -----------------------------------------------------------------------------
 # If called directly run doctests

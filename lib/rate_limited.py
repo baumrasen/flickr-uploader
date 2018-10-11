@@ -335,7 +335,7 @@ def retry(attempts=3, waittime=5, randtime=False):
             logging.error('___Retry f():[%s] '
                           'Max:[%s] Delay:[%s] Rnd[%s]: Raising ERROR!',
                           a_fn.__name__, attempts, waittime, randtime)
-            raise error
+            raise
         return new_wrapper
     return wrapper_fn
 # -----------------------------------------------------------------------------

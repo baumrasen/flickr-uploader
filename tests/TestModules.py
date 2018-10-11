@@ -42,7 +42,7 @@ class TestNicePrintMethods(unittest.TestCase):
         print(astr.getvalue())
         print('type:{}'.format(type(astr)))
         npre = r'\[[0-9. :]+\].+hello$'
-        if sys.version_info < (2, 7):
+        if sys.version_info < (3, ):
             self.assertRegexpMatches(astr.getvalue(), npre)  # noqa
         else:
             self.assertRegex(astr.getvalue(), npre)

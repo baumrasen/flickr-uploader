@@ -307,31 +307,35 @@ def retry(attempts=3, waittime=5, randtime=False):
                                  'Attempt:[%s] of [%s]',
                                  a_fn.__name__, i + 1, attempts)
                     return a_fn(*args, **kwargs)
-                except flickrapi.exceptions.FlickrError as exc:
-                    logging.error('___Retry f():[%s]: Error code A: [%s]',
-                                  a_fn.__name__, exc)
-                except lite.Error as err:
-                    logging.error('___Retry f():[%s]: Error code B: [%s]',
-                                  a_fn.__name__, err)
-                    # CODING: Release existing locks on error?
+                except (flickrapi.exceptions.FlickrError,
+                        lite.Error,
+                        Exception) as err:
+                    # CODING: On lite.erro release existing locks on error?
                     # Check how to handle this particular scenario.
-                except Exception as err:
-                    logging.error('___Retry f():[%s]: Error code C: Catchall',
-                                  a_fn.__name__)
+                    logging.error('___Retry f():[%s]: [%s/%s] '
+                                  'Error code: [%s]',
+                                  a_fn.__name__, i + 1, attempts,
+                                  err)
 
-                logging.warning('___Function:[%s] Waiting:[%s] Rnd:[%s]',
-                                a_fn.__name__, waittime, randtime)
-                if randtime:
-                    rtime.sleep(random.randrange(0,
-                                                 (waittime + 1)
-                                                 if waittime >= 0
-                                                 else 1))
-                else:
-                    rtime.sleep(waittime if waittime >= 0 else 0)
-            logging.error('___Retry f():[%s] '
-                          'Max:[%s] Delay:[%s] Rnd[%s]: Raising ERROR!',
-                          a_fn.__name__, attempts, waittime, randtime)
-            raise
+                    if i == attempts - 1:
+                        logging.error('___Retry f():[%s] '
+                                      'Max:[%s] Delay:[%s] Rnd[%s]: '
+                                      'Raising ERROR!',
+                                      a_fn.__name__,
+                                      attempts, waittime, randtime)
+                        raise
+
+                    logging.warning('___Function:[%s] [%s/%s] '
+                                    'Waiting:[%s] Rnd:[%s]',
+                                    a_fn.__name__, i + 1, attempts,
+                                    waittime, randtime)
+                    if randtime:
+                        rtime.sleep(random.randrange(0,
+                                                     (waittime + 1)
+                                                     if waittime >= 0
+                                                     else 1))
+                    else:
+                        rtime.sleep(waittime if waittime >= 0 else 0)
         return new_wrapper
     return wrapper_fn
 # -----------------------------------------------------------------------------

@@ -53,9 +53,9 @@ class Konstants:
         if __version__.__version__ is not None:
             Version = __version__.__version__
         else:
-            Version = '2.7.0'
-    except Exception:
-        Version = '2.7.0'
+            Version = '2.0.0-alpha.1'
+    except (AttributeError, LookupError, NameError, TypeError, ValueError):
+        Version = '2.0.0-alpha.1'
 
     # -------------------------------------------------------------------------
     # Color Codes for colorful output

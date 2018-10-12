@@ -303,8 +303,7 @@ def retry(attempts=3, waittime=5, randtime=False):
                                       a_fn.__name__, i, arg)
             for i in range(attempts if attempts > 0 else 1):
                 try:
-                    logging.info('___Retry f():[%s]: '
-                                 'Attempt:[%s] of [%s]',
+                    logging.info('___Retry f():[%s]: [%s/%s] Attempt',
                                  a_fn.__name__, i + 1, attempts)
                     return a_fn(*args, **kwargs)
                 except (flickrapi.exceptions.FlickrError,
@@ -325,7 +324,7 @@ def retry(attempts=3, waittime=5, randtime=False):
                                       attempts, waittime, randtime)
                         raise
 
-                    logging.warning('___Function:[%s] [%s/%s] '
+                    logging.warning('___Retry f():[%s] [%s/%s] '
                                     'Waiting:[%s] Rnd:[%s]',
                                     a_fn.__name__, i + 1, attempts,
                                     waittime, randtime)

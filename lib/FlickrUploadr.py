@@ -427,7 +427,7 @@ class Uploadr(object):
                         os.path.join(NP.strunicodeout(dirpath),
                                      NP.strunicodeout(fnameonly) + '.JPG'))
                     logging.debug('Converted .JPG file size=[%s]', filesize)
-                except Exception:
+                except OSError:
                     okfilesize = False
                     NP.niceerror(caught=True,
                                  caughtprefix='+++',
@@ -514,8 +514,11 @@ class Uploadr(object):
 
             logging.info(command)
             try:
-                p_cmd = subprocess.call(command, shell=True)
-            except Exception:
+                p_cmd = subprocess.check_call(command)
+            # CODING: SubprocessError ony available from Python 3.3 onwards
+            # except subprocess.SubprocessError
+            except (NameError, ValueError, TypeError, OSError,
+                    subprocess.CalledProcessError):
                 NP.niceerror(caught=True,
                              caughtprefix='+++',
                              caughtcode='030',

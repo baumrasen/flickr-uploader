@@ -303,7 +303,7 @@ def retry(attempts=3, waittime=5, randtime=False):
                                       a_fn.__name__, i, arg)
             for i in range(attempts if attempts > 0 else 1):
                 try:
-                    logging.info('___Retry f():[%s]: [%s/%s] Attempt',
+                    logging.info('___Retry f():[%s] [%s/%s] Attempt',
                                  a_fn.__name__, i + 1, attempts)
                     return a_fn(*args, **kwargs)
                 except (flickrapi.exceptions.FlickrError,
@@ -311,7 +311,7 @@ def retry(attempts=3, waittime=5, randtime=False):
                         Exception) as err:
                     # CODING: On lite.erro release existing locks on error?
                     # Check how to handle this particular scenario.
-                    logging.error('___Retry f():[%s]: [%s/%s] '
+                    logging.error('___Retry f():[%s] [%s/%s] '
                                   'Error code: [%s]',
                                   a_fn.__name__, i + 1, attempts,
                                   err)

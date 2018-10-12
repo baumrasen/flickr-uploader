@@ -515,8 +515,7 @@ class Uploadr(object):
             logging.info(command)
             try:
                 p_cmd = subprocess.check_call(command)
-            # CODING: SubprocessError ony available from Python 3.3 onwards
-            # except subprocess.SubprocessError
+            # CODING: Exception subprocess.SubprocessError from Python 3.3
             except (NameError, ValueError, TypeError, OSError,
                     subprocess.CalledProcessError):
                 NP.niceerror(caught=True,
@@ -1508,7 +1507,6 @@ class Uploadr(object):
                          logalso=logging.WARNING)
 
             # Update the db the file uploaded
-            # Control for when running multiprocessing set locking
             litedb.execute(con,
                            'UPDATE#055',
                            lock, self.args.processes,
@@ -1565,15 +1563,6 @@ class Uploadr(object):
                                  fname='replace',
                                  logalso=logging.ERROR)
 
-        except lite.Error as err:
-            NP.niceerror(caught=True,
-                         caughtprefix='+++ DB',
-                         caughtcode='081',
-                         caughtmsg='DB error: [{!s}]'.format(err.args[0]),
-                         useniceprint=True)
-            # Release the lock on error.
-            mp.use_lock(lock, False, self.args.processes)
-            success = False
         except Exception:
             NP.niceerror(caught=True,
                          caughtprefix='+++',

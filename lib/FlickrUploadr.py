@@ -27,6 +27,7 @@ import os.path
 import time
 import sqlite3 as lite
 import subprocess
+import shlex
 import xml
 # Prevents error "AttributeError: 'module' object has no attribute 'etree'"
 try:
@@ -515,7 +516,7 @@ class Uploadr(object):
             logging.info(command)
             p_cmd = None
             try:
-                p_cmd = subprocess.check_call(command, shell=True)
+                p_cmd = subprocess.check_call(shlex.split(command))
             # CODING: Exception subprocess.SubprocessError from Python 3.3
             except (NameError, ValueError, TypeError, OSError,
                     subprocess.CalledProcessError):

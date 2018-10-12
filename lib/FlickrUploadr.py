@@ -513,8 +513,9 @@ class Uploadr(object):
                 return False
 
             logging.info(command)
+            p_cmd = None
             try:
-                p_cmd = subprocess.check_call(command)
+                p_cmd = subprocess.check_call(command, shell=True)
             # CODING: Exception subprocess.SubprocessError from Python 3.3
             except (NameError, ValueError, TypeError, OSError,
                     subprocess.CalledProcessError):
@@ -527,8 +528,7 @@ class Uploadr(object):
                              exceptsysinfo=True)
                 result_cmd = False
             finally:
-                if p_cmd is None:
-                    del p_cmd
+                del p_cmd
 
             return result_cmd
         # ---------------------------------------------------------------------

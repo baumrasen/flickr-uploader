@@ -134,7 +134,7 @@ class Konstants:
     def __repr__(self):
         """ class Konstants __repr__
         """
-        
+
         __rep2return__ = ''
         for item in sorted([attr for attr in self.__class__.__dict__
                             if not callable(getattr(self, attr)) and

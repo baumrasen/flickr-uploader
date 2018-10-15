@@ -132,16 +132,10 @@ class Konstants:
     # class Konstants __rept__
     #
     def __repr__(self):
-        """ class Konstants __init__
+        """ class Konstants __repr__
         """
-
+        
         __rep2return__ = ''
-        # for item in sorted(self.__dict__):
-        #     __rep2return__ += '[{!s:20s}]/type:[{!s:13s}] = [{!s:10s}]\n'\
-        #                       .format(item,
-        #                               type(self.__dict__[item]),
-        #                               self.__dict__[item])
-
         for item in sorted([attr for attr in self.__class__.__dict__
                             if not callable(getattr(self, attr)) and
                             not attr.startswith("__")]):

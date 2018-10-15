@@ -12,7 +12,7 @@ about: Let us know if something is broken on flickr-uploader or if you have a qu
 ## To Reproduce
 <!-- Steps to reproduce the bug. Attach logs! -->
 
-## My Platform**
+## My Platform
 <!--
     Any details about your specific platform:
     * What version of the flickr-uploader tool?

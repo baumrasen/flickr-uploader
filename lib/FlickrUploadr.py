@@ -453,7 +453,7 @@ class Uploadr(object):
                                      NP.strunicodeout(afile))))
             else:
                 NP.niceprint('Convert raw file failed. '
-                             'Skipping file: [{!s}]'
+                             'Skipping file:[{!s}]'
                              .format(os.path.normpath(
                                  NP.strunicodeout(dirpath) +
                                  NP.strunicodeout('/') +
@@ -1140,7 +1140,7 @@ class Uploadr(object):
                         zuploaderror = True
                         NP.niceprint('More than one file with same '
                                      'checksum/album tag! '
-                                     'Any collisions? File: [{!s}]'
+                                     'Any collisions? File:[{!s}]'
                                      .format(NP.strunicodeout(file)),
                                      logalso=logging.ERROR)
                         break
@@ -1216,7 +1216,7 @@ class Uploadr(object):
                         zuploaderror = True
                         NP.niceprint('More than one file with same '
                                      'checksum/album tag! '
-                                     'Any collisions? File: [{!s}]'
+                                     'Any collisions? File:[{!s}]'
                                      .format(NP.strunicodeout(file)),
                                      logalso=logging.ERROR)
                         break
@@ -1228,7 +1228,7 @@ class Uploadr(object):
             if (not zuploadok) and (
                     attempts == (self.xcfg.MAX_UPLOAD_ATTEMPTS - 1)):
                 NP.niceprint('Reached max attempts to upload. Skipping '
-                             'file: [{!s}]'.format(NP.strunicodeout(file)),
+                             'file:[{!s}]'.format(NP.strunicodeout(file)),
                              logalso=logging.ERROR)
             # Error
             elif (not zuploadok) and zuploaderror:

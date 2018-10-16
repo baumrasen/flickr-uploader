@@ -597,6 +597,9 @@ if __name__ == "__main__":
             UPLDR_K.ini_file = UPLDR_K.etc_ini_file
 
     # Source configuration from ini_file
+    NPR.niceprint('FINAL ini_file:[{!s}'.format(UPLDR_K.ini_file),
+                  verbosity = 1,
+                  logalso=logging.WARNING)
     logging.warning('FINAL ini_file:[%s]', UPLDR_K.ini_file)
     MY_CFG.readconfig(UPLDR_K.ini_file, ['Config'])
     if not (MY_CFG.processconfig() and MY_CFG.verifyconfig()):

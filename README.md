@@ -15,12 +15,12 @@ on the WEB and as a backup of your local storage.
 ---------------------------------------
 | version | system_name | percent | download_count |
 | ------- | ----------- | ------: | -------------: |
-| 2.8.6   | Linux       |  61.29% |             38 |
-| 2.8.7   | Linux       |  14.52% |              9 |
-| 2.8.6   | Darwin      |  11.29% |              7 |
-| 2.8.7a1 | Linux       |   6.45% |              4 |
-| 2.8.6   | Windows     |   4.84% |              3 |
-| 2.8.6a9 | Linux       |   1.61% |              1 |
+| 2.8.6   | Linux       |  58.46% |             38 |
+| 2.8.7   | Linux       |  18.46% |             12 |
+| 2.8.6   | Darwin      |  10.77% |              7 |
+| 2.8.7a1 | Linux       |   6.15% |              4 |
+| 2.8.6   | Windows     |   4.62% |              3 |
+| 2.8.6a9 | Linux       |   1.54% |              1 |
 
 ## Features
 -----------

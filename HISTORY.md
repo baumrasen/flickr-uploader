@@ -2,7 +2,7 @@ Release History
 ===============
 
 # "2.8.7"
-    published_at: "2018-10-01T12:40:26Z"
+    published_at: 2018-10-01
 * V2.8.7 Features: Masking sensitive data in logs. No delete option. Fixes & Refactoring. Code coverage and Python 3.7 testing.
         
 ## Fixes/Features
@@ -70,7 +70,7 @@ ROTATING_LOGGING_LEVEL = 30
   - niceprocessedfiles new argument for adaptable output message 
 - On upload failure: sleep for(configured on Konstants.py)  20s (instead of 10) to avoid duplicated uploaded files."
 # "2.8.7.a36"
-    published_at: "2018-09-23T20:52:57Z"
+    published_at: 2018-09-23
 * "V2.8.7-alpha36 Features: Masking sensitive data in logs. No delete option. Fixes & Refactoring. Code coverage and Python 3.7 testing."
         
 ## Fixes/Features
@@ -134,7 +134,7 @@ ROTATING_LOGGING_LEVEL = 30
   - setup.py (**optional use**)
   - or mannual"
 #  "2.8.6"
-    published_at: "2018-06-23T16:37:36Z"
+    published_at: 2018-06-23
 * "V2.8.6 Features: install via PyPi. New settings on uploadr.ini. Under the hood improvements/refactoring."
         
 ## Fixes/Features
@@ -190,7 +190,7 @@ ROTATING_LOGGING_LEVEL = 30
   - setup.py (**optional use**)
   - or mannual"
 #  "2.8.5"
-    published_at: "2018-05-27T19:24:57Z"
+    published_at: 2018-05-27
 * "V2.8.5 Features: authentication, rotating, FlickrAPI wrapper module, setup. Under the hood improvements/refactoring."
         
 ## Fixes/Features
@@ -242,7 +242,7 @@ ROTATING_LOGGING_LEVEL = 30
 - setup.py (**optional use**)
 - setup.py installcfg (**optional use**)"
 #  "2.8.1"
-    published_at: "2018-05-06T16:18:20Z"
+    published_at: 2018-05-06
 * "V2.8.1 Under the hood improvements/refactoring. Standardize multiprocessing processes."
         
 ## Fixes/Features
@@ -270,7 +270,7 @@ ROTATING_LOGGING_LEVEL = 30
 - Runs several unittests
 - setup.py (**optional use**)"
 #  "2.8.0"
-    published_at: "2018-04-27T17:11:03Z"
+    published_at: 2018-04-27
 * "V2.8.0 Improved performance on Add Pics to Sets/Albums running in Multiprocessing mode"
         
 ## Fixes/Features
@@ -303,7 +303,7 @@ ROTATING_LOGGING_LEVEL = 30
 - Runs several unittests
 - Created setup.py (**optional use**)"
 #  "2.7.8"
-    published_at: "2018-04-22T18:03:33Z"
+    published_at: 2018-04-22
 * "V2.7.8 convert Raw Files option with exiftool"
         
 ## Fixes/Features
@@ -331,7 +331,7 @@ ROTATING_LOGGING_LEVEL = 30
 - Runs several unittests
 - Created setup.py (**optional use**)"
 #  "2.7.7"
-    published_at: "2018-04-17T21:59:15Z"
+    published_at: 2018-04-17
 * "V2.7.7 Compatibility with Windows (use of portalocker, if available), Fix #56"
         
 ## Fixes/Features
@@ -357,7 +357,7 @@ ROTATING_LOGGING_LEVEL = 30
 - Runs several unittests
 - Created setup.py (**optional use**)"
 #  "2.7.6"
-    published_at: "2018-04-15T16:29:20Z"
+    published_at: 2018-04-15
 * "V2.7.6 Enhanced control on INI parameters. Improved UploadFile function. New setup.py (optional)"
         
 ## Fixes/Features
@@ -384,7 +384,7 @@ ROTATING_LOGGING_LEVEL = 30
 - Runs several unittests
 - Created setup.py (**optional**)"
 #  "V2.7.3"
-    published_at: "2018-03-29T23:02:46Z"
+    published_at: 2018-03-29
 * "V2.7.3 Replace Video (#45), Code cleanup (autopep8, flakes adjustments, use of lib modules)"
         
 ## Fixes/Features
@@ -418,7 +418,7 @@ ROTATING_LOGGING_LEVEL = 30
 - Created setup.py (in trial)
 - Addressed #23 (split into modules)"
 #  "2.7.1"
-    published_at: "2018-03-05T21:58:32Z"
+    published_at: 2018-03-05
 * "V2.7.1 List bad files. Album tag on uploaded pics. Several performance, control and fixes."
 ## Fixes/Features
 - New option (--list-bad-files)to list badfiles recorded no the Database (feature #27)
@@ -458,7 +458,7 @@ ROTATING_LOGGING_LEVEL = 30
 - Enhanced is_photo_already_uploaded function (V2.7.0).
 "
 #  "2.7.0"
-    published_at: "2018-02-18T22:44:57Z"
+    published_at: 2018-02-18
 * "Version 2.7.0 Tag pics with their album (similar to checksum)"
 ## Fixes/Features
 - Include Album as a PIC tag. to facilitate finding failed load pics (feature #29).
@@ -485,7 +485,7 @@ ROTATING_LOGGING_LEVEL = 30
 - Adapted nuceprint to print function name on new otional parameter.
 - Enhanced is_photo_already_uploaded function."
 #  "2.6.7"
-    published_at: "2018-02-03T14:56:01Z"
+    published_at: 2018-02-03
 * "Version 2.6.7 (faster runs after 1st execution)"
 ## Fixes/Features
 - Optimize calling md5Cecksum which results in huge gains in runs after the 1st one.
@@ -499,7 +499,7 @@ ROTATING_LOGGING_LEVEL = 30
 ## Environment and Coding
 - Python 2 + 3 compatibility"
 #  "2.6.6"
-    published_at: "2018-01-20T15:27:46Z"
+    published_at: 2018-01-20
 * "V2.6.6 Stable release fixes #26, #28, #31. Python 2 and 3 compatibility."
 ## Fixes/Features
 - Clarified use of Task Scheduler/crontab/SLEEP_TIME on instructions
@@ -522,7 +522,7 @@ uploadPhoto function fixes:
 - Python 2 + 3 compatibility
 - Python 3 testing scenarios"
 #  "2.6.5"
-    published_at: "2018-01-01T19:52:11Z"
+    published_at: 2018-01-01
 * "V2.6.5 Stability with more testing, Python 2 and 3 compatibility "
 ## Fixes/Features
 - 2.6.4 plus fix for #26 logging level for error \"190\" 
@@ -543,7 +543,7 @@ uploadPhoto function fixes:
 - RemoveIgnoredMedia function with unicode Python 2/3
 - Further testing options. Added uploadr_excluded.ini file for testing. .travis.yml adjusted"
 #  "2.6.3"
-    published_at: "2017-12-14T21:26:03Z"
+    published_at: "2017-12-14
 * "Do not load duplicates, retry on error, fix output messages. Use of TravisCI for testing."
 ## Fixes/Features
 - doctest isthisStringUnicode
@@ -573,7 +573,7 @@ uploadPhoto function fixes:
 - fix on Run identification
 - edited function is_photo_already_uploaded"
 #  "2.5.11"
-    published_at: "2017-11-12T19:15:11Z"
+    published_at: "2017-11-12
 * "V2.5.11 More Stable. good for testing."
 - fixed replacePhoto to use fileobj instead of filename to cater for unicode file names.
 - should fix issue #14 
@@ -584,7 +584,7 @@ uploadPhoto function fixes:
 - under testing.
 - \"-s\" parameter to search for duplicates not operational yet"
 #  "2.5.10"
-    published_at: "2017-11-09T02:53:05Z"
+    published_at: "2017-11-09
 * "V2.5.10 Good for testing. (I've ran with 28K pics)"
 - addressed issue #12 and #13
 - niceprint a + b -> niceprint a .format(b)
@@ -592,20 +592,20 @@ uploadPhoto function fixes:
 - more error codes
 - unicode on EXCLUDED_FOLDERS definition"
 #  "2.4.4"
-    published_at: "2017-11-01T12:03:06Z"
+    published_at: "2017-11-01
 * "Fix for issue #5"
 Template uploadr.ini file was wrong. Please load up this new uploadr.ini and reconfigure. Sorry!"
 #  "2.4.1"
-    published_at: "2017-11-01T04:25:43Z"
+    published_at: "2017-11-01
 * "Enhanced  Multiprocessing mode to show number of loaded photos"
 Addresses enhancement #3 
 Fixes issue #4 "
 #  "2.3.1"
-    published_at: "2017-11-01T01:35:01Z"
+    published_at: "2017-11-01
 * "Fix for  issue #2"
 Database is now properly updated to PRAGMA user_version 2."
 #  "V2.3.0"
-    published_at: "2017-11-01T01:15:58Z"
+    published_at: "2017-11-01
 * "Upload a directory of media to Flickr to use as a backup to your local storage"
 by oPromessa, 2017, V2.02
 

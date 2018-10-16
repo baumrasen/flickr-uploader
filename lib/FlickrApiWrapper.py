@@ -127,12 +127,12 @@ def flickrapi_fn(fn_name,
                       exceptmsg=flickr_ex,
                       useniceprint=True,
                       exceptsysinfo=True)
-    except (IOError, httplib.HTTPException):
+    except (IOError, OSError, httplib.HTTPException) as exc:
         NPR.niceerror(caught=True,
                       caughtprefix='+++Api',
                       caughtcode=caughtcode,
-                      caughtmsg='Caught IO/HTTP Error on [{!s}]'
-                      .format(fn_name.__name__))
+                      caughtmsg='Caught {!s} Error on [{!s}]'
+                      .format(type(exc), fn_name.__name__))
     except Exception as exc:
         NPR.niceerror(caught=True,
                       caughtprefix='+++Api',
@@ -141,13 +141,6 @@ def flickrapi_fn(fn_name,
                       exceptuse=True,
                       exceptmsg=exc,
                       useniceprint=True,
-                      exceptsysinfo=True)
-    except BaseException:
-        NPR.niceerror(caught=True,
-                      caughtprefix='+++Api',
-                      caughtcode=caughtcode,
-                      caughtmsg='BaseException on [{!s}]'
-                      .format(fn_name.__name__),
                       exceptsysinfo=True)
     finally:
         pass

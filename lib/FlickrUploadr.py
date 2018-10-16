@@ -519,12 +519,12 @@ class Uploadr(object):
                 p_cmd = subprocess.check_call(shlex.split(command))
             # CODING: Exception subprocess.SubprocessError from Python 3.3
             except (NameError, ValueError, TypeError, OSError,
-                    subprocess.CalledProcessError):
+                    subprocess.CalledProcessError) as exc:
                 NP.niceerror(caught=True,
                              caughtprefix='+++',
                              caughtcode='030',
-                             caughtmsg='Error calling exiftool:[{!s}]'
-                             .format(convert_or_copy_tags),
+                             caughtmsg='Error {!s} calling exiftool:[{!s}]'
+                             .format(type(exc), convert_or_copy_tags),
                              useniceprint=True,
                              exceptsysinfo=True)
                 result_cmd = False
@@ -1098,11 +1098,12 @@ class Uploadr(object):
                         zuploaderror = True
                         raise IOError(uploadresp)
 
-                except (IOError, httplib.HTTPException):
+                except (IOError, httplib.HTTPException) as exc:
                     NP.niceerror(caught=True,
                                  caughtprefix='+++',
                                  caughtcode='038',
-                                 caughtmsg='Caught IOError/HTTP exception',
+                                 caughtmsg='Caught {!s} exception'
+                                 .format(type(exc)),
                                  useniceprint=True,
                                  exceptsysinfo=True)
                     # CODING: Repeat also below on FlickError (!= 5 and 8)
@@ -1466,12 +1467,12 @@ class Uploadr(object):
                     break
                 # Exceptions for flickr.upload function call handled on the
                 # outer try/except.
-                except (IOError, ValueError, httplib.HTTPException):
+                except (IOError, ValueError, httplib.HTTPException) as exc:
                     NP.niceerror(caught=True,
                                  caughtprefix='+++',
                                  caughtcode='060',
-                                 caughtmsg='Caught IOError, ValueError, '
-                                 'HTTP exception',
+                                 caughtmsg='Caught {!s} exception'
+                                 .format(type(exc)),
                                  useniceprint=True,
                                  exceptsysinfo=True)
                     NP.niceerror(caught=True,

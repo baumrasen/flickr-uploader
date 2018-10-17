@@ -169,7 +169,7 @@ class MyConfig(object):
         "3",
         # MAX_UPLOAD_ATTEMPTS
         "10",
-        # LOGGING_LEVEL (30 = logging.ERROR). Note: Affects doctests results
+        # LOGGING_LEVEL (30 = logging.WARNING). Note: Affects doctests results
         "40",
         # ROTATING_LOGGING
         "False",

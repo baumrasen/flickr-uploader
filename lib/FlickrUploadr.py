@@ -1979,7 +1979,7 @@ class Uploadr(object):
                          .format(NP.strunicodeout(file[1]),
                                  NP.strunicodeout(set_id)))
 
-            litedb.execute(con, 'SELECT#159', lock, self.args.processes,
+            litedb.execute(con, 'UPDATE#159', lock, self.args.processes,
                            bcur,
                            'UPDATE files SET set_id = ? '
                            'WHERE files_id = ?',
@@ -1999,7 +1999,7 @@ class Uploadr(object):
             NP.niceprint('Photo already in set... updating DB'
                          'set_id=[{!s}] photo_id=[{!s}]'
                          .format(set_id, file[0]))
-            litedb.execute(con, 'SELECT#160', lock, self.args.processes,
+            litedb.execute(con, 'UPDATE#160', lock, self.args.processes,
                            bcur,
                            'UPDATE files SET set_id = ? '
                            'WHERE files_id = ?',
@@ -3163,7 +3163,7 @@ class Uploadr(object):
 
         if get_success and get_errcode == 0:
             totalpgs = int(get_result.find('photos').attrib['pages'])
-            count=0
+            count = 0
             for pg in range(1, totalpgs+1):
                 if pg > 1:
                     get_success, get_result, get_errcode = faw.flickrapi_fn(
@@ -3181,20 +3181,20 @@ class Uploadr(object):
                     output_str = 'id={!s}|title={!s}|'.format(
                         row.attrib['id'],
                         NP.strunicodeout(row.attrib['title']))
-    
+
                     tags_success, tags_result, tags_errcode = faw.flickrapi_fn(
                         self.nuflickr.tags.getListPhoto, (),
                         dict(photo_id=row.attrib['id']),
                         2, 2, False, caughtcode='412')
-    
+
                     if tags_success and tags_errcode == 0:
                         for tag in tags_result.find('photo')\
                                 .find('tags').findall('tag'):
                             output_str += 'tag_attrib={!s}|'.format(
                                 NP.strunicodeout(tag.attrib['raw']))
-    
+
                     NP.niceprint(output_str)
-    
+
                     count += 1
                     if (count >= list_photos_not_in_set - 1):
                         logging.info('Stopped at photo [%s] listing '

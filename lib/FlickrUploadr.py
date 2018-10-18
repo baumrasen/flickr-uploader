@@ -3169,6 +3169,7 @@ class Uploadr(object):
             logging.debug('list_photos_not_in_set: totalpgs:[%s]', totalpgs)
 
             count = 0
+            listing_complete = False
             for apage in range(1, totalpgs+1):
                 logging.debug('[{!s:>6s}] files listed. Page:[{!s}]'
                               .format(str(count), str(apage)))
@@ -3209,7 +3210,10 @@ class Uploadr(object):
                     if count >= max_list:
                         logging.info('Stopped at photo [%s] listing '
                                      'photos not in a set', count)
+                        listing_complete = True
                         break
+                if listing_complete:
+                    break
         else:
             NP.niceprint('Error in list get_not_in_set. No output.',
                          logalso=logging.ERROR)

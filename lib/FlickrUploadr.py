@@ -3151,6 +3151,11 @@ class Uploadr(object):
     # List pics not in sets (if within a parameter)
     #
     def list_photos_not_in_set(self, list_photos_not_in_set):
+        """ list_photos_not_in_set
+
+            List  Photos Not in Sets on Flickr
+            list_photos_not_in_set = Max number of photos to list
+        """        
         NP.niceprint('*****Listing Photos not in a set in Flickr******')
 
         # List pics not in sets (if within a parameter, default 10)

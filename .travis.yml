@@ -22,7 +22,7 @@ python:
   - "3.7"
 
 # -----------------------------------------------------------------------------
-# dist: trusty (not python 3.7 compatible) or senial (python 3.7 compatible)
+# dist: trusty (not python 3.7 compatible) or xenial (python 3.7 compatible)
 dist: xenial
 
 # -----------------------------------------------------------------------------

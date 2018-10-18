@@ -3088,14 +3088,13 @@ class Uploadr(object):
                 Returns SELECT Count(*) from atable
             """
 
-            con, cur = litedb.connect(self.xcfg.DB_PATH)
+            acon, acur = litedb.connect(self.xcfg.DB_PATH)
             acount = litedb.total_rows(
-                con, atable,
+                acon, atable,
                 None, self.args.processes,  # No need for lock,
-                cur, dbcaughtcode='220')
+                acur, dbcaughtcode='220')
 
-            if con is not None and con in locals():
-                litedb.close(con)
+            litedb.close(acon)
 
             return acount
 
@@ -3146,60 +3145,67 @@ class Uploadr(object):
                              int(countflickr) - int(countlocal),
                              countnotinsets))
 
-        # List pics not in sets (if within a parameter) -----------------------
-        # Maximum allowed per_page by Flickr is 500.
-        # Avoid going over in order not to have to handle multipl pages.
-        if (self.args.list_photos_not_in_set and
-                self.args.list_photos_not_in_set > 0 and
-                countnotinsets > 0):
-            NP.niceprint('*****Listing Photos not in a set in Flickr******')
+    # -------------------------------------------------------------------------
+    # list_photos_not_in_set
+    #
+    # List pics not in sets (if within a parameter)
+    #
+    def list_photos_not_in_set(self, list_photos_not_in_set):
+        NP.niceprint('*****Listing Photos not in a set in Flickr******')
 
-            # List pics not in sets (if within a parameter, default 10)
-            # (per_page=min(self.args.list_photos_not_in_set, 500):
-            #       find('photos').attrib['total']
-            get_success, get_result, get_errcode = faw.flickrapi_fn(
-                self.nuflickr.photos.getNotInSet, (),
-                dict(per_page=min(self.args.list_photos_not_in_set, 500)),
-                3, 3, False, caughtcode='410')
+        # List pics not in sets (if within a parameter, default 10)
+        # (per_page=min(self.args.list_photos_not_in_set, 500):
+        #       find('photos').attrib['total']
+        get_success, get_result, get_errcode = faw.flickrapi_fn(
+            self.nuflickr.photos.getNotInSet, (),
+            dict(per_page=min(list_photos_not_in_set, 500)),
+            3, 3, False, caughtcode='410')
 
-            if get_success and get_errcode == 0:
-                for count, row in enumerate(get_result.find('photos')
-                                            .findall('photo')):
+        if get_success and get_errcode == 0:
+            totalpgs = int(get_result.find('photos').attrib['pages'])
+            count=0
+            for pg in range(1, totalpgs+1):
+                if pg > 1:
+                    get_success, get_result, get_errcode = faw.flickrapi_fn(
+                        self.nuflickr.photos.getNotInSet, (),
+                        dict(page=pg,
+                             per_page=min(list_photos_not_in_set, 500)),
+                        3, 3, False, caughtcode='411')
+                    if not (get_success and get_errcode == 0):
+                        break
+
+                for row in get_result.find('photos').findall('photo'):
                     logging.info('Photo Not in Set: id:[%s] title:[%s]',
                                  row.attrib['id'],
                                  NP.strunicodeout(row.attrib['title']))
                     output_str = 'id={!s}|title={!s}|'.format(
                         row.attrib['id'],
                         NP.strunicodeout(row.attrib['title']))
-
+    
                     tags_success, tags_result, tags_errcode = faw.flickrapi_fn(
                         self.nuflickr.tags.getListPhoto, (),
                         dict(photo_id=row.attrib['id']),
-                        2, 2, False, caughtcode='411')
-
+                        2, 2, False, caughtcode='412')
+    
                     if tags_success and tags_errcode == 0:
                         for tag in tags_result.find('photo')\
                                 .find('tags').findall('tag'):
-                            output_str += 'tag_attrib={!s}|'\
-                                          .format(
-                                              NP.strunicodeout(
-                                                  tag.attrib['raw']))
-
+                            output_str += 'tag_attrib={!s}|'.format(
+                                NP.strunicodeout(tag.attrib['raw']))
+    
                     NP.niceprint(output_str)
-
-                    logging.info('count=[%s]', count)
-                    if (count == 500 or
-                            count >= (self.args.list_photos_not_in_set - 1) or
-                            count >= (countnotinsets - 1)):
+    
+                    count += 1
+                    if (count >= list_photos_not_in_set - 1):
                         logging.info('Stopped at photo [%s] listing '
                                      'photos not in a set', count)
                         break
-            else:
-                NP.niceprint('Error in list get_not_in_set. No output.',
-                             logalso=logging.ERROR)
+        else:
+            NP.niceprint('Error in list get_not_in_set. No output.',
+                         logalso=logging.ERROR)
 
-            NP.niceprint('*****Completed Listing Photos not in a set '
-                         'in Flickr******')
+        NP.niceprint('*****Completed Listing Photos not in a set '
+                     'in Flickr******')
 
 
 # -----------------------------------------------------------------------------

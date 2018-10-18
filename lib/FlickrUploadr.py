@@ -3161,7 +3161,7 @@ class Uploadr(object):
         # List pics not in sets (if within a parameter, default 10)
         get_success, get_result, get_errcode = faw.flickrapi_fn(
             self.nuflickr.photos.getNotInSet, (),
-            dict(per_page=min(max_list, 500)),
+            dict(per_page=min(max_list if max_list > 0 else 500, 500)),
             3, 3, False, caughtcode='410')
 
         if get_success and get_errcode == 0:
@@ -3207,7 +3207,7 @@ class Uploadr(object):
                     if count % 100 > 0:
                         logging.info('[{!s:>6s}] files listed. Page:[{!s}]'
                                      .format(str(count), str(apage)))
-                    if count >= max_list:
+                    if max_list > 0 and count >= max_list:
                         logging.info('Stopped at photo [%s] listing '
                                      'photos not in a set', count)
                         listing_complete = True

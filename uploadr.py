@@ -200,8 +200,8 @@ def parse_arguments():
                                  'It appends to the tags defined in INI file.')
     # used in pics_status function
     igrpparser.add_argument('-l', '--list-photos-not-in-set',
-                            metavar='N', type=int,
-                            help='List as many as N photos (with tags) '
+                            metavar='N', type=int, nargs='?', const=-1,
+                            help='List all or N photos (with tags) '
                                  'not in set.')
 
     # Processing related options ----------------------------------------------
@@ -428,8 +428,7 @@ def run_uploadr(args):
 
             myflick.create_sets()
             myflick.pics_status(KonstantsClass.media_count)
-            if (args.list_photos_not_in_set and
-                    args.list_photos_not_in_set > 0):
+            if args.list_photos_not_in_set:
                 myflick.list_photos_not_in_set(args.list_photos_not_in_set)
     # Run Uploadr -------------------------------------------------------------
 

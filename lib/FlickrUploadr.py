@@ -3218,8 +3218,8 @@ class Uploadr(object):
             NP.niceprint('Error in list get_not_in_set. No output.',
                          logalso=logging.ERROR)
 
-        NP.niceprint('*****Completed Listing Photos not in a set '
-                     'in Flickr******')
+        NP.niceprint('*****Completed Listing [{!s}] Photos not in a set '
+                     'in Flickr******'.format(count))
 
 
 # -----------------------------------------------------------------------------

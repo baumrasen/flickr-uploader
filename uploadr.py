@@ -430,7 +430,7 @@ def run_uploadr(args):
             myflick.pics_status(KonstantsClass.media_count)
             if (args.list_photos_not_in_set and
                     args.list_photos_not_in_set > 0):
-                myflick.pics_not_in_set(args.list_photos_not_in_set)
+                myflick.list_photos_not_in_set(args.list_photos_not_in_set)
     # Run Uploadr -------------------------------------------------------------
 
 

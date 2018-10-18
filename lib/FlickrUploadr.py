@@ -3150,31 +3150,29 @@ class Uploadr(object):
     #
     # List pics not in sets (if within a parameter)
     #
-    def list_photos_not_in_set(self, list_photos_not_in_set):
+    def list_photos_not_in_set(self, max_list):
         """ list_photos_not_in_set
 
             List  Photos Not in Sets on Flickr
-            list_photos_not_in_set = Max number of photos to list
+            max_list = Max number of photos to list
         """
         NP.niceprint('*****Listing Photos not in a set in Flickr******')
 
         # List pics not in sets (if within a parameter, default 10)
-        # (per_page=min(self.args.list_photos_not_in_set, 500):
-        #       find('photos').attrib['total']
         get_success, get_result, get_errcode = faw.flickrapi_fn(
             self.nuflickr.photos.getNotInSet, (),
-            dict(per_page=min(list_photos_not_in_set, 500)),
+            dict(per_page=min(max_list, 500)),
             3, 3, False, caughtcode='410')
 
         if get_success and get_errcode == 0:
             totalpgs = int(get_result.find('photos').attrib['pages'])
             count = 0
-            for pg in range(1, totalpgs+1):
-                if pg > 1:
+            for apage in range(1, totalpgs+1):
+                if apage > 1:
                     get_success, get_result, get_errcode = faw.flickrapi_fn(
                         self.nuflickr.photos.getNotInSet, (),
-                        dict(page=pg,
-                             per_page=min(list_photos_not_in_set, 500)),
+                        dict(page=apage,
+                             per_page=min(max_list, 500)),
                         3, 3, False, caughtcode='411')
                     if not (get_success and get_errcode == 0):
                         break
@@ -3201,7 +3199,7 @@ class Uploadr(object):
                     NP.niceprint(output_str)
 
                     count += 1
-                    if (count >= list_photos_not_in_set - 1):
+                    if (count >= max_list - 1):
                         logging.info('Stopped at photo [%s] listing '
                                      'photos not in a set', count)
                         break

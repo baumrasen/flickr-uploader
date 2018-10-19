@@ -323,9 +323,9 @@ $ ./uploadr.py --dry-run
 ```
 Run `./uploadr.py --help` for up to the minute information on arguments:
 ```bash
-[961][2018.09.16 06:06:42]:[15221      ][PRINT   ]:[uploadr] ----------- (V2.8.7) Start -----------(Log:40)
+[733][2018.10.20 00:40:40]:[21211      ][PRINT   ]:[uploadr] ----------- (V2.8.8-alpha.1) Start -----------(Log:40)
 usage: uploadr.py [-h] [-C filename.ini] [-a] [-v] [-x] [-m] [-n] [-i TITLE]
-                  [-e DESCRIPTION] [-t TAGS] [-l N] [-r] [-p P] [-u]
+                  [-e DESCRIPTION] [-t TAGS] [-l [N]] [-r] [-p P] [-u]
                   [--no-delete-from-flickr [nodelete]] [-d] [-b] [-c] [-s]
                   [-g] [--add-albums-migrate]
 
@@ -362,9 +362,8 @@ Information options:
                         set in INI file.
   -t TAGS, --tags TAGS  Space-separated tags for uploaded files. It appends to
                         the tags defined in INI file.
-  -l N, --list-photos-not-in-set N
-                        List as many as N photos (with tags) not in set.
-                        Maximum listed photos is 500.
+  -l [N], --list-photos-not-in-set [N]
+                        List all or N photos (with tags) not in set.
 
 Processing related options:
   -r, --drip-feed       Wait a bit between uploading individual files.
@@ -376,8 +375,8 @@ Processing related options:
                         INITIAL upload. Do not use it in subsequent uploads to
                         prevent/recover orphan pics without a set.
   --no-delete-from-flickr [nodelete]
-                        Do not actually deletepics from flickr.com & mark them
-                        with tag:[nodelete]
+                        Do not actually delete pics from flickr.com & mark
+                        them with tag:[nodelete]
   -d, --daemon          Run forever as a daemon.Uploading every SLEEP_TIME
                         seconds. Please note it only performs upload/raw
                         convert/replace.

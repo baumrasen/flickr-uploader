@@ -96,6 +96,7 @@ class MyConfig(object):
         'EXCLUDED_FOLDERS',
         'IGNORED_REGEX',
         'ALLOWED_EXT',
+        'REMOVE_PATH_PARTS',
         'CONVERT_RAW_FILES',
         'RAW_EXT',
         'RAW_TOOL_PATH',
@@ -109,7 +110,7 @@ class MyConfig(object):
         'ROTATING_LOGGING_PATH',
         'ROTATING_LOGGING_FILE_SIZE',
         'ROTATING_LOGGING_FILE_COUNT',
-        'ROTATING_LOGGING_LEVEL'
+        'ROTATING_LOGGING_LEVEL',
     ]
     # Default configuration keys/values pairs ---------------------------------
     INIvalues = [
@@ -149,6 +150,8 @@ class MyConfig(object):
         # "['IMG_[0-8]', '.+Ignore.+']",
         # ALLOWED_EXT
         "['jpg','png','avi','mov','mpg','mp4','3gp']",
+        # REMOVE_PATH_PARTS
+        "[]",
         # CONVERT_RAW_FILES
         "False",
         # RAW_EXT
@@ -182,7 +185,7 @@ class MyConfig(object):
         # ROTATING_LOGGING_FILE_COUNT
         "3",
         # ROTATING_LOGGING_LEVEL
-        "30"
+        "30",
     ]
 
     # -------------------------------------------------------------------------
@@ -280,6 +283,7 @@ class MyConfig(object):
             'list',  # 'EXCLUDED_FOLDERS',
             'list',  # 'IGNORED_REGEX',
             'list',  # 'ALLOWED_EXT',
+            'list',  # REMOVE_PATH_PARTS
             'bool',  # 'CONVERT_RAW_FILES',
             'list',  # 'RAW_EXT',
             'str',   # 'RAW_TOOL_PATH',
@@ -293,7 +297,7 @@ class MyConfig(object):
             'str',   # ROTATING_LOGGING_PATH,
             'int',   # ROTATING_LOGGING_FILE_SIZE,
             'int',   # ROTATING_LOGGING_FILE_COUNT,
-            'int'    # ROTATING_LOGGING_LEVEL
+            'int',   # ROTATING_LOGGING_LEVEL
         ]
         ini_check = dict(zip(self.ini_keys, ini_types))
         if logging.getLogger().getEffectiveLevel() <= logging.INFO:

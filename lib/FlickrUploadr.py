@@ -899,18 +899,19 @@ class Uploadr(object):
                            dbcaughtcode='035')
         # ---------------------------------------------------------------------
 
+        setname = faw.set_name_from_file(file,
+                                         self.xcfg.FILES_DIR,
+                                         self.xcfg.FULL_SET_NAME,
+                                         self.xcfg.REMOVE_PATH_PARTS)
+
         if self.args.dry_run:
-            NP.niceprint('   Dry Run file:[{!s}]...'
-                         .format(NP.strunicodeout(file)))
+            NP.niceprint('   Dry Run file:[{!s}] to album [{!s}]...'
+                         .format(NP.strunicodeout(file), NP.strunicodeout(setname)))
             return True
 
         NP.niceprint('  Checking file:[{!s}]...'
                      .format(NP.strunicodeout(file)),
                      verbosity=1)
-
-        setname = faw.set_name_from_file(file,
-                                         self.xcfg.FILES_DIR,
-                                         self.xcfg.FULL_SET_NAME)
 
         success = False
         con, cur = litedb.connect(self.xcfg.DB_PATH)
@@ -1780,7 +1781,8 @@ class Uploadr(object):
             # filepic[2] = set_id from files table
             setname = faw.set_name_from_file(filepic[1],
                                              self.xcfg.FILES_DIR,
-                                             self.xcfg.FULL_SET_NAME)
+                                             self.xcfg.FULL_SET_NAME,
+                                             self.xcfg.REMOVE_PATH_PARTS)
 
             aset = None
             litedb.execute(fn_con,
@@ -1850,7 +1852,7 @@ class Uploadr(object):
             return True
 
         con, cur = litedb.connect(self.xcfg.DB_PATH)
-        con.create_function("getSet", 3, faw.set_name_from_file)
+        con.create_function("getSet", 4, faw.set_name_from_file)
         # Enable traceback return from con.create_function.
         litedb.enable_callback_tracebacks(True)
 
@@ -1858,13 +1860,15 @@ class Uploadr(object):
             # List of Sets to be created
             litedb.execute(con, 'SELECT#145', slockdb, self.args.processes,
                            cur,
-                           'SELECT DISTINCT getSet(path, ?, ?) '
-                           'FROM files WHERE getSet(path, ?, ?) '
+                           'SELECT DISTINCT getSet(path, ?, ?, ?) '
+                           'FROM files WHERE getSet(path, ?, ?, ?) '
                            'NOT IN (SELECT name FROM sets)',
                            qmarkargs=(self.xcfg.FILES_DIR,
                                       self.xcfg.FULL_SET_NAME,
+                                      self.xcfg.REMOVE_PATH_PARTS,
                                       self.xcfg.FILES_DIR,
-                                      self.xcfg.FULL_SET_NAME,),
+                                      self.xcfg.FULL_SET_NAME,
+                                      self.xcfg.REMOVE_PATH_PARTS,),
                            dbcaughtcode='145')
             sets_to_create = cur.fetchall()
 
@@ -1877,9 +1881,10 @@ class Uploadr(object):
                                'SELECT MIN(files_id), path '
                                'FROM files '
                                'WHERE set_id is NULL '
-                               'AND getSet(path, ?, ?) = ?',
+                               'AND getSet(path, ?, ?, ?) = ?',
                                qmarkargs=(self.xcfg.FILES_DIR,
                                           self.xcfg.FULL_SET_NAME,
+                                          self.xcfg.REMOVE_PATH_PARTS,
                                           setname,),
                                dbcaughtcode='156')
                 primary_pic = cur.fetchone()
@@ -1927,7 +1932,8 @@ class Uploadr(object):
                     # filepic[2] = set_id from files table
                     setname = faw.set_name_from_file(filepic[1],
                                                      self.xcfg.FILES_DIR,
-                                                     self.xcfg.FULL_SET_NAME)
+                                                     self.xcfg.FULL_SET_NAME,
+                                                     self.xcfg.REMOVE_PATH_PARTS)
 
                     litedb.execute(con, 'SELECT#158',
                                    slockdb, self.args.processes,
@@ -1997,7 +2003,8 @@ class Uploadr(object):
             NP.niceprint('Photoset not found, creating new set...')
             setname = faw.set_name_from_file(file[1],
                                              self.xcfg.FILES_DIR,
-                                             self.xcfg.FULL_SET_NAME)
+                                             self.xcfg.FULL_SET_NAME,
+                                             self.xcfg.REMOVE_PATH_PARTS)
             # CODING: cur vs bcur! Check!
             self.create_set(lock, setname, file[0], cur, con)
         elif not get_success and get_errcode == 3:
@@ -2852,7 +2859,8 @@ class Uploadr(object):
             # row[1] = path for the file from table files
             setname = faw.set_name_from_file(afile[1],
                                              self.xcfg.FILES_DIR,
-                                             self.xcfg.FULL_SET_NAME)
+                                             self.xcfg.FULL_SET_NAME,
+                                             self.xcfg.REMOVE_PATH_PARTS)
             tfind, tid = self.photos_find_tag(
                 photo_id=afile[0],
                 intag='album:{}'.format(afile[2]
@@ -2977,7 +2985,8 @@ class Uploadr(object):
                 # row[1] = path for the file from table files
                 setname = faw.set_name_from_file(row[1],
                                                  self.xcfg.FILES_DIR,
-                                                 self.xcfg.FULL_SET_NAME)
+                                                 self.xcfg.FULL_SET_NAME,
+                                                 self.xcfg.REMOVE_PATH_PARTS)
 
                 tfind, tid = self.photos_find_tag(
                     photo_id=row[0],

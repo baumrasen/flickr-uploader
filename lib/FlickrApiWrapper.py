@@ -106,35 +106,35 @@ def flickrapi_fn(fn_name,
                  fn_name.__name__, attempts, waittime, randtime)
 
     if logging.getLogger().getEffectiveLevel() <= logging.INFO:
-        for i, arg in enumerate(fn_args):
-            logging.info('fn:[%s] arg[%s]={%s}', fn_name.__name__, i, arg)
-        for name, value in fn_kwargs.items():
+        for i, argvalue in enumerate(fn_args):
+            logging.info('fn:[%s] arg[%s]={%s}', fn_name.__name__, i, argvalue)
+        for name, argvalue in fn_kwargs.items():
             logging.info('fn:[%s] kwarg[%s]=[%s]',
-                         fn_name.__name__, name, value)
+                         fn_name.__name__, name, argvalue)
 
     fn_success = False
     fn_result = None
     fn_errcode = 0
     try:
         fn_result = retry_flickrapi_fn(fn_kwargs)
-    except flickrapi.exceptions.FlickrError as flickr_ex:
-        fn_errcode = flickr_ex.code
+    except flickrapi.exceptions.FlickrError as exc:
+        fn_errcode = exc.code
         NPR.niceerror(caught=True,
                       caughtprefix='+++Api',
                       caughtcode=caughtcode,
                       caughtmsg='Flickrapi exception on [{!s}]'
                       .format(fn_name.__name__),
                       exceptuse=True,
-                      exceptcode=flickr_ex.code,
-                      exceptmsg=flickr_ex,
+                      exceptcode=exc.code,
+                      exceptmsg=exc,
                       useniceprint=True,
                       exceptsysinfo=True)
-    except (IOError, httplib.HTTPException):
+    except (IOError, OSError, httplib.HTTPException) as exc:
         NPR.niceerror(caught=True,
                       caughtprefix='+++Api',
                       caughtcode=caughtcode,
-                      caughtmsg='Caught IO/HTTP Error on [{!s}]'
-                      .format(fn_name.__name__))
+                      caughtmsg='Caught {!s} Error on [{!s}]'
+                      .format(type(exc), fn_name.__name__))
     except Exception as exc:
         NPR.niceerror(caught=True,
                       caughtprefix='+++Api',
@@ -143,13 +143,6 @@ def flickrapi_fn(fn_name,
                       exceptuse=True,
                       exceptmsg=exc,
                       useniceprint=True,
-                      exceptsysinfo=True)
-    except BaseException:
-        NPR.niceerror(caught=True,
-                      caughtprefix='+++Api',
-                      caughtcode=caughtcode,
-                      caughtmsg='BaseException on [{!s}]'
-                      .format(fn_name.__name__),
                       exceptsysinfo=True)
     finally:
         pass

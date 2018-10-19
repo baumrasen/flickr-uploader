@@ -13,7 +13,7 @@ PATH=$PATH:${PREFIX}/bin
 
 # Edit line to to reference folder where uploadr.py is located when mannually
 # installed. Also where logs will be saved.
-FOLDER=~/apps/flickr-uploader-2.8.6
+FOLDER=~/apps/flickr-uploader-2.8.7
 
 # Compatible with different installation modes of uploadr.py: PIP or Mannual
 RUNCMD=`which uploadr.py`
@@ -30,8 +30,10 @@ export PYTHONPATH=${PREFIX}/lib/python2.7/site-packages
 # Some Logging...
 echo Start
 date +"[%F %T] Start ----"
+# Create logs folder
+[ -d $FOLDER ] && mkdir -p $FOLDER/logs
 # Set parameters as appropriate to your system
-python2.7 $RUNCMD -v -b -p 10 >>$FOLDER/uploadr.out 2>>$FOLDER/uploadr.err
+python2.7 $RUNCMD -v -b -p 10 >>$FOLDER/logs/uploadr.out 2>>$FOLDER/logs/uploadr.err
 echo Result: $?
 echo End
 date +"[%F %T] End ----"
@@ -41,5 +43,5 @@ echo --------- uploadr.out
 [ -f $FOLDER/logs/uploadr.out ] && tail -100 $FOLDER/logs/uploadr.out
 echo ---------
 echo ---------
-echo Further output on file: $FOLDER/uploadr.out and $FOLDER/uploadr.err
+echo Further output on file: $FOLDER/logs/uploadr.out and $FOLDER/logs/uploadr.err
 echo ---------

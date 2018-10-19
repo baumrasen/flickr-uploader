@@ -1,6 +1,6 @@
 # flickr-uploader
 -----------------
-by oPromessa, 2017, V2.8.6 [![Master Build Status](https://travis-ci.org/oPromessa/flickr-uploader.svg?branch=master)](https://travis-ci.org/oPromessa/flickr-uploader) [![Coverage Status](https://coveralls.io/repos/github/oPromessa/flickr-uploader/badge.svg)](https://coveralls.io/github/oPromessa/flickr-uploader)
+by oPromessa, 2017, V2.8.7 [![Master Build Status](https://travis-ci.org/oPromessa/flickr-uploader.svg?branch=master)](https://travis-ci.org/oPromessa/flickr-uploader) [![Coverage Status](https://coveralls.io/repos/github/oPromessa/flickr-uploader/badge.svg)](https://coveralls.io/github/oPromessa/flickr-uploader)
 * Published on [https://github.com/oPromessa/flickr-uploader/](https://github.com/oPromessa/flickr-uploader/)
 
 ## Description
@@ -11,15 +11,16 @@ on the WEB and as a backup of your local storage.
 * flickr-uploader designed primarly for Synology Devices.
    * Also works on Linux, Mac and Windows systems.
 
-## PyPi Download stats (as of Sep/2018)
+## PyPi Download stats (as of Oct/2018)
 ---------------------------------------
 | version | system_name | percent | download_count |
 | ------- | ----------- | ------: | -------------: |
-| 2.8.6   | Linux       |  71.70% |             38 |
-| 2.8.6   | Darwin      |  13.21% |              7 |
-| 2.8.7a1 | Linux       |   7.55% |              4 |
-| 2.8.6   | Windows     |   5.66% |              3 |
-| 2.8.6a9 | Linux       |   1.89% |              1 |
+| 2.8.6   | Linux       |  58.46% |             38 |
+| 2.8.7   | Linux       |  18.46% |             12 |
+| 2.8.6   | Darwin      |  10.77% |              7 |
+| 2.8.7a1 | Linux       |   6.15% |              4 |
+| 2.8.6   | Windows     |   4.62% |              3 |
+| 2.8.6a9 | Linux       |   1.54% |              1 |
 
 ## Features
 -----------
@@ -93,7 +94,7 @@ REMOVE_PATH_PARTS = ["/Sub$"]
 * Python 2.7+ (should work on DSM from Synology (v6.1), Windows and MAC)
 * Also compatile with Python 3.6 and 3.7
 * Recommendation on Synology DSM: **do not install/use** the "Python Module" from the DSM Packages.
-* flicrkapi module. May need to install get-pip.py. (Instructions for
+* flickrapi module. May need to install get-pip.py. (Instructions for
   Synology DSM below.)
 * portalocker module for Windows systems. Not mandatory for Synology.
 * File write access (for the token and local database)
@@ -172,7 +173,6 @@ $ cd dev
 dev$ export PYTHONPATH=~/apps/Python/lib/python2.7/site-packages
 dev$ pip install flickrapi --prefix=~/apps/Python
 ```
-
 #### 4.2 OPTION #2: Mannually
 - **Download** flickrapi-2.4.tar.gz from [PyPi.Python.Org](https://pypi.python.org/pypi/flickrapi).
 - **Extract to** ~/dev and run `python setup.py install --prefix=~/apps/Python`
@@ -217,7 +217,11 @@ dev$ export PYTHONPATH=~/apps/Python/lib/python2.7/site-packages
 dev$ pip install flickr-uploader --prefix=~/apps/Python
 ```
    * Installation also copies to '~/apps/Python/etc' folder the data files `uploadr.ini` and `uploadr.cron`
-
+   * To upgrade the version, one has to use the pip `--upgrade` option:
+   * **IMPORTANT NOTICE** Upgrade option will overwrite `uploadr.ini` and `uploadr.cron` files. **Do backup pevious files.**
+```bash
+dev$ pip install flickr-uploader --prefix=~/apps/Python --upgrade
+```
 #### 5.2 OPTION #2: Mannually to be run from local folder
 - Download mannually from GitHub [flickr-uploader/releases/latest](https://github.com/oPromessa/flickr-uploader/releases/latest).
 - You can find under **Assets**:
@@ -329,9 +333,9 @@ $ ./uploadr.py --dry-run
 ```
 Run `./uploadr.py --help` for up to the minute information on arguments:
 ```bash
-[961][2018.09.16 06:06:42]:[15221      ][PRINT   ]:[uploadr] ----------- (V2.8.7) Start -----------(Log:40)
+[733][2018.10.20 00:40:40]:[21211      ][PRINT   ]:[uploadr] ----------- (V2.8.8-alpha.1) Start -----------(Log:40)
 usage: uploadr.py [-h] [-C filename.ini] [-a] [-v] [-x] [-m] [-n] [-i TITLE]
-                  [-e DESCRIPTION] [-t TAGS] [-l N] [-r] [-p P] [-u]
+                  [-e DESCRIPTION] [-t TAGS] [-l [N]] [-r] [-p P] [-u]
                   [--no-delete-from-flickr [nodelete]] [-d] [-b] [-c] [-s]
                   [-g] [--add-albums-migrate]
 
@@ -368,9 +372,8 @@ Information options:
                         set in INI file.
   -t TAGS, --tags TAGS  Space-separated tags for uploaded files. It appends to
                         the tags defined in INI file.
-  -l N, --list-photos-not-in-set N
-                        List as many as N photos (with tags) not in set.
-                        Maximum listed photos is 500.
+  -l [N], --list-photos-not-in-set [N]
+                        List all or N photos (with tags) not in set.
 
 Processing related options:
   -r, --drip-feed       Wait a bit between uploading individual files.
@@ -382,8 +385,8 @@ Processing related options:
                         INITIAL upload. Do not use it in subsequent uploads to
                         prevent/recover orphan pics without a set.
   --no-delete-from-flickr [nodelete]
-                        Do not actually deletepics from flicr.com & mark them
-                        with tag:[nodelete]
+                        Do not actually delete pics from flickr.com & mark
+                        them with tag:[nodelete]
   -d, --daemon          Run forever as a daemon.Uploading every SLEEP_TIME
                         seconds. Please note it only performs upload/raw
                         convert/replace.
@@ -498,13 +501,15 @@ And enjoy!!!
    - If using relative FILES_DIR and two files exist on the same subfolder, it will not be re-uploaded.
    - So, in a nutshell, too many issues if you play around changing the FILES_DIR location.
 
+* Q: If one changes the FILES_DIR folder and do not DELETE the files from flickr.com?
+   - Uploadr WILL not delete the files from flickr.com.
 
 * Q: "my understanding is that this is a sync script, which means when I later delete a pic from a synced folder, it will get deleted from Flickr"
    - Yes a file removed locally will be deleted from Flickr.
    - *Remark*: I'm assuming in between each run you keep the contents of the flickrdb control database and do not remove it.
 
 * Q: "What about previously existing folders (they didn't seem to get deleted)"
-   - If all files from a folder (and corresponding Album on flickr) are deleted, then the actual Album will be also eliminated. Again, if you do not chnage the FILES_DIR in between runs.
+   - If all files from a folder (and corresponding Album on flickr) are deleted, then the actual Album will be also eliminated. Again, if you do not change the FILES_DIR in between runs.
 
 * Q: What about when I sync a folder with the same name of a previously existing folder? (you mention
 getting existing sets from Flickr is managed also
@@ -540,6 +545,12 @@ Not in sets on Flickr:[     0]
 
 * Q: What happens if the local control Database (flickrdb) is deleted?
   - By re-running the program **without the -u opiotn** it will go thru your local files and check/search for already loaded pics with same checksum+Set and re-builds the local database.
-  
+
 * Q: Is all sensitive information (albums and filenames) masked with the **-u** option?
   - Please note the **-u** masking option does not filter every sensitive information. In particular when DEBUG error level is set.
+
+* Q: What happens to previously loaded files if one reduces FILE_MAX_SIZE in settings?
+  - The files previously loaded over such reduced new size are not removed.
+
+* Q: What happens to previously loaded files if one changes the IGNORED_REGEX setting to filter out files?
+  - The files previously loaded over such reduced new size are not removed. Check possible future enhancement #83.

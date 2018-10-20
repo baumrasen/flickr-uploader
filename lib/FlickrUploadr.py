@@ -917,7 +917,8 @@ class Uploadr(object):
 
         if self.args.dry_run:
             NP.niceprint('   Dry Run file:[{!s}] to album [{!s}]...'
-                         .format(NP.strunicodeout(file), NP.strunicodeout(setname)))
+                         .format(NP.strunicodeout(file),
+                                 NP.strunicodeout(setname)))
             return True
 
         NP.niceprint('  Checking file:[{!s}]...'

@@ -188,7 +188,8 @@ class Uploadr(object):
         Remove previously uploaded files, that are now being excluded due to
         change of the INI file configuration EXCLUDED_FOLDERS.
         """
-        NP.niceprint('*****Removing files from Excluded Folders*****')
+        NP.niceprint('*****Removing files from Excluded Folders*****',
+                     logalso=logging.WARNING)
 
         if not self.check_token():
             # authenticate sys.exits in case of failure
@@ -218,7 +219,8 @@ class Uploadr(object):
 
         litedb.close(con)
 
-        NP.niceprint('*****Completed files from Excluded Folders*****')
+        NP.niceprint('*****Completed files from Excluded Folders*****',
+                     logalso=logging.WARNING)
 
     # -------------------------------------------------------------------------
     # removeDeleteMedia
@@ -235,7 +237,8 @@ class Uploadr(object):
             if not exists, delete photo from fickr (flickr.photos.delete.html)
         """
 
-        NP.niceprint('*****Removing deleted files*****')
+        NP.niceprint('*****Removing deleted files*****',
+                     logalso=logging.WARNING)
 
         if not self.check_token():
             # authenticate sys.exits in case of failure
@@ -270,7 +273,8 @@ class Uploadr(object):
 
         litedb.close(con)
 
-        NP.niceprint('*****Completed deleted files*****')
+        NP.niceprint('*****Completed deleted files*****',
+                     logalso=logging.WARNING)
 
     # -------------------------------------------------------------------------
     # upload
@@ -293,7 +297,8 @@ class Uploadr(object):
         numutex = None
         nurunning = None
 
-        NP.niceprint("*****Uploading files*****")
+        NP.niceprint("*****Uploading files*****",
+                     logalso=logging.WARNING)
 
         con, cur = litedb.connect(self.xcfg.DB_PATH)
 
@@ -391,7 +396,8 @@ class Uploadr(object):
         # Closing DB connection
         litedb.close(con)
 
-        NP.niceprint("*****Completed uploading files*****")
+        NP.niceprint("*****Completed uploading files*****",
+                     logalso=logging.WARNING)
 
     # -------------------------------------------------------------------------
     # convert_raw_files
@@ -410,7 +416,8 @@ class Uploadr(object):
         if not self.xcfg.CONVERT_RAW_FILES:
             return
 
-        NP.niceprint('*****Converting files*****')
+        NP.niceprint('*****Converting files*****',
+                     logalso=logging.WARNING)
         for fullpath in rawfiles:
             dirpath, afile = os.path.split(fullpath)
             fnameonly = os.path.splitext(afile)[0]
@@ -459,7 +466,8 @@ class Uploadr(object):
                                  NP.strunicodeout('/') +
                                  NP.strunicodeout(afile))))
         final_media_files.sort()
-        NP.niceprint('*****Completed converting files*****')
+        NP.niceprint('*****Completed converting files*****',
+                     logalso=logging.WARNING)
 
     # -------------------------------------------------------------------------
     # convert_raw_file
@@ -1780,7 +1788,7 @@ class Uploadr(object):
 
             aset = None
             litedb.execute(fn_con,
-                           'SELECT#098:delete_record_localdb',
+                           'SELECT#098:select_sets_by_name',
                            lockdb, self.args.processes,
                            acur,
                            'SELECT set_id, name FROM sets WHERE name = ?',
@@ -1840,7 +1848,7 @@ class Uploadr(object):
         smutex = None
         srunning = None
 
-        NP.niceprint('*****Creating Sets*****')
+        NP.niceprint('*****Creating Sets*****', logalso=logging.WARNING)
 
         if self.args.dry_run:
             return True
@@ -1924,10 +1932,11 @@ class Uploadr(object):
                 for filepic in files:
                     # filepic[1] = path for the file from table files
                     # filepic[2] = set_id from files table
-                    setname = faw.set_name_from_file(filepic[1],
-                                                     self.xcfg.FILES_DIR,
-                                                     self.xcfg.FULL_SET_NAME,
-                                                     self.xcfg.REMOVE_PATH_PARTS)
+                    setname = faw.set_name_from_file(
+                        filepic[1],
+                        self.xcfg.FILES_DIR,
+                        self.xcfg.FULL_SET_NAME,
+                        self.xcfg.REMOVE_PATH_PARTS)
 
                     litedb.execute(con, 'SELECT#158',
                                    slockdb, self.args.processes,
@@ -1953,7 +1962,8 @@ class Uploadr(object):
 
         # Closing DB connection
         litedb.close(con)
-        NP.niceprint('*****Completed creating sets*****')
+        NP.niceprint('*****Completed creating sets*****',
+                     logalso=logging.WARNING)
 
     # -------------------------------------------------------------------------
     # add_file_to_set
@@ -2297,7 +2307,8 @@ class Uploadr(object):
 
         Remove unused Sets (Sets not listed on Flickr) from local DB
         """
-        NP.niceprint('*****Removing empty Sets from DB*****')
+        NP.niceprint('*****Removing empty Sets from DB*****',
+                     logalso=logging.WARNING)
         if self.args.dry_run:
             return True
 
@@ -2328,7 +2339,8 @@ class Uploadr(object):
 
         # Closing DB connection
         litedb.close(con)
-        NP.niceprint('*****Completed removing empty Sets from DB*****')
+        NP.niceprint('*****Completed removing empty Sets from DB*****',
+                     logalso=logging.WARNING)
 
     # -------------------------------------------------------------------------
     # display_sets
@@ -2368,7 +2380,8 @@ class Uploadr(object):
             local DB accordingly
         """
 
-        NP.niceprint('*****Adding Flickr Sets to DB*****')
+        NP.niceprint('*****Adding Flickr Sets to DB*****',
+                     logalso=logging.WARNING)
         if self.args.dry_run:
             return True
 
@@ -3035,7 +3048,7 @@ class Uploadr(object):
         """
 
         NP.niceprint('*****Listing badfiles: Start.*****',
-                     fname='list_bad_files')
+                     fname='list_bad_files', logalso=logging.WARNING)
 
         con, cur = litedb.connect(self.xcfg.DB_PATH)
         if not litedb.execute(con,
@@ -3075,7 +3088,7 @@ class Uploadr(object):
         NP.niceprocessedfiles(count, count_total, True, msg='Badfiles Listed')
         NP.niceprint('*****Listing badfiles: End. '
                      'No more options will run.*****',
-                     fname='list_bad_files')
+                     fname='list_bad_files', logalso=logging.WARNING)
 
         return True
 
@@ -3165,7 +3178,8 @@ class Uploadr(object):
             List  Photos Not in Sets on Flickr
             max_list = Max number of photos to list
         """
-        NP.niceprint('*****Listing Photos not in a set in Flickr******')
+        NP.niceprint('*****Listing Photos not in a set in Flickr******',
+                     logalso=logging.WARNING)
 
         # List pics not in sets (if within a parameter, default 10)
         get_success, get_result, get_errcode = faw.flickrapi_fn(
@@ -3228,7 +3242,7 @@ class Uploadr(object):
                          logalso=logging.ERROR)
 
         NP.niceprint('*****Completed Listing [{!s}] Photos not in a set '
-                     'in Flickr******'.format(count))
+                     'in Flickr******'.format(count), logalso=logging.WARNING)
 
 
 # -----------------------------------------------------------------------------

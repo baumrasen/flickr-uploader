@@ -20,7 +20,6 @@ import os.path
 import logging
 import hashlib
 import re
-
 try:
     import httplib as httplib      # Python 2
 except ImportError:
@@ -446,38 +445,75 @@ def md5checksum(afilepath):
 def set_name_from_file(afile, afiles_dir, afull_set_name, aremove_path_parts):
     """set_name_from_file
 
-       Return setname for a file path depending on FULL_SET_NAME True/False
-       Example:
-            File to upload: /home/user/media/2014/05/05/photo.jpg
-                 FILES_DIR: /home/user/media
-         REMOVE_PATH_PARTS: []
-             FULL_SET_NAME:
-                False=> 05
-                 True=> 2014/05/05
+    Return setname for a file path depending on FULL_SET_NAME True/False
+    and REMOVE_PATH_PARTS 'removal' regular expression.
+    Example#1:
+         File to upload: /home/user/media/2014/05/05/photo.jpg
+              FILES_DIR: /home/user/media
+      REMOVE_PATH_PARTS: []
+          FULL_SET_NAME:
+             False=> 05
+              True=> 2014/05/05
+    Example#2:
+    Some parts of the path can also be removed using the REMOVE_PATH_PARTS
+    list of regular expression.
+    Example:
+         File to upload: /home/user/media/2014/05/05/Output/photo.jpg
+              FILES_DIR: /home/user/media
+          FULL_SET_NAME: True
+      REMOVE_PATH_PARTS:
+                []=> 2014/05/05/Output
+      ["/Output$"]=> 2014/05/05
 
-        >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
-        '/some/photos', False, [])
-        'Album'
-        >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
-        '/some/photos', True, [])
-        'Parent/Album'
+    >>> logging.getLogger().setLevel(logging.DEBUG)
+    >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
+    '/some/photos', False, [])
+    'Album'
+    >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
+    '/some/photos', True, [])
+    'Parent/Album'
+    >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
+    '/some/photos', False, ['Album'])
+    'Parent'
+    >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
+    '/some/photos', True, ['Album'])
+    'Parent'
+    >>> set_name_from_file('/some/photos/Parent/Album/Output/unique.jpg',\
+    '/some/photos', True, ['/Output$'])
+    'Parent/Album'
+    >>> set_name_from_file('/some/photos/Parent/Album/Output/unique.jpg',\
+    '/some/photos', False, ['/Output$'])
+    'Album'
+    >>> set_name_from_file('/some/photos/Parent/Out/Album/Out/unique.jpg',\
+    '/some/photos', False, ['/Out$'])
+    'Album'
+    >>> set_name_from_file('/some/photos/Parent/Out/Album/Out/unique.jpg',\
+    '/some/photos', True, ['/Out$'])
+    'Parent/Out/Album'
 
-       Some parts of the path can also be removed using the REMOVE_PATH_PARTS
-       list of regular expression.
-       Example:
-            File to upload: /home/user/media/2014/05/05/Output/photo.jpg
-                 FILES_DIR: /home/user/media
-             FULL_SET_NAME: True
-         REMOVE_PATH_PARTS:
-                   []=> 2014/05/05/Output
-         ["/Output$"]=> 2014/05/05
+
+    >>> set_name_from_file('/some/photos/Out/unique.jpg',\
+    '/some/photos/Out', True, ['/some/photos/Out'])
+    'EmptyAlbum'
+    >>> set_name_from_file('/some/photos/Out/unique.jpg',\
+    '/some/photos/Out', True, ['some/photos/Out'])
+    'EmptyAlbum
+
+    # >>> set_name_from_file('/Test Photo Library/Pics.Dupped/dupped_31.jpg',\
+    # '/home/ruler/Documents/GitHub/flickr-uploader/tests/Test Photo Library',\
+    # False, ['/Test Photo Library/Pics.Dupped'])
+    # 'EmptyAlbum'
+    # >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
+    # '/some/photos', False, ['Album'])
+    # 'Parent'
     """
 
     assert afile, NPR.niceassert('[{!s}] is empty!'
                                  .format(NPR.strunicodeout(afile)))
 
-    logging.debug('set_name_from_file in: '
-                  'afile:[%s] afiles_dir=[%s] afull_set_name:[%s] aremove_path_parts:[%s]',
+    logging.debug('set_name_from_file  in: '
+                  'afile:[%s] afiles_dir=[%s] afull_set_name:[%-5s] '
+                  'aremove_path_parts:[%s]',
                   NPR.strunicodeout(afile),
                   NPR.strunicodeout(afiles_dir),
                   NPR.strunicodeout(afull_set_name),
@@ -487,14 +523,22 @@ def set_name_from_file(afile, afiles_dir, afull_set_name, aremove_path_parts):
     if aremove_path_parts:
         for reg_exp in aremove_path_parts:
             dir_name = re.sub(reg_exp, "", dir_name)
+        logging.debug('in  empty? dir_name:[%s]', dir_name)
+        # dir_name = dir_name.rstrip(os.sep)  # Avoids os.path.split return ''
+        # dir_name = 'EmptyAlbum' if dir_name == '' else dir_name
+        logging.debug('out empty? dir_name:[%s]', dir_name)
 
     if afull_set_name:
+        logging.debug('relpath\n\tdir_name:[%s]\n\tafiles_dir:[%s]',
+                      dir_name, afiles_dir)
         asetname = os.path.relpath(dir_name, afiles_dir)
     else:
+        logging.debug('path.split\n\tdir_name:[%s]\n\tafiles_dir:[%s]',
+                      dir_name, afiles_dir)
         _, asetname = os.path.split(dir_name)
     logging.debug('set_name_from_file out: '
-                  'afile:[%s] afiles_dir=[%s] afull_set_name:[%s] aremove_path_parts:[%s]'
-                  ' asetname:[%s]',
+                  'afile:[%s] afiles_dir=[%s] afull_set_name:[%-5s] '
+                  'aremove_path_parts:[%s] asetname:[%s]',
                   NPR.strunicodeout(afile),
                   NPR.strunicodeout(afiles_dir),
                   NPR.strunicodeout(afull_set_name),

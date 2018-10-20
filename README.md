@@ -79,6 +79,16 @@ You should get the following depending on how the setting FULL_SET_NAME is set:
 | /home/user/media/Album5/pic01.jpg | Album5 |  Album5 | pic01 | Same pic as in Album01 is loaded twice as it's part of a different Album |
 | /home/user/media/Album5/Sub/pic051.jpg | Sub |  Album5/Sub | pic051 | With FULL_SET_NAME=False it will go into Album "Sub" |
 
+You can also ignore parts of the path name to anem the album.
+Example:
+```python
+REMOVE_PATH_PARTS = ["/Sub$"]
+```
+| FilePathName | Set/Album Name (without REMOVE_PATH_PARTS) | Set/Album Name (with REMOVE_PATH_PARTS)
+| ------------- | ------------- | ------------- | ------------- | ------------- |
+| /home/user/media/Album4/pic04.jpg | Album4 | Album4 |
+| /home/user/media/Album4/Sub/pic041.jpg | Sub | Album4 |
+
 ## Requirements
 ---------------
 * Python 2.7+ (should work on DSM from Synology (v6.1), Windows and MAC)

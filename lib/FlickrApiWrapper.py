@@ -19,6 +19,8 @@ import sys
 import os.path
 import logging
 import hashlib
+import re
+
 try:
     import httplib as httplib      # Python 2
 except ImportError:
@@ -441,43 +443,62 @@ def md5checksum(afilepath):
 # -------------------------------------------------------------------------
 # set_name_from_file
 #
-def set_name_from_file(afile, afiles_dir, afull_set_name):
+def set_name_from_file(afile, afiles_dir, afull_set_name, aremove_path_parts):
     """set_name_from_file
 
        Return setname for a file path depending on FULL_SET_NAME True/False
        Example:
-       File to upload: /home/user/media/2014/05/05/photo.jpg
-            FILES_DIR: /home/user/media
-        FULL_SET_NAME:
-               False=> 05
-                True=> 2014/05/05
+            File to upload: /home/user/media/2014/05/05/photo.jpg
+                 FILES_DIR: /home/user/media
+         REMOVE_PATH_PARTS: []
+             FULL_SET_NAME:
+                False=> 05
+                 True=> 2014/05/05
 
         >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
-        '/some/photos', False)
+        '/some/photos', False, [])
         'Album'
         >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
-        '/some/photos', True)
+        '/some/photos', True, [])
         'Parent/Album'
+
+       Some parts of the path can also be removed using the REMOVE_PATH_PARTS
+       list of regular expression.
+       Example:
+            File to upload: /home/user/media/2014/05/05/Output/photo.jpg
+                 FILES_DIR: /home/user/media
+             FULL_SET_NAME: True
+         REMOVE_PATH_PARTS:
+                   []=> 2014/05/05/Output
+         ["/Output$"]=> 2014/05/05
     """
 
     assert afile, NPR.niceassert('[{!s}] is empty!'
                                  .format(NPR.strunicodeout(afile)))
 
     logging.debug('set_name_from_file in: '
-                  'afile:[%s] afiles_dir=[%s] afull_set_name:[%s]',
+                  'afile:[%s] afiles_dir=[%s] afull_set_name:[%s] aremove_path_parts:[%s]',
                   NPR.strunicodeout(afile),
                   NPR.strunicodeout(afiles_dir),
-                  NPR.strunicodeout(afull_set_name))
+                  NPR.strunicodeout(afull_set_name),
+                  NPR.strunicodeout(aremove_path_parts))
+
+    dir_name = os.path.dirname(afile)
+    if aremove_path_parts:
+        for reg_exp in aremove_path_parts:
+            dir_name = re.sub(reg_exp, "", dir_name)
+
     if afull_set_name:
-        asetname = os.path.relpath(os.path.dirname(afile), afiles_dir)
+        asetname = os.path.relpath(dir_name, afiles_dir)
     else:
-        _, asetname = os.path.split(os.path.dirname(afile))
+        _, asetname = os.path.split(dir_name)
     logging.debug('set_name_from_file out: '
-                  'afile:[%s] afiles_dir=[%s] afull_set_name:[%s]'
+                  'afile:[%s] afiles_dir=[%s] afull_set_name:[%s] aremove_path_parts:[%s]'
                   ' asetname:[%s]',
                   NPR.strunicodeout(afile),
                   NPR.strunicodeout(afiles_dir),
                   NPR.strunicodeout(afull_set_name),
+                  NPR.strunicodeout(aremove_path_parts),
                   NPR.strunicodeout(asetname))
 
     return asetname

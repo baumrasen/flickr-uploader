@@ -1854,14 +1854,22 @@ class Uploadr(object):
         if self.args.dry_run:
             return True
 
-        def getSet(path):
+        # ---------------------------------------------------------------------
+        # db_getset
+        #
+        def db_getset(path):
+            """ db_getset
+
+                Proxy function to FlickrApiWrappet.set_name_from_file to be
+                used within SQL Query commands.
+            """
             return faw.set_name_from_file(path,
                                           self.xcfg.FILES_DIR,
                                           self.xcfg.FULL_SET_NAME,
                                           self.xcfg.REMOVE_PATH_PARTS)
 
         con, cur = litedb.connect(self.xcfg.DB_PATH)
-        con.create_function("getSet", 1, getSet)
+        con.create_function("db_getset", 1, db_getset)
         # Enable traceback return from con.create_function.
         litedb.enable_callback_tracebacks(True)
 
@@ -1869,8 +1877,8 @@ class Uploadr(object):
             # List of Sets to be created
             litedb.execute(con, 'SELECT#145', slockdb, self.args.processes,
                            cur,
-                           'SELECT DISTINCT getSet(path) '
-                           'FROM files WHERE getSet(path) '
+                           'SELECT DISTINCT db_getset(path) '
+                           'FROM files WHERE db_getset(path) '
                            'NOT IN (SELECT name FROM sets)',
                            dbcaughtcode='145')
             sets_to_create = cur.fetchall()
@@ -1884,7 +1892,7 @@ class Uploadr(object):
                                'SELECT MIN(files_id), path '
                                'FROM files '
                                'WHERE set_id is NULL '
-                               'AND getSet(path) = ?',
+                               'AND db_getset(path) = ?',
                                qmarkargs=(setname,),
                                dbcaughtcode='156')
                 primary_pic = cur.fetchone()

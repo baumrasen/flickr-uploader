@@ -909,7 +909,8 @@ class Uploadr(object):
 
         if self.args.dry_run:
             NP.niceprint('   Dry Run file:[{!s}] to album [{!s}]...'
-                         .format(NP.strunicodeout(file), NP.strunicodeout(setname)))
+                         .format(NP.strunicodeout(file),
+                                 NP.strunicodeout(setname)))
             return True
 
         NP.niceprint('  Checking file:[{!s}]...'
@@ -1845,9 +1846,13 @@ class Uploadr(object):
         if self.args.dry_run:
             return True
 
-        con, cur = litedb.connect(self.xcfg.DB_PATH)
         def getSet(path):
-            return faw.set_name_from_file(path, self.xcfg.FILES_DIR, self.xcfg.FULL_SET_NAME, self.xcfg.REMOVE_PATH_PARTS)
+            return faw.set_name_from_file(path,
+                                          self.xcfg.FILES_DIR,
+                                          self.xcfg.FULL_SET_NAME,
+                                          self.xcfg.REMOVE_PATH_PARTS)
+
+        con, cur = litedb.connect(self.xcfg.DB_PATH)
         con.create_function("getSet", 1, getSet)
         # Enable traceback return from con.create_function.
         litedb.enable_callback_tracebacks(True)
@@ -1917,10 +1922,11 @@ class Uploadr(object):
                 for filepic in files:
                     # filepic[1] = path for the file from table files
                     # filepic[2] = set_id from files table
-                    setname = faw.set_name_from_file(filepic[1],
-                                                     self.xcfg.FILES_DIR,
-                                                     self.xcfg.FULL_SET_NAME,
-                                                     self.xcfg.REMOVE_PATH_PARTS)
+                    setname = faw.set_name_from_file(
+                        filepic[1],
+                        self.xcfg.FILES_DIR,
+                        self.xcfg.FULL_SET_NAME,
+                        self.xcfg.REMOVE_PATH_PARTS)
 
                     litedb.execute(con, 'SELECT#158',
                                    slockdb, self.args.processes,

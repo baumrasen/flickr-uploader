@@ -78,7 +78,7 @@ You should get the following depending on how the setting FULL_SET_NAME is set:
 | /home/user/media/Album5/pic01.jpg | Album5 |  Album5 | pic01 | Same pic as in Album01 is loaded twice as it's part of a different Album |
 | /home/user/media/Album5/Sub/pic051.jpg | Sub |  Album5/Sub | pic051 | With FULL_SET_NAME=False it will go into Album "Sub" |
 
-You can also ignore parts of the path name to anem the album.
+You can also ignore parts of the path in order to compute the name for the album.
 Example:
 ```python
 REMOVE_PATH_PARTS = ["/Sub$"]

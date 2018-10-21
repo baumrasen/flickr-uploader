@@ -1852,7 +1852,9 @@ class Uploadr(object):
             return True
 
         con, cur = litedb.connect(self.xcfg.DB_PATH)
-        con.create_function("getSet", 4, faw.set_name_from_file)
+        def getSet(path):
+            return faw.set_name_from_file(path, self.xcfg.FILES_DIR, self.xcfg.FULL_SET_NAME, self.xcfg.REMOVE_PATH_PARTS)
+        con.create_function("getSet", 1, getSet)
         # Enable traceback return from con.create_function.
         litedb.enable_callback_tracebacks(True)
 
@@ -1860,15 +1862,9 @@ class Uploadr(object):
             # List of Sets to be created
             litedb.execute(con, 'SELECT#145', slockdb, self.args.processes,
                            cur,
-                           'SELECT DISTINCT getSet(path, ?, ?, ?) '
-                           'FROM files WHERE getSet(path, ?, ?, ?) '
+                           'SELECT DISTINCT getSet(path) '
+                           'FROM files WHERE getSet(path) '
                            'NOT IN (SELECT name FROM sets)',
-                           qmarkargs=(self.xcfg.FILES_DIR,
-                                      self.xcfg.FULL_SET_NAME,
-                                      self.xcfg.REMOVE_PATH_PARTS,
-                                      self.xcfg.FILES_DIR,
-                                      self.xcfg.FULL_SET_NAME,
-                                      self.xcfg.REMOVE_PATH_PARTS,),
                            dbcaughtcode='145')
             sets_to_create = cur.fetchall()
 
@@ -1881,11 +1877,8 @@ class Uploadr(object):
                                'SELECT MIN(files_id), path '
                                'FROM files '
                                'WHERE set_id is NULL '
-                               'AND getSet(path, ?, ?, ?) = ?',
-                               qmarkargs=(self.xcfg.FILES_DIR,
-                                          self.xcfg.FULL_SET_NAME,
-                                          self.xcfg.REMOVE_PATH_PARTS,
-                                          setname,),
+                               'AND getSet(path) = ?',
+                               qmarkargs=(setname,),
                                dbcaughtcode='156')
                 primary_pic = cur.fetchone()
 

@@ -28,6 +28,9 @@ class TestNicePrintMethods(unittest.TestCase):
         Print a message with the format:
             [2017.11.19 01:53:57]:[PID       ][PRINT   ]:[uploadr] Some Message
         """
+        # CODING pylint
+        # pylint: disable=deprecated-method
+
         # with captured_stdout() as astr:
         #     print "hello"
         # assert astr.getvalue() == "hello\n", 'not ok'
@@ -39,7 +42,10 @@ class TestNicePrintMethods(unittest.TestCase):
         print(astr.getvalue())
         print('type:{}'.format(type(astr)))
         npre = r'\[[0-9. :]+\].+hello$'
-        self.assertRegexpMatches(astr.getvalue(), npre)
+        if sys.version_info < (3, ):
+            self.assertRegexpMatches(astr.getvalue(), npre)  # noqa
+        else:
+            self.assertRegex(astr.getvalue(), npre)
 
     def test_unicode(self):
         """ test_unicode
@@ -88,19 +94,33 @@ class TestMethods(unittest.TestCase):
         with self.assertRaises(TypeError):
             astr.split(2)
 
+
+class TestKonstantsMethods(unittest.TestCase):
+    """ TestKonstantsMethods
+    """
+    upldr_k = KonstantsClass.Konstants()
+
+    def test_media_count(self):
+        """ test_media_count
+        """
+
+        for j in range(1, 20):
+            self.upldr_k.media_count = j
+            self.assertEqual(self.upldr_k.media_count, j)
+
     def test_run(self):
         """ test_run
 
             Unit tests for KonstantsClass.Run formula
 
         """
-        print(eval(time.strftime('int("%j")+int("%H")*100'
-                                 '+int("%M")*10+int("%S")')))
+        print(int(time.strftime('%j')) +
+              int(time.strftime('%H'))*100 +
+              int(time.strftime('%M'))*10 +
+              int(time.strftime('%S')))
 
-        self.assertTrue(
-            1 <= eval(
-                time.strftime('int("%j")+int("%H")*100'
-                              '+int("%M")*10+int("%S")')) <= 3415)
+        self.assertTrue(1 <= self.upldr_k.Run <= 3415)
+
         for j in range(1, 366 + 1):
             for h_hour in range(24):
                 for m_min in range(60):
@@ -108,18 +128,16 @@ class TestMethods(unittest.TestCase):
                         self.assertTrue(1 <=
                                         j+h_hour*100+m_min*10+s_secs <= 3415)
 
-
-class TestKonstantsMethods(unittest.TestCase):
-    """ TestKonstantsMethods
-    """
-    def test_media_count(self):
+    def test_initvalues(self):
         """ test_media_count
         """
-        upldr_k = KonstantsClass.Konstants()
+        self.assertIsInstance(self.upldr_k.base_dir, str)
+        self.assertIsInstance(self.upldr_k.ini_file, str)
+        self.assertIsInstance(self.upldr_k.etc_ini_file, str)
+        self.assertIsInstance(self.upldr_k.no_delete_tag, str)
 
-        for j in range(1, 20):
-            upldr_k.media_count = j
-            self.assertEqual(upldr_k.media_count, j)
+        self.assertIsInstance(self.upldr_k.upload_sleep, int)
+        self.assertTrue(0 <= self.upldr_k.upload_sleep <= 600)
 
 
 if __name__ == '__main__':
@@ -131,6 +149,5 @@ if __name__ == '__main__':
     SUITE = unittest.TestLoader().loadTestsFromTestCase(TestNicePrintMethods)
     unittest.TextTestRunner(verbosity=2).run(SUITE)
 
-    SUITE = unittest.TestLoader().loadTestsFromTestCase(
-        TestKonstantsMethods)
+    SUITE = unittest.TestLoader().loadTestsFromTestCase(TestKonstantsMethods)
     unittest.TextTestRunner(verbosity=2).run(SUITE)

@@ -27,6 +27,7 @@ import os.path
 import time
 import sqlite3 as lite
 import subprocess
+import shlex
 import xml
 # Prevents error "AttributeError: 'module' object has no attribute 'etree'"
 try:
@@ -427,7 +428,7 @@ class Uploadr(object):
                         os.path.join(NP.strunicodeout(dirpath),
                                      NP.strunicodeout(fnameonly) + '.JPG'))
                     logging.debug('Converted .JPG file size=[%s]', filesize)
-                except Exception:
+                except OSError:
                     okfilesize = False
                     NP.niceerror(caught=True,
                                  caughtprefix='+++',
@@ -452,7 +453,7 @@ class Uploadr(object):
                                      NP.strunicodeout(afile))))
             else:
                 NP.niceprint('Convert raw file failed. '
-                             'Skipping file: [{!s}]'
+                             'Skipping file:[{!s}]'
                              .format(os.path.normpath(
                                  NP.strunicodeout(dirpath) +
                                  NP.strunicodeout('/') +
@@ -513,20 +514,22 @@ class Uploadr(object):
                 return False
 
             logging.info(command)
+            p_cmd = None
             try:
-                p_cmd = subprocess.call(command, shell=True)
-            except Exception:
+                p_cmd = subprocess.check_call(shlex.split(command))
+            # CODING: Exception subprocess.SubprocessError from Python 3.3
+            except (NameError, ValueError, TypeError, OSError,
+                    subprocess.CalledProcessError) as exc:
                 NP.niceerror(caught=True,
                              caughtprefix='+++',
                              caughtcode='030',
-                             caughtmsg='Error calling exiftool:[{!s}]'
-                             .format(convert_or_copy_tags),
+                             caughtmsg='Error {!s} calling exiftool:[{!s}]'
+                             .format(type(exc), convert_or_copy_tags),
                              useniceprint=True,
                              exceptsysinfo=True)
                 result_cmd = False
             finally:
-                if p_cmd is None:
-                    del p_cmd
+                del p_cmd
 
             return result_cmd
         # ---------------------------------------------------------------------
@@ -1096,11 +1099,12 @@ class Uploadr(object):
                         zuploaderror = True
                         raise IOError(uploadresp)
 
-                except (IOError, httplib.HTTPException):
+                except (IOError, httplib.HTTPException) as exc:
                     NP.niceerror(caught=True,
                                  caughtprefix='+++',
                                  caughtcode='038',
-                                 caughtmsg='Caught IOError/HTTP exception',
+                                 caughtmsg='Caught {!s} exception'
+                                 .format(type(exc)),
                                  useniceprint=True,
                                  exceptsysinfo=True)
                     # CODING: Repeat also below on FlickError (!= 5 and 8)
@@ -1138,7 +1142,7 @@ class Uploadr(object):
                         zuploaderror = True
                         NP.niceprint('More than one file with same '
                                      'checksum/album tag! '
-                                     'Any collisions? File: [{!s}]'
+                                     'Any collisions? File:[{!s}]'
                                      .format(NP.strunicodeout(file)),
                                      logalso=logging.ERROR)
                         break
@@ -1214,19 +1218,19 @@ class Uploadr(object):
                         zuploaderror = True
                         NP.niceprint('More than one file with same '
                                      'checksum/album tag! '
-                                     'Any collisions? File: [{!s}]'
+                                     'Any collisions? File:[{!s}]'
                                      .format(NP.strunicodeout(file)),
                                      logalso=logging.ERROR)
                         break
 
-            logging.error('After CYCLE Up/Reuploading:[%s/%s attempts].',
-                          attempts, self.xcfg.MAX_UPLOAD_ATTEMPTS)
+            logging.warning('After CYCLE Up/Reuploading:[%s/%s attempts].',
+                            attempts, self.xcfg.MAX_UPLOAD_ATTEMPTS)
 
             # Max attempts reached
             if (not zuploadok) and (
                     attempts == (self.xcfg.MAX_UPLOAD_ATTEMPTS - 1)):
                 NP.niceprint('Reached max attempts to upload. Skipping '
-                             'file: [{!s}]'.format(NP.strunicodeout(file)),
+                             'file:[{!s}]'.format(NP.strunicodeout(file)),
                              logalso=logging.ERROR)
             # Error
             elif (not zuploadok) and zuploaderror:
@@ -1464,12 +1468,12 @@ class Uploadr(object):
                     break
                 # Exceptions for flickr.upload function call handled on the
                 # outer try/except.
-                except (IOError, ValueError, httplib.HTTPException):
+                except (IOError, ValueError, httplib.HTTPException) as exc:
                     NP.niceerror(caught=True,
                                  caughtprefix='+++',
                                  caughtcode='060',
-                                 caughtmsg='Caught IOError, ValueError, '
-                                 'HTTP exception',
+                                 caughtmsg='Caught {!s} exception'
+                                 .format(type(exc)),
                                  useniceprint=True,
                                  exceptsysinfo=True)
                     NP.niceerror(caught=True,
@@ -1506,7 +1510,6 @@ class Uploadr(object):
                          logalso=logging.WARNING)
 
             # Update the db the file uploaded
-            # Control for when running multiprocessing set locking
             litedb.execute(con,
                            'UPDATE#055',
                            lock, self.args.processes,
@@ -1563,15 +1566,6 @@ class Uploadr(object):
                                  fname='replace',
                                  logalso=logging.ERROR)
 
-        except lite.Error as err:
-            NP.niceerror(caught=True,
-                         caughtprefix='+++ DB',
-                         caughtcode='081',
-                         caughtmsg='DB error: [{!s}]'.format(err.args[0]),
-                         useniceprint=True)
-            # Release the lock on error.
-            mp.use_lock(lock, False, self.args.processes)
-            success = False
         except Exception:
             NP.niceerror(caught=True,
                          caughtprefix='+++',
@@ -1984,7 +1978,7 @@ class Uploadr(object):
                          .format(NP.strunicodeout(file[1]),
                                  NP.strunicodeout(set_id)))
 
-            litedb.execute(con, 'SELECT#159', lock, self.args.processes,
+            litedb.execute(con, 'UPDATE#159', lock, self.args.processes,
                            bcur,
                            'UPDATE files SET set_id = ? '
                            'WHERE files_id = ?',
@@ -2005,7 +1999,7 @@ class Uploadr(object):
             NP.niceprint('Photo already in set... updating DB'
                          'set_id=[{!s}] photo_id=[{!s}]'
                          .format(set_id, file[0]))
-            litedb.execute(con, 'SELECT#160', lock, self.args.processes,
+            litedb.execute(con, 'UPDATE#160', lock, self.args.processes,
                            bcur,
                            'UPDATE files SET set_id = ? '
                            'WHERE files_id = ?',
@@ -3096,14 +3090,13 @@ class Uploadr(object):
                 Returns SELECT Count(*) from atable
             """
 
-            con, cur = litedb.connect(self.xcfg.DB_PATH)
+            acon, acur = litedb.connect(self.xcfg.DB_PATH)
             acount = litedb.total_rows(
-                con, atable,
+                acon, atable,
                 None, self.args.processes,  # No need for lock,
-                cur, dbcaughtcode='220')
+                acur, dbcaughtcode='220')
 
-            if con is not None and con in locals():
-                litedb.close(con)
+            litedb.close(acon)
 
             return acount
 
@@ -3154,25 +3147,44 @@ class Uploadr(object):
                              int(countflickr) - int(countlocal),
                              countnotinsets))
 
-        # List pics not in sets (if within a parameter) -----------------------
-        # Maximum allowed per_page by Flickr is 500.
-        # Avoid going over in order not to have to handle multipl pages.
-        if (self.args.list_photos_not_in_set and
-                self.args.list_photos_not_in_set > 0 and
-                countnotinsets > 0):
-            NP.niceprint('*****Listing Photos not in a set in Flickr******')
+    # -------------------------------------------------------------------------
+    # list_photos_not_in_set
+    #
+    # List pics not in sets (if within a parameter)
+    #
+    def list_photos_not_in_set(self, max_list):
+        """ list_photos_not_in_set
 
-            # List pics not in sets (if within a parameter, default 10)
-            # (per_page=min(self.args.list_photos_not_in_set, 500):
-            #       find('photos').attrib['total']
-            get_success, get_result, get_errcode = faw.flickrapi_fn(
-                self.nuflickr.photos.getNotInSet, (),
-                dict(per_page=min(self.args.list_photos_not_in_set, 500)),
-                3, 3, False, caughtcode='410')
+            List  Photos Not in Sets on Flickr
+            max_list = Max number of photos to list
+        """
+        NP.niceprint('*****Listing Photos not in a set in Flickr******')
 
-            if get_success and get_errcode == 0:
-                for count, row in enumerate(get_result.find('photos')
-                                            .findall('photo')):
+        # List pics not in sets (if within a parameter, default 10)
+        get_success, get_result, get_errcode = faw.flickrapi_fn(
+            self.nuflickr.photos.getNotInSet, (),
+            dict(per_page=min(max_list if max_list > 0 else 500, 500)),
+            3, 3, False, caughtcode='410')
+
+        if get_success and get_errcode == 0:
+            totalpgs = int(get_result.find('photos').attrib['pages'])
+            logging.debug('list_photos_not_in_set: totalpgs:[%s]', totalpgs)
+
+            count = 0
+            listing_complete = False
+            for apage in range(1, totalpgs+1):
+                logging.debug('[{!s:>6s}] files listed. Page:[{!s}]'
+                              .format(str(count), str(apage)))
+                if apage > 1:
+                    get_success, get_result, get_errcode = faw.flickrapi_fn(
+                        self.nuflickr.photos.getNotInSet, (),
+                        dict(page=apage,
+                             per_page=min(max_list, 500)),
+                        3, 3, False, caughtcode='411')
+                    if not (get_success and get_errcode == 0):
+                        break
+
+                for row in get_result.find('photos').findall('photo'):
                     logging.info('Photo Not in Set: id:[%s] title:[%s]',
                                  row.attrib['id'],
                                  NP.strunicodeout(row.attrib['title']))
@@ -3183,31 +3195,33 @@ class Uploadr(object):
                     tags_success, tags_result, tags_errcode = faw.flickrapi_fn(
                         self.nuflickr.tags.getListPhoto, (),
                         dict(photo_id=row.attrib['id']),
-                        2, 2, False, caughtcode='411')
+                        2, 2, False, caughtcode='412')
 
                     if tags_success and tags_errcode == 0:
                         for tag in tags_result.find('photo')\
                                 .find('tags').findall('tag'):
-                            output_str += 'tag_attrib={!s}|'\
-                                          .format(
-                                              NP.strunicodeout(
-                                                  tag.attrib['raw']))
+                            output_str += 'tag_attrib={!s}|'.format(
+                                NP.strunicodeout(tag.attrib['raw']))
 
                     NP.niceprint(output_str)
 
-                    logging.info('count=[%s]', count)
-                    if (count == 500 or
-                            count >= (self.args.list_photos_not_in_set - 1) or
-                            count >= (countnotinsets - 1)):
+                    count += 1
+                    if count % 100 > 0:
+                        logging.info('[{!s:>6s}] files listed. Page:[{!s}]'
+                                     .format(str(count), str(apage)))
+                    if max_list > 0 and count >= max_list:
                         logging.info('Stopped at photo [%s] listing '
                                      'photos not in a set', count)
+                        listing_complete = True
                         break
-            else:
-                NP.niceprint('Error in list get_not_in_set. No output.',
-                             logalso=logging.ERROR)
+                if listing_complete:
+                    break
+        else:
+            NP.niceprint('Error in list get_not_in_set. No output.',
+                         logalso=logging.ERROR)
 
-            NP.niceprint('*****Completed Listing Photos not in a set '
-                         'in Flickr******')
+        NP.niceprint('*****Completed Listing [{!s}] Photos not in a set '
+                     'in Flickr******'.format(count))
 
 
 # -----------------------------------------------------------------------------

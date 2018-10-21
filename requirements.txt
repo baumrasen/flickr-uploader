@@ -1,3 +1,6 @@
+# urllib3 version 1.24 is not python 2.7 compatible for now
+# requests 2.20.0 should now be compatible
+# urllib3==1.23 ; python_version <='2.7'
 # Force six 1.11.0
 six>=1.11.0 ; python_version >= '2.7'
 flickrapi ; python_version >= '2.7'

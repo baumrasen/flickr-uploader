@@ -291,12 +291,11 @@ def retry(attempts=3, waittime=5, randtime=False):
                 new_wrapper function for @retry
             """
             rtime = time
-            error = None
 
             if logging.getLogger().getEffectiveLevel() <= logging.INFO:
                 if args is not None:
-                    logging.info('___Retry f():[%s] '
-                                 'Max:[%s] Delay:[%s] Rnd[%s]',
+                    logging.info('___Retry f():[%s] Max:[%s] '
+                                 'Delay:[%s] Rnd[%s]',
                                  a_fn.__name__, attempts,
                                  waittime, randtime)
                     for i, arg in enumerate(args):
@@ -304,38 +303,36 @@ def retry(attempts=3, waittime=5, randtime=False):
                                       a_fn.__name__, i, arg)
             for i in range(attempts if attempts > 0 else 1):
                 try:
-                    logging.info('___Retry f():[%s]: '
-                                 'Attempt:[%s] of [%s]',
+                    logging.info('___Retry f():[%s]: [%s/%s] Attempt',
                                  a_fn.__name__, i + 1, attempts)
                     return a_fn(*args, **kwargs)
-                except flickrapi.exceptions.FlickrError as exc:
-                    logging.error('___Retry f():[%s]: Error code A: [%s]',
-                                  a_fn.__name__, exc)
-                    error = exc
-                except lite.Error as err:
-                    logging.error('___Retry f():[%s]: Error code B: [%s]',
-                                  a_fn.__name__, err)
-                    error = err
-                    # CODING: Release existing locks on error?
+                except (flickrapi.exceptions.FlickrError,
+                        lite.Error,
+                        Exception) as err:
+                    # CODING: On lite.erro release existing locks on error?
                     # Check how to handle this particular scenario.
-                except Exception as err:
-                    logging.error('___Retry f():[%s]: Error code C: Catchall',
-                                  a_fn.__name__)
-                    error = err
+                    logging.error('___Retry f():[%s]: [%s/%s] Error: [%s]',
+                                  a_fn.__name__, i + 1, attempts, err)
 
-                logging.warning('___Function:[%s] Waiting:[%s] Rnd:[%s]',
-                                a_fn.__name__, waittime, randtime)
-                if randtime:
-                    rtime.sleep(random.randrange(0,
-                                                 (waittime + 1)
-                                                 if waittime >= 0
-                                                 else 1))
-                else:
-                    rtime.sleep(waittime if waittime >= 0 else 0)
-            logging.error('___Retry f():[%s] '
-                          'Max:[%s] Delay:[%s] Rnd[%s]: Raising ERROR!',
-                          a_fn.__name__, attempts, waittime, randtime)
-            raise error
+                    if i == attempts - 1:
+                        logging.error('___Retry f():[%s] '
+                                      'Max:[%s] Delay:[%s] Rnd[%s]: '
+                                      'Raising ERROR!',
+                                      a_fn.__name__,
+                                      attempts, waittime, randtime)
+                        raise
+
+                    logging.warning('___Retry f():[%s] [%s/%s] '
+                                    'Waiting:[%s] Rnd:[%s]',
+                                    a_fn.__name__, i + 1, attempts,
+                                    waittime, randtime)
+                    if randtime:
+                        rtime.sleep(random.randrange(0,
+                                                     (waittime + 1)
+                                                     if waittime >= 0
+                                                     else 1))
+                    else:
+                        rtime.sleep(waittime if waittime >= 0 else 0)
         return new_wrapper
     return wrapper_fn
 # -----------------------------------------------------------------------------

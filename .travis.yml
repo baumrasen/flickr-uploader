@@ -19,13 +19,16 @@ language: python
 python:
   - "2.7"
   - "3.6"
-  - "3.7-dev"
-#  - "3.7"
+  - "3.7"
+
+# -----------------------------------------------------------------------------
+# dist: trusty (not python 3.7 compatible) or xenial (python 3.7 compatible)
+dist: xenial
 
 # -----------------------------------------------------------------------------
 #branches:
 #  except:
-#    - dev-jul18
+#    - dev-oct18b
 
 # -----------------------------------------------------------------------------
 before_install:
@@ -61,9 +64,9 @@ env:
     - TAIL_LINES=20          # Tail $TAIL_LINES for output logging. Default: 20
     - WAIT_TIME=1            # Sleep time between first and second run
     - DeleteAllFromFlickr=0  # To ensure an empty Flickr. Set DeleteAllFromFlickr=1. 0 otherwise.
-    - NOHUPLOGFILE=/home/travis/build/oPromessa/flickr-uploader/nohup.log
-    - NOHUPLSTFILE=/home/travis/build/oPromessa/flickr-uploader/nohup.lst
-
+    - NOHUPOUTFILE=/home/travis/build/oPromessa/flickr-uploader/uploadr.out
+    - NOHUPERRFILE=/home/travis/build/oPromessa/flickr-uploader/uploadr.err.lst
+    - NOHUPLOGFILE=/home/travis/build/oPromessa/flickr-uploader/uploadr.log
 # -----------------------------------------------------------------------------
 # Matrix of Test Scenarios
 #   Help
@@ -75,10 +78,10 @@ env:
 #   ExcludedFolders+IgnoredFiles in Single Processing mode.
 #       Also test cleaning up badfiles database entries and listing files not in set. Plus RAW files.
 #       Also test -m/--mask-sensitive option
-#       Also test ROTATING_LOGGIN into uploadr.err file
+#       Also test ROTATING_LOGGING into uploadr.err file
 #   Old273INI to test previous INI config file format using os.path.dirname(sys.argv[0]) vs os.getcwd()
 #   NoVerbose
-#       Also test ROTATING_LOGGIN into uploadr.err file
+#       Also test ROTATING_LOGGING into uploadr.err file
   matrix:
 # TestScenario: Help, DryRunNoToken, BadFiles, MultiProcessing, Remove, Replace, RemoveReplace, Old273INI
     - TestScenario=Help UploadrOptions="$VerboseVar --help" DeleteAllFromFlickr=1
@@ -110,8 +113,7 @@ before_script:
 #  - find "./tests/Test Photo Library" -type f -exec md5sum '{}' \;
 # Prevent errors in case log and err files are not generated
   - touch build.txt
-  - touch /home/travis/build/oPromessa/flickr-uploader/uploadr.err
-  - touch $NOHUPLOGFILE $NOHUPLSTFILE
+  - touch $NOHUPOUTFILE $NOHUPERRFILE $NOHUPLOGFILE
   - touch /home/travis/build/oPromessa/flickr-uploader/dbrun1.log
   - touch /home/travis/build/oPromessa/flickr-uploader/dbrun2.log
 # INI File for deletr... to bypass erro "pytest --doctest-modules" exited with 2.
@@ -153,8 +155,8 @@ script:
 
 # First RUN -------------------------------------------------------------------
   # stdout to LOG file, stderr to LST file
-  - coverage run -a --concurrency multiprocessing `which uploadr.py` $VerboseVar $UploadrOptions > $NOHUPLOGFILE 2> $NOHUPLSTFILE
-  - tail -n $TAIL_LINES $NOHUPLOGFILE $NOHUPLSTFILE
+  - coverage run -a --concurrency multiprocessing `which uploadr.py` $VerboseVar $UploadrOptions > $NOHUPOUTFILE 2> $NOHUPERRFILE
+  - tail -n $TAIL_LINES $NOHUPOUTFILE $NOHUPERRFILE
 
   - coverage combine
   - coverage html
@@ -213,11 +215,11 @@ script:
 
   # Actual RUN
   # Scenario Old273INI: run ./uploadr.py instead of `which uploadr.py`
-  - if [[ $TestScenario == Old273INI ]]; then coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> $NOHUPLOGFILE 2>> $NOHUPLSTFILE; fi
-  - if [[ $TestScenario == DryRunNoToken ]]; then coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> $NOHUPLOGFILE 2>> $NOHUPLSTFILE < /home/travis/build/oPromessa/flickr-uploader/tests/verifiercode.txt || echo ok; fi
-  - if [[ $TestScenario != Old273INI && $TestScenario != DryRunNoToken ]]; then coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> $NOHUPLOGFILE 2>> $NOHUPLSTFILE; fi
+  - if [[ $TestScenario == Old273INI ]]; then coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> $NOHUPOUTFILE 2>> $NOHUPERRFILE; fi
+  - if [[ $TestScenario == DryRunNoToken ]]; then coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> $NOHUPOUTFILE 2>> $NOHUPERRFILE < /home/travis/build/oPromessa/flickr-uploader/tests/verifiercode.txt || echo ok; fi
+  - if [[ $TestScenario != Old273INI && $TestScenario != DryRunNoToken ]]; then coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> $NOHUPOUTFILE 2>> $NOHUPERRFILE; fi
 
-  - tail -n $TAIL_LINES $NOHUPLOGFILE $NOHUPLSTFILE
+  - tail -n $TAIL_LINES $NOHUPOUTFILE $NOHUPERRFILE
 
   - coverage combine
   - sleep $WAIT_TIME
@@ -236,22 +238,22 @@ script:
 after_failure:
   # Write build related data to control file
   - echo -e "TRAVIS_TEST_RESULT:\t${TRAVIS_TEST_RESULT}\nTRAVIS_PYTHON_VERSION:\t${TRAVIS_PYTHON_VERSION}\nTRAVIS_BUILD_DIR:\t${TRAVIS_BUILD_DIR}\nTRAVIS_BUILD_ID:\t${TRAVIS_BUILD_ID}\nTRAVIS_BUILD_NUMBER:\t${TRAVIS_BUILD_NUMBER}\nTRAVIS_JOB_NUMBER:\t${TRAVIS_JOB_NUMBER}\nTRAVIS_EVENT_TYPE:\t${TRAVIS_EVENT_TYPE}\nTRAVIS_COMMIT:\t\t${TRAVIS_COMMIT}\nTRAVIS_COMMIT_MESSAGE:\t${TRAVIS_COMMIT_MESSAGE}\n" >> build.txt
-  # Upload LOG/ERR files to dropbox
+  # Upload OUT/LOG/ERR files to dropbox
   - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN `basename $NOHUPOUTFILE` $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN `basename $NOHUPERRFILE` $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   - python tests/drop.py --token $DROPBOX_TOKEN dbrun1.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   - python tests/drop.py --token $DROPBOX_TOKEN dbrun2.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
-  - python tests/drop.py --token $DROPBOX_TOKEN uploadr.err $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN `basename $NOHUPLOGFILE` $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
 
-  - tail -n $TAIL_LINES $NOHUPLSTFILE
+  - tail -n $TAIL_LINES $NOHUPERRFILE
 
 # -----------------------------------------------------------------------------
 # after_script
 after_script:
-# MD5SUM Output for REFERENCE -------------------------------------------------
+  # MD5SUM Output for REFERENCE -----------------------------------------------
 #  - if [[ $TestScenario == RemoveReplace ]]; then find "./tests/Test Photo Library" -type f -exec md5sum '{}' \; ; fi
-# DB OUTPUT for Second RUN#2------------------------------------------------
+  # DB OUTPUT for Second RUN#2------------------------------------------------
   - sqlite3 flickrdb "SELECT *, datetime( last_modified, 'unixepoch', 'localtime') FROM files ORDER BY path;"
   - sqlite3 flickrdb 'SELECT * FROM badfiles ORDER BY path;'
   - sqlite3 flickrdb 'SELECT * FROM sets ORDER BY name;'
@@ -263,14 +265,16 @@ after_script:
   - echo DBRUN2-------End DB sets check
   # Write build related data to control file
   - echo -e "TRAVIS_TEST_RESULT:\t${TRAVIS_TEST_RESULT}\nTRAVIS_PYTHON_VERSION:\t${TRAVIS_PYTHON_VERSION}\nTRAVIS_BUILD_DIR:\t${TRAVIS_BUILD_DIR}\nTRAVIS_BUILD_ID:\t${TRAVIS_BUILD_ID}\nTRAVIS_BUILD_NUMBER:\t${TRAVIS_BUILD_NUMBER}\nTRAVIS_JOB_NUMBER:\t${TRAVIS_JOB_NUMBER}\nTRAVIS_EVENT_TYPE:\t${TRAVIS_EVENT_TYPE}\nTRAVIS_COMMIT:\t\t${TRAVIS_COMMIT}\nTRAVIS_COMMIT_MESSAGE:\t${TRAVIS_COMMIT_MESSAGE}\n" >> build.txt
-# Upload LOG/ERR files to Dropbox
+  # Upload OUT/LOG/ERR files to dropbox
   - python tests/drop.py --token $DROPBOX_TOKEN build.txt $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
-  - python tests/drop.py --token $DROPBOX_TOKEN nohup.lst $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN `basename $NOHUPOUTFILE` $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+  - python tests/drop.py --token $DROPBOX_TOKEN `basename $NOHUPERRFILE` $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   - python tests/drop.py --token $DROPBOX_TOKEN dbrun1.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
   - python tests/drop.py --token $DROPBOX_TOKEN dbrun2.log $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
-  - python tests/drop.py --token $DROPBOX_TOKEN uploadr.err $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
-  - python tests/drop.py --token $DROPBOX_TOKEN coverage_html.tar.gz $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario} || echo ok
+  - python tests/drop.py --token $DROPBOX_TOKEN `basename $NOHUPLOGFILE` $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario}
+
+  # Coverage is uploaded to coveralls.io
+#  - python tests/drop.py --token $DROPBOX_TOKEN coverage_html.tar.gz $TRAVIS_BUILD_NUMBER/${TRAVIS_JOB_NUMBER}-${TRAVIS_TEST_RESULT}_${TestScenario} || echo ok
 
 # -----------------------------------------------------------------------------
 # Deploy to Heroku

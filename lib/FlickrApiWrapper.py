@@ -491,21 +491,24 @@ def set_name_from_file(afile, afiles_dir, afull_set_name, aremove_path_parts):
     '/some/photos', True, ['/Out$'])
     'Parent/Out/Album'
 
-
     >>> set_name_from_file('/some/photos/Out/unique.jpg',\
     '/some/photos/Out', True, ['/some/photos/Out'])
-    'EmptyAlbum'
+    'Out'
     >>> set_name_from_file('/some/photos/Out/unique.jpg',\
     '/some/photos/Out', True, ['some/photos/Out'])
-    'EmptyAlbum
+    'Out'
 
-    # >>> set_name_from_file('/Test Photo Library/Pics.Dupped/dupped_31.jpg',\
-    # '/home/ruler/Documents/GitHub/flickr-uploader/tests/Test Photo Library',\
-    # False, ['/Test Photo Library/Pics.Dupped'])
-    # 'EmptyAlbum'
-    # >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
-    # '/some/photos', False, ['Album'])
-    # 'Parent'
+    >>> set_name_from_file('/Test Photo Library/Pics.Dupped/dupped_31.jpg',\
+    '/home/ruler/Documents/GitHub/flickr-uploader/tests/Test Photo Library',\
+    False, [])
+    'Pics.Dupped'
+    >>> set_name_from_file('/Test Photo Library/Pics.Dupped/dupped_31.jpg',\
+    '/home/ruler/Documents/GitHub/flickr-uploader/tests/Test Photo Library',\
+    False, ['/Test Photo Library/Pics.Dupped'])
+    'Test Photo Library'
+    >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
+    '/some/photos', False, ['Album'])
+    'Parent'
     """
 
     assert afile, NPR.niceassert('[{!s}] is empty!'
@@ -519,23 +522,33 @@ def set_name_from_file(afile, afiles_dir, afull_set_name, aremove_path_parts):
                   NPR.strunicodeout(afull_set_name),
                   NPR.strunicodeout(aremove_path_parts))
 
+    _, noalbum = os.path.split(
+        afiles_dir.rstrip(os.sep) if afiles_dir else 'NoAlbum')
+
     dir_name = os.path.dirname(afile)
+    dir_name = os.path.relpath(dir_name, afiles_dir)
+    logging.debug('new_dir_name:[%s]', dir_name)
+
     if aremove_path_parts:
         for reg_exp in aremove_path_parts:
             dir_name = re.sub(reg_exp, "", dir_name)
         logging.debug('in  empty? dir_name:[%s]', dir_name)
-        # dir_name = dir_name.rstrip(os.sep)  # Avoids os.path.split return ''
-        # dir_name = 'EmptyAlbum' if dir_name == '' else dir_name
+        dir_name = dir_name.rstrip(os.sep)  # Avoids os.path.split return ''
+        dir_name = noalbum if dir_name == '' else dir_name
         logging.debug('out empty? dir_name:[%s]', dir_name)
 
     if afull_set_name:
         logging.debug('relpath\n\tdir_name:[%s]\n\tafiles_dir:[%s]',
                       dir_name, afiles_dir)
-        asetname = os.path.relpath(dir_name, afiles_dir)
+        # asetname = os.path.relpath(dir_name, afiles_dir)
+        asetname = dir_name
     else:
         logging.debug('path.split\n\tdir_name:[%s]\n\tafiles_dir:[%s]',
                       dir_name, afiles_dir)
         _, asetname = os.path.split(dir_name)
+
+    asetname = asetname if not (asetname == '.' or
+                                asetname == '..') else noalbum
     logging.debug('set_name_from_file out: '
                   'afile:[%s] afiles_dir=[%s] afull_set_name:[%-5s] '
                   'aremove_path_parts:[%s] asetname:[%s]',

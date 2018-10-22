@@ -478,9 +478,9 @@ class Uploadr(object):
     def convert_raw_file(self, a_dirpath, a_fname, a_fext, a_fbasename):
         """ convert_raw_file
 
-        a_dirpath  = dirpath folder for filename
-        a_fname    = filename (including extension)
-        a_fext     = lower case extension of current file
+        a_dirpath   = dirpath folder for filename
+        a_fname     = filename (including extension)
+        a_fext      = lower case extension of current file
         a_fbasename = filiename without extension
         """
         # ---------------------------------------------------------------------

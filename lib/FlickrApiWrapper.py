@@ -447,6 +447,9 @@ def set_name_from_file(afile, afiles_dir, afull_set_name, aremove_path_parts):
 
     Return setname for a file path depending on FULL_SET_NAME True/False
     and REMOVE_PATH_PARTS 'removal' regular expression.
+    A REMOVE_PATH_PARTS regular expression which results in an empty, '.' or
+    '..' setname is converted to the basedir of afiles_dir or 'NoAlbum' string
+    if it is not available.
     Example#1:
          File to upload: /home/user/media/2014/05/05/photo.jpg
               FILES_DIR: /home/user/media
@@ -488,16 +491,20 @@ def set_name_from_file(afile, afiles_dir, afull_set_name, aremove_path_parts):
     '/some/photos', False, ['/Out$'])
     'Album'
     >>> set_name_from_file('/some/photos/Parent/Out/Album/Out/unique.jpg',\
-    '/some/photos', True, ['/Out$'])
+    '/some/photos', True, ['(/Out$)+'])
     'Parent/Out/Album'
-
+    >>> set_name_from_file('/some/photos/Parent/Out/Album/Out/unique.jpg',\
+    '/some/photos', False, ['(/Out)+'])
+    'Album'
+    >>> set_name_from_file('/some/photos/Parent/Out/Album/Out/unique.jpg',\
+    '/some/photos', True, ['(/Out)+'])
+    'Parent/Album'
     >>> set_name_from_file('/some/photos/Out/unique.jpg',\
     '/some/photos/Out', True, ['/some/photos/Out'])
     'Out'
     >>> set_name_from_file('/some/photos/Out/unique.jpg',\
     '/some/photos/Out', True, ['some/photos/Out'])
     'Out'
-
     >>> set_name_from_file('/Test Photo Library/Pics.Dupped/dupped_31.jpg',\
     '/home/ruler/Documents/GitHub/flickr-uploader/tests/Test Photo Library',\
     False, [])
@@ -531,7 +538,16 @@ def set_name_from_file(afile, afiles_dir, afull_set_name, aremove_path_parts):
 
     if aremove_path_parts:
         for reg_exp in aremove_path_parts:
-            dir_name = re.sub(reg_exp, "", dir_name)
+            try:
+                dir_name = re.sub(reg_exp, "", dir_name)
+            except re.error as exc:
+                NPR.niceerror(caught=True,
+                              caughtprefix='+++',
+                              caughtcode='015',
+                              caughtmsg='Caught {!s} exception'
+                              .format(type(exc)),
+                              useniceprint=True,
+                              exceptsysinfo=True)
         logging.debug('in  empty? dir_name:[%s]', dir_name)
         dir_name = dir_name.rstrip(os.sep)  # Avoids os.path.split return ''
         dir_name = noalbum if dir_name == '' else dir_name

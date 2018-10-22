@@ -468,7 +468,6 @@ def set_name_from_file(afile, afiles_dir, afull_set_name, aremove_path_parts):
                 []=> 2014/05/05/Output
       ["/Output$"]=> 2014/05/05
 
-    >>> logging.getLogger().setLevel(logging.DEBUG)
     >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
     '/some/photos', False, [])
     'Album'
@@ -534,7 +533,15 @@ def set_name_from_file(afile, afiles_dir, afull_set_name, aremove_path_parts):
 
     dir_name = os.path.dirname(afile)
     dir_name = os.path.relpath(dir_name, afiles_dir)
-    logging.debug('new_dir_name:[%s]', dir_name)
+
+    logging.debug('set_name_from_file dir: '
+                  'afile:[%s] dir_name=[%s] afull_set_name:[%-5s] '
+                  'aremove_path_parts:[%s] noalbum:[%s]',
+                  NPR.strunicodeout(afile),
+                  NPR.strunicodeout(dir_name),
+                  NPR.strunicodeout(afull_set_name),
+                  NPR.strunicodeout(aremove_path_parts),
+                  NPR.strunicodeout(noalbum))
 
     if aremove_path_parts:
         for reg_exp in aremove_path_parts:
@@ -548,30 +555,30 @@ def set_name_from_file(afile, afiles_dir, afull_set_name, aremove_path_parts):
                               .format(type(exc)),
                               useniceprint=True,
                               exceptsysinfo=True)
-        logging.debug('in  empty? dir_name:[%s]', dir_name)
+
+        logging.debug('set_name_from_file    : dir_name:[%s] after re',
+                      NPR.strunicodeout(dir_name))
         dir_name = dir_name.rstrip(os.sep)  # Avoids os.path.split return ''
         dir_name = noalbum if dir_name == '' else dir_name
-        logging.debug('out empty? dir_name:[%s]', dir_name)
+        logging.debug('set_name_from_file    : dir_name:[%s] after check',
+                      NPR.strunicodeout(dir_name))
 
     if afull_set_name:
-        logging.debug('relpath\n\tdir_name:[%s]\n\tafiles_dir:[%s]',
-                      dir_name, afiles_dir)
-        # asetname = os.path.relpath(dir_name, afiles_dir)
         asetname = dir_name
     else:
-        logging.debug('path.split\n\tdir_name:[%s]\n\tafiles_dir:[%s]',
-                      dir_name, afiles_dir)
         _, asetname = os.path.split(dir_name)
 
     asetname = asetname if not (asetname == '.' or
                                 asetname == '..') else noalbum
+
     logging.debug('set_name_from_file out: '
-                  'afile:[%s] afiles_dir=[%s] afull_set_name:[%-5s] '
-                  'aremove_path_parts:[%s] asetname:[%s]',
+                  'afile:[%s] dir_name=[%s] afull_set_name:[%-5s] '
+                  'aremove_path_parts:[%s] noalbum:[%s] asetname:[%s]',
                   NPR.strunicodeout(afile),
-                  NPR.strunicodeout(afiles_dir),
+                  NPR.strunicodeout(dir_name),
                   NPR.strunicodeout(afull_set_name),
                   NPR.strunicodeout(aremove_path_parts),
+                  NPR.strunicodeout(noalbum),
                   NPR.strunicodeout(asetname))
 
     return asetname

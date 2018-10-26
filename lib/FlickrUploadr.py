@@ -2745,6 +2745,14 @@ class Uploadr(object):
                                      logalso=logging.WARNING)
                         continue
 
+            # CODING XXX flickr sometimes returns an empty "photo" array
+            if pic_index == 0:
+                NP.niceprint('Flickr returning incorrect data: "photos" array '
+                             'returned by photos.search is empty!'
+                             'Try again later. Exiting...',
+                             fname='is_uploaded', logalso=logging.CRITICAL)
+                sys.exit(10)
+
         return ret_is_photo_uploaded, ret_photos_uploaded, \
             ret_photo_id, ret_uploaded_no_set
 

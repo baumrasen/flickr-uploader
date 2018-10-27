@@ -116,7 +116,7 @@ before_script:
   - touch $NOHUPOUTFILE $NOHUPERRFILE $NOHUPLOGFILE
   - touch /home/travis/build/oPromessa/flickr-uploader/dbrun1.log
   - touch /home/travis/build/oPromessa/flickr-uploader/dbrun2.log
-# INI File for deletr... to bypass erro "pytest --doctest-modules" exited with 2.
+# INI File for deletr... to bypass error "pytest --doctest-modules" exited with 2.
   - cp flickr-deletr-master/tests/deletr.ini /home/travis/virtualenv/python$pythonVersion/bin/deletr.ini || cp flickr-deletr-master/tests/deletr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/deletr.ini
 
 # -----------------------------------------------------------------------------
@@ -130,17 +130,17 @@ script:
 # CODE CHECK: flakes, flake8, doctest, unittests ------------------------------
 #     pytest --flakes (Code analysis)
 #     pytest
-#     pytest --doctest-modules
+#     pytest --doctest-modules flickr-uploader
 #     unittests
 #     flake8
   - |
     if [[ $TestScenario == Help ]]
     then
-      pytest -v --flakes;          ec1=$?
-      pytest -v;                   ec2=$?
-      pytest --doctest-modules;    ec3=$?
-      python tests/TestModules.py; ec4=$?
-      flake8;                      ec5=$?
+      pytest -v --flakes;                         ec1=$?
+      pytest -v;                                  ec2=$?
+      pytest --doctest-modules flickr-uploader;   ec3=$?
+      python tests/TestModules.py;                ec4=$?
+      flake8;                                     ec5=$?
       echo $ec1 $ec2 $ec3 $ec4 $ec5
     fi; (( ! ( ec1 + ec2 + ec3 + ec4 + ec5 ) ))
 

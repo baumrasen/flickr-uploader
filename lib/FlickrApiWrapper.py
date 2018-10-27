@@ -558,7 +558,9 @@ def set_name_from_file(afile, afiles_dir, afull_set_name, aremove_path_parts):
 
         logging.debug('set_name_from_file    : dir_name:[%s] after re',
                       NPR.strunicodeout(dir_name))
-        dir_name = dir_name.rstrip(os.sep)  # Avoids os.path.split return ''
+        # Right Strip '/' prevents os.path.split return '' (empty setname)
+        # Also eliminates leading '/'
+        dir_name = dir_name.rstrip(os.sep).lstrip(os.sep)
         dir_name = noalbum if dir_name == '' else dir_name
         logging.debug('set_name_from_file    : dir_name:[%s] after check',
                       NPR.strunicodeout(dir_name))

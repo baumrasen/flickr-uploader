@@ -2748,7 +2748,7 @@ class Uploadr(object):
             # CODING XXX flickr sometimes returns an empty "photo" array
             if pic_index == 0:
                 NP.niceprint('Flickr returning incorrect data: "photos" array '
-                             'returned by photos.search is empty!'
+                             'returned by photos.search is empty! '
                              'Try again later. Exiting...',
                              fname='is_uploaded', logalso=logging.CRITICAL)
                 sys.exit(10)

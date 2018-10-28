@@ -74,7 +74,8 @@ def execute(aconn, qry_name, adb_lock, nprocs,
         >>> if sys.version_info < (3, 4):
         ...     con, cur = litedb.connect("temp_test_file_db")
         ... else:
-        ...     con, cur = litedb.connect("file::memory:?cache=shared", uri=True)
+        ...     con, cur = litedb.connect("file::memory:?cache=shared",
+        ...                uri=True)
         >>> litedb.execute(con,
         ...                'CREATE', None, 0, cur,
         ...                'CREATE TABLE IF NOT EXISTS files '

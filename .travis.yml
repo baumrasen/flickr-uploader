@@ -45,7 +45,7 @@ install:
   - pip install -r requirements.txt
   # Get deletr to delete all pics Flickr prior to a run
   - wget https://github.com/oPromessa/flickr-deletr/archive/master.tar.gz -O flickr-deletr-master.tar.gz
-  - tar zxvf flickr-deletr-master.tar.gz
+  - tar zxvf flickr-deletr-master.tar.gz -C ..
   # Run python setup.py install. Allow --old-and-unmanageable to copy ini file to etc folder
   - python setup.py install --old-and-unmanageable
   - which uploadr.py
@@ -117,7 +117,7 @@ before_script:
   - touch /home/travis/build/oPromessa/flickr-uploader/dbrun1.log
   - touch /home/travis/build/oPromessa/flickr-uploader/dbrun2.log
 # INI File for deletr... to bypass error "pytest --doctest-modules" exited with 2.
-  - cp flickr-deletr-master/tests/deletr.ini /home/travis/virtualenv/python$pythonVersion/bin/deletr.ini || cp flickr-deletr-master/tests/deletr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/deletr.ini
+  - cp ../flickr-deletr-master/tests/deletr.ini /home/travis/virtualenv/python$pythonVersion/bin/deletr.ini || cp ../flickr-deletr-master/tests/deletr.ini /home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/bin/deletr.ini
 
 # -----------------------------------------------------------------------------
 # run script for tests
@@ -148,9 +148,9 @@ script:
   - |
     if [[ $TRAVIS_PYTHON_VERSION == 2* && $DeleteAllFromFlickr == 1 ]]
     then
-      cp flickr-deletr-master/tests/deletr.ini flickr-deletr-master/deletr.ini
-      cp token/oauth-tokens.sqlite flickr-deletr-master/token/oauth-tokens.sqlite
-      coverage run -a --concurrency multiprocessing ./flickr-deletr-master/delete.py
+      cp ../flickr-deletr-master/tests/deletr.ini ../flickr-deletr-master/deletr.ini
+      cp token/oauth-tokens.sqlite ../flickr-deletr-master/token/oauth-tokens.sqlite
+      coverage run -a --concurrency multiprocessing ../flickr-deletr-master/delete.py
     fi
 
 # First RUN -------------------------------------------------------------------

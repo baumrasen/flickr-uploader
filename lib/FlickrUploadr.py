@@ -2593,7 +2593,7 @@ class Uploadr(object):
         # Set 'Number of pics with specified checksum' to 0 and return.
         if not search_is_uploaded.find('photos').attrib['total']:
             ret_photos_uploaded = 0
-            NP.niceprint(' IS_UPLOADED=[ERROR#3]: Invalid return. Confinuing',
+            NP.niceprint(' IS_UPLOADED=[ERROR#3]: Invalid return. Continuing',
                          fname='isuploaded',
                          verbosity=3,
                          logalso=logging.ERROR)

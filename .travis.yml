@@ -136,11 +136,11 @@ script:
   - |
     if [[ $TestScenario == Help ]]
     then
-      pytest -v --flakes;                         ec1=$?
-      pytest -v;                                  ec2=$?
-      pytest --doctest-modules flickr-uploader;   ec3=$?
-      python tests/TestModules.py;                ec4=$?
-      flake8;                                     ec5=$?
+      pytest -v --flakes;             ec1=$?
+      pytest -v;                      ec2=$?
+      pytest --doctest-modules;       ec3=$?
+      python tests/TestModules.py;    ec4=$?
+      flake8;                         ec5=$?
       echo $ec1 $ec2 $ec3 $ec4 $ec5
     fi; (( ! ( ec1 + ec2 + ec3 + ec4 + ec5 ) ))
 

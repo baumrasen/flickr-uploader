@@ -515,6 +515,12 @@ def set_name_from_file(afile, afiles_dir, afull_set_name, aremove_path_parts):
     >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
     '/some/photos', False, ['Album'])
     'Parent'
+    >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
+    '/some/photos', False, ['Album', 'Parent'])
+    'photos'
+    >>> set_name_from_file('/some/photos/Parent/Album/unique file.jpg',\
+    '/some/photos', False, ['Album', '(Parent'])
+    'Parent'    
     """
 
     assert afile, NPR.niceassert('[{!s}] is empty!'

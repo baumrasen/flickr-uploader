@@ -90,7 +90,8 @@ env:
     - TestScenario=MultiProcessing UploadrOptions="$VerboseVar $BadFilesVar -p 20"
     - TestScenario=add_albums_tag UploadrOptions="$VerboseVar -p 20"
     - TestScenario=RemoveReplace UploadrOptions="$VerboseVar $BadFilesVar $ListPhotosNotInSet -p 10 -c"
-    - TestScenario=ExcludedFolders UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -c -l 50 -m"
+    # CODING... added processes... for debug
+    - TestScenario=ExcludedFolders UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -c -l 50 -m -p 10"
     - TestScenario=Old273INI UploadrOptions="$VerboseVar $BadFilesVar $ExcludedVar -p 10"
     - TestScenario=NoVerbose UploadrOptions="-p 20"
 

@@ -18,6 +18,7 @@ from __future__ import division    # This way: 3 / 2 == 1.5; 3 // 2 == 1
 # -----------------------------------------------------------------------------
 # Import section
 #
+import sys
 import logging
 import sqlite3 as lite
 # -----------------------------------------------------------------------------
@@ -36,7 +37,7 @@ NPR = NicePrint.NicePrint()
 # -----------------------------------------------------------------------------
 
 
-def connect(sqlite_file):
+def connect(sqlite_file, uri=False):
     """ connect
 
         Make connection to an SQLite database file
@@ -44,12 +45,15 @@ def connect(sqlite_file):
         Returns the connection and a cursor to be used in subsequent queries
     """
 
-    logging.debug('Open DB [%s]', sqlite_file)
-    conn = lite.connect(sqlite_file)
+    logging.debug('Open DB [%s] uri:[%s]', sqlite_file, uri)
+    if sys.version_info < (3, 4):
+        conn = lite.connect(sqlite_file)
+    else:
+        conn = lite.connect(sqlite_file, uri=uri)
     conn.text_factory = str
 
     acursor = conn.cursor()
-    logging.debug('Opened DB [%s]', sqlite_file)
+    logging.debug('Opened DB [%s] uri:[%s]', sqlite_file, uri)
 
     return conn, acursor
 
@@ -67,7 +71,10 @@ def execute(aconn, qry_name, adb_lock, nprocs,
         Returns False on sqlite3 exception
 
         >>> import lib.SQLiteDBHelper as litedb
-        >>> con, cur = litedb.connect("file::memory:?cache=shared")
+        >>> if sys.version_info < (3, 4):
+        ...     con, cur = litedb.connect("temp_test_file_db")
+        ... else:
+        ...     con, cur = litedb.connect("file::memory:?cache=shared", uri=True)
         >>> litedb.execute(con,
         ...                'CREATE', None, 0, cur,
         ...                'CREATE TABLE IF NOT EXISTS files '

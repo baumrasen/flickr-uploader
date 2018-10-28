@@ -2593,7 +2593,7 @@ class Uploadr(object):
         # Set 'Number of pics with specified checksum' to 0 and return.
         if not search_is_uploaded.find('photos').attrib['total']:
             ret_photos_uploaded = 0
-            NP.niceprint(' IS_UPLOADED=[ERROR#3]: Invalid return. Confinuing',
+            NP.niceprint(' IS_UPLOADED=[ERROR#3]: Invalid return. Continuing',
                          fname='isuploaded',
                          verbosity=3,
                          logalso=logging.ERROR)
@@ -2611,6 +2611,18 @@ class Uploadr(object):
             logging.warning('+++#190: '
                             'Found [%s] images with checksum:[%s]',
                             ret_photos_uploaded, xchecksum)
+            
+            # CODING XXX flickr sometimes returns an empty "photo" array
+            if len(search_is_uploaded.find('photos').findall('photo')) == 0:
+                ret_photos_uploaded = 0
+                NP.niceprint('IS_UPLOADED=[ERROR#4]: file:[{!s}]: Incorrect '
+                             'data returned: empty "photos" array on '
+                             'photos.search. Assuming IS_UPLOADED=[FALSE] '
+                             'May generate duplicated pics!'.format(xfile),
+                             fname='is_uploaded', logalso=logging.CRITICAL)
+                return ret_is_photo_uploaded, ret_photos_uploaded, \
+                    ret_photo_id, ret_uploaded_no_set                
+                
             # Get title from filepath as filename without extension
             # NOTE: not compatible with use of the -i option
             xtitle_filename = os.path.split(xfile)[1]
@@ -2744,14 +2756,6 @@ class Uploadr(object):
                                      fname='isuploaded', verbosity=2,
                                      logalso=logging.WARNING)
                         continue
-
-            # CODING XXX flickr sometimes returns an empty "photo" array
-            if pic_index == 0:
-                NP.niceprint('Flickr returning incorrect data: "photos" array '
-                             'returned by photos.search is empty! '
-                             'Try again later. Exiting...',
-                             fname='is_uploaded', logalso=logging.CRITICAL)
-                sys.exit(10)
 
         return ret_is_photo_uploaded, ret_photos_uploaded, \
             ret_photo_id, ret_uploaded_no_set

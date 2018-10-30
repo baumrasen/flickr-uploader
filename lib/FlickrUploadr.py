@@ -2611,7 +2611,7 @@ class Uploadr(object):
             logging.warning('+++#190: '
                             'Found [%s] images with checksum:[%s]',
                             ret_photos_uploaded, xchecksum)
-            
+
             # CODING XXX flickr sometimes returns an empty "photo" array
             if len(search_is_uploaded.find('photos').findall('photo')) == 0:
                 ret_photos_uploaded = 0
@@ -2621,8 +2621,8 @@ class Uploadr(object):
                              'May generate duplicated pics!'.format(xfile),
                              fname='is_uploaded', logalso=logging.CRITICAL)
                 return ret_is_photo_uploaded, ret_photos_uploaded, \
-                    ret_photo_id, ret_uploaded_no_set                
-                
+                    ret_photo_id, ret_uploaded_no_set
+
             # Get title from filepath as filename without extension
             # NOTE: not compatible with use of the -i option
             xtitle_filename = os.path.split(xfile)[1]

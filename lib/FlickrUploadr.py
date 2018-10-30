@@ -2569,10 +2569,12 @@ class Uploadr(object):
         #         ispublic="0" isfriend="1" isfamily="1" />
         # </photos>
         #
+        # Search also for title...
         # Use a big random waitime to avoid errors in multiprocessing mode.
         get_success, search_is_uploaded, get_errcode = faw.flickrapi_fn(
             self.nuflickr.photos.search, (),
             dict(user_id="me",
+                 text=os.path.splitext(os.path.split(xfile)[1])[0],
                  tags='checksum:{}'.format(xchecksum),
                  extras='tags'),
             3, 20, False, caughtcode='180')

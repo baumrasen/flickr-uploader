@@ -218,7 +218,8 @@ script:
   # Scenario Old273INI: run ./uploadr.py instead of `which uploadr.py`
   - if [[ $TestScenario == Old273INI ]]; then coverage run -a --concurrency multiprocessing uploadr.py $UploadrOptions >> $NOHUPOUTFILE 2>> $NOHUPERRFILE; fi
   - if [[ $TestScenario == DryRunNoToken ]]; then coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> $NOHUPOUTFILE 2>> $NOHUPERRFILE < /home/travis/build/oPromessa/flickr-uploader/tests/verifiercode.txt || echo ok; fi
-  - if [[ $TestScenario != Old273INI && $TestScenario != DryRunNoToken ]]; then coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> $NOHUPOUTFILE 2>> $NOHUPERRFILE; fi
+  #- if [[ $TestScenario != Old273INI && $TestScenario != DryRunNoToken ]]; then coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions >> $NOHUPOUTFILE 2>> $NOHUPERRFILE; fi
+  - if [[ $TestScenario != Old273INI && $TestScenario != DryRunNoToken ]]; then coverage run -a --concurrency multiprocessing `which uploadr.py` $UploadrOptions; fi
 
   - tail -n $TAIL_LINES $NOHUPOUTFILE $NOHUPERRFILE
 

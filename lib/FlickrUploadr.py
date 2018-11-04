@@ -901,13 +901,13 @@ class Uploadr(object):
             last_modified = Last modified time
             """
 
-            litedb.execute(con, 'INSERT#035', lock, self.args.processes,
+            litedb.execute(con, 'INSERT#034', lock, self.args.processes,
                            cur,
                            'INSERT INTO badfiles '
                            '(path, md5, last_modified, tagged) '
                            'VALUES (?, ?, ?, 1)',
                            qmarkargs=(file, file_checksum, last_modified),
-                           dbcaughtcode='035')
+                           dbcaughtcode='034')
         # ---------------------------------------------------------------------
 
         setname = faw.set_name_from_file(file,
@@ -928,12 +928,12 @@ class Uploadr(object):
         success = False
         con, cur = litedb.connect(self.xcfg.DB_PATH)
 
-        litedb.execute(con, 'SELECT#036', lock, self.args.processes,
+        litedb.execute(con, 'SELECT#035', lock, self.args.processes,
                        cur,
                        'SELECT rowid, files_id, path, set_id, md5, '
                        'tagged, last_modified FROM files WHERE path = ?',
                        qmarkargs=(file,),
-                       dbcaughtcode='036')
+                       dbcaughtcode='035')
         row = cur.fetchone()
         logging.debug('row: %s', row)
 
@@ -949,16 +949,27 @@ class Uploadr(object):
             logging.info('not_is_already_uploaded:[%s]', is_loaded)
         else:
             file_checksum = faw.md5checksum(file)
-            is_loaded, is_count, isfile_id, is_no_set = \
-                self.is_already_uploaded(file, file_checksum, setname)
-            logging.info('is_already_uploaded:[%s] '
-                         'count:[%s] pic:[%s] '
-                         'row is None == [%s] '
-                         'is_no_set:[%s]',
-                         is_loaded,
-                         is_count, isfile_id,
-                         row is None,
-                         is_no_set)
+            try:
+                is_loaded, is_count, isfile_id, is_no_set = \
+                    self.is_already_uploaded(file, file_checksum, setname)
+                logging.info('is_already_uploaded:[%s] '
+                             'count:[%s] pic:[%s] '
+                             'row is None == [%s] '
+                             'is_no_set:[%s]',
+                             is_loaded,
+                             is_count, isfile_id,
+                             row is None,
+                             is_no_set)
+            except ValueError as exc:
+                NP.niceerror(caught=True,
+                             caughtprefix='+++',
+                             caughtcode='036',
+                             caughtmsg='Caught {!s} exception'
+                             .format(type(exc)),
+                             useniceprint=True,
+                             exceptsysinfo=True)
+                return success
+
         # CODING: REUPLOAD deleted files from Flickr...
         # A) File loaded. Not recorded on DB. Update local DB.
         # B) Not loaded. Not recorded on DB. Upload file to FLickr.
@@ -1111,7 +1122,7 @@ class Uploadr(object):
                 except (IOError, httplib.HTTPException) as exc:
                     NP.niceerror(caught=True,
                                  caughtprefix='+++',
-                                 caughtcode='038',
+                                 caughtcode='037',
                                  caughtmsg='Caught {!s} exception'
                                  .format(type(exc)),
                                  useniceprint=True,
@@ -1120,15 +1131,29 @@ class Uploadr(object):
                     # On error, check if exists a photo with file_checksum
                     NP.niceerror(caught=True,
                                  caughtprefix='xxx',
-                                 caughtcode='039',
+                                 caughtcode='038',
                                  caughtmsg='Sleep {!s} and check if file is'
                                  ' already uploaded.'
                                  .format(UPLDR_K.upload_sleep),
                                  useniceprint=True)
                     NUTIME.sleep(UPLDR_K.upload_sleep)
 
-                    zisloaded, ziscount, photo_id, zisnoset = \
-                        self.is_already_uploaded(file, file_checksum, setname)
+                    try:
+                        zisloaded, ziscount, photo_id, zisnoset = \
+                            self.is_already_uploaded(file,
+                                                     file_checksum,
+                                                     setname)
+                    except ValueError as exc:
+                        NP.niceerror(caught=True,
+                                     caughtprefix='+++',
+                                     caughtcode='039',
+                                     caughtmsg='Caught {!s} exception'
+                                     .format(type(exc)),
+                                     useniceprint=True,
+                                     exceptsysinfo=True)
+                        zuploaderror = True
+                        break
+
                     logging.warning('is_already_uploaded:[%s] '
                                     'ziscount:[%s] Zpic:[%s] '
                                     'zisnoset:[%s]',
@@ -1203,8 +1228,23 @@ class Uploadr(object):
                                  useniceprint=True)
                     NUTIME.sleep(UPLDR_K.upload_sleep)
 
-                    zisloaded, ziscount, photo_id, zisnoset = \
-                        self.is_already_uploaded(file, file_checksum, setname)
+                    try:
+                        zisloaded, ziscount, photo_id, zisnoset = \
+                            self.is_already_uploaded(file,
+                                                     file_checksum,
+                                                     setname)
+
+                    except ValueError as exc:
+                        NP.niceerror(caught=True,
+                                     caughtprefix='+++',
+                                     caughtcode='045',
+                                     caughtmsg='Caught {!s} exception'
+                                     .format(type(exc)),
+                                     useniceprint=True,
+                                     exceptsysinfo=True)
+                        zuploaderror = True
+                        break
+
                     logging.warning('is_already_uploaded:[%s] '
                                     'ziscount:[%s] Zpic:[%s] '
                                     'zisnoset:[%s]',
@@ -2622,8 +2662,8 @@ class Uploadr(object):
                              'photos.search. Assuming IS_UPLOADED=[FALSE] '
                              'May generate duplicated pics!'.format(xfile),
                              fname='is_uploaded', logalso=logging.CRITICAL)
-                return ret_is_photo_uploaded, ret_photos_uploaded, \
-                    ret_photo_id, ret_uploaded_no_set
+                raise ValueError('Incorrect data returned: empty "photos" '
+                                 'array on photos.search')
 
             # Get title from filepath as filename without extension
             # NOTE: not compatible with use of the -i option

@@ -2659,8 +2659,8 @@ class Uploadr(object):
                 ret_photos_uploaded = 0
                 NP.niceprint('IS_UPLOADED=[ERROR#4]: file:[{!s}]: Incorrect '
                              'data returned: empty "photos" array on '
-                             'photos.search. Assuming IS_UPLOADED=[FALSE] '
-                             'May generate duplicated pics!'.format(xfile),
+                             'photos.search. Check manually for '
+                             'duplicated pics!'.format(xfile),
                              fname='is_uploaded', logalso=logging.CRITICAL)
                 raise ValueError('Incorrect data returned: empty "photos" '
                                  'array on photos.search')

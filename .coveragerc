@@ -2,7 +2,7 @@
 [run]
 # source = flickrapi
 omit =
-    flickr-deletr-master/*
+    */flickr-deletr-master/*
     /home/travis/virtualenv/python2.7.14/lib/*
     /home/travis/virtualenv/python3.6.?/lib/*
     /home/travis/virtualenv/python3.7-dev/lib/*

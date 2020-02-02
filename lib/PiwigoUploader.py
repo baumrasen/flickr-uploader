@@ -105,8 +105,9 @@ class Uploader(object):
 
         # get nuflickr/token from Cache file, if it exists
         self.nuflickr = faw.get_cached_token(
-            self.xcfg.FLICKR["api_key"],
-            self.xcfg.FLICKR["secret"],
+            self.xcfg.PIWIGO["url"],
+            self.xcfg.PIWIGO["username"],
+            self.xcfg.PIWIGO["password"],
             token_cache_location=self.xcfg.TOKEN_CACHE,
             perms='delete')
         if self.nuflickr is not None:
@@ -152,7 +153,7 @@ class Uploader(object):
     # -------------------------------------------------------------------------
     # authenticate
     #
-    # Authenticates via flickrapi on flickr.com
+    # Authenticates via piwigoapi
     #
     def authenticate(self):
         """ authenticate
@@ -164,8 +165,9 @@ class Uploader(object):
         # Instantiate nuflickr for connection to flickr via flickrapi
         NP.niceprint('Authenticating...')
         self.nuflickr = faw.nu_authenticate(
-            self.xcfg.FLICKR["api_key"],
-            self.xcfg.FLICKR["secret"],
+            self.xcfg.PIWIGO["url"],
+            self.xcfg.PIWIGO["username"],
+            self.xcfg.PIWIGO["password"],
             token_cache_location=self.xcfg.TOKEN_CACHE,
             perms=u'delete')
 

@@ -87,7 +87,7 @@ class MyConfig(object):
     ini_keys = [
         'FOLDER',
         'FILES_DIR',
-        'FLICKR',
+        'PIWIGO',
         'SLEEP_TIME',
         'DRIP_TIME',
         'DB_PATH',
@@ -117,15 +117,16 @@ class MyConfig(object):
         "os.path.abspath(os.getcwd())",
         # FILES_DIR
         "'.'",  # Other possible default: "'photos'",
-        # FLICKR
-        "{ 'title'       : '',\
+        # PIWIGO
+        "{ 'url'         : '',\
+           'username'    : '',\
+           'password'    : '',\
            'description' : '',\
            'tags'        : 'auto-upload',\
            'is_public'   : '0',\
            'is_friend'   : '0',\
            'is_family'   : '0',\
-           'api_key'     : 'api_key_not_defined',\
-           'secret'      : 'secret_not_defined'\
+           'parent_album_id'      : '0'\
         }",
         # SLEEP_TIME
         "1 * 60",

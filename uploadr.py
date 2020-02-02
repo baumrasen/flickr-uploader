@@ -369,8 +369,8 @@ def run_uploadr(args):
     check_piwigo_secret()
 
     # Instantiate class Uploadr. getCachedToken is called on __init__
-    logging.debug('Instantiating the Main class myflick = Uploadr()')
-    myflick = FlickrUploadr.Uploadr(MY_CFG, args)
+    logging.debug('Instantiating the Main class myflick = Uploadr()')    
+    mypiwigo = PiwigoUploader.Uploader(MY_CFG, args)
 
     # Setup the database. Clean badfiles entries if asked
     myflick.setup_db()
@@ -678,7 +678,7 @@ if __name__ == "__main__":
         logging.debug('Masking Patterns: %s', UPLDR_K.MaskPatterns)
 
     NPR.niceprint('Output for FLICKR Configuration:\n{!s}'
-                  .format(pprint.pformat(MY_CFG.FLICKR)),
+                  .format(pprint.pformat(MY_CFG.PIWIGO)),
                   verbosity=3,
                   logalso=logging.INFO)
 

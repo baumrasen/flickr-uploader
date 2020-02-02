@@ -176,8 +176,9 @@ def flickrapi_fn(fn_name,
 #
 # Authenticates via flickrapi on flickr.com
 #
-def nu_authenticate(api_key,
-                    secret,
+def nu_authenticate(url,
+                    username,
+                    password,
                     token_cache_location,
                     perms='delete'):
     """ nu_authenticate
@@ -185,20 +186,22 @@ def nu_authenticate(api_key,
         Authenticate user so we can upload files.
         Assumes the cached token is not available or valid.
 
-        api_key, secret, token_cache_location, perms
+        url, username, password, token_cache_location, perms
 
         Returns an instance object for the class flickrapi
     """
 
-    # Instantiate flickr for connection to flickr via flickrapi
+    # Instantiate piwigo for connection to piwigo via piwigoapi
     logging.info(' Authentication: Connecting...')
 
     fn_result = True
     try:
-        flickrobj = flickrapi.FlickrAPI(
-            api_key,
-            secret,
-            token_cache_location=token_cache_location)
+        #flickrobj = flickrapi.FlickrAPI(
+        #    api_key,
+        #    secret,
+        #    token_cache_location=token_cache_location)
+        flickrobj = Piwigo(url)
+        flickrobj.pwg.session.login(username=username, password=password)
     except flickrapi.exceptions.FlickrError as ex:
         NPR.niceerror(caught=True,
                       caughtprefix='+++Api',

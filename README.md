@@ -99,7 +99,7 @@ You should get the following depending on how the setting FULL_SET_NAME is set:
 1. Enable SSH access to Synology DSM Server. (Optionally) install Python 3.
 2. Prepare a local folder location for Python modules install
 3. Download and install pip
-4. Download and install flickrapi and portalocker
+4. Download and install flickrapi and portalocker --> piwigo
 5. Download and install flickr-uploader
 
 ### 1.Enable SSH access to Synology DSM Server. (Optionally) install Python 3.
@@ -533,3 +533,15 @@ Not in sets on Flickr:[     0]
   
 * Q: Is all sensitive information (albums and filenames) masked with the **-u** option?
   - Please note the **-u** masking option does not filter every sensitive information. In particular when DEBUG error level is set.
+
+# Git-Help:
+don't track changes in uploadr.ini and token/oauth-tokens.sqlite with this:
+There are often times when you want to modify a file but not commit the changes, for example changing the database configuration to run on your local machine.
+
+Adding the file to .gitignore doesn’t work, because the file is already tracked. Luckily, Git will allow you to manually “ignore” changes to a file or directory:
+
+git update-index --assume-unchanged <file>
+And if you want to start tracking changes again, you can undo the previous command using:
+
+git update-index --no-assume-unchanged <file>
+Easy!

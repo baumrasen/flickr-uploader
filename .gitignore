@@ -9,3 +9,5 @@ dist
 flickr_uploader.egg-info/*
 **logs
 .venv/
+uploadr.ini
+token/oauth-tokens.sqlite

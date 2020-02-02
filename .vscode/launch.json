@@ -12,6 +12,7 @@
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/uploadr.py",
             "args": [     
+                "--no-delete-from-flickr",
                 "--dry-run",
                 "--verbose-progress",
                 "--verbose"  

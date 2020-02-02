@@ -8,3 +8,4 @@ flickrdb
 dist
 flickr_uploader.egg-info/*
 **logs
+.venv/

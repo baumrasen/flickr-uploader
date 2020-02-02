@@ -11,8 +11,10 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/uploadr.py",
-            "args": [              
-                "--debug"  
+            "args": [     
+                "--dry-run",
+                "--verbose-progress",
+                "--verbose"  
             ],
             "root": "${workspaceRoot}\\"
         }

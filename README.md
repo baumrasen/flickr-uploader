@@ -99,7 +99,7 @@ You should get the following depending on how the setting FULL_SET_NAME is set:
 1. Enable SSH access to Synology DSM Server. (Optionally) install Python 3.
 2. Prepare a local folder location for Python modules install
 3. Download and install pip
-4. Download and install flickrapi
+4. Download and install flickrapi and portalocker
 5. Download and install flickr-uploader
 
 ### 1.Enable SSH access to Synology DSM Server. (Optionally) install Python 3.

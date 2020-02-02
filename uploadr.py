@@ -67,6 +67,9 @@ import pprint
 # Helper FlickrUploadr class to upload pics/videos into Flickr.
 import lib.FlickrUploadr as FlickrUploadr
 # -----------------------------------------------------------------------------
+# Helper PiwigoUploader class to upload pics/videos into Piwigo.
+import lib.PiwigoUploader as PiwigoUploader
+# -----------------------------------------------------------------------------
 # Helper class and functions for UPLoaDeR Global Constants.
 import lib.Konstants as KonstantsClass
 # -----------------------------------------------------------------------------

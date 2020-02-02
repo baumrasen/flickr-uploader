@@ -332,19 +332,19 @@ def run_uploadr(args):
 
             sys.exit(8)
 
-    def check_flickr_key_secret():
-        """ def check_flickr_key_secret():
+    def check_piwigo_secret():
+        """ def check_piwigo_secret():
 
-            Confirms the configuration for api_key and secret is defined.
+            Confirms the configuration for piwigo secret is defined.
             Exits from program otherwise.
         """
 
-        if MY_CFG.FLICKR["api_key"] == "" or MY_CFG.FLICKR["secret"] == "":
+        if MY_CFG.PIWIGO["url"] == "" or MY_CFG.PIWIGO["username"] == "" or MY_CFG.PIWIGO["password"] == "":
             NPR.niceerror(
                 caught=True,
                 caughtprefix='xxx',
                 caughtcode='635',
-                caughtmsg='Please enter an API key and secret in the '
+                caughtmsg='Please enter an url, username and password in the '
                 'configuration file [normaly uploadr.ini] (see README).',
                 useniceprint=True)
 
@@ -365,8 +365,8 @@ def run_uploadr(args):
                           logalso=logging.INFO)
 
     # Initial checks
-    check_files_dir()
-    check_flickr_key_secret()
+    check_files_dir()    
+    check_piwigo_secret()
 
     # Instantiate class Uploadr. getCachedToken is called on __init__
     logging.debug('Instantiating the Main class myflick = Uploadr()')
